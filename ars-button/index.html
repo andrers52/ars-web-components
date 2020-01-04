@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+
+    <button is="ars-button"
+      id="test_button"
+      base-color="blue">
+      button text
+    </button>
+
+    <script type="module" src="./ars-button.js"></script>
+    <script> 
+    window.addEventListener(
+      'ars-button:test_button:click',
+        event => {
+          console.log(`button event received: ${event.detail.result}`)
+          // document.getElementById('test_button').disabled = true
+        }
+    )
+    </script>
+</html>

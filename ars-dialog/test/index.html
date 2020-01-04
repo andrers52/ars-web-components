@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+    <button onclick="startDialog()"> test dialog with confirmation buttons </button>
+    <button onclick="startNotificationDialog()"> test dialog notification </button>
+
+    <script type="module" src="ars-web-components-lnks/ars-dialog/ars-dialog.js"></script>
+
+    <script type="module">
+      import ArsDialog from './ars-web-components-lnks/ars-dialog/ars-dialog.js'
+      window.startDialog = async function startDialog() {
+
+        const result = await ArsDialog.dialog(`content: <br> <input id='test'></input>`,'dialog_tittle')
+        if(!result) {console.log('no data returned'); return}
+        // this is an example of how to retrieve information from the dialog
+        console.log(`data inside input is ${result.querySelector('input').value}`)
+      }
+
+      window.startNotificationDialog = async function startNotificationDialog() {
+        await ArsDialog.notify(
+          `
+            notification jaçlsfdj asfd çlas jfdças fçjf
+            asfaa afasdf asf  af haklshfd klajs fka shfka hdfka hfka hfdkahs
+            sdfaaasf ao fhlajf laç sfdçlajsfdlaçsjfdlahsd fkash fdkashdf
+            sdfas asfa  çfaçsf jçalsj fdalsçkf jalshflkash flash fdlaksh dfk
+            asdffs  aflçajs fçla jdfl ajsdfçl jasçlfd jals jfdla sflas jfl jalfalfd a fjd
+            aas  assl l hahlash flas hflash flkahs flkas  laj flçasj fçlas jdfçlasj fdçlas jflças flça
+            fda  a jsfdjasdçfljasçdfjaçlsdfj çlas aj sdflçjas dflja sdflçj asldfj alsjdf aslhfd 
+            asfaa afasdf asf  af haklshfd klajs fka shfka hdfka hfka hfdkahs
+            sdfaaasf ao fhlajf laç sfdçlajsfdlaçsjfdlahsd fkash fdkashdf
+            sdfas asfa  çfaçsf jçalsj fdalsçkf jalshflkash flash fdlaksh dfk
+            asdffs  aflçajs fçla jdfl ajsdfçl jasçlfd jals jfdla sflas jfl jalfalfd a fjd
+            aas  assl l hahlash flas hflash flkahs flkas  laj flçasj fçlas jdfçlasj fdçlas jflças flça
+            fda  a jsfdjasdçfljasçdfjaçlsdfj çlas aj sdflçjas dflja sdflçj asldfj alsjdf aslhfd 
+            asfaa afasdf asf  af haklshfd klajs fka shfka hdfka hfka hfdkahs
+          `
+        )
+        console.log('you just closed the notification!')
+      }
+    </script>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "ars-web-components",
+  "version": "0.0.1",
+  "description": "Andre's web components collection",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "arslib": "0.0.6"
+  },
+  "author": "Andre Rodrigues da Silva",
+  "license": "MIT"
+}
