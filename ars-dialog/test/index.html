@@ -4,10 +4,8 @@
     <button onclick="startDialog()"> test dialog with confirmation buttons </button>
     <button onclick="startNotificationDialog()"> test dialog notification </button>
 
-    <script type="module" src="ars-web-components-lnks/ars-dialog/ars-dialog.js"></script>
-
     <script type="module">
-      import ArsDialog from './ars-web-components-lnks/ars-dialog/ars-dialog.js'
+      import ArsDialog from '../ars-dialog.js'
       window.startDialog = async function startDialog() {
 
         const result = await ArsDialog.dialog(`content: <br> <input id='test'></input>`,'dialog_tittle')

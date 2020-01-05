@@ -9,7 +9,7 @@
 // notification event: `ars-button:<button_id>:click`
 
 
-import PressedEffect from './pressed-effect.js'
+import PressedEffect from '../mixins/pressed-effect/pressed-effect.js'
 export default class ArsButton extends PressedEffect(HTMLButtonElement) {
   constructor() {
     super()
