@@ -1,6 +1,6 @@
 import Assert from '../../../arslib/util/assert.js'
 
-export default function RemoteCallReceiver(classToExtend) {
+function RemoteCallReceiver(classToExtend) {
   return class extends classToExtend {
     
     // If you are using this and implementing "connectedCallback" and "disconnectedCallback"
@@ -29,3 +29,6 @@ export default function RemoteCallReceiver(classToExtend) {
     
   }
 }
+
+export {RemoteCallReceiver as default}
+export {RemoteCallReceiver}

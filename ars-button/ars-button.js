@@ -10,7 +10,7 @@
 
 
 import PressedEffect from '../mixins/pressed-effect/pressed-effect.js'
-export default class ArsButton extends PressedEffect(HTMLButtonElement) {
+class ArsButton extends PressedEffect(HTMLButtonElement) {
   constructor() {
     super()
 
@@ -57,3 +57,5 @@ export default class ArsButton extends PressedEffect(HTMLButtonElement) {
 
 window.customElements.define('ars-button', ArsButton, {extends: 'button'})
 
+export {ArsButton as default}
+export {ArsButton}

@@ -48,7 +48,7 @@ let cellHeight
 //   'events': [<list_of_events_for_the_selected_day>]
 // }
 
-export default class ArsCalendar extends WebComponentBase {
+class ArsCalendar extends WebComponentBase {
   constructor() {
     super()
        
@@ -380,3 +380,6 @@ export default class ArsCalendar extends WebComponentBase {
 }
 
 window.customElements.define('ars-calendar', ArsCalendar)
+
+export {ArsCalendar as default}
+export {ArsCalendar}

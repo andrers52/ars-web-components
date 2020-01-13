@@ -1,7 +1,10 @@
 // TODO: change to generic web component mixin
-export function ShowIfPropertyTrue(classToExtend, propertyToObserve) {
+function ShowIfPropertyTrue(classToExtend, propertyToObserve) {
   return class extends classToExtend {
-
+    constructor() {
+      super()
+      this._showIfTrue(propertyToObserve)
+    }
     // *** TODO *** ADD PROXY TO INTERCEPT PROPERGY GET ***
 
     _showIfTrue(propertyToObserve) {
@@ -9,5 +12,8 @@ export function ShowIfPropertyTrue(classToExtend, propertyToObserve) {
     }
   }
 }
+
+export {ShowIfPropertyTrue as default}
+export {ShowIfPropertyTrue}
 
 

@@ -5,7 +5,7 @@
 import EArray from '../../arslib/enhancements/e-array.js'
 import WebComponentBase from '../web-component-base/web-component-base.js'
 var colors = ['Aqua','Aquamarine','BlueViolet','Brown','BurlyWood','CadetBlue','Chartreuse','Chocolate','Crimson','Cyan','DarkCyan','DarkGoldenRod','DarkGray','DarkGreen','DarkKhaki','DarkMagenta','DarkOliveGreen','DarkOrange','DarkOrchid','DarkRed','DarkSalmon','DarkSeaGreen','DarkSlateBlue','DarkSlateGray','DarkTurquoise','DarkViolet','DeepPink','DeepSkyBlue','DimGray','DodgerBlue','FireBrick','ForestGreen','Fuchsia','Gold','GoldenRod','Gray','Green','GreenYellow','HotPink','IndianRed','LawnGreen','LightBlue','LightCoral','LightGreen','LightSalmon','LightSeaGreen','LightSkyBlue','LightSlateGray','LightSteelBlue','Lime','LimeGreen','Magenta','MediumAquaMarine','MediumOrchid','MediumPurple','MediumSeaGreen','MediumSlateBlue','MediumSpringGreen','MediumTurquoise','MediumVioletRed','Olive','Orange','OrangeRed','Orchid','Peru','Pink','Plum','Purple','RebeccaPurple','Red','RosyBrown','RoyalBlue','SaddleBrown','Salmon','SandyBrown','SeaGreen','Sienna','Silver','SkyBlue','SlateBlue','SlateGray','SpringGreen','SteelBlue','Tan','Teal','Thistle','Tomato','Turquoise','Violet','Yellow','YellowGreen']
-export default class ArsColorSelect extends WebComponentBase {
+class ArsColorSelect extends WebComponentBase {
   constructor() {
     super()
     this.template = `
@@ -133,3 +133,5 @@ if(document.createElement('ars-color-select').constructor === HTMLElement) {
   window.customElements.define('ars-color-select', ArsColorSelect)
 }
 
+export {ArsColorSelect as default}
+export {ArsColorSelect}

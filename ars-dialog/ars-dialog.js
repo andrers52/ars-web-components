@@ -17,7 +17,7 @@
 import '../ars-button/ars-button.js'
 import WebComponentBase from '../web-component-base/web-component-base.js'
 
-export default class ArsDialog extends WebComponentBase {
+class ArsDialog extends WebComponentBase {
   constructor() {
     super()
   }
@@ -211,5 +211,8 @@ export default class ArsDialog extends WebComponentBase {
 }
 
 window.customElements.define('ars-dialog', ArsDialog)
+
+export {ArsDialog as default}
+export {ArsDialog}
 
 

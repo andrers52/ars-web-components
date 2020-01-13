@@ -8,7 +8,7 @@
 
 import Localization from '../../../arslib/util/singleton/Localization.js'
 
-export default function Localized (classToExtend, language, symbols) {
+function Localized (classToExtend, language, symbols) {
   return class extends classToExtend {
     connectedCallback() {
       super.connectedCallback && super.connectedCallback()
@@ -17,6 +17,5 @@ export default function Localized (classToExtend, language, symbols) {
   }
 }
 
-
-
-
+export {Localized as default}
+export {Localized}

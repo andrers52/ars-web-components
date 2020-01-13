@@ -33,7 +33,14 @@ function mapPropertiesToAttributes(obj, propKeys) {
   return obj
 }
 
-export default class WebComponentBase extends HTMLElement {
+class WebComponentBase extends HTMLElement {
+
+  alreadyMappedAttributes = false
+  // Gets populated by attributeChangedCallback
+  _attributesMap = {}
+  _waitingOnAttr = {}
+
+  
 
   static defaultAttributeValue() {
     /* the name of the attribute is parsed in as a parameter */
@@ -51,10 +58,6 @@ export default class WebComponentBase extends HTMLElement {
 
   constructor() {
     super()
-    this.alreadyMappedAttributes = false
-
-    // Gets populated by attributeChangedCallback
-    this._attributesMap = {}
 
     this._waitingOnAttr = (
       this.constructor.observedAttributes || []
@@ -116,11 +119,9 @@ export default class WebComponentBase extends HTMLElement {
     this.shadowRoot.getElementById(elementId)[eventStr] = 
       function() {
         eval(`${methodCallStr.replace(/this/g,'self')}`)
-      }
-    
+      }    
   }
-
-
-
 }
 
+export {WebComponentBase as default}
+export {WebComponentBase}

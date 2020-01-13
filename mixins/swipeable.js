@@ -3,7 +3,7 @@
 
 import Assert from '../../arslib/util/assert.js'
 
-export default function Swipeable() {
+function Swipeable() {
   // Assert.assertIsFunction(this.onSwipeRight,  'onSwipeRight not found')
   // Assert.assertIsFunction(this.onSwipeLeft,   'onSwipeLeft not found')
   // Assert.assertIsFunction(this.onSwipeUp,     'onSwipeUp not found')
@@ -92,3 +92,6 @@ export default function Swipeable() {
   this.addEventListener('touchend', this._endTouch.bind(this), false)
 
 }
+
+export {Swipeable as default}
+export {Swipeable}

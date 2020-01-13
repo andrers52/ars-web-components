@@ -4,7 +4,7 @@
 //consts
 const ANIMATION_TIME = 500
 const NUM_ANIMATION_STEPS = 100
-export default function PressedEffect(classToExtend) {
+function PressedEffect(classToExtend) {
   return class extends classToExtend {
     constructor() {
       super()
@@ -76,3 +76,6 @@ export default function PressedEffect(classToExtend) {
     }
   }
 }
+
+export {PressedEffect as default}
+export {PressedEffect}
