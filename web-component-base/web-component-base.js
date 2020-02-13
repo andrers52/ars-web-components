@@ -35,13 +35,6 @@ function mapPropertiesToAttributes(obj, propKeys) {
 
 class WebComponentBase extends HTMLElement {
 
-  alreadyMappedAttributes = false
-  // Gets populated by attributeChangedCallback
-  _attributesMap = {}
-  _waitingOnAttr = {}
-
-  
-
   static defaultAttributeValue() {
     /* the name of the attribute is parsed in as a parameter */
     return
@@ -59,6 +52,11 @@ class WebComponentBase extends HTMLElement {
   constructor() {
     super()
 
+    this.alreadyMappedAttributes = false
+    // Gets populated by attributeChangedCallback
+    this._attributesMap = {}
+    this._waitingOnAttr = {}
+  
     this._waitingOnAttr = (
       this.constructor.observedAttributes || []
     ).filter(name => {
