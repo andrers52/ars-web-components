@@ -15,8 +15,9 @@
 
 // -- EXTRA STYLING ---
 // You can add styles to the elements of the component
-// by puting them in the "css/components/ars-dialog.css"
-// file.
+// by puting them in the "css/components/ars-dialog.css" file
+// or setting the attribute "extra-css-file"
+
 
 
 import '../ars-button/ars-button.js'
@@ -32,7 +33,7 @@ class ArsDialog extends WebComponentBase {
   _getTemplate() {
     return `
       <style>
-        @import "css/components/ars-dialog.css";
+        @import "${(this.getAttribute('extra-css-file')!== '')? this.getAttribute('extra-css-file') : 'css/components/ars-dialog.css'}";
         .overlay {
           background-color: cyan;
           position: fixed;
@@ -180,10 +181,11 @@ class ArsDialog extends WebComponentBase {
     return this.shadowRoot.getElementById('overlay').style.visibility === 'visible'
   }
 
-  static notify(content = '',  title = '!') {
+  static notify(content = '',  title = '!', extraCss = '') {
     return new Promise(function(resolve) {
       let dialog =  document.createElement('ars-dialog')
       dialog.id = 'notification_dialog'
+      dialog.setAttribute('extra-css-file', extraCss)
       dialog.setAttribute('content', content)
       dialog.setAttribute('showConfirmButtons', false)
       dialog.setAttribute('title', title)
@@ -197,10 +199,11 @@ class ArsDialog extends WebComponentBase {
   }
 
 
-  static dialog(content = '',  title = '', localizedYes = 'Yes', localizedNo = 'No') {
+  static dialog(content = '',  title = '', extraCss = '', localizedYes = 'Yes', localizedNo = 'No') {
     return new Promise(function(resolve) {
       let dialog =  document.createElement('ars-dialog')
       dialog.id = 'notification_dialog'
+      dialog.setAttribute('extra-css-file', extraCss)
       dialog.setAttribute('content', content)
       dialog.setAttribute('showConfirmButtons', true)
       dialog.setAttribute('title', title)
