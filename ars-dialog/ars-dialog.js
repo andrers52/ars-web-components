@@ -13,6 +13,11 @@
 // - option to continue right away (fire and forget)
 //  ArsDialog.notify('content', 'title')
 
+// -- EXTRA STYLING ---
+// You can add styles to the elements of the component
+// by puting them in the "css/components/ars-dialog.css"
+// file.
+
 
 import '../ars-button/ars-button.js'
 import WebComponentBase from '../web-component-base/web-component-base.js'
@@ -27,6 +32,7 @@ class ArsDialog extends WebComponentBase {
   _getTemplate() {
     return `
       <style>
+        @import "css/components/ars-dialog.css";
         .overlay {
           background-color: cyan;
           position: fixed;

@@ -1,6 +1,6 @@
 {
   "name": "ars-web-components",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Andre's web components collection",
   "repository": "https://github.com/andrers52/ars-web-components.git",
   "main": "index.js",
