@@ -8,54 +8,63 @@
 //
 // notification event: `ars-button:<button_id>:click`
 
-
-import PressedEffect from '../mixins/pressed-effect/pressed-effect.js'
+import PressedEffect from "../mixins/pressed-effect/pressed-effect.js";
 class ArsButton extends PressedEffect(HTMLButtonElement) {
   constructor() {
-    super()
+    super();
 
-    this._setStyle()
+    this._setStyle();
 
-    this.addEventListener('click', (event) => {
-      this._notifyClick(event.detail)
-      event.preventDefault()
-    })
+    this.addEventListener("click", (event) => {
+      this._notifyClick(event.detail);
+      event.preventDefault();
+    });
   }
 
-  //send ars-button:<button_id>:click event
-  _notifyClick (result) {
-    if(!this.id) return
-    this.dispatchEvent(new CustomEvent(`ars-button:${this.id}:click`, {
-      detail: {result}, bubbles: true, composed: true
-    }))
+  /**
+   * Sends a custom event when the button is clicked.
+   * @param {any} result - The detail of the event.
+   * @private
+   */
+  _notifyClick(result) {
+    if (!this.id) return;
+    this.dispatchEvent(
+      new CustomEvent(`ars-button:${this.id}:click`, {
+        detail: { result },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
+  /**
+   * Sets the initial style for the button.
+   * @private
+   */
   _setStyle() {
-    const BLUE = 'rgb(66, 133, 244)'
-    this.style.backgroundColor = BLUE
-    this.style.border = 'none'
-    this.style.borderRadius = '2px'
-    this.style.padding = '6px 9px'
-    this.style.fontSize = '16px'
-    // this.style.textTransform = 'uppercase'
-    this.style.cursor = 'pointer'
-    this.style.color = 'white'
-    this.style.backgroundColor = '#2196f3'
-    this.style.boxShadow = '0 0 4px #999'
-    this.style.outline = 'none'
+    const DEFAULT_COLOR = "#2196f3";
+    this.style.backgroundColor = DEFAULT_COLOR;
+    this.style.border = "none";
+    this.style.borderRadius = "2px";
+    this.style.padding = "6px 9px";
+    this.style.fontSize = "16px";
+    this.style.cursor = "pointer";
+    this.style.color = "white";
+    this.style.boxShadow = "0 0 4px #999";
+    this.style.outline = "none";
   }
-
 
   static get observedAttributes() {
-    return ['base-color']
+    return ["base-color"];
   }
+
   attributeChangedCallback(attrName, oldVal, newVal) {
-    if(attrName === 'base-color')
-      this.style.backgroundColor = newVal
+    if (attrName === "base-color") {
+      this.style.backgroundColor = newVal || "#2196f3";
+    }
   }
 }
 
-window.customElements.define('ars-button', ArsButton, {extends: 'button'})
+window.customElements.define("ars-button", ArsButton, { extends: "button" });
 
-export {ArsButton as default}
-export {ArsButton}
+export { ArsButton, ArsButton as default };

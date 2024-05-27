@@ -1,15 +1,15 @@
 {
-  "name": "ars-web-components",
-  "version": "0.0.8",
-  "description": "Andre's web components collection",
-  "repository": "https://github.com/andrers52/ars-web-components.git",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "dependencies": {
-    "arslib": "^0.1.1"
-  },
-  "author": "Andre Rodrigues da Silva",
-  "license": "MIT"
+    "name": "ars-web-components",
+    "version": "0.0.9",
+    "description": "Andre's web components collection",
+    "repository": "https://github.com/andrers52/ars-web-components.git",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "arslib": "0.2.0"
+    },
+    "author": "Andre Rodrigues da Silva",
+    "license": "MIT"
 }
