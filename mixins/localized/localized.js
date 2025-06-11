@@ -12,9 +12,9 @@ function Localized(classToExtend, language, symbols) {
   return class extends classToExtend {
     connectedCallback() {
       super.connectedCallback && super.connectedCallback();
-      this.localization = Localization(language, symbols);
+      this.localization = new Localization(language, symbols);
     }
   };
 }
 
-export { Localized, Localized as default };
+export { Localized as default, Localized };
