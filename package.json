@@ -1,14 +1,23 @@
 {
     "name": "ars-web-components",
-    "version": "0.1.0",
-    "description": "Andre's web components collection",
+    "version": "0.2.0",
+    "description": "A modern collection of reusable web components built with vanilla JavaScript and ES modules",
     "repository": "https://github.com/andrers52/ars-web-components.git",
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },
+    "keywords": [
+        "web-components",
+        "custom-elements",
+        "vanilla-javascript",
+        "es-modules",
+        "ui-components",
+        "frontend",
+        "reusable-components"
+    ],
     "dependencies": {
-        "arslib": "0.4.0"
+        "arslib": "0.6.1"
     },
     "author": "Andre Rodrigues da Silva",
     "license": "MIT"

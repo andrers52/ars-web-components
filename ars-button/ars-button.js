@@ -2,13 +2,14 @@
 //  <button
 //    is="ars-button"
 //    id="<button_id>" <-- if provided will send click event
-//    base-color: used as base for appearance and effects. Default is blue (rgb(191,128,64))
-//    base-color="<base_color>"
+//    class="your-css-classes" <-- style with regular CSS classes
+//    effect-color="#hex-color" <-- optional: color for pressed effect animation
 //  </button>
 //
 // notification event: `ars-button:<button_id>:click`
 
 import PressedEffect from "../mixins/pressed-effect/pressed-effect.js";
+
 class ArsButton extends PressedEffect(HTMLButtonElement) {
   constructor() {
     super();
@@ -42,25 +43,23 @@ class ArsButton extends PressedEffect(HTMLButtonElement) {
    * @private
    */
   _setStyle() {
-    const DEFAULT_COLOR = "#2196f3";
-    this.style.backgroundColor = DEFAULT_COLOR;
-    this.style.border = "none";
-    this.style.borderRadius = "2px";
-    this.style.padding = "6px 9px";
-    this.style.fontSize = "16px";
-    this.style.cursor = "pointer";
-    this.style.color = "white";
-    this.style.boxShadow = "0 0 4px #999";
-    this.style.outline = "none";
+    // No styling applied - component is purely functional
+    // All styling should be handled via CSS classes
+
+    // Store effect color for pressed effect if provided
+    const effectColor = this.getAttribute("effect-color");
+    if (effectColor) {
+      this._effectColor = effectColor;
+    }
   }
 
   static get observedAttributes() {
-    return ["base-color"];
+    return ["effect-color"];
   }
 
   attributeChangedCallback(attrName, oldVal, newVal) {
-    if (attrName === "base-color") {
-      this.style.backgroundColor = newVal || "#2196f3";
+    if (attrName === "effect-color") {
+      this._effectColor = newVal;
     }
   }
 }

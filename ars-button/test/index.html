@@ -1,20 +1,40 @@
 <!DOCTYPE html>
 <html>
 
-    <button is="ars-button"
-      id="test_button"
-      base-color="blue">
-      button text
-    </button>
+<head>
+  <style>
+    /* Example CSS styling for the button */
+    .test-button {
+      background-color: blue;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
 
-    <script type="module" src="../ars-button.js"></script>
-    <script> 
+    .test-button:hover {
+      background-color: darkblue;
+    }
+
+  </style>
+</head>
+
+<body>
+  <button is="ars-button" id="test_button" class="test-button" effect-color="#0000ff">
+    button text
+  </button>
+
+  <script type="module" src="../ars-button.js"></script>
+  <script>
     window.addEventListener(
       'ars-button:test_button:click',
-        event => {
-          console.log(`button event received: ${event.detail.result}`)
-          // document.getElementById('test_button').disabled = true
-        }
+      event => {
+        console.log(`button event received: ${event.detail.result}`)
+        // document.getElementById('test_button').disabled = true
+      }
     )
-    </script>
+  </script>
+</body>
+
 </html>
