@@ -1,53 +1,63 @@
-import css from './ars-calendar-css.js'
+// HTML template for ARS Calendar component
+// Contains the complete calendar structure
 
-export default function getTemplate(self) {
+export function renderCalendarHTML(self) {
+  const customCSS = self.customCSS || "";
+
   return `
     <style>
-      ${css}
+      ${self.defaultCSS}
+      ${customCSS}
     </style>
 
-    <div id="cal">
-      <div class="header">
-        <div class="button" id="prev" > &lang; </div>
-        <div class="month-year" id="label"> ${self.monthToShowString(self.monthToShow)} ${self.yearToShow} </div>
-        <div style="display: flex">
-          <div class="button right" id="today" > ${self.localizedToday} </div>
-          <div class="button right" id="next" > &rang; </div>
+    <div class="calendar-container">
+      <div class="calendar-header">
+        <div class="calendar-button" id="prev">&lang;</div>
+        <div class="calendar-month-year" id="label">${self.monthToShowString(
+          self.monthToShow,
+        )} ${self.yearToShow}</div>
+        <div class="calendar-nav-buttons">
+          <div class="calendar-button right" id="today">${
+            self.localizedToday
+          }</div>
+          <div class="calendar-button right" id="next">&rang;</div>
         </div>
       </div>
-      <table id="localizedAbbreviatedDays">
-        <td>${self.localizedAbbreviatedDays[0]}</td>
-        <td>${self.localizedAbbreviatedDays[1]}</td>
-        <td>${self.localizedAbbreviatedDays[2]}</td>
-        <td>${self.localizedAbbreviatedDays[3]}</td>
-        <td>${self.localizedAbbreviatedDays[4]}</td>
-        <td>${self.localizedAbbreviatedDays[5]}</td>
-        <td>${self.localizedAbbreviatedDays[6]}</td>
+      <table class="calendar-table calendar-days-header">
+        <tr>
+          <td class="calendar-cell">${self.localizedAbbreviatedDays[0]}</td>
+          <td class="calendar-cell">${self.localizedAbbreviatedDays[1]}</td>
+          <td class="calendar-cell">${self.localizedAbbreviatedDays[2]}</td>
+          <td class="calendar-cell">${self.localizedAbbreviatedDays[3]}</td>
+          <td class="calendar-cell">${self.localizedAbbreviatedDays[4]}</td>
+          <td class="calendar-cell">${self.localizedAbbreviatedDays[5]}</td>
+          <td class="calendar-cell">${self.localizedAbbreviatedDays[6]}</td>
+        </tr>
       </table>
-      <div id="cal-frame">
-        <table class="curr">
+      <div class="calendar-frame">
+        <table class="calendar-table calendar-body">
           <tbody>
-            <tr> 
-              <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td>
+            <tr>
+              <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td>
             </tr>
-            <tr> 
-              <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td>
+            <tr>
+              <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td>
             </tr>
-            <tr> 
-              <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td>
+            <tr>
+              <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td>
             </tr>
-            <tr> 
-              <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td>
+            <tr>
+              <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td>
             </tr>
-            <tr> 
-              <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td>
+            <tr>
+              <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td>
             </tr>
-            <tr> 
-              <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td>
+            <tr>
+              <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
-  `
+  `;
 }

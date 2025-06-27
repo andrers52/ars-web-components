@@ -1,7 +1,8 @@
 import { EObject, ImageUtil } from "arslib";
 import Swipeable from "../mixins/swipeable.js";
 import WebComponentBase from "../web-component-base/web-component-base.js";
-import getTemplate from "./ars-calendar-html.js";
+import { DEFAULT_CSS } from "./ars-calendar-css.js";
+import { renderCalendarHTML } from "./ars-calendar-html.js";
 
 // store here cell dimensions needed to draw the pie charts
 let cellWidth;
@@ -14,7 +15,36 @@ let cellHeight;
 //  localized_abbreviated_days = "["day1","day2",...,"day3"]">
 //  localized_months = "["month1","month2",...,"month3"]"
 //  localized_today = "<today word localized>"
+//  custom-css = "<custom CSS string>" <- optional, adds to default styles
+//  css-vars = "{"var-name": "value", ...}" <- optional, CSS custom properties
 //</ars-calendar>
+
+// *** CUSTOMIZATION ***
+//
+// CSS Variables (use css-vars attribute or setCSSVars() method):
+// --ars-calendar-bg: background color
+// --ars-calendar-shadow: box shadow
+// --ars-calendar-border-radius: border radius
+// --ars-calendar-header-bg: header background
+// --ars-calendar-header-height: header height
+// --ars-calendar-header-color: header text color
+// --ars-calendar-header-text-shadow: header text shadow
+// --ars-calendar-button-hover-bg: button hover background
+// --ars-calendar-table-bg: table background
+// --ars-calendar-cell-color: cell text color
+// --ars-calendar-cell-width: cell width
+// --ars-calendar-cell-height: cell height
+// --ars-calendar-cell-border: cell border
+// --ars-calendar-days-header-color: days header color
+// --ars-calendar-days-border: days header border
+// --ars-calendar-selected-color: selected day color
+// --ars-calendar-selected-shadow: selected day shadow
+// --ars-calendar-cell-hover-shadow: cell hover shadow
+//
+// Methods:
+// setCustomTemplate(templateFunction) - provide custom HTML template to completely override calendar structure
+// setCSSVars(cssVarsObject) - set CSS variables programmatically
+// getCSSVars() - get current CSS variables
 
 // *** EVENTS ***
 
@@ -166,13 +196,32 @@ class ArsCalendar extends WebComponentBase {
     // this.onSwipeUp    = function()  { this.previousYear()   }
     // this.onSwipeDown  = function()  { this.nextYear()       }
     Swipeable.call(this);
+
+    // Customization properties
+    this.customTemplate = null; // Custom template function
+    this.customCSS = null; // Custom CSS string
+    this.cssVars = {}; // CSS variables for theming
+    this.defaultCSS = DEFAULT_CSS; // Default CSS styles
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    // Ensure initial render when component is added to DOM
+    setTimeout(() => {
+      if (!this.shadowRoot) {
+        this.attachShadow({ mode: "open" });
+      }
+      this._render();
+    }, 0);
   }
 
   allAttributesChangedCallback() {
     if (!this.shadowRoot) this.attachShadow({ mode: "open" });
 
-    // this is causing the rendering without vars set when they are (I don't know why)
-    // this._render()
+    // Render after all attributes are processed
+    setTimeout(() => {
+      this._render();
+    }, 0);
   }
 
   clearAllData() {
@@ -222,54 +271,88 @@ class ArsCalendar extends WebComponentBase {
   }
 
   _render() {
+    console.log("ARS Calendar render called");
     if (!this.shadowRoot) return;
 
-    this.fillDaySlots(this.monthToShow, this.yearToShow);
+    try {
+      this.fillDaySlots(this.monthToShow, this.yearToShow);
 
-    let self = this;
-    this.shadowRoot.innerHTML = eval("`" + getTemplate(self) + "`");
-    let dayElements = this.shadowRoot.querySelectorAll(
-      ".curr > tbody > tr > td",
-    );
-    for (let weekIndex = 0; weekIndex < this.WEEKS_IN_MONTH; weekIndex++) {
-      for (
-        let dayOfWeekIndex = 0;
-        dayOfWeekIndex < this.DAYS_IN_WEEK;
-        dayOfWeekIndex++
-      ) {
-        let dayElement =
-          dayElements[this.getDaySlotIndex(weekIndex, dayOfWeekIndex)];
-        let backgroundCanvas =
-          this.daySlotsColors[this.getDaySlotIndex(weekIndex, dayOfWeekIndex)];
-        cellWidth = dayElement.offsetWidth;
-        cellHeight = dayElement.offsetHeight;
-        let backgroundCanvasImage = "url(" + backgroundCanvas.toDataURL() + ")";
-        dayElement.style.background = backgroundCanvasImage;
-        dayElement.innerText =
-          this.daySlots[this.getDaySlotIndex(weekIndex, dayOfWeekIndex)];
-        dayElement.onclick = () => {
-          eval(
-            `this.onDayClicked(this.getDaySlotIndex(${weekIndex}, ${dayOfWeekIndex}))`,
-          );
-        };
+      let self = this;
+      // Use custom template if provided, otherwise use default calendar HTML
+      const template = this.customTemplate
+        ? this.customTemplate(self)
+        : renderCalendarHTML(self);
+      this.shadowRoot.innerHTML = template;
 
-        //change class if selected day
-        if (
-          this.selectedDay ===
-            this.daySlots[this.getDaySlotIndex(weekIndex, dayOfWeekIndex)] &&
-          this.selectedMonth === this.monthToShow &&
-          this.selectedYear === this.yearToShow
+      let dayElements = this.shadowRoot.querySelectorAll(
+        ".calendar-body > tbody > tr > td",
+      );
+
+      for (let weekIndex = 0; weekIndex < this.WEEKS_IN_MONTH; weekIndex++) {
+        for (
+          let dayOfWeekIndex = 0;
+          dayOfWeekIndex < this.DAYS_IN_WEEK;
+          dayOfWeekIndex++
         ) {
-          dayElement.classList.toggle("selected-day");
+          let dayElement =
+            dayElements[this.getDaySlotIndex(weekIndex, dayOfWeekIndex)];
+          if (!dayElement) continue;
+
+          let backgroundCanvas =
+            this.daySlotsColors[
+              this.getDaySlotIndex(weekIndex, dayOfWeekIndex)
+            ];
+
+          // Update cell dimensions for future renders
+          if (dayElement.offsetWidth > 0) {
+            cellWidth = dayElement.offsetWidth;
+            cellHeight = dayElement.offsetHeight;
+          }
+
+          // Apply background only if there's a canvas (events exist)
+          if (backgroundCanvas) {
+            let backgroundCanvasImage =
+              "url(" + backgroundCanvas.toDataURL() + ")";
+            dayElement.style.backgroundImage = backgroundCanvasImage;
+          } else {
+            // Clear any existing background for days with no events
+            dayElement.style.backgroundImage = "none";
+          }
+
+          dayElement.innerText =
+            this.daySlots[this.getDaySlotIndex(weekIndex, dayOfWeekIndex)] ||
+            "";
+          dayElement.onclick = () => {
+            this.onDayClicked(this.getDaySlotIndex(weekIndex, dayOfWeekIndex));
+          };
+
+          //change class if selected day
+          if (
+            this.selectedDay ===
+              this.daySlots[this.getDaySlotIndex(weekIndex, dayOfWeekIndex)] &&
+            this.selectedMonth === this.monthToShow &&
+            this.selectedYear === this.yearToShow
+          ) {
+            dayElement.classList.add("selected-day");
+          } else {
+            dayElement.classList.remove("selected-day");
+          }
         }
       }
+
+      let prevButton = this.shadowRoot.getElementById("prev");
+      if (prevButton) prevButton.onclick = this.previousMonth.bind(this);
+      let todayButton = this.shadowRoot.getElementById("today");
+      if (todayButton)
+        todayButton.onclick = this.setSelectedDateToToday.bind(this);
+      let nextButton = this.shadowRoot.getElementById("next");
+      if (nextButton) nextButton.onclick = this.nextMonth.bind(this);
+
+      // Apply CSS variables after rendering
+      this._applyCSSVars();
+    } catch (error) {
+      console.error("ARS Calendar render error:", error);
     }
-    let prevButton = this.shadowRoot.getElementById("prev");
-    prevButton.onclick = this.previousMonth.bind(this);
-    let todayButton = this.shadowRoot.getElementById("today");
-    todayButton.onclick = this.setSelectedDateToToday.bind(this);
-    let nextButton = this.shadowRoot.getElementById("next");
-    nextButton.onclick = this.nextMonth.bind(this);
   }
 
   static get observedAttributes() {
@@ -277,6 +360,8 @@ class ArsCalendar extends WebComponentBase {
       "localized_abbreviated_days",
       "localized_months",
       "localized_today",
+      "custom-css",
+      "css-vars",
     ];
   }
 
@@ -295,6 +380,54 @@ class ArsCalendar extends WebComponentBase {
       this.localizedToday = newVal;
       this._render();
     }
+    if (attrName === "custom-css") {
+      this.customCSS = newVal;
+      this._render();
+    }
+    if (attrName === "css-vars") {
+      this.cssVars = JSON.parse(newVal || "{}");
+      this._applyCSSVars();
+      this._render();
+    }
+  }
+
+  // Method to set custom template
+  setCustomTemplate(templateFunction) {
+    this.customTemplate = templateFunction;
+    this._render();
+  }
+
+  // Method to apply CSS variables
+  _applyCSSVars() {
+    if (!this.cssVars || !this.shadowRoot) return;
+
+    // Find or create a style element specifically for CSS variables
+    let cssVarStyle = this.shadowRoot.querySelector("style.css-vars-style");
+    if (!cssVarStyle) {
+      cssVarStyle = document.createElement("style");
+      cssVarStyle.className = "css-vars-style";
+      this.shadowRoot.prepend(cssVarStyle);
+    }
+
+    let cssVarString = ":host {\n";
+    for (const [key, value] of Object.entries(this.cssVars)) {
+      cssVarString += `  --${key}: ${value};\n`;
+    }
+    cssVarString += "}\n";
+
+    cssVarStyle.textContent = cssVarString;
+  }
+
+  // Method to set CSS variables programmatically
+  setCSSVars(cssVars) {
+    // Replace all CSS variables, not merge
+    this.cssVars = { ...cssVars };
+    this._applyCSSVars();
+  }
+
+  // Method to get current CSS variables
+  getCSSVars() {
+    return { ...this.cssVars };
   }
 
   monthToShowString(month) {
@@ -352,8 +485,12 @@ class ArsCalendar extends WebComponentBase {
     }
   }
 
-  // Return canvas with colors (or white)
+  // Return canvas with colors (or null for no events)
   getColorCanvasFromDate(day, month, year) {
+    // Use default cell dimensions if not yet calculated
+    const defaultCellWidth = cellWidth || 30;
+    const defaultCellHeight = cellHeight || 30;
+
     let colorsForDate = this.events
       .filter(
         (eventFound) =>
@@ -364,30 +501,26 @@ class ArsCalendar extends WebComponentBase {
       .map((event) => event.color);
 
     if (!colorsForDate.length) {
-      return ImageUtil.createPieGraphWithEvenlyDistributedColors(
-        cellWidth,
-        cellHeight,
-        ["white"],
-      );
+      // Return null for days with no events - no background will be applied
+      return null;
     }
     return ImageUtil.createPieGraphWithEvenlyDistributedColors(
-      cellWidth,
-      cellHeight,
+      defaultCellWidth,
+      defaultCellHeight,
       colorsForDate,
     );
   }
 
   buildDayAndClassSlots() {
+    // Use default cell dimensions if not yet calculated
+    const defaultCellWidth = cellWidth || 30;
+    const defaultCellHeight = cellHeight || 30;
+
     this.daySlots = new Array(this.WEEKS_IN_MONTH * this.DAYS_IN_WEEK).fill(
       null,
     );
-    this.daySlotsColors = this.daySlots.map(() =>
-      ImageUtil.createPieGraphWithEvenlyDistributedColors(
-        cellWidth,
-        cellHeight,
-        ["white"],
-      ),
-    );
+    // Initialize with null - no background for empty days
+    this.daySlotsColors = this.daySlots.map(() => null);
   }
 
   numDaysInMonth(month, year) {

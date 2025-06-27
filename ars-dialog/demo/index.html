@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Dialog - Test Page</title>
+
+  <!-- Import Map for module resolution -->
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "../../node_modules/arslib/index.js"
+    }
+  }
+  </script>
+
+  <!-- Common CSS -->
+  <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/buttons.css">
+
+  <style>
+    /* Component-specific styles */
+    .dialog-demo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .dialog-result {
+      background: white;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 10px 0;
+      min-height: 60px;
+      width: 100%;
+    }
+
+    .dialog-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      width: 100%;
+    }
+
+    .dialog-type {
+      text-align: center;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+
+    .dialog-type h4 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .dialog-type p {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .sample-content {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      margin: 10px 0;
+    }
+
+    /* Jewel theme button styles for dialogs */
+    .emerald-btn,
+    .sapphire-btn,
+    .onyx-btn {
+      position: relative;
+      padding-left: 40px;
+      /* Space for icon */
+      line-height: 20px;
+    }
+
+    .emerald-btn::before,
+    .sapphire-btn::before,
+    .onyx-btn::before {
+      content: '';
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .emerald-btn::before {
+      background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M8 2H20L26 8V20L20 26H8L2 20V8L8 2Z' fill='%2310B981' stroke='%23065F46' stroke-width='2'/%3e%3cpath d='M8 2L20 26M20 2L8 26M2 8L26 20M2 20L26 8' stroke='rgba(255,255,255,0.3)' stroke-width='1'/%3e%3c/svg%3e");
+    }
+
+    .sapphire-btn::before {
+      background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M14 2L2 10L14 26L26 10L14 2Z' fill='%232563EB' stroke='%231E3A8A' stroke-width='2'/%3e%3cpath d='M2 10L26 10M14 2L7 10L14 14L21 10L14 2Z' stroke='rgba(255,255,255,0.5)' stroke-width='1.5'/%3e%3c/svg%3e");
+    }
+
+    .onyx-btn::before {
+      background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='14' cy='14' r='12' fill='%2318181B' stroke='%233F3F46' stroke-width='2'/%3e%3cpath d='M8 8 A 10 10, 0, 0, 1, 20 20' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='2'/%3e%3c/svg%3e");
+    }
+
+    .emerald-btn {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      border: 2px solid #065f46;
+      box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+    }
+
+    .emerald-btn:hover {
+      background: linear-gradient(135deg, #34d399, #10b981);
+      box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .sapphire-btn {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      border: 2px solid #1e3a8a;
+      box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+    }
+
+    .sapphire-btn:hover {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      box-shadow: 0 6px 12px rgba(37, 99, 235, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .onyx-btn {
+      background: linear-gradient(135deg, #18181b, #09090b);
+      color: #facc15;
+      border: 2px solid #3f3f46;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .onyx-btn:hover {
+      background: linear-gradient(135deg, #27272a, #18181b);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
+      transform: translateY(-1px);
+      color: #fbbf24;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>💬 ARS Dialog</h1>
+      <p>Modal Dialog Component Test</p>
+    </div>
+
+    <div class="content">
+      <a href="../../" class="back-link">← Back to Test Suite</a>
+
+      <div class="info-box">
+        <h4>About ARS Dialog</h4>
+        <p>Modal dialog component for user interactions. Supports custom content, styling with backdrop management, and
+          both confirmation and notification modes.</p>
+      </div>
+
+      <!-- Basic Usage -->
+      <div class="test-section">
+        <h3>🎯 Dialog Types</h3>
+        <div class="dialog-controls">
+
+          <div class="dialog-type">
+            <h4>📝 Input Dialog</h4>
+            <p>Dialog with form input and confirmation buttons</p>
+            <button class="btn" onclick="showInputDialog()">Open Input Dialog</button>
+          </div>
+
+          <div class="dialog-type">
+            <h4>⚠️ Confirmation Dialog</h4>
+            <p>Dialog with yes/no confirmation options</p>
+            <button class="btn" onclick="showConfirmDialog()">Open Confirm Dialog</button>
+          </div>
+
+          <div class="dialog-type">
+            <h4>ℹ️ Notification Dialog</h4>
+            <p>Simple notification with OK button</p>
+            <button class="btn" onclick="showNotificationDialog()">Open Notification</button>
+          </div>
+
+          <div class="dialog-type">
+            <h4>📄 Rich Content Dialog</h4>
+            <p>Dialog with complex HTML content</p>
+            <button class="btn" onclick="showRichContentDialog()">Open Rich Dialog</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Advanced Features -->
+      <div class="test-section">
+        <h3>⚡ Advanced Features</h3>
+        <div class="dialog-demo">
+          <div class="controls">
+            <button class="btn" onclick="showCustomStyledDialog()">🎨 Custom Styled</button>
+            <button class="btn" onclick="showLongContentDialog()">📜 Long Content</button>
+            <button class="btn" onclick="showFormDialog()">📋 Form Dialog</button>
+            <button class="btn-secondary" onclick="showMultipleDialogs()">🔗 Multiple Dialogs</button>
+          </div>
+
+          <div class="dialog-result" id="dialogResult">
+            <strong>Dialog Result:</strong> <span id="resultText">No dialog opened yet</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CSS Customization -->
+      <div class="test-section">
+        <h3>🎨 CSS Customization & Themes</h3>
+        <div class="dialog-demo">
+          <div class="localization-demo">
+            <h4>Dialog Theming Features:</h4>
+            <p><strong>CSS Variables:</strong> Theme using CSS custom properties</p>
+            <p><strong>Custom CSS:</strong> Add your own styles</p>
+            <p><strong>Backdrop Effects:</strong> Customize overlay and animations</p>
+          </div>
+
+          <div class="controls">
+            <button class="btn emerald-btn" onclick="showEmeraldDialog()">Emerald Dialog</button>
+            <button class="btn sapphire-btn" onclick="showSapphireDialog()">Sapphire Dialog</button>
+            <button class="btn onyx-btn" onclick="showOnyxDialog()">Onyx Dialog</button>
+            <button class="btn" onclick="showDefaultDialog()">🔄 Default Dialog</button>
+          </div>
+
+          <div class="localization-demo">
+            <h4>Current Theme Preview:</h4>
+            <div id="themePreview">Click a theme button above to see a styled dialog</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Event Monitoring -->
+      <div class="test-section">
+        <h3>📡 Event Monitoring</h3>
+        <p style="margin-bottom: 15px; color: #666;">All dialog interactions are logged below.</p>
+
+        <div class="demo-output">
+          <h4>Event Log:</h4>
+          <div class="event-log" id="eventLog">Ready to capture dialog events...\n</div>
+          <div class="controls">
+            <button class="btn-secondary" onclick="clearLog()">🗑️ Clear Log</button>
+            <button class="btn-secondary" onclick="exportLog()">📄 Export Log</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Usage Instructions -->
+      <div class="test-section">
+        <h3>📖 Usage Instructions</h3>
+        <div class="info-box">
+          <h4>ES Module Import:</h4>
+          <div class="sample-content">import ArsDialog from '../ars-dialog.js'</div>
+        </div>
+
+        <div class="info-box">
+          <h4>Dialog Method:</h4>
+          <div class="sample-content">const result = await ArsDialog.dialog(content, title)</div>
+          <p>Returns the dialog DOM element or null if cancelled</p>
+        </div>
+
+        <div class="info-box">
+          <h4>Notification Method:</h4>
+          <div class="sample-content">await ArsDialog.notify(content, title)</div>
+          <p>Shows a simple notification dialog</p>
+        </div>
+
+        <div class="info-box">
+          <h4>Content Examples:</h4>
+          <div class="sample-content">
+            // Simple text<br>
+            'Hello, World!'<br><br>
+            // HTML content<br>
+            '&lt;p&gt;Enter your name: &lt;input id="name"&gt;&lt;/p&gt;'<br><br>
+            // Complex forms<br>
+            '&lt;form&gt;...&lt;/form&gt;'
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load the component -->
+  <script type="module">
+    import ArsDialog from '../ars-dialog.js';
+
+    const eventLog = document.getElementById('eventLog');
+    const resultText = document.getElementById('resultText');
+
+    function logEvent(message) {
+      const timestamp = new Date().toLocaleTimeString();
+      const logEntry = `[${timestamp}] ${message}\n`;
+      eventLog.textContent += logEntry;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function updateResult(result) {
+      if (result) {
+        resultText.textContent = 'Dialog confirmed - see log for details';
+        resultText.style.color = '#4caf50';
+      } else {
+        resultText.textContent = 'Dialog cancelled or closed';
+        resultText.style.color = '#f44336';
+      }
+    }
+
+    // Themed dialog functions
+    window.showEmeraldDialog = async function () {
+      logEvent('Opening Emerald themed dialog...');
+
+      const emeraldTheme = {
+        'ars-dialog-bg': '#ecfdf5',
+        'ars-dialog-overlay-bg': 'rgba(16, 185, 129, 0.1)',
+        'ars-dialog-border-radius': '16px',
+        'ars-dialog-shadow': '0 25px 50px -12px rgba(16, 185, 129, 0.25)',
+        'ars-dialog-title-color': '#065f46',
+        'ars-dialog-content-color': '#047857',
+        'ars-dialog-primary-button-bg': '#10b981',
+        'ars-dialog-primary-button-hover-bg': '#059669',
+        'ars-dialog-secondary-button-border': '1px solid #10b981',
+        'ars-dialog-secondary-button-color': '#059669',
+        'ars-dialog-backdrop-filter': 'blur(4px)'
+      };
+
+      const result = await ArsDialog.dialog(
+        `<p>This is an <strong>Emerald themed dialog</strong> with nature-inspired colors and styling.</p>
+         <p>The emerald theme uses green tones and soft shadows to create a fresh, natural appearance.</p>`,
+        'Emerald Theme Dialog',
+        emeraldTheme
+      );
+
+      updateResult(result);
+      updateThemePreview('Emerald', emeraldTheme);
+    };
+
+    window.showSapphireDialog = async function () {
+      logEvent('Opening Sapphire themed dialog...');
+
+      const sapphireTheme = {
+        'ars-dialog-bg': '#eff6ff',
+        'ars-dialog-overlay-bg': 'rgba(37, 99, 235, 0.1)',
+        'ars-dialog-border-radius': '20px',
+        'ars-dialog-shadow': '0 25px 50px -12px rgba(37, 99, 235, 0.25)',
+        'ars-dialog-title-color': '#1e3a8a',
+        'ars-dialog-content-color': '#1d4ed8',
+        'ars-dialog-primary-button-bg': '#2563eb',
+        'ars-dialog-primary-button-hover-bg': '#1d4ed8',
+        'ars-dialog-secondary-button-border': '1px solid #2563eb',
+        'ars-dialog-secondary-button-color': '#1d4ed8',
+        'ars-dialog-backdrop-filter': 'blur(6px)'
+      };
+
+      const result = await ArsDialog.dialog(
+        `<p>This is a <strong>Sapphire themed dialog</strong> with royal blue colors and elegant styling.</p>
+         <p>The sapphire theme uses deep blue tones and enhanced blur effects for a premium feel.</p>`,
+        'Sapphire Theme Dialog',
+        sapphireTheme
+      );
+
+      updateResult(result);
+      updateThemePreview('Sapphire', sapphireTheme);
+    };
+
+    window.showOnyxDialog = async function () {
+      logEvent('Opening Onyx themed dialog...');
+
+      const onyxTheme = {
+        'ars-dialog-bg': '#18181b',
+        'ars-dialog-overlay-bg': 'rgba(0, 0, 0, 0.7)',
+        'ars-dialog-border-radius': '12px',
+        'ars-dialog-shadow': '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+        'ars-dialog-title-color': '#facc15',
+        'ars-dialog-content-color': '#e4e4e7',
+        'ars-dialog-primary-button-bg': '#facc15',
+        'ars-dialog-primary-button-color': '#18181b',
+        'ars-dialog-primary-button-hover-bg': '#fbbf24',
+        'ars-dialog-secondary-button-bg': '#27272a',
+        'ars-dialog-secondary-button-border': '1px solid #3f3f46',
+        'ars-dialog-secondary-button-color': '#a1a1aa',
+        'ars-dialog-secondary-button-hover-bg': '#3f3f46',
+        'ars-dialog-backdrop-filter': 'blur(8px)'
+      };
+
+      const result = await ArsDialog.dialog(
+        `<p>This is an <strong>Onyx themed dialog</strong> with dark colors and golden accents.</p>
+         <p>The onyx theme uses a dark background with gold highlights for a sophisticated, modern look.</p>`,
+        'Onyx Theme Dialog',
+        onyxTheme
+      );
+
+      updateResult(result);
+      updateThemePreview('Onyx', onyxTheme);
+    };
+
+    window.showDefaultDialog = async function () {
+      logEvent('Opening default styled dialog...');
+
+      const result = await ArsDialog.dialog(
+        `<p>This is the <strong>default dialog</strong> with standard styling.</p>
+         <p>No custom theme is applied, showing the clean, neutral appearance.</p>`,
+        'Default Dialog'
+      );
+
+      updateResult(result);
+      updateThemePreview('Default', {});
+    };
+
+    function updateThemePreview(themeName, cssVars) {
+      const preview = document.getElementById('themePreview');
+      if (Object.keys(cssVars).length === 0) {
+        preview.innerHTML = `<strong>${themeName} theme active:</strong> Clean, neutral styling with standard colors`;
+      } else {
+        const varList = Object.entries(cssVars)
+          .slice(0, 3)
+          .map(([key, value]) => `<code>--${key}: ${value}</code>`)
+          .join('<br>');
+        preview.innerHTML = `<strong>${themeName} theme active:</strong><br>${varList}<br><em>...and ${Object.keys(cssVars).length - 3} more variables</em>`;
+      }
+    }
+
+    // Dialog functions
+    window.showInputDialog = async function () {
+      logEvent('Opening input dialog...');
+
+      const result = await ArsDialog.dialog(
+        `<div style="padding: 20px;">
+          <p style="margin-bottom: 15px;">Please enter your information:</p>
+          <p><label>Name: <input id='userName' placeholder='Enter your name' style='margin-left: 10px; padding: 5px;'></label></p>
+          <p><label>Email: <input id='userEmail' type='email' placeholder='Enter your email' style='margin-left: 10px; padding: 5px; margin-top: 10px;'></label></p>
+        </div>`,
+        'User Information'
+      );
+
+      if (result) {
+        const name = result.querySelector('#userName').value;
+        const email = result.querySelector('#userEmail').value;
+        logEvent(`Input dialog confirmed - Name: "${name}", Email: "${email}"`);
+      } else {
+        logEvent('Input dialog cancelled');
+      }
+
+      updateResult(result);
+    };
+
+    window.showConfirmDialog = async function () {
+      logEvent('Opening confirmation dialog...');
+
+      const result = await ArsDialog.dialog(
+        `<div style="padding: 20px; text-align: center;">
+          <h3 style="color: #f44336; margin-bottom: 15px;">⚠️ Confirm Action</h3>
+          <p>Are you sure you want to delete this item?</p>
+          <p style="color: #666; font-size: 0.9rem; margin-top: 10px;">This action cannot be undone.</p>
+        </div>`,
+        'Confirmation Required'
+      );
+
+      if (result) {
+        logEvent('Confirmation dialog: User confirmed deletion');
+      } else {
+        logEvent('Confirmation dialog: User cancelled deletion');
+      }
+
+      updateResult(result);
+    };
+
+    window.showNotificationDialog = async function () {
+      logEvent('Opening notification dialog...');
+
+      await ArsDialog.notify(
+        `<div style="padding: 20px; text-align: center;">
+          <h3 style="color: #4caf50; margin-bottom: 15px;">✅ Success!</h3>
+          <p>Your operation has been completed successfully.</p>
+          <p style="color: #666; font-size: 0.9rem; margin-top: 10px;">You can now continue working.</p>
+        </div>`,
+        'Operation Complete'
+      );
+
+      logEvent('Notification dialog closed');
+      resultText.textContent = 'Notification dialog was shown';
+      resultText.style.color = '#2196f3';
+    };
+
+    window.showRichContentDialog = async function () {
+      logEvent('Opening rich content dialog...');
+
+      const result = await ArsDialog.dialog(
+        `<div style="padding: 20px;">
+          <h3 style="margin-bottom: 15px;">🎨 Rich Content Example</h3>
+          <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <h4>Features:</h4>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+              <li>✅ Custom HTML content</li>
+              <li>✅ Multiple form elements</li>
+              <li>✅ Styled components</li>
+              <li>✅ Interactive elements</li>
+            </ul>
+          </div>
+          <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <select id="category" style="
+              padding: 7px 28px 7px 12px;
+              border: 1.5px solid #bdbdbd;
+              border-radius: 6px;
+              background: #f5f5f5 url('data:image/svg+xml;utf8,<svg fill=\'%23666\' height=\'18\' viewBox=\'0 0 20 20\' width=\'18\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7.293 8.293a1 1 0 011.414 0L10 9.586l1.293-1.293a1 1 0 111.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z\'/></svg>') no-repeat right 10px center/18px 18px;
+              font-size: 1rem;
+              color: #333;
+              appearance: none;
+              -webkit-appearance: none;
+              -moz-appearance: none;
+              transition: border-color 0.2s, box-shadow 0.2s;
+              box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+              min-width: 120px;
+            " onfocus="this.style.borderColor='#2563eb';this.style.boxShadow='0 0 0 2px #2563eb33';" onblur="this.style.borderColor='#bdbdbd';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.04)';">
+              <option>General</option>
+              <option>Technical</option>
+              <option>Feedback</option>
+            </select>
+            <input id="priority" type="range" min="1" max="5" value="3">
+            <span id="priorityLabel">Priority: 3</span>
+          </div>
+          <textarea
+            id="description"
+            placeholder="Enter description..."
+            style="
+              width: 100%;
+              height: 80px;
+              padding: 10px 12px;
+              border: 1.5px solid #bdbdbd;
+              border-radius: 6px;
+              background: #f8fafc;
+              font-size: 1rem;
+              color: #22223b;
+              resize: vertical;
+              box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+              transition: border-color 0.2s, box-shadow 0.2s;
+              outline: none;
+            "
+            onfocus="this.style.borderColor='#2563eb';this.style.boxShadow='0 0 0 2px #2563eb33';"
+            onblur="this.style.borderColor='#bdbdbd';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.04)';"
+          ></textarea>
+        </div>`,
+        'Advanced Form Dialog'
+      );
+
+      if (result) {
+        const category = result.querySelector('#category').value;
+        const priority = result.querySelector('#priority').value;
+        const description = result.querySelector('#description').value;
+        logEvent(`Rich content dialog confirmed - Category: "${category}", Priority: ${priority}, Description: "${description}"`);
+      } else {
+        logEvent('Rich content dialog cancelled');
+      }
+
+      updateResult(result);
+    };
+
+    window.showCustomStyledDialog = async function () {
+      logEvent('Opening custom styled dialog...');
+
+      const result = await ArsDialog.dialog(
+        `<div style="padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px;">
+          <h3 style="margin-bottom: 20px; text-align: center;">🌟 Custom Styled Dialog</h3>
+          <p style="margin-bottom: 15px;">This dialog demonstrates custom CSS styling capabilities.</p>
+          <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px;">Choose theme:</label>
+            <input type="radio" name="theme" value="light" id="light"> <label for="light">Light</label><br>
+            <input type="radio" name="theme" value="dark" id="dark"> <label for="dark">Dark</label><br>
+            <input type="radio" name="theme" value="auto" id="auto" checked> <label for="auto">Auto</label>
+          </div>
+        </div>`,
+        'Custom Theme'
+      );
+
+      if (result) {
+        const selectedTheme = result.querySelector('input[name="theme"]:checked').value;
+        logEvent(`Custom styled dialog confirmed - Selected theme: "${selectedTheme}"`);
+      } else {
+        logEvent('Custom styled dialog cancelled');
+      }
+
+      updateResult(result);
+    };
+
+    window.showLongContentDialog = async function () {
+      logEvent('Opening long content dialog...');
+
+      const longContent = `
+        <div style="padding: 20px;">
+          <h3>📜 Terms and Conditions</h3>
+          <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; margin: 15px 0; background: #f9f9f9;">
+            <h4>1. Introduction</h4>
+            <p>Welcome to our service. By using this application, you agree to these terms...</p>
+            <h4>2. Data Collection</h4>
+            <p>We collect information to provide better services to all our users...</p>
+            <h4>3. Privacy Policy</h4>
+            <p>Your privacy is important to us. We are committed to protecting your data...</p>
+            <h4>4. User Responsibilities</h4>
+            <p>Users are responsible for maintaining the confidentiality of their account...</p>
+            <h4>5. Service Availability</h4>
+            <p>We strive to maintain high service availability, but cannot guarantee 100% uptime...</p>
+            <h4>6. Intellectual Property</h4>
+            <p>All content and materials available through our service are protected by copyright...</p>
+            <h4>7. Limitation of Liability</h4>
+            <p>In no event shall we be liable for any indirect, incidental, special, consequential...</p>
+            <h4>8. Changes to Terms</h4>
+            <p>We reserve the right to modify these terms at any time. Continued use constitutes acceptance...</p>
+          </div>
+          <label>
+            <input type="checkbox" id="acceptTerms"> I have read and accept the terms and conditions
+          </label>
+        </div>
+      `;
+
+      const result = await ArsDialog.dialog(longContent, 'Terms and Conditions');
+
+      if (result) {
+        const accepted = result.querySelector('#acceptTerms').checked;
+        logEvent(`Terms dialog confirmed - Terms accepted: ${accepted}`);
+      } else {
+        logEvent('Terms dialog cancelled');
+      }
+
+      updateResult(result);
+    };
+
+    window.showFormDialog = async function () {
+      logEvent('Opening form dialog...');
+
+      const result = await ArsDialog.dialog(
+        `<form style="padding: 20px;">
+          <h3 style="margin-bottom: 20px;">📋 Contact Form</h3>
+
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Full Name:</label>
+            <input id="fullName" type="text" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Subject:</label>
+            <select id="subject" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+              <option value="">Select a subject...</option>
+              <option value="support">Technical Support</option>
+              <option value="billing">Billing Question</option>
+              <option value="feature">Feature Request</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Message:</label>
+            <textarea id="message" required style="width: 100%; height: 100px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;" placeholder="Enter your message here..."></textarea>
+          </div>
+
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Priority:</label>
+            <input type="radio" name="priority" value="low" id="pLow"> <label for="pLow">Low</label>
+            <input type="radio" name="priority" value="normal" id="pNormal" checked> <label for="pNormal">Normal</label>
+            <input type="radio" name="priority" value="high" id="pHigh"> <label for="pHigh">High</label>
+          </div>
+        </form>`,
+        'Contact Us'
+      );
+
+      if (result) {
+        const fullName = result.querySelector('#fullName').value;
+        const subject = result.querySelector('#subject').value;
+        const message = result.querySelector('#message').value;
+        const priority = result.querySelector('input[name="priority"]:checked').value;
+        logEvent(`Form dialog submitted - Name: "${fullName}", Subject: "${subject}", Priority: "${priority}", Message length: ${message.length} chars`);
+      } else {
+        logEvent('Form dialog cancelled');
+      }
+
+      updateResult(result);
+    };
+
+    window.showMultipleDialogs = async function () {
+      logEvent('Opening first dialog in sequence...');
+
+      const result1 = await ArsDialog.dialog(
+        `<div style="padding: 20px; text-align: center;">
+          <h3>🔗 Step 1 of 3</h3>
+          <p>This demonstrates multiple dialogs in sequence.</p>
+          <p style="color: #666; margin-top: 10px;">Click OK to continue to step 2.</p>
+        </div>`,
+        'Multi-Step Process'
+      );
+
+      if (!result1) {
+        logEvent('Multi-dialog sequence cancelled at step 1');
+        updateResult(false);
+        return;
+      }
+
+      logEvent('Step 1 completed, opening step 2...');
+
+      const result2 = await ArsDialog.dialog(
+        `<div style="padding: 20px; text-align: center;">
+          <h3>🔗 Step 2 of 3</h3>
+          <p>Enter a value for the next step:</p>
+          <input id="stepValue" type="text" placeholder="Enter something..." style="margin-top: 10px; padding: 8px; width: 200px;">
+        </div>`,
+        'Multi-Step Process'
+      );
+
+      if (!result2) {
+        logEvent('Multi-dialog sequence cancelled at step 2');
+        updateResult(false);
+        return;
+      }
+
+      const stepValue = result2.querySelector('#stepValue').value;
+      logEvent(`Step 2 completed with value: "${stepValue}", opening step 3...`);
+
+      await ArsDialog.notify(
+        `<div style="padding: 20px; text-align: center;">
+          <h3>🎉 Step 3 of 3 - Complete!</h3>
+          <p>Multi-step process completed successfully.</p>
+          <p style="color: #666; margin-top: 10px;">You entered: "<strong>${stepValue}</strong>"</p>
+        </div>`,
+        'Process Complete'
+      );
+
+      logEvent('Multi-dialog sequence completed successfully');
+      resultText.textContent = 'Multi-step dialog sequence completed';
+      resultText.style.color = '#4caf50';
+    };
+
+    // Utility functions
+    window.clearLog = function () {
+      eventLog.textContent = 'Event log cleared...\n';
+    };
+
+    window.exportLog = function () {
+      const logContent = eventLog.textContent;
+      const blob = new Blob([logContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'ars-dialog-event-log.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      logEvent('Event log exported to file');
+    };
+
+    // Initialize
+    window.addEventListener('load', function () {
+      logEvent('ARS Dialog test page loaded');
+    });
+
+    // Add priority range slider handler for rich content dialog
+    document.addEventListener('input', function (e) {
+      if (e.target.id === 'priority') {
+        const label = document.getElementById('priorityLabel');
+        if (label) {
+          label.textContent = `Priority: ${e.target.value}`;
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

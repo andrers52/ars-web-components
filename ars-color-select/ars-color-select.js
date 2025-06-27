@@ -102,6 +102,11 @@ class ArsColorSelect extends WebComponentBase {
     super();
     this.template = `
       <style>
+        :host {
+          display: inline-block;
+          width: 44px;
+          height: 44px;
+        }
         .overlay {
           position: fixed;
           visibility: hidden;
@@ -138,11 +143,19 @@ class ArsColorSelect extends WebComponentBase {
           border-radius: 5px;
         }
         .colorSelector {
-          width: 100%;
-          height: 100%;
+          width: 40px;
+          height: 40px;
           margin: auto;
           background-color: blue;
           border-radius: 5px;
+          cursor: pointer;
+          border: 2px solid #ccc;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          transition: all 0.2s ease;
+        }
+        .colorSelector:hover {
+          transform: scale(1.05);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
       </style>
       <div id= "colorSelector" class="colorSelector"  style="visibility: visible;"> &nbsp; </div>

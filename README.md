@@ -16,6 +16,12 @@ A modern collection of reusable web components built with vanilla JavaScript and
 npm install ars-web-components
 ```
 
+## Demo
+
+```bash
+npm start
+```
+
 ## Usage
 
 ### Method 1: ES Module Import (Recommended)
@@ -59,11 +65,110 @@ Enhanced button with custom events and pressed effects.
 
 ### ArsCalendar
 
-Interactive calendar component.
+Interactive calendar component with full customization support.
+
+```html
+<ars-calendar
+  id="myCalendar"
+  localized_abbreviated_days='["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]'
+  localized_months='["January","February","March",...,"December"]'
+  localized_today="Today"
+  css-vars='{"ars-calendar-bg": "#f0f0f0", "ars-calendar-header-bg": "#333"}'
+></ars-calendar>
+```
+
+**Attributes:**
+
+- `localized_abbreviated_days`: JSON array of localized day abbreviations
+- `localized_months`: JSON array of localized month names
+- `localized_today`: Localized text for "Today" button
+- `custom-css`: Custom CSS string to add to component styles
+- `css-vars`: JSON object of CSS custom properties for theming
+
+**Methods:**
+
+- `addEvent(event)`: Add an event to the calendar
+- `removeEvent(event)`: Remove an event from the calendar
+- `changeEvent(date, newText, newColor)`: Modify an existing event
+- `selectDate(day, month, year)`: Programmatically select a date
+- `setSelectedDateToToday()`: Select today's date
+- `setCustomTemplate(templateFunction)`: Provide custom HTML template
+- `setCSSVars(cssVarsObject)`: Set CSS variables programmatically
+- `getCSSVars()`: Get current CSS variables
+
+**Events:**
+
+- `ars-calendar:daySelected`: Fired when a date is selected
+
+**CSS Customization:**
+
+The calendar supports extensive theming through CSS variables:
+
+```css
+ars-calendar {
+  --ars-calendar-bg: #ffffff;
+  --ars-calendar-shadow: 0px 3px 3px rgba(0, 0, 0, 0.25);
+  --ars-calendar-border-radius: 5px;
+  --ars-calendar-header-bg: linear-gradient(to bottom, #b32b0c, #cd310d);
+  --ars-calendar-header-height: 34px;
+  --ars-calendar-header-color: #fff;
+  --ars-calendar-cell-width: 30px;
+  --ars-calendar-cell-height: 30px;
+  /* ... and many more */
+}
+```
 
 ### ArsDialog
 
-Modal dialog component.
+Modal dialog component for user interactions. Supports custom content, styling with backdrop management, and both confirmation and notification modes.
+
+```javascript
+// Open a dialog with confirmation buttons and custom content
+const result = await ArsDialog.dialog(
+  `<form><label>Name: <input id='name'></label></form>`,
+  "Dialog Title",
+);
+if (result) {
+  const name = result.querySelector("#name").value;
+  // ...
+}
+
+// Show a notification dialog
+await ArsDialog.notify("Operation complete!", "Success");
+```
+
+**Attributes:**
+
+- `custom-css`: Custom CSS string to add to dialog styles
+- `css-vars`: JSON object of CSS custom properties for theming
+
+**Methods:**
+
+- `setCSSVars(cssVarsObject)`: Set CSS variables programmatically
+- `getCSSVars()`: Get current CSS variables
+
+**Styling & Theming:**
+
+- Dialog supports extensive theming via CSS variables (see `ars-dialog-css.js`)
+- Form elements (`input`, `select`, `textarea`) are styled by default, even for light DOM content injected as HTML
+- Content area is fully responsive and prevents overflow
+
+**Light DOM Form Styling:**
+
+If you inject form elements as raw HTML (light DOM) into the dialog, ARS Dialog will automatically inject a `<style>` tag with form element CSS into the content area, ensuring consistent styling for `input`, `select`, and `textarea`.
+
+**Events:**
+
+- Dialog returns the content DOM element (for confirmation dialogs) or `null`/`false` if cancelled
+
+**Example:**
+
+```javascript
+const result = await ArsDialog.dialog('<input id="myInput">', "Enter Value");
+if (result) {
+  alert(result.querySelector("#myInput").value);
+}
+```
 
 ### ArsColorSelect
 
@@ -71,20 +176,30 @@ Color picker component.
 
 ## Development
 
-### Testing Components
+### Quick Start
 
-Start a local server in the ars-web-components directory:
+Start the development server with all component tests:
 
 ```bash
 cd ars-web-components
-python3 -m http.server 8080
+npm start
 ```
 
-Then visit:
+This will:
 
-- **ars-button**: http://localhost:8080/ars-button/test/index.html
-- **ars-calendar**: http://localhost:8080/ars-calendar/test/index.html
-- **ars-dialog**: http://localhost:8080/ars-dialog/test/index.html
+- Start an HTTP server on port 8080
+- Open your browser automatically
+- Display a comprehensive test suite interface
+
+### Testing Components
+
+Once the server is running, you can access:
+
+- **Main Test Suite**: http://localhost:8080/
+- **Individual Components**:
+  - **ars-button**: http://localhost:8080/ars-button/test/
+  - **ars-calendar**: http://localhost:8080/ars-calendar/test/
+  - **ars-dialog**: http://localhost:8080/ars-dialog/test/
 
 ### Co-development Setup
 

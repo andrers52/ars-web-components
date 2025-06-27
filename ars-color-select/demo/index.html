@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Color Select - Test Page</title>
+
+  <!-- Import Map for module resolution -->
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "../../node_modules/arslib/index.js"
+    }
+  }
+  </script>
+
+  <!-- Common CSS -->
+  <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/buttons.css">
+
+  <style>
+    /* Component-specific styles */
+    .color-display {
+      width: 100px;
+      height: 40px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+      font-weight: bold;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎨 ARS Color Select</h1>
+      <p>Interactive Color Picker Component Test</p>
+    </div>
+
+    <div class="content">
+      <a href="../../" class="back-link">← Back to Test Suite</a>
+
+      <div class="info-box">
+        <h4>About ARS Color Select</h4>
+        <p>A customizable color picker component that displays a color selector button. Click to open a color palette
+          overlay with predefined color options.</p>
+      </div>
+
+      <!-- Basic Usage -->
+      <div class="test-section">
+        <h3>🎯 Basic Usage</h3>
+        <div class="demo">
+          <div class="demo-item">
+            <label>Default (Random Color)</label>
+            <ars-color-select id="colorSelect1"></ars-color-select>
+          </div>
+          <div class="demo-item">
+            <label>Preset Color (Red)</label>
+            <ars-color-select id="colorSelect2" color="Red"></ars-color-select>
+          </div>
+          <div class="demo-item">
+            <label>Preset Color (Blue)</label>
+            <ars-color-select id="colorSelect3" color="Blue"></ars-color-select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advanced Features -->
+      <div class="test-section">
+        <h3>⚡ Interactive Features</h3>
+        <div class="demo">
+          <div class="demo-item">
+            <label>Programmatic Control</label>
+            <ars-color-select id="colorSelect4" color="Green"></ars-color-select>
+          </div>
+          <div class="demo-item">
+            <label>Current Color Display</label>
+            <div class="color-display" id="colorDisplay">Click selector →</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="btn" onclick="setRandomColor()">🎲 Set Random Color</button>
+          <button class="btn" onclick="setSpecificColor('Gold')">⭐ Set Gold</button>
+          <button class="btn" onclick="setSpecificColor('Purple')">💜 Set Purple</button>
+          <button class="btn-secondary" onclick="getCurrentColor()">📋 Get Current Color</button>
+        </div>
+      </div>
+
+      <!-- Event Monitoring -->
+      <div class="test-section">
+        <h3>📡 Event Monitoring</h3>
+        <p style="margin-bottom: 15px; color: #666;">All color selection events are logged below. Try clicking on any
+          color selector above.</p>
+
+        <div class="demo-output">
+          <h4>Event Log:</h4>
+          <div class="event-log" id="eventLog">Ready to capture color selection events...\n</div>
+          <div class="controls">
+            <button class="btn-secondary" onclick="clearLog()">🗑️ Clear Log</button>
+            <button class="btn-secondary" onclick="exportLog()">📄 Export Log</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Usage Instructions -->
+      <div class="test-section">
+        <h3>📖 Usage Instructions</h3>
+        <div class="info-box">
+          <h4>HTML Usage:</h4>
+          <p><strong>&lt;ars-color-select id="myColorPicker" color="Blue"&gt;&lt;/ars-color-select&gt;</strong></p>
+        </div>
+
+        <div class="info-box">
+          <h4>Event Handling:</h4>
+          <p><strong>Event:</strong> ars-color-select:change<br>
+            <strong>Detail:</strong> { id: "elementId", color: "selectedColor" }
+          </p>
+        </div>
+
+        <div class="info-box">
+          <h4>Attributes:</h4>
+          <p><strong>color:</strong> Initial color (optional). If not provided, a random color is selected.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load the component -->
+  <script type="module" src="../ars-color-select.js"></script>
+
+  <!-- Test scripts -->
+  <script>
+    // Event listeners for all color selectors
+    const colorSelectors = ['colorSelect1', 'colorSelect2', 'colorSelect3', 'colorSelect4'];
+    const eventLog = document.getElementById('eventLog');
+    const colorDisplay = document.getElementById('colorDisplay');
+
+    // Add event listeners to all color selectors
+    colorSelectors.forEach(id => {
+      document.addEventListener('ars-color-select:change', function (event) {
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = `[${timestamp}] Color changed for ${event.detail.id}: ${event.detail.color}\n`;
+        eventLog.textContent += logEntry;
+        eventLog.scrollTop = eventLog.scrollHeight;
+
+        // Update color display if it's from colorSelect4
+        if (event.detail.id === 'colorSelect4') {
+          colorDisplay.style.backgroundColor = event.detail.color;
+          colorDisplay.textContent = event.detail.color;
+        }
+      });
+    });
+
+    // Utility functions
+    function setRandomColor() {
+      const colors = ['Red', 'Blue', 'Green', 'Yellow', 'Purple', 'Orange', 'Pink', 'Cyan', 'Magenta', 'Lime'];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      const colorSelect4 = document.getElementById('colorSelect4');
+      colorSelect4.setAttribute('color', randomColor);
+
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] Programmatically set random color: ${randomColor}\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function setSpecificColor(color) {
+      const colorSelect4 = document.getElementById('colorSelect4');
+      colorSelect4.setAttribute('color', color);
+
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] Programmatically set specific color: ${color}\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function getCurrentColor() {
+      const colorSelect4 = document.getElementById('colorSelect4');
+      const currentColor = colorSelect4.getAttribute('color');
+
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] Current color retrieved: ${currentColor}\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+
+      alert(`Current color: ${currentColor}`);
+    }
+
+    function clearLog() {
+      eventLog.textContent = 'Event log cleared...\n';
+    }
+
+    function exportLog() {
+      const logContent = eventLog.textContent;
+      const blob = new Blob([logContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'ars-color-select-event-log.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] Event log exported to file\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    // Initialize color display
+    window.addEventListener('load', function () {
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] ARS Color Select test page loaded\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    });
+  </script>
+</body>
+
+</html>
