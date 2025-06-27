@@ -24,7 +24,7 @@ class ArsButton extends PressedEffect(HTMLButtonElement) {
 
   /**
    * Sends a custom event when the button is clicked.
-   * @param {any} result - The detail of the event.
+   * @param {string} result - The detail of the event.
    * @private
    */
   _notifyClick(result) {

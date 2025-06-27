@@ -1,6 +1,10 @@
 # ARS Web Components
 
-A modern collection of reusable web components built with vanilla JavaScript and ES modules.
+A collection of reusable web components built with vanilla JavaScript and ES modules.
+
+## 🚀 Live Demo
+
+**[Try the Interactive Demo →](https://andrers52.github.io/ars-web-components/)**
 
 ## Features
 
@@ -174,6 +178,131 @@ if (result) {
 
 Color picker component.
 
+## Mixins
+
+ARS Web Components includes a collection of reusable mixins that can be applied to any web component to add specific functionality.
+
+### PressedEffect Mixin
+
+Adds pressed animation effects to components with solid background colors.
+
+```javascript
+import { PressedEffect } from "ars-web-components";
+
+class MyButton extends PressedEffect(HTMLElement) {
+  constructor() {
+    super();
+    // Your component logic
+  }
+}
+```
+
+**Features:**
+
+- Automatic color detection from background
+- Smooth pressed animation effects
+- Works with solid background colors
+- Touch and mouse support
+
+**Demo:** http://localhost:8080/mixins/pressed-effect/demo/
+
+### Localized Mixin
+
+Provides localization capabilities for components with dynamic language switching.
+
+```javascript
+import { Localized } from "ars-web-components";
+
+class LocalizedComponent extends Localized(HTMLElement) {
+  constructor() {
+    super();
+    this.setLocalizedText({
+      en: "Hello World",
+      es: "Hola Mundo",
+      fr: "Bonjour le Monde",
+    });
+  }
+}
+```
+
+**Features:**
+
+- Dynamic language switching
+- Text localization support
+- Event-driven updates
+- Mock localization system for testing
+
+**Demo:** http://localhost:8080/mixins/localized/demo/
+
+### RemoteCall Mixin
+
+Enables inter-component communication through method calls and event dispatching.
+
+```javascript
+import { RemoteCallCaller, RemoteCallReceiver } from "ars-web-components";
+
+// Receiver component
+class MyReceiver extends RemoteCallReceiver(HTMLElement) {
+  constructor() {
+    super();
+    this.exposeMethod("greet", (name) => `Hello ${name}!`);
+  }
+}
+
+// Caller component
+class MyCaller extends RemoteCallCaller(HTMLElement) {
+  async callRemote() {
+    const result = await this.callRemote("receiver-id", "greet", "World");
+    console.log(result); // "Hello World!"
+  }
+}
+```
+
+**Features:**
+
+- Component ID-based targeting
+- Method call with parameters
+- Error handling and validation
+- Real-time logging
+- Support for multiple receiver instances
+
+**Demo:** http://localhost:8080/mixins/remote-call/demo/
+
+### ShowIfPropertyTrue Mixin
+
+Conditionally shows/hides components based on property values.
+
+```javascript
+import { ShowIfPropertyTrue } from "ars-web-components";
+
+class ConditionalComponent extends ShowIfPropertyTrue(HTMLElement) {
+  constructor() {
+    super();
+    this.showIfPropertyTrue("visible", true);
+  }
+}
+```
+
+**Demo:** http://localhost:8080/mixins/show-if-property-true/demo/
+
+### Swipeable Mixin
+
+Adds swipe gesture support to components.
+
+```javascript
+import { Swipeable } from "ars-web-components";
+
+class SwipeableComponent extends Swipeable(HTMLElement) {
+  constructor() {
+    super();
+    this.onSwipeLeft = () => console.log("Swiped left!");
+    this.onSwipeRight = () => console.log("Swiped right!");
+  }
+}
+```
+
+**Demo:** http://localhost:8080/mixins/swipeable/demo/
+
 ## Development
 
 ### Quick Start
@@ -220,10 +349,14 @@ export { ArsCalendar } from "./ars-calendar/ars-calendar.js";
 export { ArsColorSelect } from "./ars-color-select/ars-color-select.js";
 export { ArsDialog } from "./ars-dialog/ars-dialog.js";
 export { WebComponentBase } from "./web-component-base/web-component-base.js";
+
 // Mixins
 export { Localized } from "./mixins/localized/localized.js";
 export { PressedEffect } from "./mixins/pressed-effect/pressed-effect.js";
-// ... and more
+export { RemoteCallCaller } from "./mixins/remote-call/remote-call-caller.js";
+export { RemoteCallReceiver } from "./mixins/remote-call/remote-call-receiver.js";
+export { ShowIfPropertyTrue } from "./mixins/show-if-property-true/show-if-property-true.js";
+export { Swipeable } from "./mixins/swipeable/swipeable.js";
 ```
 
 ## Requirements

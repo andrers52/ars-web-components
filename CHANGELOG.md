@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2025-01-27
+
+### Fixed
+
+- **PressedEffect Mixin Demo**: Fixed pressed effect animation issues where only one button showed the effect. Replaced gradient backgrounds with solid colors and simplified color detection logic for better compatibility.
+- **Localized Mixin Demo**: Completely refactored demo to use actual Localized mixin instead of custom localization system. Created custom elements extending Localized mixin with mock localization system for dynamic language switching.
+- **RemoteCall Mixin Demo**: Replaced placeholder demo with comprehensive interactive demo featuring caller and receiver components, method calls, error handling, and real-time logging. Fixed event listener issues and implemented component ID-based targeting system.
+
+### Added
+
+- **PressedEffect Demo**: Added debugging logs to verify event listeners and animation triggers, confirming proper functionality.
+- **Localized Demo**: Implemented mock localization system with dynamic language switching, custom elements extending Localized mixin, and proper event handling.
+- **RemoteCall Demo**: Created full-featured demo with:
+  - Interactive caller and receiver components
+  - Method call functionality with parameter passing
+  - Error handling and validation
+  - Real-time logging system
+  - Component ID-based targeting (allowing multiple instances)
+  - Color-coded UI for better user experience
+  - Individual and simultaneous method calling capabilities
+- **Enhanced Demo Architecture**: Improved demo structure with better error handling, lifecycle management, and user feedback systems.
+
+### Technical Changes
+
+- **PressedEffect**: Enhanced color detection to work with solid background colors instead of gradients
+- **Localized**: Implemented proper mixin inheritance and mock localization system
+- **RemoteCall**: Switched from tag name-based to component ID-based event targeting for better component isolation
+- **Demo Infrastructure**: Added comprehensive debugging and logging systems across all mixin demos
+
 ## [0.2.2] - 2025-06-27
 
 ### Fixed

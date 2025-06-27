@@ -1,5 +1,5 @@
 import { EObject, ImageUtil } from "arslib";
-import Swipeable from "../mixins/swipeable.js";
+import Swipeable from "../mixins/swipeable/swipeable.js";
 import WebComponentBase from "../web-component-base/web-component-base.js";
 import { DEFAULT_CSS } from "./ars-calendar-css.js";
 import { renderCalendarHTML } from "./ars-calendar-html.js";

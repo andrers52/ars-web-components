@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Localized Mixin - Demo</title>
+
+  <!-- Import Map for module resolution -->
+  <script type="importmap">
+    {
+      "imports": {
+        "arslib": "../../../node_modules/arslib/index.js"
+      }
+    }
+    </script>
+
+  <!-- Common CSS -->
+  <link rel="stylesheet" href="../../../css/base.css">
+  <link rel="stylesheet" href="../../../css/components.css">
+  <link rel="stylesheet" href="../../../css/buttons.css">
+
+  <style>
+    /* Component-specific styles */
+    .language-selector {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .language-buttons {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+
+    .lang-btn {
+      background: #f8f9fa;
+      border: 2px solid #dee2e6;
+      border-radius: 6px;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .lang-btn:hover {
+      background: #e9ecef;
+      border-color: #adb5bd;
+    }
+
+    .lang-btn.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .localized-component {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 25px;
+      margin: 20px 0;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .localized-text {
+      font-size: 1.1rem;
+      margin: 10px 0;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border-left: 4px solid #667eea;
+    }
+
+    .translation-table {
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .translation-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .translation-table th,
+    .translation-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .translation-table th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #495057;
+    }
+
+    .translation-table tr:hover {
+      background: #f8f9fa;
+    }
+
+    .code-example {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.9rem;
+      margin: 10px 0;
+      overflow-x: auto;
+    }
+
+    .instructions {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      padding: 15px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+    }
+
+    .instructions h4 {
+      color: #1976d2;
+      margin-bottom: 10px;
+    }
+
+    .demo-form {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #495057;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🌍 Localized Mixin</h1>
+      <p>Internationalization Support for Web Components</p>
+    </div>
+
+    <div class="content">
+      <a href="../../../" class="back-link">← Back to Demo Page</a>
+
+      <div class="info-box">
+        <h4>About Localized Mixin</h4>
+        <p>This mixin provides internationalization (i18n) support for web components. It integrates with the arslib
+          Localization system
+          to automatically translate text content based on the specified language. Perfect for creating multi-language
+          applications.</p>
+      </div>
+
+      <!-- Language Selector -->
+      <div class="demo-section">
+        <h3>🌐 Language Selector</h3>
+        <p>Choose a language to see the localized components update:</p>
+
+        <div class="language-selector">
+          <div class="language-buttons">
+            <button class="lang-btn active" onclick="changeLanguage('en')">🇺🇸 English</button>
+            <button class="lang-btn" onclick="changeLanguage('es')">🇪🇸 Español</button>
+            <button class="lang-btn" onclick="changeLanguage('fr')">🇫🇷 Français</button>
+            <button class="lang-btn" onclick="changeLanguage('de')">🇩🇪 Deutsch</button>
+            <button class="lang-btn" onclick="changeLanguage('pt')">🇧🇷 Português</button>
+            <button class="lang-btn" onclick="changeLanguage('ja')">🇯🇵 日本語</button>
+          </div>
+
+          <div class="form-group">
+            <label>Current Language:</label>
+            <input type="text" id="currentLang" value="en" readonly>
+          </div>
+        </div>
+      </div>
+
+      <!-- Localized Components Demo -->
+      <div class="demo-section">
+        <h3>📝 Localized Components</h3>
+        <p>These components automatically update their text based on the selected language:</p>
+
+        <div class="localized-component">
+          <h4>Welcome Component</h4>
+          <welcome-component></welcome-component>
+        </div>
+
+        <div class="localized-component">
+          <h4>Form Component</h4>
+          <form-component></form-component>
+        </div>
+
+        <div class="localized-component">
+          <h4>Navigation Component</h4>
+          <navigation-component></navigation-component>
+        </div>
+      </div>
+
+      <!-- Translation Table -->
+      <div class="demo-section">
+        <h3>📋 Translation Reference</h3>
+        <p>Reference table showing all available translations:</p>
+
+        <div class="translation-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>English</th>
+                <th>Español</th>
+                <th>Français</th>
+                <th>Deutsch</th>
+                <th>Português</th>
+                <th>日本語</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>welcome</code></td>
+                <td>Welcome to our application!</td>
+                <td>¡Bienvenido a nuestra aplicación!</td>
+                <td>Bienvenue dans notre application !</td>
+                <td>Willkommen in unserer Anwendung!</td>
+                <td>Bem-vindo ao nosso aplicativo!</td>
+                <td>アプリケーションへようこそ！</td>
+              </tr>
+              <tr>
+                <td><code>description</code></td>
+                <td>This is a localized component demo</td>
+                <td>Este es un demo de componente localizado</td>
+                <td>Ceci est une démo de composant localisé</td>
+                <td>Dies ist eine Demo einer lokalisierten Komponente</td>
+                <td>Este é um demo de componente localizado</td>
+                <td>これはローカライズされたコンポーネントのデモです</td>
+              </tr>
+              <tr>
+                <td><code>name</code></td>
+                <td>Name</td>
+                <td>Nombre</td>
+                <td>Nom</td>
+                <td>Name</td>
+                <td>Nome</td>
+                <td>名前</td>
+              </tr>
+              <tr>
+                <td><code>email</code></td>
+                <td>Email</td>
+                <td>Correo electrónico</td>
+                <td>Email</td>
+                <td>E-Mail</td>
+                <td>Email</td>
+                <td>メール</td>
+              </tr>
+              <tr>
+                <td><code>submit</code></td>
+                <td>Submit</td>
+                <td>Enviar</td>
+                <td>Soumettre</td>
+                <td>Absenden</td>
+                <td>Enviar</td>
+                <td>送信</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Implementation Guide -->
+      <div class="demo-section">
+        <h3>📖 Implementation Guide</h3>
+
+        <div class="instructions">
+          <h4>How to Use the Localized Mixin:</h4>
+          <p>1. Import the mixin: <code>import Localized from './mixins/localized/localized.js'</code></p>
+          <p>2. Extend your class: <code>class MyComponent extends Localized(HTMLElement, 'en')</code></p>
+          <p>3. Use <code>[[localization.key]]</code> syntax in your HTML content</p>
+          <p>4. Remember to call <code>super.connectedCallback()</code> if you implement it</p>
+        </div>
+
+        <div class="code-example">
+          // Basic usage with a custom element
+          import Localized from './mixins/localized/localized.js';
+
+          class WelcomeComponent extends Localized(HTMLElement, 'en') {
+          constructor() {
+          super();
+          this.innerHTML = `
+          &lt;h2&gt;[[localization.welcome]]&lt;/h2&gt;
+          &lt;p&gt;[[localization.description]]&lt;/p&gt;
+          &lt;button&gt;[[localization.submit]]&lt;/button&gt;
+          `;
+          }
+          }
+
+          customElements.define('welcome-component', WelcomeComponent);
+        </div>
+
+        <div class="code-example">
+          // Using with custom symbols/translations
+          const customSymbols = {
+          welcome: 'Custom Welcome',
+          description: 'Custom Description'
+          };
+
+          class CustomComponent extends Localized(HTMLElement, 'en', customSymbols) {
+          constructor() {
+          super();
+          this.innerHTML = '&lt;p&gt;[[localization.welcome]]&lt;/p&gt;';
+          }
+          }
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div class="demo-section">
+        <h3>✨ Features</h3>
+        <div class="info-box">
+          <h4>What the Localized Mixin Provides:</h4>
+          <ul>
+            <li><strong>Multi-language Support:</strong> Easy switching between languages</li>
+            <li><strong>Template Syntax:</strong> Use <code>[[localization.key]]</code> in HTML</li>
+            <li><strong>Automatic Updates:</strong> Content updates when language changes</li>
+            <li><strong>Custom Symbols:</strong> Override default translations</li>
+            <li><strong>arslib Integration:</strong> Built on the arslib Localization system</li>
+            <li><strong>Lifecycle Management:</strong> Proper initialization in connectedCallback</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load the mixin and demo -->
+  <script type="module">
+    import Localized from '../localized.js';
+
+    // Define changeLanguage function immediately to avoid reference errors
+    window.changeLanguage = function (lang) {
+      // Update active button
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      // Update current language display
+      document.getElementById('currentLang').value = lang;
+
+      // Update all localized components
+      if (window.updateAllComponents) {
+        window.updateAllComponents(lang);
+      }
+
+      console.log(`Language changed to: ${lang}`);
+    };
+
+    // Demo translations - these would normally be in arslib Localization
+    const demoTranslations = {
+      en: {
+        welcome: 'Welcome to our application!',
+        description: 'This is a localized component demo',
+        name: 'Name',
+        namePlaceholder: 'Enter your name',
+        email: 'Email',
+        emailPlaceholder: 'Enter your email',
+        country: 'Country',
+        selectCountry: 'Select a country',
+        submit: 'Submit',
+        nav: {
+          home: 'Home',
+          about: 'About',
+          contact: 'Contact',
+          settings: 'Settings'
+        },
+        countries: {
+          us: 'United States',
+          es: 'Spain',
+          fr: 'France',
+          de: 'Germany'
+        }
+      },
+      es: {
+        welcome: '¡Bienvenido a nuestra aplicación!',
+        description: 'Este es un demo de componente localizado',
+        name: 'Nombre',
+        namePlaceholder: 'Ingresa tu nombre',
+        email: 'Correo electrónico',
+        emailPlaceholder: 'Ingresa tu correo',
+        country: 'País',
+        selectCountry: 'Selecciona un país',
+        submit: 'Enviar',
+        nav: {
+          home: 'Inicio',
+          about: 'Acerca de',
+          contact: 'Contacto',
+          settings: 'Configuración'
+        },
+        countries: {
+          us: 'Estados Unidos',
+          es: 'España',
+          fr: 'Francia',
+          de: 'Alemania'
+        }
+      },
+      fr: {
+        welcome: 'Bienvenue dans notre application !',
+        description: 'Ceci est une démo de composant localisé',
+        name: 'Nom',
+        namePlaceholder: 'Entrez votre nom',
+        email: 'Email',
+        emailPlaceholder: 'Entrez votre email',
+        country: 'Pays',
+        selectCountry: 'Sélectionnez un pays',
+        submit: 'Soumettre',
+        nav: {
+          home: 'Accueil',
+          about: 'À propos',
+          contact: 'Contact',
+          settings: 'Paramètres'
+        },
+        countries: {
+          us: 'États-Unis',
+          es: 'Espagne',
+          fr: 'France',
+          de: 'Allemagne'
+        }
+      },
+      de: {
+        welcome: 'Willkommen in unserer Anwendung!',
+        description: 'Dies ist eine Demo einer lokalisierten Komponente',
+        name: 'Name',
+        namePlaceholder: 'Geben Sie Ihren Namen ein',
+        email: 'E-Mail',
+        emailPlaceholder: 'Geben Sie Ihre E-Mail ein',
+        country: 'Land',
+        selectCountry: 'Wählen Sie ein Land',
+        submit: 'Absenden',
+        nav: {
+          home: 'Startseite',
+          about: 'Über uns',
+          contact: 'Kontakt',
+          settings: 'Einstellungen'
+        },
+        countries: {
+          us: 'Vereinigte Staaten',
+          es: 'Spanien',
+          fr: 'Frankreich',
+          de: 'Deutschland'
+        }
+      },
+      pt: {
+        welcome: 'Bem-vindo ao nosso aplicativo!',
+        description: 'Este é um demo de componente localizado',
+        name: 'Nome',
+        namePlaceholder: 'Digite seu nome',
+        email: 'Email',
+        emailPlaceholder: 'Digite seu email',
+        country: 'País',
+        selectCountry: 'Selecione um país',
+        submit: 'Enviar',
+        nav: {
+          home: 'Início',
+          about: 'Sobre',
+          contact: 'Contato',
+          settings: 'Configurações'
+        },
+        countries: {
+          us: 'Estados Unidos',
+          es: 'Espanha',
+          fr: 'França',
+          de: 'Alemanha'
+        }
+      },
+      ja: {
+        welcome: 'アプリケーションへようこそ！',
+        description: 'これはローカライズされたコンポーネントのデモです',
+        name: '名前',
+        namePlaceholder: '名前を入力してください',
+        email: 'メール',
+        emailPlaceholder: 'メールアドレスを入力してください',
+        country: '国',
+        selectCountry: '国を選択してください',
+        submit: '送信',
+        nav: {
+          home: 'ホーム',
+          about: '概要',
+          contact: 'お問い合わせ',
+          settings: '設定'
+        },
+        countries: {
+          us: 'アメリカ合衆国',
+          es: 'スペイン',
+          fr: 'フランス',
+          de: 'ドイツ'
+        }
+      }
+    };
+
+    // Mock Localization class for demo (since arslib might not be available)
+    class MockLocalization {
+      constructor(language, symbols) {
+        this.language = language;
+        this.symbols = symbols || demoTranslations[language] || demoTranslations.en;
+      }
+
+      get(key) {
+        const keys = key.split('.');
+        let value = this.symbols;
+
+        for (const k of keys) {
+          value = value[k];
+          if (value === undefined) return key;
+        }
+
+        return value;
+      }
+    }
+
+    // Create a custom Localized mixin for demo purposes
+    function DemoLocalized(classToExtend, language, symbols) {
+      return class extends classToExtend {
+        connectedCallback() {
+          super.connectedCallback && super.connectedCallback();
+          this.localization = new MockLocalization(language, symbols);
+          this.updateContent();
+        }
+
+        updateContent() {
+          if (this.localization) {
+            console.log('Updating content for component:', this);
+
+            // Get the original template if it exists, otherwise use current innerHTML
+            let template = this._originalTemplate || this.innerHTML;
+
+            // Store the original template on first run
+            if (!this._originalTemplate) {
+              this._originalTemplate = this.innerHTML;
+            }
+
+            console.log('Using template:', template);
+
+            let html = template;
+            html = html.replace(/\[\[localization\.([^\]]+)\]\]/g, (match, key) => {
+              const translation = this.localization.get(key);
+              console.log(`Translating ${key} to:`, translation);
+              return translation || match;
+            });
+
+            console.log('New innerHTML:', html);
+            this.innerHTML = html;
+          }
+        }
+      };
+    }
+
+    // Create localized components
+    class WelcomeComponent extends DemoLocalized(HTMLElement, 'en') {
+      constructor() {
+        super();
+        this.innerHTML = `
+          <div class="localized-text">[[localization.welcome]]</div>
+          <div class="localized-text">[[localization.description]]</div>
+        `;
+      }
+    }
+
+    class FormComponent extends DemoLocalized(HTMLElement, 'en') {
+      constructor() {
+        super();
+        this.innerHTML = `
+          <div class="demo-form">
+            <div class="form-group">
+              <label>[[localization.name]]:</label>
+              <input type="text" placeholder="[[localization.namePlaceholder]]">
+            </div>
+            <div class="form-group">
+              <label>[[localization.email]]:</label>
+              <input type="email" placeholder="[[localization.emailPlaceholder]]">
+            </div>
+            <div class="form-group">
+              <label>[[localization.country]]:</label>
+              <select>
+                <option value="">[[localization.selectCountry]]</option>
+                <option value="us">[[localization.countries.us]]</option>
+                <option value="es">[[localization.countries.es]]</option>
+                <option value="fr">[[localization.countries.fr]]</option>
+                <option value="de">[[localization.countries.de]]</option>
+              </select>
+            </div>
+            <button class="btn">[[localization.submit]]</button>
+          </div>
+        `;
+      }
+    }
+
+    class NavigationComponent extends DemoLocalized(HTMLElement, 'en') {
+      constructor() {
+        super();
+        this.innerHTML = `
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn-secondary">[[localization.nav.home]]</button>
+            <button class="btn-secondary">[[localization.nav.about]]</button>
+            <button class="btn-secondary">[[localization.nav.contact]]</button>
+            <button class="btn-secondary">[[localization.nav.settings]]</button>
+          </div>
+        `;
+      }
+    }
+
+    // Register custom elements
+    customElements.define('welcome-component', WelcomeComponent);
+    customElements.define('form-component', FormComponent);
+    customElements.define('navigation-component', NavigationComponent);
+
+    // Global function to update all localized components
+    window.updateAllComponents = function (language) {
+      console.log('Updating components for language:', language);
+      const components = document.querySelectorAll('welcome-component, form-component, navigation-component');
+      console.log('Found components:', components.length, components);
+
+      components.forEach(component => {
+        console.log('Updating component:', component);
+        component.localization = new MockLocalization(language);
+        component.updateContent();
+      });
+    };
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log('Localized Mixin Demo initialized');
+    });
+  </script>
+</body>
+
+</html>
