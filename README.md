@@ -4,7 +4,18 @@ A collection of reusable web components built with vanilla JavaScript and ES mod
 
 ## 🚀 Live Demo
 
-**[Try the Interactive Demo →](https://andrers52.github.io/ars-web-components/)**
+**Quick Start (Recommended):**
+
+```bash
+git clone https://github.com/andrers52/ars-web-components.git
+cd ars-web-components
+npm install
+npm start
+```
+
+This will automatically open the demo in your browser at `http://localhost:8080`
+
+**Alternative:** Download the repository and open `index.html` in a local web server.
 
 ## Features
 
@@ -307,10 +318,11 @@ class SwipeableComponent extends Swipeable(HTMLElement) {
 
 ### Quick Start
 
-Start the development server with all component tests:
+Start the development server with all component demos:
 
 ```bash
 cd ars-web-components
+npm install
 npm start
 ```
 
@@ -318,13 +330,13 @@ This will:
 
 - Start an HTTP server on port 8080
 - Open your browser automatically
-- Display a comprehensive test suite interface
+- Display a demo of the available components and mixins
 
-### Testing Components
+### Eperimenting with Components and mixins
 
 Once the server is running, you can access:
 
-- **Main Test Suite**: http://localhost:8080/
+- **Main Demo Gallery**: http://localhost:8080/
 - **Individual Components**:
   - **ars-button**: http://localhost:8080/ars-button/test/
   - **ars-calendar**: http://localhost:8080/ars-calendar/test/

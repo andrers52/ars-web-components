@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] - 2025-01-27
+
+### Changed
+
+- **README**: Improved demo access instructions with clear setup steps using `npm start` command
+- **README**: Replaced non-functional GitHub Pages link with practical clone-and-run instructions
+- **Documentation**: Enhanced user experience for accessing the interactive demo without complex setup
+
+### Added
+
+- **README**: Added prominent "Live Demo" section with quick start instructions
+- **README**: Comprehensive mixins documentation with usage examples and demo links
+- **README**: Updated available exports section to include all mixin exports
+
+### Fixed
+
+- **Demo Access**: Resolved issue where users couldn't view demo due to ES module requirements
+- **Documentation**: Fixed demo link that pointed to non-existent GitHub Pages setup
+
 ## [0.2.3] - 2025-01-27
 
 ### Fixed
