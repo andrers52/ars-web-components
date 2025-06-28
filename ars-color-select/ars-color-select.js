@@ -6,48 +6,6 @@ import { EArray } from "arslib";
 import WebComponentBase from "../web-component-base/web-component-base.js";
 
 class ArsColorSelect extends WebComponentBase {
-  constructor() {
-    super();
-    this.template = ArsColorSelect.#createTemplate();
-    this.colorSelector = "";
-  }
-
-  connectedCallback() {
-    ArsColorSelect.#initializeColorSelect(this);
-  }
-
-  static get observedAttributes() {
-    return ["color"];
-  }
-
-  attributeChangedCallback(attrName, oldVal, newVal) {
-    super.attributeChangedCallback(attrName, oldVal, newVal);
-    if (attrName === "color" && oldVal !== newVal && newVal) {
-      ArsColorSelect.#sendColorChangeEvent(this, newVal);
-      this.#setBackgroundColor(newVal);
-    }
-  }
-
-  #setBackgroundColor(color) {
-    if (!this.shadowRoot) return;
-    ArsColorSelect.#setBackgroundColor(
-      this.shadowRoot.getElementById("colorSelector"),
-      color,
-    );
-  }
-
-  #toggleElementVisibility(element) {
-    ArsColorSelect.#toggleElementVisibility(element);
-  }
-
-  #toggleColorSelection() {
-    ArsColorSelect.#toggleColorSelection(this);
-  }
-
-  #sendColorChangeEvent(color) {
-    ArsColorSelect.#sendColorChangeEvent(this, color);
-  }
-
   // ---- PRIVATE STATIC UTILITY METHODS ----
   static #COLORS = [
     "Aqua",
@@ -257,13 +215,13 @@ class ArsColorSelect extends WebComponentBase {
       const backgroundColor = element.currentTarget.style.backgroundColor;
       ArsColorSelect.#setBackgroundColor(colorSelector, backgroundColor);
       ArsColorSelect.#setColorAttribute(component, backgroundColor);
-      component.#toggleColorSelection();
+      component.toggleColorSelection();
     };
   }
 
   static #createSelectorClickHandler(component) {
     return () => {
-      component.#toggleColorSelection();
+      component.toggleColorSelection();
     };
   }
 
@@ -319,6 +277,46 @@ class ArsColorSelect extends WebComponentBase {
       initialColor,
     );
     return component;
+  }
+
+  // ---- PRIVATE INSTANCE METHODS ----
+
+  constructor() {
+    super();
+    this.template = ArsColorSelect.#createTemplate();
+    this.colorSelector = "";
+  }
+
+  connectedCallback() {
+    ArsColorSelect.#initializeColorSelect(this);
+  }
+
+  static get observedAttributes() {
+    return ["color"];
+  }
+
+  attributeChangedCallback(attrName, oldVal, newVal) {
+    super.attributeChangedCallback(attrName, oldVal, newVal);
+    if (attrName === "color" && oldVal !== newVal && newVal) {
+      ArsColorSelect.#sendColorChangeEvent(this, newVal);
+      this.setBackgroundColor(newVal);
+    }
+  }
+
+  // ---- PUBLIC INSTANCE METHODS ----
+  setBackgroundColor(color) {
+    if (!this.shadowRoot) return;
+    ArsColorSelect.#setBackgroundColor(
+      this.shadowRoot.getElementById("colorSelector"),
+      color,
+    );
+  }
+
+  toggleColorSelection() {
+    const colorSelector = this.shadowRoot.getElementById("colorSelector");
+    const optionsContainer = this.shadowRoot.getElementById("optionsContainer");
+    ArsColorSelect.#toggleElementVisibility(colorSelector);
+    ArsColorSelect.#toggleElementVisibility(optionsContainer);
   }
 }
 

@@ -362,6 +362,45 @@ class SwipeableComponent extends SwipeableMixin(HTMLElement) {
 
 **Demo:** http://localhost:8080/mixins/swipeable/demo/
 
+## Show If Property True Mixin
+
+This mixin allows you to show or hide a custom element based on a boolean property, attribute, or data attribute. It is ideal for toggling the visibility of UI elements in a declarative way.
+
+### Usage Example
+
+```html
+<!-- Toggle the bar by changing the isVisible property -->
+<conditional-element class="bar" show-if-property="isVisible"
+  >isVisible Bar</conditional-element
+>
+```
+
+```js
+import { ShowIfPropertyTrueMixin } from "./mixins/show-if-property-true/show-if-property-true.js";
+
+class ConditionalElement extends ShowIfPropertyTrueMixin(HTMLElement) {}
+customElements.define("conditional-element", ConditionalElement);
+
+// Toggle visibility
+const el = document.querySelector("conditional-element");
+el.isVisible = true; // shows the bar
+el.isVisible = false; // hides the bar
+```
+
+### keep-space-when-hidden Attribute
+
+Add the `keep-space-when-hidden` attribute to keep the element's space in the layout when hidden (uses `visibility: hidden` instead of `display: none`).
+
+```html
+<conditional-element
+  class="bar"
+  show-if-property="isVisible"
+  keep-space-when-hidden
+>
+  isVisible Bar
+</conditional-element>
+```
+
 ## Development
 
 ### Quick Start

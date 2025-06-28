@@ -52,18 +52,35 @@ const ShowIfPropertyTrueMixin = (BaseClass) => {
     }
 
     #updateVisibility() {
-      if (!this._showProperty) {
-        return;
-      }
-
+      if (!this._showProperty) return;
       this.#storeOriginalDisplay();
-
       const shouldShow = this.#getPropertyValue(this._showProperty);
+      const content = this.querySelector(".conditional-content");
+      const keepSpace =
+        this.hasAttribute("keep-space-when-hidden") || this.keepSpaceWhenHidden;
 
-      if (shouldShow) {
-        this.style.display = this._originalDisplay || "block";
+      if (content) {
+        if (shouldShow) {
+          content.style.display = "";
+          content.style.visibility = "";
+        } else if (keepSpace) {
+          content.style.display = "";
+          content.style.visibility = "hidden";
+        } else {
+          content.style.display = "none";
+          content.style.visibility = "";
+        }
       } else {
-        this.style.display = "none";
+        if (shouldShow) {
+          this.style.display = this._originalDisplay || "block";
+          this.style.visibility = "";
+        } else if (keepSpace) {
+          this.style.display = this._originalDisplay || "block";
+          this.style.visibility = "hidden";
+        } else {
+          this.style.display = "none";
+          this.style.visibility = "";
+        }
       }
     }
 

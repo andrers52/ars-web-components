@@ -188,3 +188,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multiple mixins: Localized, PressedEffect, RemoteCallCaller, etc.
 - Basic ES module support
 - Initial test pages for all components
+
+## [0.3.1] - 2024-06-27
+
+### Added
+
+- Minimal, intent-revealing demo for Show If Property True Mixin: each property toggle controls a single bar/button.
+- `keep-space-when-hidden` attribute: allows elements to remain in the layout (using `visibility: hidden`) when hidden.
+- Improved documentation and usage examples for the mixin.
+
+### Changed
+
+- Demo refactored for clarity and simplicity.

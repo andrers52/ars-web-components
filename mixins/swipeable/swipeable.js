@@ -9,8 +9,20 @@ const SwipeableMixin = (BaseClass) => {
       this._touchStartY = 0;
       this._touchEndX = 0;
       this._touchEndY = 0;
-      this._minSwipeDistance = 50;
-      this._maxSwipeTime = 300;
+
+      // Adaptive settings based on device type
+      const isTouchDevice =
+        "ontouchstart" in window || navigator.maxTouchPoints > 0;
+      if (isTouchDevice) {
+        // Mobile/touch device settings
+        this._minSwipeDistance = 50;
+        this._maxSwipeTime = 300;
+      } else {
+        // Desktop/mouse device settings
+        this._minSwipeDistance = 30;
+        this._maxSwipeTime = 800;
+      }
+
       this._touchStartTime = 0;
     }
 
@@ -31,11 +43,21 @@ const SwipeableMixin = (BaseClass) => {
     }
 
     #getTouchCoordinates(event) {
-      const touch = event.touches[0] || event.changedTouches[0];
-      return {
-        x: touch.clientX,
-        y: touch.clientY,
-      };
+      // Handle both touch and mouse events
+      if (event.touches && event.touches.length > 0) {
+        // Touch event
+        const touch = event.touches[0] || event.changedTouches[0];
+        return {
+          x: touch.clientX,
+          y: touch.clientY,
+        };
+      } else {
+        // Mouse event
+        return {
+          x: event.clientX,
+          y: event.clientY,
+        };
+      }
     }
 
     #calculateSwipeDistance() {
@@ -76,6 +98,27 @@ const SwipeableMixin = (BaseClass) => {
     };
 
     #handleTouchEnd = (event) => {
+      const coords = this.#getTouchCoordinates(event);
+      this._touchEndX = coords.x;
+      this._touchEndY = coords.y;
+
+      const { deltaX, deltaY, distance } = this.#calculateSwipeDistance();
+      const time = this.#calculateSwipeTime();
+
+      if (this.#isValidSwipe(distance, time)) {
+        const direction = this.#determineSwipeDirection(deltaX, deltaY);
+        this.onSwipe(direction, { deltaX, deltaY, distance, time });
+      }
+    };
+
+    #handleMouseStart = (event) => {
+      const coords = this.#getTouchCoordinates(event);
+      this._touchStartX = coords.x;
+      this._touchStartY = coords.y;
+      this._touchStartTime = Date.now();
+    };
+
+    #handleMouseEnd = (event) => {
       const coords = this.#getTouchCoordinates(event);
       this._touchEndX = coords.x;
       this._touchEndY = coords.y;
@@ -134,8 +177,14 @@ const SwipeableMixin = (BaseClass) => {
         this._maxSwipeTime = parseInt(time);
       }
 
+      // Touch events for mobile
       this.addEventListener("touchstart", this.#handleTouchStart);
       this.addEventListener("touchend", this.#handleTouchEnd);
+
+      // Mouse events for desktop
+      this.addEventListener("mousedown", this.#handleMouseStart);
+      this.addEventListener("mouseup", this.#handleMouseEnd);
+      this.addEventListener("mouseleave", this.#handleMouseEnd);
     }
 
     disconnectedCallback() {
@@ -145,6 +194,10 @@ const SwipeableMixin = (BaseClass) => {
 
       this.removeEventListener("touchstart", this.#handleTouchStart);
       this.removeEventListener("touchend", this.#handleTouchEnd);
+
+      this.removeEventListener("mousedown", this.#handleMouseStart);
+      this.removeEventListener("mouseup", this.#handleMouseEnd);
+      this.removeEventListener("mouseleave", this.#handleMouseEnd);
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
