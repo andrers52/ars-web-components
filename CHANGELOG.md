@@ -200,3 +200,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Demo refactored for clarity and simplicity.
+
+## [0.3.2] - 2024-07-01
+
+### Added
+
+- **Modern Color Palette UI**: Color blocks are now displayed in a responsive grid with borders, shadows, and animated hover effects.
+- **Dismiss on Overlay Click**: The color palette overlay can be dismissed by clicking outside the color blocks.
+- **Event-driven Integration**: Demo and documentation now show how to update UI text in response to color changes using the `ars-color-select:change` event.
+
+### Changed
+
+- **Improved Accessibility and Usability**: Larger, touch-friendly color blocks with reduced spacing and better alignment.
+- **Demo Page**: Updated to show best practices for integrating the color picker and updating UI on color change.

@@ -533,7 +533,6 @@ class ArsCalendar extends ArsCalendarBase {
   }
 
   render() {
-    console.log("ARS Calendar render called");
     if (!this.shadowRoot) return;
 
     try {
@@ -584,6 +583,9 @@ class ArsCalendar extends ArsCalendarBase {
 
           const day = this.daySlots[daySlotIndex];
           if (
+            this.selectedDay !== null &&
+            this.selectedMonth !== null &&
+            this.selectedYear !== null &&
             ArsCalendar.#isDaySelected(
               day,
               this.monthToShow,
@@ -737,12 +739,14 @@ class ArsCalendar extends ArsCalendarBase {
 
   previousYear() {
     this.yearToShow--;
-    this.selectDate(this.selectedDay, this.monthToShow, this.yearToShow);
+    this.clearSelectedDate();
+    this.render();
   }
 
   nextYear() {
     this.yearToShow++;
-    this.selectDate(this.selectedDay, this.monthToShow, this.yearToShow);
+    this.clearSelectedDate();
+    this.render();
   }
 
   previousMonth() {
@@ -751,7 +755,8 @@ class ArsCalendar extends ArsCalendarBase {
       this.yearToShow--;
     } else this.monthToShow--;
 
-    this.selectDate(this.selectedDay, this.monthToShow, this.yearToShow);
+    this.clearSelectedDate();
+    this.render();
   }
 
   nextMonth() {
@@ -760,7 +765,8 @@ class ArsCalendar extends ArsCalendarBase {
       this.yearToShow++;
     } else this.monthToShow++;
 
-    this.selectDate(this.selectedDay, this.monthToShow, this.yearToShow);
+    this.clearSelectedDate();
+    this.render();
   }
 
   getColorCanvasFromDate(day, month, year) {

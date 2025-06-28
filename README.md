@@ -232,7 +232,41 @@ if (result) {
 
 ### ArsColorSelect
 
-Color picker component.
+Color picker component with improved UI and UX.
+
+```html
+<ars-color-select id="myColorPicker" color="Blue"></ars-color-select>
+```
+
+**Features:**
+
+- Modern, touch-friendly color palette with grid layout
+- Color blocks have a border, shadow, and animated hover effect
+- Palette overlay can be dismissed by clicking outside the color blocks
+- Emits `ars-color-select:change` event with `{ id, color }` detail
+- Easy integration: update any text or UI in response to color changes
+
+**Usage Example:**
+
+```html
+<span id="selectedColorText">Press the element below to change its color.</span>
+<ars-color-select id="colorSelect1"></ars-color-select>
+<script>
+  const colorSelect = document.getElementById("colorSelect1");
+  const colorText = document.getElementById("selectedColorText");
+  colorSelect.addEventListener("ars-color-select:change", (e) => {
+    colorText.textContent = `Selected Color: ${e.detail.color}`;
+  });
+</script>
+```
+
+**Attributes:**
+
+- `color`: Initial color (optional). If not provided, a random color is selected.
+
+**Events:**
+
+- `ars-color-select:change`: Fired when a color is selected or changed.
 
 ## Mixins
 

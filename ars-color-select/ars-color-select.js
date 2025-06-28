@@ -169,21 +169,35 @@ class ArsColorSelect extends WebComponentBase {
           padding: 5px;
         }
         .flex-container {
-          position:absolute;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+          column-gap: 4px;
+          row-gap: 8px;
+          justify-content: center;
+          align-content: flex-start;
+          width: 80%;
+          padding: 5px;
+          position: absolute;
           top: 40%; left: 50%;
           transform: translate(-50%,-40%);
           user-select: none;
-          display: flex;
-          flex-direction: row;
-          flex-wrap: wrap;
-          height: 80%;
           z-index: 99;
           visibility: inherit;
         }
         .flex-container > div {
-          width: 10%;
-          margin: 4px;
-          border-radius: 5px;
+          width: 44px;
+          height: 44px;
+          border-radius: 6px;
+          border: 2px solid #fff;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+          cursor: pointer;
+          transition: transform 0.18s cubic-bezier(.4,2,.6,1), box-shadow 0.18s;
+          background-clip: padding-box;
+        }
+        .flex-container > div:hover {
+          transform: translateY(-6px) scale(1.08);
+          box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+          z-index: 1;
         }
         .colorSelector {
           width: 40px;
@@ -276,6 +290,14 @@ class ArsColorSelect extends WebComponentBase {
       component.shadowRoot.getElementById("colorSelector"),
       initialColor,
     );
+    // Add overlay click handler to dismiss on outside click
+    const optionsContainer =
+      component.shadowRoot.getElementById("optionsContainer");
+    optionsContainer.onclick = (e) => {
+      if (e.target === optionsContainer) {
+        component.toggleColorSelection();
+      }
+    };
     return component;
   }
 

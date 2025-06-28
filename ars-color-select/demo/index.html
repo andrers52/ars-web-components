@@ -59,16 +59,22 @@
       <div class="demo-section">
         <h3>🎯 Basic Usage</h3>
         <div class="demo">
+          <div style="width:100%;text-align:left;margin-bottom:10px;font-size:1.05em;color:#444;">
+            Press the elements below to change their color.
+          </div>
           <div class="demo-item">
-            <label>Default (Random Color)</label>
+            <span id="selectedColorText1" style="display:block; margin-bottom:4px; color:#333; font-size:0.95em;">Press
+              the element below to change its color.</span>
             <ars-color-select id="colorSelect1"></ars-color-select>
           </div>
           <div class="demo-item">
-            <label>Preset Color (Red)</label>
+            <span id="selectedColorText2" style="display:block; margin-bottom:4px; color:#333; font-size:0.95em;">Press
+              the element below to change its color.</span>
             <ars-color-select id="colorSelect2" color="Red"></ars-color-select>
           </div>
           <div class="demo-item">
-            <label>Preset Color (Blue)</label>
+            <span id="selectedColorText3" style="display:block; margin-bottom:4px; color:#333; font-size:0.95em;">Press
+              the element below to change its color.</span>
             <ars-color-select id="colorSelect3" color="Blue"></ars-color-select>
           </div>
         </div>
@@ -159,6 +165,21 @@
           colorDisplay.textContent = event.detail.color;
         }
       });
+    });
+
+    // Add event listeners to update the selected color text above each selector
+    [
+      { selector: 'colorSelect1', text: 'selectedColorText1' },
+      { selector: 'colorSelect2', text: 'selectedColorText2' },
+      { selector: 'colorSelect3', text: 'selectedColorText3' }
+    ].forEach(({ selector, text }) => {
+      const colorSelect = document.getElementById(selector);
+      const colorText = document.getElementById(text);
+      if (colorSelect && colorText) {
+        colorSelect.addEventListener('ars-color-select:change', (e) => {
+          colorText.textContent = `Selected Color: ${e.detail.color}`;
+        });
+      }
     });
 
     // Utility functions
