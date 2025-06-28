@@ -4,103 +4,188 @@
 //  </ars-color-select>
 import { EArray } from "arslib";
 import WebComponentBase from "../web-component-base/web-component-base.js";
-var colors = [
-  "Aqua",
-  "Aquamarine",
-  "BlueViolet",
-  "Brown",
-  "BurlyWood",
-  "CadetBlue",
-  "Chartreuse",
-  "Chocolate",
-  "Crimson",
-  "Cyan",
-  "DarkCyan",
-  "DarkGoldenRod",
-  "DarkGray",
-  "DarkGreen",
-  "DarkKhaki",
-  "DarkMagenta",
-  "DarkOliveGreen",
-  "DarkOrange",
-  "DarkOrchid",
-  "DarkRed",
-  "DarkSalmon",
-  "DarkSeaGreen",
-  "DarkSlateBlue",
-  "DarkSlateGray",
-  "DarkTurquoise",
-  "DarkViolet",
-  "DeepPink",
-  "DeepSkyBlue",
-  "DimGray",
-  "DodgerBlue",
-  "FireBrick",
-  "ForestGreen",
-  "Fuchsia",
-  "Gold",
-  "GoldenRod",
-  "Gray",
-  "Green",
-  "GreenYellow",
-  "HotPink",
-  "IndianRed",
-  "LawnGreen",
-  "LightBlue",
-  "LightCoral",
-  "LightGreen",
-  "LightSalmon",
-  "LightSeaGreen",
-  "LightSkyBlue",
-  "LightSlateGray",
-  "LightSteelBlue",
-  "Lime",
-  "LimeGreen",
-  "Magenta",
-  "MediumAquaMarine",
-  "MediumOrchid",
-  "MediumPurple",
-  "MediumSeaGreen",
-  "MediumSlateBlue",
-  "MediumSpringGreen",
-  "MediumTurquoise",
-  "MediumVioletRed",
-  "Olive",
-  "Orange",
-  "OrangeRed",
-  "Orchid",
-  "Peru",
-  "Pink",
-  "Plum",
-  "Purple",
-  "RebeccaPurple",
-  "Red",
-  "RosyBrown",
-  "RoyalBlue",
-  "SaddleBrown",
-  "Salmon",
-  "SandyBrown",
-  "SeaGreen",
-  "Sienna",
-  "Silver",
-  "SkyBlue",
-  "SlateBlue",
-  "SlateGray",
-  "SpringGreen",
-  "SteelBlue",
-  "Tan",
-  "Teal",
-  "Thistle",
-  "Tomato",
-  "Turquoise",
-  "Violet",
-  "Yellow",
-  "YellowGreen",
-];
+
 class ArsColorSelect extends WebComponentBase {
   constructor() {
     super();
-    this.template = `
+    this.template = ArsColorSelect.#createTemplate();
+    this.colorSelector = "";
+  }
+
+  connectedCallback() {
+    ArsColorSelect.#initializeColorSelect(this);
+  }
+
+  static get observedAttributes() {
+    return ["color"];
+  }
+
+  attributeChangedCallback(attrName, oldVal, newVal) {
+    super.attributeChangedCallback(attrName, oldVal, newVal);
+    if (attrName === "color" && oldVal !== newVal && newVal) {
+      ArsColorSelect.#sendColorChangeEvent(this, newVal);
+      this.#setBackgroundColor(newVal);
+    }
+  }
+
+  #setBackgroundColor(color) {
+    if (!this.shadowRoot) return;
+    ArsColorSelect.#setBackgroundColor(
+      this.shadowRoot.getElementById("colorSelector"),
+      color,
+    );
+  }
+
+  #toggleElementVisibility(element) {
+    ArsColorSelect.#toggleElementVisibility(element);
+  }
+
+  #toggleColorSelection() {
+    ArsColorSelect.#toggleColorSelection(this);
+  }
+
+  #sendColorChangeEvent(color) {
+    ArsColorSelect.#sendColorChangeEvent(this, color);
+  }
+
+  // ---- PRIVATE STATIC UTILITY METHODS ----
+  static #COLORS = [
+    "Aqua",
+    "Aquamarine",
+    "BlueViolet",
+    "Brown",
+    "BurlyWood",
+    "CadetBlue",
+    "Chartreuse",
+    "Chocolate",
+    "Crimson",
+    "Cyan",
+    "DarkCyan",
+    "DarkGoldenRod",
+    "DarkGray",
+    "DarkGreen",
+    "DarkKhaki",
+    "DarkMagenta",
+    "DarkOliveGreen",
+    "DarkOrange",
+    "DarkOrchid",
+    "DarkRed",
+    "DarkSalmon",
+    "DarkSeaGreen",
+    "DarkSlateBlue",
+    "DarkSlateGray",
+    "DarkTurquoise",
+    "DarkViolet",
+    "DeepPink",
+    "DeepSkyBlue",
+    "DimGray",
+    "DodgerBlue",
+    "FireBrick",
+    "ForestGreen",
+    "Fuchsia",
+    "Gold",
+    "GoldenRod",
+    "Gray",
+    "Green",
+    "GreenYellow",
+    "HotPink",
+    "IndianRed",
+    "LawnGreen",
+    "LightBlue",
+    "LightCoral",
+    "LightGreen",
+    "LightSalmon",
+    "LightSeaGreen",
+    "LightSkyBlue",
+    "LightSlateGray",
+    "LightSteelBlue",
+    "Lime",
+    "LimeGreen",
+    "Magenta",
+    "MediumAquaMarine",
+    "MediumOrchid",
+    "MediumPurple",
+    "MediumSeaGreen",
+    "MediumSlateBlue",
+    "MediumSpringGreen",
+    "MediumTurquoise",
+    "MediumVioletRed",
+    "Olive",
+    "Orange",
+    "OrangeRed",
+    "Orchid",
+    "Peru",
+    "Pink",
+    "Plum",
+    "Purple",
+    "RebeccaPurple",
+    "Red",
+    "RosyBrown",
+    "RoyalBlue",
+    "SaddleBrown",
+    "Salmon",
+    "SandyBrown",
+    "SeaGreen",
+    "Sienna",
+    "Silver",
+    "SkyBlue",
+    "SlateBlue",
+    "SlateGray",
+    "SpringGreen",
+    "SteelBlue",
+    "Tan",
+    "Teal",
+    "Thistle",
+    "Tomato",
+    "Turquoise",
+    "Violet",
+    "Yellow",
+    "YellowGreen",
+  ];
+
+  static #getRandomColor() {
+    return EArray.choice(ArsColorSelect.#COLORS);
+  }
+
+  static #getColorAttribute(element) {
+    return element.getAttribute("color");
+  }
+
+  static #setColorAttribute(element, color) {
+    element.setAttribute("color", color);
+  }
+
+  static #setBackgroundColor(element, color) {
+    if (!element) return;
+    element.style.backgroundColor = color;
+  }
+
+  static #toggleElementVisibility(element) {
+    if (!element) return;
+    element.style.visibility =
+      element.style.visibility === "visible" ? "hidden" : "visible";
+  }
+
+  static #createColorChangeEvent(id, color) {
+    return new CustomEvent("ars-color-select:change", {
+      detail: { id, color },
+      bubbles: true,
+      composed: true,
+    });
+  }
+
+  static #createColorDiv(color) {
+    return `<div style="background-color: ${color};"></div>`;
+  }
+
+  static #createColorOptionsHTML() {
+    return ArsColorSelect.#COLORS
+      .map(ArsColorSelect.#createColorDiv)
+      .join(" &nbsp ");
+  }
+
+  static #createTemplate() {
+    return `
       <style>
         :host {
           display: inline-block;
@@ -158,93 +243,85 @@ class ArsColorSelect extends WebComponentBase {
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
       </style>
-      <div id= "colorSelector" class="colorSelector"  style="visibility: visible;"> &nbsp; </div>
+      <div id="colorSelector" class="colorSelector" style="visibility: visible;"> &nbsp; </div>
       <div id="optionsContainer" class="overlay" style="visibility: hidden;">
         <div id="colorsDiv" class="flex-container center" >
-        ${colors
-          .map((color) => {
-            return `<div style="background-color: ${color};"></div>`;
-          })
-          .join(" &nbsp ")}
+        ${ArsColorSelect.#createColorOptionsHTML()}
         </div>
       </div>
     `;
-    this.colorSelector = "";
   }
 
-  connectedCallback() {
-    // *** TODO *** Create ShadowRoot with this test in web-component-base.js ***
-    if (!this.shadowRoot) this.attachShadow({ mode: "open" });
-
-    this.shadowRoot.innerHTML = eval("`" + this.template + "`");
-    let colorSelector = this.shadowRoot.getElementById("colorSelector");
-    let colorsDiv = this.shadowRoot.getElementById("colorsDiv");
-    let innerDivs = colorsDiv.getElementsByTagName("div");
-    for (let i = 0; i < innerDivs.length; i++) {
-      var self = this;
-      innerDivs[i].onclick = function (element) {
-        colorSelector.style.backgroundColor =
-          element.currentTarget.style.backgroundColor;
-        self.setAttribute("color", element.currentTarget.style.backgroundColor);
-        self._toggleColorSelection();
-      };
-    }
-
-    if (!this.getAttribute("color"))
-      this.setAttribute("color", EArray.choice(colors));
-    this._setBackgroundColor(this.getAttribute("color"));
-    this.shadowRoot.getElementById("colorSelector").onclick = function () {
-      self._toggleColorSelection();
+  static #createColorClickHandler(colorSelector, component) {
+    return (element) => {
+      const backgroundColor = element.currentTarget.style.backgroundColor;
+      ArsColorSelect.#setBackgroundColor(colorSelector, backgroundColor);
+      ArsColorSelect.#setColorAttribute(component, backgroundColor);
+      component.#toggleColorSelection();
     };
   }
 
-  static get observedAttributes() {
-    return ["color"];
+  static #createSelectorClickHandler(component) {
+    return () => {
+      component.#toggleColorSelection();
+    };
   }
 
-  attributeChangedCallback(attrName, oldVal, newVal) {
-    super.attributeChangedCallback(attrName, oldVal, newVal);
-
-    if (attrName === "color" && oldVal !== newVal && newVal) {
-      this._sendColorChangeEvent(newVal);
-      this._setBackgroundColor(newVal);
+  static #initializeColorSelectors(shadowRoot, component) {
+    const colorSelector = shadowRoot.getElementById("colorSelector");
+    const colorsDiv = shadowRoot.getElementById("colorsDiv");
+    const innerDivs = colorsDiv.getElementsByTagName("div");
+    for (let i = 0; i < innerDivs.length; i++) {
+      innerDivs[i].onclick = ArsColorSelect.#createColorClickHandler(
+        colorSelector,
+        component,
+      );
     }
+    colorSelector.onclick =
+      ArsColorSelect.#createSelectorClickHandler(component);
   }
 
-  _setBackgroundColor(color) {
-    if (!this.shadowRoot) return;
-    this.shadowRoot.getElementById("colorSelector").style.backgroundColor =
-      color;
+  static #initializeColor(component) {
+    if (!ArsColorSelect.#getColorAttribute(component)) {
+      ArsColorSelect.#setColorAttribute(
+        component,
+        ArsColorSelect.#getRandomColor(),
+      );
+    }
+    return ArsColorSelect.#getColorAttribute(component);
   }
 
-  _toggleElementVisibility(element) {
-    element.style.visibility =
-      element.style.visibility === "visible" ? "hidden" : "visible";
-  }
-
-  _toggleColorSelection() {
-    this._toggleElementVisibility(
-      this.shadowRoot.getElementById("colorSelector"),
+  static #sendColorChangeEvent(component, color) {
+    component.dispatchEvent(
+      ArsColorSelect.#createColorChangeEvent(component.id, color),
     );
-    this._toggleElementVisibility(
-      this.shadowRoot.getElementById("optionsContainer"),
-    );
-    // this._toggleElementVisibility(this.shadowRoot.getElementById('colors'))
   }
 
-  //send ars-color-select:change event with color to be picked up by another component
-  _sendColorChangeEvent(color) {
-    this.dispatchEvent(
-      new CustomEvent("ars-color-select:change", {
-        detail: { id: this.id, color: color },
-        bubbles: true,
-        composed: true,
-      }),
+  static #toggleColorSelection(component) {
+    const colorSelector = component.shadowRoot.getElementById("colorSelector");
+    const optionsContainer =
+      component.shadowRoot.getElementById("optionsContainer");
+    ArsColorSelect.#toggleElementVisibility(colorSelector);
+    ArsColorSelect.#toggleElementVisibility(optionsContainer);
+  }
+
+  static #initializeColorSelect(component) {
+    if (!component.shadowRoot) {
+      component.attachShadow({ mode: "open" });
+    }
+    component.shadowRoot.innerHTML = eval(
+      "`" + ArsColorSelect.#createTemplate() + "`",
     );
+    ArsColorSelect.#initializeColorSelectors(component.shadowRoot, component);
+    const initialColor = ArsColorSelect.#initializeColor(component);
+    ArsColorSelect.#setBackgroundColor(
+      component.shadowRoot.getElementById("colorSelector"),
+      initialColor,
+    );
+    return component;
   }
 }
 
-// *** TODO: MOVE THIS TO A BASE WEB COMPONENT CLASS ***
 if (document.createElement("ars-color-select").constructor === HTMLElement) {
   window.customElements.define("ars-color-select", ArsColorSelect);
 }

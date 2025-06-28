@@ -24,6 +24,51 @@ This will automatically open the demo in your browser at `http://localhost:8080`
 - **⚡ ES Modules**: Modern module system with proper imports/exports
 - **🔧 Interactive Effects**: Built-in pressed effects and animations
 - **📱 Touch Support**: Full mobile and desktop interaction support
+- **🧪 Functional Architecture**: Pure functions and functional programming principles for better testability
+- **🔒 Proper Encapsulation**: Private methods and static utilities for clean API design
+
+## Architecture
+
+### Functional Programming Design
+
+ARS Web Components uses functional programming principles while maintaining the class structure required by the Custom Elements API:
+
+- **Pure Functions**: Utility functions are extracted as pure functions for better testability
+- **Private Methods**: Internal logic uses proper private methods (`#methodName`) for encapsulation
+- **Static Utilities**: Helper functions are organized as private static methods (`static #methodName`)
+- **Public API**: Only methods meant to be called externally are exposed as public static methods
+
+### Method Organization
+
+```javascript
+class MyComponent extends HTMLElement {
+  // Public static methods - meant to be called from outside
+  static get observedAttributes() {
+    return ["attr1", "attr2"];
+  }
+
+  // Private static methods - internal utilities
+  static #validateInput(input) {
+    /* validation logic */
+  }
+  static #createElement(tag, props) {
+    /* element creation */
+  }
+
+  // Private instance methods - internal component logic
+  #handleClick() {
+    /* click handling */
+  }
+  #updateDisplay() {
+    /* display updates */
+  }
+
+  // Public instance methods - component API
+  publicMethod() {
+    /* public functionality */
+  }
+}
+```
 
 ## Installation
 
@@ -198,9 +243,9 @@ ARS Web Components includes a collection of reusable mixins that can be applied 
 Adds pressed animation effects to components with solid background colors.
 
 ```javascript
-import { PressedEffect } from "ars-web-components";
+import { PressedEffectMixin } from "ars-web-components";
 
-class MyButton extends PressedEffect(HTMLElement) {
+class MyButton extends PressedEffectMixin(HTMLElement) {
   constructor() {
     super();
     // Your component logic
@@ -222,9 +267,9 @@ class MyButton extends PressedEffect(HTMLElement) {
 Provides localization capabilities for components with dynamic language switching.
 
 ```javascript
-import { Localized } from "ars-web-components";
+import { LocalizedMixin } from "ars-web-components";
 
-class LocalizedComponent extends Localized(HTMLElement) {
+class LocalizedComponent extends LocalizedMixin(HTMLElement) {
   constructor() {
     super();
     this.setLocalizedText({
@@ -250,10 +295,13 @@ class LocalizedComponent extends Localized(HTMLElement) {
 Enables inter-component communication through method calls and event dispatching.
 
 ```javascript
-import { RemoteCallCaller, RemoteCallReceiver } from "ars-web-components";
+import {
+  RemoteCallCallerMixin,
+  RemoteCallReceiverMixin,
+} from "ars-web-components";
 
 // Receiver component
-class MyReceiver extends RemoteCallReceiver(HTMLElement) {
+class MyReceiver extends RemoteCallReceiverMixin(HTMLElement) {
   constructor() {
     super();
     this.exposeMethod("greet", (name) => `Hello ${name}!`);
@@ -261,7 +309,7 @@ class MyReceiver extends RemoteCallReceiver(HTMLElement) {
 }
 
 // Caller component
-class MyCaller extends RemoteCallCaller(HTMLElement) {
+class MyCaller extends RemoteCallCallerMixin(HTMLElement) {
   async callRemote() {
     const result = await this.callRemote("receiver-id", "greet", "World");
     console.log(result); // "Hello World!"
@@ -284,9 +332,9 @@ class MyCaller extends RemoteCallCaller(HTMLElement) {
 Conditionally shows/hides components based on property values.
 
 ```javascript
-import { ShowIfPropertyTrue } from "ars-web-components";
+import { ShowIfPropertyTrueMixin } from "ars-web-components";
 
-class ConditionalComponent extends ShowIfPropertyTrue(HTMLElement) {
+class ConditionalComponent extends ShowIfPropertyTrueMixin(HTMLElement) {
   constructor() {
     super();
     this.showIfPropertyTrue("visible", true);
@@ -301,9 +349,9 @@ class ConditionalComponent extends ShowIfPropertyTrue(HTMLElement) {
 Adds swipe gesture support to components.
 
 ```javascript
-import { Swipeable } from "ars-web-components";
+import { SwipeableMixin } from "ars-web-components";
 
-class SwipeableComponent extends Swipeable(HTMLElement) {
+class SwipeableComponent extends SwipeableMixin(HTMLElement) {
   constructor() {
     super();
     this.onSwipeLeft = () => console.log("Swiped left!");
@@ -363,12 +411,12 @@ export { ArsDialog } from "./ars-dialog/ars-dialog.js";
 export { WebComponentBase } from "./web-component-base/web-component-base.js";
 
 // Mixins
-export { Localized } from "./mixins/localized/localized.js";
-export { PressedEffect } from "./mixins/pressed-effect/pressed-effect.js";
-export { RemoteCallCaller } from "./mixins/remote-call/remote-call-caller.js";
-export { RemoteCallReceiver } from "./mixins/remote-call/remote-call-receiver.js";
-export { ShowIfPropertyTrue } from "./mixins/show-if-property-true/show-if-property-true.js";
-export { Swipeable } from "./mixins/swipeable/swipeable.js";
+export { LocalizedMixin } from "./mixins/localized/localized.js";
+export { PressedEffectMixin } from "./mixins/pressed-effect/pressed-effect.js";
+export { RemoteCallCallerMixin } from "./mixins/remote-call/remote-call-caller.js";
+export { RemoteCallReceiverMixin } from "./mixins/remote-call/remote-call-receiver.js";
+export { ShowIfPropertyTrueMixin } from "./mixins/show-if-property-true/show-if-property-true.js";
+export { SwipeableMixin } from "./mixins/swipeable/swipeable.js";
 ```
 
 ## Requirements

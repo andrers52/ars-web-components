@@ -2,32 +2,84 @@
 
 // from: http://2ality.com/2014/12/es6-proxies.html (tracePropAccess)
 
-// Helper function to map properties to attributes
-function mapPropertiesToAttributes(obj, propKeys) {
-  propKeys.forEach(function (propKey) {
+// Pure utility functions
+const parseJsonSafely = (value) => {
+  try {
+    return JSON.parse(value);
+  } catch (e) {
+    return value;
+  }
+};
+
+const stringifySafely = (value) => {
+  return typeof value === "string" ? value : JSON.stringify(value);
+};
+
+const getAttributeValue = (element, propKey) => {
+  const attr = element.getAttribute(propKey);
+  return parseJsonSafely(attr);
+};
+
+const setAttributeValue = (element, propKey, value) => {
+  element.setAttribute(propKey, stringifySafely(value));
+};
+
+// Pure function to create property descriptor
+const createPropertyDescriptor = (propKey) => ({
+  get() {
+    return getAttributeValue(this, propKey);
+  },
+  set(value) {
+    setAttributeValue(this, propKey, value);
+  },
+});
+
+// Pure function to map properties to attributes
+const mapPropertiesToAttributes = (obj, propKeys) => {
+  propKeys.forEach((propKey) => {
     try {
-      Object.defineProperty(obj, propKey, {
-        get: function () {
-          let attr = this.getAttribute(propKey);
-          try {
-            return JSON.parse(attr);
-          } catch (e) {
-            return attr;
-          }
-        },
-        set: function (value) {
-          this.setAttribute(
-            propKey,
-            typeof value === "string" ? value : JSON.stringify(value),
-          );
-        },
-      });
+      Object.defineProperty(obj, propKey, createPropertyDescriptor(propKey));
     } catch (err) {
       console.error(`Error mapping property '${propKey}':`, err);
     }
   });
   return obj;
-}
+};
+
+// Pure function to create event
+const createCustomEvent = (name, detail) =>
+  new CustomEvent(name, { detail, bubbles: true, composed: true });
+
+// Pure function to filter observed attributes
+const filterObservedAttributes = (attributes, observedAttrs) =>
+  observedAttrs.filter((name) => !!attributes.getNamedItem(name));
+
+// Pure function to create initial attributes map
+const createInitialAttributesMap = (element, observedAttrs, defaultValueFn) => {
+  const attributesMap = {};
+  observedAttrs.forEach((name) => {
+    if (!element.attributes.getNamedItem(name)) {
+      attributesMap[name] = defaultValueFn(name);
+    }
+  });
+  return attributesMap;
+};
+
+// Pure function to remove item from array
+const removeFromArray = (array, item) => {
+  const index = array.indexOf(item);
+  if (index !== -1) {
+    array.splice(index, 1);
+  }
+  return array;
+};
+
+// Factory function for event connection
+const createEventConnector = (elementId, eventStr, methodCallStr) => (self) => {
+  self.shadowRoot.getElementById(elementId)[eventStr] = function () {
+    eval(`${methodCallStr.replace(/this/g, "self")}`);
+  };
+};
 
 class WebComponentBase extends HTMLElement {
   static get observedAttributes() {
@@ -39,11 +91,7 @@ class WebComponentBase extends HTMLElement {
   }
 
   static parseAttributeValue(name, value) {
-    try {
-      return JSON.parse(value);
-    } catch (e) {
-      return value; // Return as string if parsing fails
-    }
+    return parseJsonSafely(value);
   }
 
   constructor() {
@@ -52,14 +100,16 @@ class WebComponentBase extends HTMLElement {
     this._attributesMap = {};
     this._waitingOnAttr = [];
 
-    this._waitingOnAttr = (this.constructor.observedAttributes || []).filter(
-      (name) => {
-        if (!this.attributes.getNamedItem(name)) {
-          this._attributesMap[name] =
-            this.constructor.defaultAttributeValue(name);
-        }
-        return !!this.attributes.getNamedItem(name);
-      },
+    const observedAttrs = this.constructor.observedAttributes || [];
+    this._attributesMap = createInitialAttributesMap(
+      this,
+      observedAttrs,
+      this.constructor.defaultAttributeValue.bind(this.constructor),
+    );
+
+    this._waitingOnAttr = filterObservedAttributes(
+      this.attributes,
+      observedAttrs,
     );
 
     // No attributes so update attribute never called.
@@ -88,11 +138,7 @@ class WebComponentBase extends HTMLElement {
     );
 
     if (this._waitingOnAttr.length) {
-      const index = this._waitingOnAttr.indexOf(attr);
-      if (index !== -1) {
-        // Remove it from array.
-        this._waitingOnAttr.splice(index, 1);
-      }
+      removeFromArray(this._waitingOnAttr, attr);
     }
 
     if (this._waitingOnAttr.length === 0 && !this.alreadyMappedAttributes) {
@@ -103,9 +149,7 @@ class WebComponentBase extends HTMLElement {
   }
 
   emitEvent(name, detail) {
-    this.dispatchEvent(
-      new CustomEvent(name, { detail, bubbles: true, composed: true }),
-    );
+    this.dispatchEvent(createCustomEvent(name, detail));
   }
 
   allAttributesChangedCallback(attributes) {
@@ -114,11 +158,9 @@ class WebComponentBase extends HTMLElement {
   }
 
   connectElementWithEvent(elementId, eventStr, methodCallStr) {
-    let self = this;
-    this.shadowRoot.getElementById(elementId)[eventStr] = function () {
-      eval(`${methodCallStr.replace(/this/g, "self")}`);
-    };
+    const connector = createEventConnector(elementId, eventStr, methodCallStr);
+    connector(this);
   }
 }
 
-export { WebComponentBase, WebComponentBase as default };
+export { WebComponentBase as default, WebComponentBase };

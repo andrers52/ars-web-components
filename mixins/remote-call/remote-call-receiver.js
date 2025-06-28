@@ -1,71 +1,156 @@
-import { Assert } from "arslib";
+// Remote Call Receiver Mixin
+// Provides functionality to receive and handle remote calls from other components
 
-function RemoteCallReceiver(classToExtend) {
-  return class extends classToExtend {
-    // If you are using this and implementing "connectedCallback" and "disconnectedCallback"
-    // remeber to call "super" in them
+const RemoteCallReceiverMixin = (BaseClass) => {
+  return class extends BaseClass {
+    constructor() {
+      super();
+      this._remoteCallId = null;
+      this._isListening = false;
+    }
+
+    // Public static methods
+    static get observedAttributes() {
+      return ["remote-call-id"];
+    }
+
+    // Private utility functions
+    #validateCallId(callId) {
+      return typeof callId === "string" && callId.trim().length > 0;
+    }
+
+    #createResponseEvent(callId, data = {}) {
+      return new CustomEvent("remote-call-response", {
+        detail: {
+          callId,
+          data,
+          timestamp: Date.now(),
+        },
+        bubbles: true,
+        composed: true,
+      });
+    }
+
+    #handleRemoteCall(event) {
+      if (event.detail && event.detail.callId === this._remoteCallId) {
+        const response = this.processRemoteCall(event.detail.data);
+        const responseEvent = this.#createResponseEvent(
+          this._remoteCallId,
+          response,
+        );
+        document.dispatchEvent(responseEvent);
+      }
+    }
+
+    #startListening() {
+      if (!this._isListening) {
+        document.addEventListener(
+          "remote-call",
+          this.#handleRemoteCall.bind(this),
+        );
+        this._isListening = true;
+      }
+    }
+
+    #stopListening() {
+      if (this._isListening) {
+        document.removeEventListener(
+          "remote-call",
+          this.#handleRemoteCall.bind(this),
+        );
+        this._isListening = false;
+      }
+    }
+
+    // Public instance methods - override this in your component
+    processRemoteCall(data) {
+      // Default implementation - override in your component
+      console.log("Remote call received:", data);
+      return { success: true, message: "Call processed" };
+    }
+
+    // Lifecycle methods
     connectedCallback() {
-      const eventName = this.id || this.localName;
+      if (super.connectedCallback) {
+        super.connectedCallback();
+      }
 
-      // Assert that the receiver has an ID for proper targeting
-      Assert.assert(
-        this.id,
-        `RemoteCallReceiver requires an ID for proper targeting. Component ${this.localName} is missing an ID attribute.`,
-      );
+      const callId = this.getAttribute("remote-call-id");
+      if (this.#validateCallId(callId)) {
+        this._remoteCallId = callId;
+        this.#startListening();
+      }
 
-      console.log(
-        "RemoteCallReceiver connectedCallback called for:",
-        eventName,
-      );
-      console.log(
-        "super.connectedCallback exists:",
-        typeof super.connectedCallback,
-      );
-      super.connectedCallback && super.connectedCallback();
-      console.log("Adding method call event listener for:", eventName);
-      this._addMethodCallEventListener();
+      // Set up event listener for method calls using component ID
+      if (this.id) {
+        this._methodCallHandler = (event) => {
+          if (event.detail && event.detail.method) {
+            const methodName = event.detail.method;
+            const args = event.detail.args || [];
+
+            // Check if method is private (starts with _)
+            if (methodName.charAt(0) === "_") {
+              console.error(`Cannot call private method: ${methodName}`);
+              return;
+            }
+
+            // Check if method exists
+            if (typeof this[methodName] === "function") {
+              try {
+                this[methodName](...args);
+              } catch (error) {
+                console.error(`Error calling method ${methodName}:`, error);
+              }
+            } else {
+              console.error(
+                `Method ${methodName} does not exist on component ${this.id}`,
+              );
+            }
+          }
+        };
+
+        document.addEventListener(this.id, this._methodCallHandler);
+      }
     }
+
     disconnectedCallback() {
-      const eventName = this.id || this.localName;
-      console.log(
-        "RemoteCallReceiver disconnectedCallback called for:",
-        eventName,
-      );
-      super.disconnectedCallback && super.disconnectedCallback();
-      document.removeEventListener(eventName, this._eventHandler);
+      if (super.disconnectedCallback) {
+        super.disconnectedCallback();
+      }
+
+      this.#stopListening();
+
+      // Clean up method call event listener
+      if (this.id && this._methodCallHandler) {
+        document.removeEventListener(this.id, this._methodCallHandler);
+        this._methodCallHandler = null;
+      }
     }
-    _addMethodCallEventListener() {
-      const eventName = this.id || this.localName;
-      console.log("Setting up event listener for:", eventName);
 
-      // Create a bound event handler so we can remove it later
-      this._eventHandler = (event) => {
-        console.log("Received remote call event for:", eventName, event.detail);
-        try {
-          Assert.assert(
-            event.detail.method.charAt(0) !== "_",
-            "Cannot call private methods",
-          );
-          console.log(
-            "Calling method:",
-            event.detail.method,
-            "with args:",
-            event.detail.args,
-          );
-          this[event.detail.method](...event.detail.args);
-        } catch (error) {
-          console.log(
-            `An error occurred while trying to remotely call ${event.detail.method}: ${error}`,
-          );
+    attributeChangedCallback(name, oldValue, newValue) {
+      if (super.attributeChangedCallback) {
+        super.attributeChangedCallback(name, oldValue, newValue);
+      }
+
+      if (name === "remote-call-id") {
+        this.#stopListening();
+
+        if (this.#validateCallId(newValue)) {
+          this._remoteCallId = newValue;
+          this.#startListening();
+        } else {
+          this._remoteCallId = null;
         }
-      };
-
-      // Listen on document for events with this component's ID or localName
-      document.addEventListener(eventName, this._eventHandler);
-
-      console.log("Event listeners set up for:", eventName);
+      }
     }
   };
+};
+
+// Export for use in other modules
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = RemoteCallReceiverMixin;
+} else if (typeof window !== "undefined") {
+  window.RemoteCallReceiverMixin = RemoteCallReceiverMixin;
 }
 
-export { RemoteCallReceiver as default, RemoteCallReceiver };
+export { RemoteCallReceiverMixin };

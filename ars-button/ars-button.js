@@ -8,49 +8,12 @@
 //
 // notification event: `ars-button:<button_id>:click`
 
-import PressedEffect from "../mixins/pressed-effect/pressed-effect.js";
+import { PressedEffectMixin } from "../mixins/pressed-effect/pressed-effect.js";
 
-class ArsButton extends PressedEffect(HTMLButtonElement) {
+class ArsButton extends PressedEffectMixin(HTMLButtonElement) {
   constructor() {
     super();
-
-    this._setStyle();
-
-    this.addEventListener("click", (event) => {
-      this._notifyClick(event.detail);
-      event.preventDefault();
-    });
-  }
-
-  /**
-   * Sends a custom event when the button is clicked.
-   * @param {string} result - The detail of the event.
-   * @private
-   */
-  _notifyClick(result) {
-    if (!this.id) return;
-    this.dispatchEvent(
-      new CustomEvent(`ars-button:${this.id}:click`, {
-        detail: { result },
-        bubbles: true,
-        composed: true,
-      }),
-    );
-  }
-
-  /**
-   * Sets the initial style for the button.
-   * @private
-   */
-  _setStyle() {
-    // No styling applied - component is purely functional
-    // All styling should be handled via CSS classes
-
-    // Store effect color for pressed effect if provided
-    const effectColor = this.getAttribute("effect-color");
-    if (effectColor) {
-      this._effectColor = effectColor;
-    }
+    ArsButton.#initializeButton(this);
   }
 
   static get observedAttributes() {
@@ -61,6 +24,49 @@ class ArsButton extends PressedEffect(HTMLButtonElement) {
     if (attrName === "effect-color") {
       this._effectColor = newVal;
     }
+  }
+
+  // ---- PRIVATE STATIC UTILITY METHODS ----
+  static #createClickEventName(buttonId) {
+    return `ars-button:${buttonId}:click`;
+  }
+
+  static #createClickEvent(buttonId, result) {
+    return new CustomEvent(this.#createClickEventName(buttonId), {
+      detail: { result },
+      bubbles: true,
+      composed: true,
+    });
+  }
+
+  static #getEffectColor(element) {
+    return element.getAttribute("effect-color");
+  }
+
+  static #hasId(element) {
+    return !!element.id;
+  }
+
+  static #dispatchClickEvent(element, result) {
+    if (!this.#hasId(element)) return;
+    element.dispatchEvent(this.#createClickEvent(element.id, result));
+  }
+
+  static #createClickHandler(element) {
+    return (event) => {
+      this.#dispatchClickEvent(element, event.detail);
+      event.preventDefault();
+    };
+  }
+
+  static #initializeButton(button) {
+    const clickHandler = this.#createClickHandler(button);
+    button.addEventListener("click", clickHandler);
+    const effectColor = this.#getEffectColor(button);
+    if (effectColor) {
+      button._effectColor = effectColor;
+    }
+    return button;
   }
 }
 

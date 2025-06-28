@@ -1,94 +1,171 @@
-// MIXIN -> Swipeable.call(<object_to_extend>)
-//          if is a class, put on constructor, after super()
+// Swipeable Mixin
+// Adds swipe gesture detection to web components
 
-import { Assert } from "arslib";
-
-function Swipeable() {
-  // Assert.assertIsFunction(this.onSwipeRight,  'onSwipeRight not found')
-  // Assert.assertIsFunction(this.onSwipeLeft,   'onSwipeLeft not found')
-  // Assert.assertIsFunction(this.onSwipeUp,     'onSwipeUp not found')
-  // Assert.assertIsFunction(this.onSwipeDown,   'onSwipeDown not found')
-
-  // Swipe Up / Down / Left / Right
-  this._initialX = null;
-  this._initialY = null;
-  this._detectedMovementDirection = null; // ['UP','DOWN', 'LEFT', 'RIGHT']
-
-  this._startTouch = function (evt) {
-    this._initialX = evt.touches[0].clientX;
-    this._initialY = evt.touches[0].clientY;
-  };
-
-  this._moveTouch = function (evt) {
-    if (this._initialX === null) {
-      return;
+const SwipeableMixin = (BaseClass) => {
+  return class extends BaseClass {
+    constructor() {
+      super();
+      this._touchStartX = 0;
+      this._touchStartY = 0;
+      this._touchEndX = 0;
+      this._touchEndY = 0;
+      this._minSwipeDistance = 50;
+      this._maxSwipeTime = 300;
+      this._touchStartTime = 0;
     }
 
-    if (this._initialY === null) {
-      return;
+    // Public static methods
+    static get observedAttributes() {
+      return ["min-swipe-distance", "max-swipe-time"];
     }
 
-    let currentX = evt.touches[0].clientX;
-    let currentY = evt.touches[0].clientY;
+    // Private utility functions
+    #validateDistance(distance) {
+      const num = parseInt(distance);
+      return !isNaN(num) && num > 0;
+    }
 
-    let diffX = this._initialX - currentX;
-    let diffY = this._initialY - currentY;
+    #validateTime(time) {
+      const num = parseInt(time);
+      return !isNaN(num) && num > 0;
+    }
 
-    if (Math.abs(diffX) > Math.abs(diffY)) {
-      // sliding horizontally
-      if (diffX > 0) {
-        this._detectedMovementDirection = "LEFT";
-        this.onSwipeLeft && evt.preventDefault();
-        return;
+    #getTouchCoordinates(event) {
+      const touch = event.touches[0] || event.changedTouches[0];
+      return {
+        x: touch.clientX,
+        y: touch.clientY,
+      };
+    }
+
+    #calculateSwipeDistance() {
+      const deltaX = this._touchEndX - this._touchStartX;
+      const deltaY = this._touchEndY - this._touchStartY;
+
+      return {
+        deltaX,
+        deltaY,
+        distance: Math.sqrt(deltaX * deltaX + deltaY * deltaY),
+      };
+    }
+
+    #calculateSwipeTime() {
+      return Date.now() - this._touchStartTime;
+    }
+
+    #determineSwipeDirection(deltaX, deltaY) {
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+
+      if (absX > absY) {
+        return deltaX > 0 ? "right" : "left";
       } else {
-        this._detectedMovementDirection = "RIGHT";
-        this.onSwipeRight && evt.preventDefault();
-        return;
+        return deltaY > 0 ? "down" : "up";
       }
-    } else {
-      // sliding vertically
-      if (diffY > 0) {
-        // swiped up
-        this._detectedMovementDirection = "UP";
-        this.onSwipeUp && evt.preventDefault();
-        return;
-      } else {
-        // swiped down
-        this._detectedMovementDirection = "DOWN";
-        this.onSwipeDown && evt.preventDefault();
-        return;
+    }
+
+    #isValidSwipe(distance, time) {
+      return distance >= this._minSwipeDistance && time <= this._maxSwipeTime;
+    }
+
+    #handleTouchStart = (event) => {
+      const coords = this.#getTouchCoordinates(event);
+      this._touchStartX = coords.x;
+      this._touchStartY = coords.y;
+      this._touchStartTime = Date.now();
+    };
+
+    #handleTouchEnd = (event) => {
+      const coords = this.#getTouchCoordinates(event);
+      this._touchEndX = coords.x;
+      this._touchEndY = coords.y;
+
+      const { deltaX, deltaY, distance } = this.#calculateSwipeDistance();
+      const time = this.#calculateSwipeTime();
+
+      if (this.#isValidSwipe(distance, time)) {
+        const direction = this.#determineSwipeDirection(deltaX, deltaY);
+        this.onSwipe(direction, { deltaX, deltaY, distance, time });
+      }
+    };
+
+    // Public instance methods - override this in your component
+    onSwipe(direction, details) {
+      // Default implementation - override in your component
+      console.log(`Swipe detected: ${direction}`, details);
+
+      // Dispatch custom event
+      const event = new CustomEvent("swipe", {
+        detail: {
+          direction,
+          ...details,
+        },
+        bubbles: true,
+        composed: true,
+      });
+      this.dispatchEvent(event);
+    }
+
+    setMinSwipeDistance(distance) {
+      if (this.#validateDistance(distance)) {
+        this._minSwipeDistance = parseInt(distance);
+      }
+    }
+
+    setMaxSwipeTime(time) {
+      if (this.#validateTime(time)) {
+        this._maxSwipeTime = parseInt(time);
+      }
+    }
+
+    // Lifecycle methods
+    connectedCallback() {
+      if (super.connectedCallback) {
+        super.connectedCallback();
+      }
+
+      const distance = this.getAttribute("min-swipe-distance");
+      if (this.#validateDistance(distance)) {
+        this._minSwipeDistance = parseInt(distance);
+      }
+
+      const time = this.getAttribute("max-swipe-time");
+      if (this.#validateTime(time)) {
+        this._maxSwipeTime = parseInt(time);
+      }
+
+      this.addEventListener("touchstart", this.#handleTouchStart);
+      this.addEventListener("touchend", this.#handleTouchEnd);
+    }
+
+    disconnectedCallback() {
+      if (super.disconnectedCallback) {
+        super.disconnectedCallback();
+      }
+
+      this.removeEventListener("touchstart", this.#handleTouchStart);
+      this.removeEventListener("touchend", this.#handleTouchEnd);
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+      if (super.attributeChangedCallback) {
+        super.attributeChangedCallback(name, oldValue, newValue);
+      }
+
+      if (name === "min-swipe-distance" && this.#validateDistance(newValue)) {
+        this._minSwipeDistance = parseInt(newValue);
+      } else if (name === "max-swipe-time" && this.#validateTime(newValue)) {
+        this._maxSwipeTime = parseInt(newValue);
       }
     }
   };
+};
 
-  this._endTouch = function () {
-    this._initialX = null;
-    this._initialY = null;
-
-    switch (this._detectedMovementDirection) {
-      case "UP":
-        this.onSwipeUp && this.onSwipeUp();
-        break;
-      case "DOWN":
-        this.onSwipeDown && this.onSwipeDown();
-        break;
-      case "LEFT":
-        this.onSwipeLeft && this.onSwipeLeft();
-        break;
-      case "RIGHT":
-        this.onSwipeRight && this.onSwipeRight();
-        break;
-
-      default:
-        Assert.assert(false, "There is an error in your logic son... :(");
-    }
-
-    this._detectedMovementDirection = null;
-  };
-
-  this.addEventListener("touchstart", this._startTouch.bind(this), false);
-  this.addEventListener("touchmove", this._moveTouch.bind(this), false);
-  this.addEventListener("touchend", this._endTouch.bind(this), false);
+// Export for use in other modules
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = SwipeableMixin;
+} else if (typeof window !== "undefined") {
+  window.SwipeableMixin = SwipeableMixin;
 }
 
-export { Swipeable, Swipeable as default };
+export { SwipeableMixin };

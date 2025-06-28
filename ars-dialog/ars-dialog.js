@@ -25,173 +25,68 @@ import { DEFAULT_CSS } from "./ars-dialog-css.js";
 class ArsDialog extends WebComponentBase {
   constructor() {
     super();
-
-    // Theming and customization properties
-    this.cssVars = {}; // CSS variables for theming
-    this.customCSS = null; // Custom CSS string
-    this.defaultCSS = DEFAULT_CSS; // Default CSS styles
+    ArsDialog.#initializeDialog(this);
   }
+
   connectedCallback() {}
 
-  _getTemplate() {
-    return `
-      <style>
-        ${this.defaultCSS}
-        ${this.customCSS || ""}
-      </style>
-      <div id="overlay" class="overlay" style="visibility: hidden;">
-        <div id="body" class="body">
-          <div id="title" class="title">
-            ${this.title || this.getAttribute("title") || ""}
-          </div>
-          <div id="content" class="content">
-            ${this.content || this.getAttribute("content")}
-          </div>
-          <div id="footer" class="footer">
-          ${this._showSelectedButtons()}
-          </div>
-        </div>
-      </div>
-    `;
+  #getTemplate() {
+    return ArsDialog.#createTemplate(this);
   }
 
-  _showSelectedButtons() {
-    if (this.getAttribute("showConfirmButtons") === "true") {
-      return `
-        <button is="ars-button" id="dialog_button_yes:${this.id}"> ${
-        this.localizedYes || "Yes"
-      } </button>
-        <button
-          is="ars-button"
-          id="dialog_button_no:${this.id}"
-          style="margin-left: 5px"
-        >  ${this.localizedNo || "No"} </button>
-      `;
-    } else {
-      return `
-          <button is="ars-button" id="dialog_button_ok:${this.id}"> Ok </button>
-      `;
-    }
-  }
   static get observedAttributes() {
     return ["open", "localizedYes", "localizedNo", "custom-css", "css-vars"];
   }
+
   attributeChangedCallback(attrName, oldVal, newVal) {
     super.attributeChangedCallback(attrName, oldVal, newVal);
-
-    if (attrName === "open" && newVal === "true") this._activate();
+    if (attrName === "open" && newVal === "true") this.#activate();
     if (attrName === "custom-css") {
       this.customCSS = newVal;
-      if (this.shadowRoot) this._render();
+      if (this.shadowRoot) this.#render();
     }
     if (attrName === "css-vars") {
       this.cssVars = JSON.parse(newVal || "{}");
-      this._applyCSSVars();
+      ArsDialog.#applyCSSVars(this.shadowRoot, this.cssVars);
     }
   }
 
-  _render() {
-    this.shadowRoot.innerHTML = eval("`" + this._getTemplate() + "`");
-    // Apply CSS variables after rendering
-    this._applyCSSVars();
+  #render() {
+    this.shadowRoot.innerHTML = eval("`" + this.#getTemplate() + "`");
+    ArsDialog.#applyCSSVars(this.shadowRoot, this.cssVars);
   }
 
-  // Method to apply CSS variables
-  _applyCSSVars() {
-    if (!this.cssVars || !this.shadowRoot) return;
-
-    // Find or create a style element specifically for CSS variables
-    let cssVarStyle = this.shadowRoot.querySelector("style.css-vars-style");
-    if (!cssVarStyle) {
-      cssVarStyle = document.createElement("style");
-      cssVarStyle.className = "css-vars-style";
-      this.shadowRoot.prepend(cssVarStyle);
-    }
-
-    let cssVarString = ":host {\n";
-    for (const [key, value] of Object.entries(this.cssVars)) {
-      cssVarString += `  --${key}: ${value};\n`;
-    }
-    cssVarString += "}\n";
-
-    cssVarStyle.textContent = cssVarString;
-  }
-
-  // Method to set CSS variables programmatically
   setCSSVars(cssVars) {
-    // Replace all CSS variables, not merge
     this.cssVars = { ...cssVars };
-    this._applyCSSVars();
+    ArsDialog.#applyCSSVars(this.shadowRoot, this.cssVars);
   }
 
-  // Method to get current CSS variables
   getCSSVars() {
     return { ...this.cssVars };
   }
 
-  _activate() {
+  #activate() {
     if (!this.shadowRoot) this.attachShadow({ mode: "open" });
-
-    this._render();
-    this.shadowRoot.getElementById("overlay").style.visibility = "visible";
-
-    let yesButton = this.shadowRoot.getElementById(
-      `dialog_button_yes:${this.id}`,
-    );
-    if (yesButton)
-      yesButton.onclick = (() => {
-        const content = this.shadowRoot.getElementById("content");
-        this.onbuttonclick && this.onbuttonclick(content);
-        this._deactivate();
-      }).bind(this);
-
-    let okButton = this.shadowRoot.getElementById(
-      `dialog_button_ok:${this.id}`,
-    );
-    if (okButton)
-      okButton.onclick = (() => {
-        this.onbuttonclick && this.onbuttonclick(true);
-        this._deactivate();
-      }).bind(this);
-
-    let noButton = this.shadowRoot.getElementById(
-      `dialog_button_no:${this.id}`,
-    );
-    if (noButton)
-      noButton.onclick = (() => {
-        this.onbuttonclick && this.onbuttonclick(false);
-        this._deactivate();
-      }).bind(this);
+    this.#render();
+    ArsDialog.#showOverlay(this);
+    ArsDialog.#setupButtonHandlers(this);
   }
 
-  _deactivate() {
-    let overlay = this.shadowRoot.getElementById("overlay");
-    if (overlay) overlay.style.visibility = "hidden";
+  #deactivate() {
+    ArsDialog.#hideOverlay(this);
   }
 
-  _isActive() {
-    return (
-      this.shadowRoot.getElementById("overlay").style.visibility === "visible"
-    );
+  #isActive() {
+    return ArsDialog.#isOverlayVisible(this);
   }
 
   static notify(content = "", title = "!", cssVars = {}, customCSS = "") {
-    return new Promise(function (resolve) {
-      let dialog = document.createElement("ars-dialog");
-      dialog.id = "notification_dialog";
-      if (customCSS) dialog.setAttribute("custom-css", customCSS);
-      if (Object.keys(cssVars).length > 0)
-        dialog.setAttribute("css-vars", JSON.stringify(cssVars));
-      dialog.setAttribute("content", content);
-      dialog.setAttribute("showConfirmButtons", false);
-      dialog.setAttribute("title", title);
-      document.body.appendChild(dialog);
-      dialog.onbuttonclick = function () {
-        dialog.parentNode.removeChild(dialog);
-        resolve();
-      };
-      dialog.setAttribute("open", true);
-    });
+    return ArsDialog.#createNotificationPromise(
+      content,
+      title,
+      customCSS,
+      cssVars,
+    );
   }
 
   static dialog(
@@ -202,24 +97,234 @@ class ArsDialog extends WebComponentBase {
     localizedYes = "Yes",
     localizedNo = "No",
   ) {
-    return new Promise(function (resolve) {
-      let dialog = document.createElement("ars-dialog");
-      dialog.id = "notification_dialog";
-      if (customCSS) dialog.setAttribute("custom-css", customCSS);
-      if (Object.keys(cssVars).length > 0)
-        dialog.setAttribute("css-vars", JSON.stringify(cssVars));
-      dialog.setAttribute("content", content);
-      dialog.setAttribute("showConfirmButtons", true);
-      dialog.setAttribute("title", title);
+    return ArsDialog.#createDialogPromise(
+      content,
+      title,
+      cssVars,
+      customCSS,
+      localizedYes,
+      localizedNo,
+    );
+  }
+
+  // ---- PRIVATE STATIC UTILITY METHODS ----
+  static #getTitle(component) {
+    return component.title || component.getAttribute("title") || "";
+  }
+
+  static #getContent(component) {
+    return component.content || component.getAttribute("content");
+  }
+
+  static #shouldShowConfirmButtons(component) {
+    return component.getAttribute("showConfirmButtons") === "true";
+  }
+
+  static #getLocalizedYes(component) {
+    return component.localizedYes || "Yes";
+  }
+
+  static #getLocalizedNo(component) {
+    return component.localizedNo || "No";
+  }
+
+  static #createCSSVarsString(cssVars) {
+    if (!cssVars || Object.keys(cssVars).length === 0) return "";
+    let cssVarString = ":host {\n";
+    for (const [key, value] of Object.entries(cssVars)) {
+      cssVarString += `  --${key}: ${value};\n`;
+    }
+    cssVarString += "}\n";
+    return cssVarString;
+  }
+
+  static #applyCSSVars(shadowRoot, cssVars) {
+    if (!cssVars || !shadowRoot) return;
+    let cssVarStyle = shadowRoot.querySelector("style.css-vars-style");
+    if (!cssVarStyle) {
+      cssVarStyle = document.createElement("style");
+      cssVarStyle.className = "css-vars-style";
+      shadowRoot.prepend(cssVarStyle);
+    }
+    cssVarStyle.textContent = ArsDialog.#createCSSVarsString(cssVars);
+  }
+
+  static #createConfirmButtonsHTML(component) {
+    return `
+      <button is="ars-button" id="dialog_button_yes:${
+        component.id
+      }"> ${ArsDialog.#getLocalizedYes(component)} </button>
+      <button is="ars-button" id="dialog_button_no:${
+        component.id
+      }" style="margin-left: 5px"> ${ArsDialog.#getLocalizedNo(
+      component,
+    )} </button>
+    `;
+  }
+
+  static #createOkButtonHTML(component) {
+    return `
+      <button is="ars-button" id="dialog_button_ok:${component.id}"> Ok </button>
+    `;
+  }
+
+  static #createFooterHTML(component) {
+    if (ArsDialog.#shouldShowConfirmButtons(component)) {
+      return ArsDialog.#createConfirmButtonsHTML(component);
+    } else {
+      return ArsDialog.#createOkButtonHTML(component);
+    }
+  }
+
+  static #createTemplate(component) {
+    return `
+      <style>
+        ${component.defaultCSS}
+        ${component.customCSS || ""}
+      </style>
+      <div id="overlay" class="overlay" style="visibility: hidden;">
+        <div id="body" class="body">
+          <div id="title" class="title">
+            ${ArsDialog.#getTitle(component)}
+          </div>
+          <div id="content" class="content">
+            ${ArsDialog.#getContent(component)}
+          </div>
+          <div id="footer" class="footer">
+          ${ArsDialog.#createFooterHTML(component)}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  static #createButtonHandler(component, action) {
+    return () => {
+      if (action === "yes") {
+        const content = component.shadowRoot.getElementById("content");
+        component.onbuttonclick && component.onbuttonclick(content);
+      } else if (action === "ok") {
+        component.onbuttonclick && component.onbuttonclick(true);
+      } else if (action === "no") {
+        component.onbuttonclick && component.onbuttonclick(false);
+      }
+      component.#deactivate();
+    };
+  }
+
+  static #setupButtonHandlers(component) {
+    const yesButton = component.shadowRoot.getElementById(
+      `dialog_button_yes:${component.id}`,
+    );
+    if (yesButton)
+      yesButton.onclick = ArsDialog.#createButtonHandler(component, "yes");
+    const okButton = component.shadowRoot.getElementById(
+      `dialog_button_ok:${component.id}`,
+    );
+    if (okButton)
+      okButton.onclick = ArsDialog.#createButtonHandler(component, "ok");
+    const noButton = component.shadowRoot.getElementById(
+      `dialog_button_no:${component.id}`,
+    );
+    if (noButton)
+      noButton.onclick = ArsDialog.#createButtonHandler(component, "no");
+  }
+
+  static #showOverlay(component) {
+    component.shadowRoot.getElementById("overlay").style.visibility = "visible";
+  }
+
+  static #hideOverlay(component) {
+    const overlay = component.shadowRoot.getElementById("overlay");
+    if (overlay) overlay.style.visibility = "hidden";
+  }
+
+  static #isOverlayVisible(component) {
+    return (
+      component.shadowRoot.getElementById("overlay").style.visibility ===
+      "visible"
+    );
+  }
+
+  static #createDialogElement(
+    id,
+    content,
+    title,
+    showConfirmButtons,
+    localizedYes,
+    localizedNo,
+    customCSS,
+    cssVars,
+  ) {
+    const dialog = document.createElement("ars-dialog");
+    dialog.id = id;
+    if (customCSS) dialog.setAttribute("custom-css", customCSS);
+    if (Object.keys(cssVars).length > 0)
+      dialog.setAttribute("css-vars", JSON.stringify(cssVars));
+    dialog.setAttribute("content", content);
+    dialog.setAttribute("showConfirmButtons", showConfirmButtons);
+    dialog.setAttribute("title", title);
+    if (showConfirmButtons) {
       dialog.setAttribute("localizedYes", localizedYes);
       dialog.setAttribute("localizedNo", localizedNo);
+    }
+    return dialog;
+  }
+
+  static #setupDialogPromise(dialog, resolve) {
+    dialog.onbuttonclick = function (result) {
+      dialog.parentNode.removeChild(dialog);
+      resolve(result);
+    };
+    dialog.setAttribute("open", true);
+  }
+
+  static #createNotificationPromise(content, title, customCSS, cssVars) {
+    return new Promise(function (resolve) {
+      const dialog = ArsDialog.#createDialogElement(
+        "notification_dialog",
+        content,
+        title,
+        false,
+        null,
+        null,
+        customCSS,
+        cssVars,
+      );
       document.body.appendChild(dialog);
-      dialog.onbuttonclick = function (result) {
-        dialog.parentNode.removeChild(dialog);
-        resolve(result); // <content div element> or false
-      };
-      dialog.setAttribute("open", true);
+      ArsDialog.#setupDialogPromise(dialog, resolve);
     });
+  }
+
+  static #createDialogPromise(
+    content,
+    title,
+    cssVars,
+    customCSS,
+    localizedYes,
+    localizedNo,
+  ) {
+    return new Promise(function (resolve) {
+      const dialog = ArsDialog.#createDialogElement(
+        "notification_dialog",
+        content,
+        title,
+        true,
+        localizedYes,
+        localizedNo,
+        customCSS,
+        cssVars,
+      );
+      document.body.appendChild(dialog);
+      ArsDialog.#setupDialogPromise(dialog, resolve);
+    });
+  }
+
+  static #initializeDialog(component) {
+    component.cssVars = {};
+    component.customCSS = null;
+    component.defaultCSS = DEFAULT_CSS;
+    return component;
   }
 }
 

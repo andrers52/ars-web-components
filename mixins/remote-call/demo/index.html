@@ -337,9 +337,12 @@
             <h4>🔢 Increment Counter</h4>
             <p>Calls the increment() method on the receivers</p>
             <div class="receiver-buttons">
-              <button class="receiver-btn receiver-1" onclick="callIncrement('demo-receiver-1')">Receiver #1</button>
-              <button class="receiver-btn receiver-2" onclick="callIncrement('demo-receiver-2')">Receiver #2</button>
-              <button class="receiver-btn both" onclick="callIncrementBoth()">Call Both</button>
+              <button class="receiver-btn receiver-1"
+                onclick="if(typeof callIncrement === 'function') callIncrement('demo-receiver-1')">Receiver #1</button>
+              <button class="receiver-btn receiver-2"
+                onclick="if(typeof callIncrement === 'function') callIncrement('demo-receiver-2')">Receiver #2</button>
+              <button class="receiver-btn both"
+                onclick="if(typeof callIncrementBoth === 'function') callIncrementBoth()">Call Both</button>
             </div>
           </div>
 
@@ -347,9 +350,12 @@
             <h4>🔢 Decrement Counter</h4>
             <p>Calls the decrement() method on the receivers</p>
             <div class="receiver-buttons">
-              <button class="receiver-btn receiver-1" onclick="callDecrement('demo-receiver-1')">Receiver #1</button>
-              <button class="receiver-btn receiver-2" onclick="callDecrement('demo-receiver-2')">Receiver #2</button>
-              <button class="receiver-btn both" onclick="callDecrementBoth()">Call Both</button>
+              <button class="receiver-btn receiver-1"
+                onclick="if(typeof callDecrement === 'function') callDecrement('demo-receiver-1')">Receiver #1</button>
+              <button class="receiver-btn receiver-2"
+                onclick="if(typeof callDecrement === 'function') callDecrement('demo-receiver-2')">Receiver #2</button>
+              <button class="receiver-btn both"
+                onclick="if(typeof callDecrementBoth === 'function') callDecrementBoth()">Call Both</button>
             </div>
           </div>
 
@@ -357,9 +363,14 @@
             <h4>🎯 Set Counter Value</h4>
             <p>Calls setCounter(value) with a random number</p>
             <div class="receiver-buttons">
-              <button class="receiver-btn receiver-1" onclick="callSetCounter('demo-receiver-1')">Receiver #1</button>
-              <button class="receiver-btn receiver-2" onclick="callSetCounter('demo-receiver-2')">Receiver #2</button>
-              <button class="receiver-btn both" onclick="callSetCounterBoth()">Call Both</button>
+              <button class="receiver-btn receiver-1"
+                onclick="if(typeof callSetCounter === 'function') callSetCounter('demo-receiver-1')">Receiver
+                #1</button>
+              <button class="receiver-btn receiver-2"
+                onclick="if(typeof callSetCounter === 'function') callSetCounter('demo-receiver-2')">Receiver
+                #2</button>
+              <button class="receiver-btn both"
+                onclick="if(typeof callSetCounterBoth === 'function') callSetCounterBoth()">Call Both</button>
             </div>
           </div>
 
@@ -367,9 +378,14 @@
             <h4>🎨 Change Color</h4>
             <p>Calls changeColor() with a random color</p>
             <div class="receiver-buttons">
-              <button class="receiver-btn receiver-1" onclick="callChangeColor('demo-receiver-1')">Receiver #1</button>
-              <button class="receiver-btn receiver-2" onclick="callChangeColor('demo-receiver-2')">Receiver #2</button>
-              <button class="receiver-btn both" onclick="callChangeColorBoth()">Call Both</button>
+              <button class="receiver-btn receiver-1"
+                onclick="if(typeof callChangeColor === 'function') callChangeColor('demo-receiver-1')">Receiver
+                #1</button>
+              <button class="receiver-btn receiver-2"
+                onclick="if(typeof callChangeColor === 'function') callChangeColor('demo-receiver-2')">Receiver
+                #2</button>
+              <button class="receiver-btn both"
+                onclick="if(typeof callChangeColorBoth === 'function') callChangeColorBoth()">Call Both</button>
             </div>
           </div>
 
@@ -377,9 +393,12 @@
             <h4>📝 Set Text</h4>
             <p>Calls setText() with a custom message</p>
             <div class="receiver-buttons">
-              <button class="receiver-btn receiver-1" onclick="callSetText('demo-receiver-1')">Receiver #1</button>
-              <button class="receiver-btn receiver-2" onclick="callSetText('demo-receiver-2')">Receiver #2</button>
-              <button class="receiver-btn both" onclick="callSetTextBoth()">Call Both</button>
+              <button class="receiver-btn receiver-1"
+                onclick="if(typeof callSetText === 'function') callSetText('demo-receiver-1')">Receiver #1</button>
+              <button class="receiver-btn receiver-2"
+                onclick="if(typeof callSetText === 'function') callSetText('demo-receiver-2')">Receiver #2</button>
+              <button class="receiver-btn both"
+                onclick="if(typeof callSetTextBoth === 'function') callSetTextBoth()">Call Both</button>
             </div>
           </div>
 
@@ -387,11 +406,14 @@
             <h4>🚫 Call Private Method (Should Fail)</h4>
             <p>Attempts to call _privateMethod() which should be blocked</p>
             <div class="receiver-buttons">
-              <button class="receiver-btn receiver-1" onclick="callPrivateMethod('demo-receiver-1')">Receiver
+              <button class="receiver-btn receiver-1"
+                onclick="if(typeof callPrivateMethod === 'function') callPrivateMethod('demo-receiver-1')">Receiver
                 #1</button>
-              <button class="receiver-btn receiver-2" onclick="callPrivateMethod('demo-receiver-2')">Receiver
+              <button class="receiver-btn receiver-2"
+                onclick="if(typeof callPrivateMethod === 'function') callPrivateMethod('demo-receiver-2')">Receiver
                 #2</button>
-              <button class="receiver-btn both" onclick="callPrivateMethodBoth()">Call Both</button>
+              <button class="receiver-btn both"
+                onclick="if(typeof callPrivateMethodBoth === 'function') callPrivateMethodBoth()">Call Both</button>
             </div>
           </div>
 
@@ -399,11 +421,15 @@
             <h4>❓ Call Non-Existent Method (Should Fail)</h4>
             <p>Attempts to call a method that doesn't exist</p>
             <div class="receiver-buttons">
-              <button class="receiver-btn receiver-1" onclick="callNonExistentMethod('demo-receiver-1')">Receiver
+              <button class="receiver-btn receiver-1"
+                onclick="if(typeof callNonExistentMethod === 'function') callNonExistentMethod('demo-receiver-1')">Receiver
                 #1</button>
-              <button class="receiver-btn receiver-2" onclick="callNonExistentMethod('demo-receiver-2')">Receiver
+              <button class="receiver-btn receiver-2"
+                onclick="if(typeof callNonExistentMethod === 'function') callNonExistentMethod('demo-receiver-2')">Receiver
                 #2</button>
-              <button class="receiver-btn both" onclick="callNonExistentMethodBoth()">Call Both</button>
+              <button class="receiver-btn both"
+                onclick="if(typeof callNonExistentMethodBoth === 'function') callNonExistentMethodBoth()">Call
+                Both</button>
             </div>
           </div>
 
@@ -439,8 +465,10 @@
           </div>
 
           <div class="control-buttons">
-            <button class="btn btn-small" onclick="resetReceiver()">Reset All</button>
-            <button class="btn btn-small" onclick="clearReceiverLog()">Clear Log</button>
+            <button class="btn btn-small" onclick="if(typeof resetReceiver === 'function') resetReceiver()">Reset
+              All</button>
+            <button class="btn btn-small" onclick="if(typeof clearReceiverLog === 'function') clearReceiverLog()">Clear
+              Log</button>
           </div>
 
           <div class="log-container" id="receiverLog">
@@ -531,22 +559,19 @@
 
   <!-- Load the mixins and demo -->
   <script type="module">
-    import RemoteCallCaller from '../remote-call-caller.js';
-    import RemoteCallReceiver from '../remote-call-receiver.js';
+    import { RemoteCallCallerMixin } from '../remote-call-caller.js';
+    import { RemoteCallReceiverMixin } from '../remote-call-receiver.js';
 
     // Create a caller component
-    class DemoCaller extends RemoteCallCaller(HTMLElement) {
+    class DemoCaller extends RemoteCallCallerMixin(HTMLElement) {
       constructor() {
         super();
-        console.log('DemoCaller constructor called');
         this.logElement = null;
       }
 
       connectedCallback() {
-        console.log('DemoCaller connectedCallback called');
         super.connectedCallback && super.connectedCallback();
         this.logElement = document.getElementById('callerLog');
-        console.log('DemoCaller logElement found:', !!this.logElement);
         this.log('Caller component ready');
       }
 
@@ -562,10 +587,9 @@
     }
 
     // Create a receiver component
-    class DemoReceiver extends RemoteCallReceiver(HTMLElement) {
+    class DemoReceiver extends RemoteCallReceiverMixin(HTMLElement) {
       constructor() {
         super();
-        console.log('DemoReceiver constructor called');
         this.counter = 0;
         this.color = '#667eea';
         this.text = 'Waiting for remote calls...';
@@ -573,58 +597,47 @@
       }
 
       connectedCallback() {
-        console.log('DemoReceiver connectedCallback called');
         super.connectedCallback && super.connectedCallback();
         this.logElement = document.getElementById('receiverLog');
-        console.log('DemoReceiver logElement found:', !!this.logElement);
         this.updateDisplay();
         this.log('Receiver component ready');
       }
 
       increment() {
-        console.log('DemoReceiver increment() called');
         this.counter++;
         this.updateDisplay();
         this.log(`Counter incremented to ${this.counter}`, 'success');
       }
 
       decrement() {
-        console.log('DemoReceiver decrement() called');
         this.counter--;
         this.updateDisplay();
         this.log(`Counter decremented to ${this.counter}`, 'success');
       }
 
       setCounter(value) {
-        console.log('DemoReceiver setCounter() called with:', value);
         this.counter = value;
         this.updateDisplay();
         this.log(`Counter set to ${this.counter}`, 'success');
       }
 
       changeColor(color) {
-        console.log('DemoReceiver changeColor() called with:', color);
         this.color = color;
         this.updateDisplay();
         this.log(`Color changed to ${color}`, 'success');
       }
 
       setText(text) {
-        console.log('DemoReceiver setText() called with:', text);
         this.text = text;
         this.updateDisplay();
         this.log(`Text set to: ${text}`, 'success');
       }
 
       _privateMethod() {
-        console.log('DemoReceiver _privateMethod() called (should not happen)');
         this.log('Private method called (this should not happen)', 'error');
       }
 
       updateDisplay() {
-        console.log('DemoReceiver updateDisplay() called for:', this.id);
-
-        // Use the component's ID to target the correct display elements
         const suffix = this.id === 'demo-receiver-1' ? '1' : '2';
         const counterDisplay = document.getElementById(`counterDisplay${suffix}`);
         const colorDisplay = document.getElementById(`colorDisplay${suffix}`);
@@ -852,37 +865,25 @@
 
     // Initialize demo
     document.addEventListener('DOMContentLoaded', function () {
-      console.log('DOM Content Loaded - setting up components');
-
       // Create the components
       const callerContainer = document.querySelector('.caller-panel');
       const receiverContainer = document.querySelector('.receiver-panel');
-
-      console.log('Caller container found:', !!callerContainer);
-      console.log('Receiver container found:', !!receiverContainer);
 
       if (callerContainer) {
         const caller = document.createElement('demo-caller');
         caller.id = 'demo-caller-1';
         callerContainer.appendChild(caller);
-        console.log('Caller component added to DOM with ID:', caller.id);
       }
 
       if (receiverContainer) {
         const receiver1 = document.createElement('demo-receiver');
         receiver1.id = 'demo-receiver-1';
         receiverContainer.appendChild(receiver1);
-        console.log('Receiver component added to DOM with ID:', receiver1.id);
 
         const receiver2 = document.createElement('demo-receiver');
         receiver2.id = 'demo-receiver-2';
         receiverContainer.appendChild(receiver2);
-        console.log('Receiver component added to DOM with ID:', receiver2.id);
       }
-
-      // Check DOM structure
-      console.log('All demo-caller elements:', document.querySelectorAll('demo-caller'));
-      console.log('All demo-receiver elements:', document.querySelectorAll('demo-receiver'));
 
       // Update connection status
       const statusIndicator = document.getElementById('statusIndicator');
@@ -894,8 +895,27 @@
         statusText.textContent = 'Components connected and ready';
         connectionStatus.className = 'connection-status connected';
       }
+    });
 
-      console.log('Remote Call Mixin Demo initialized');
+    // Ensure all functions are available when DOM is ready
+    document.addEventListener('DOMContentLoaded', function () {
+      // Re-expose all functions to ensure they're available
+      window.callIncrement = window.callIncrement;
+      window.callDecrement = window.callDecrement;
+      window.callSetCounter = window.callSetCounter;
+      window.callChangeColor = window.callChangeColor;
+      window.callSetText = window.callSetText;
+      window.callPrivateMethod = window.callPrivateMethod;
+      window.callNonExistentMethod = window.callNonExistentMethod;
+      window.resetReceiver = window.resetReceiver;
+      window.clearReceiverLog = window.clearReceiverLog;
+      window.callIncrementBoth = window.callIncrementBoth;
+      window.callDecrementBoth = window.callDecrementBoth;
+      window.callSetCounterBoth = window.callSetCounterBoth;
+      window.callChangeColorBoth = window.callChangeColorBoth;
+      window.callSetTextBoth = window.callSetTextBoth;
+      window.callPrivateMethodBoth = window.callPrivateMethodBoth;
+      window.callNonExistentMethodBoth = window.callNonExistentMethodBoth;
     });
   </script>
 </body>

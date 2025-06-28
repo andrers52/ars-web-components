@@ -163,8 +163,9 @@
         </div>
 
         <div class="controls">
-          <button class="btn" onclick="resetCounter()">🔄 Reset Counter</button>
-          <button class="btn-secondary" onclick="logEffectDetails()">📝 Log Details</button>
+          <button class="btn" onclick="if(typeof resetCounter === 'function') resetCounter()">🔄 Reset Counter</button>
+          <button class="btn-secondary" onclick="if(typeof logEffectDetails === 'function') logEffectDetails()">📝 Log
+            Details</button>
         </div>
       </div>
 
@@ -174,12 +175,18 @@
         <p>Try different background colors to see how the effect adapts:</p>
 
         <div class="color-palette">
-          <div class="color-button" style="background: #ff6b6b;" onclick="changeColor('#ff6b6b')"></div>
-          <div class="color-button" style="background: #4ecdc4;" onclick="changeColor('#4ecdc4')"></div>
-          <div class="color-button" style="background: #45b7d1;" onclick="changeColor('#45b7d1')"></div>
-          <div class="color-button" style="background: #96ceb4;" onclick="changeColor('#96ceb4')"></div>
-          <div class="color-button" style="background: #feca57;" onclick="changeColor('#feca57')"></div>
-          <div class="color-button" style="background: #ff9ff3;" onclick="changeColor('#ff9ff3')"></div>
+          <div class="color-button" style="background: #ff6b6b;"
+            onclick="if(typeof changeColor === 'function') changeColor('#ff6b6b')"></div>
+          <div class="color-button" style="background: #4ecdc4;"
+            onclick="if(typeof changeColor === 'function') changeColor('#4ecdc4')"></div>
+          <div class="color-button" style="background: #45b7d1;"
+            onclick="if(typeof changeColor === 'function') changeColor('#45b7d1')"></div>
+          <div class="color-button" style="background: #96ceb4;"
+            onclick="if(typeof changeColor === 'function') changeColor('#96ceb4')"></div>
+          <div class="color-button" style="background: #feca57;"
+            onclick="if(typeof changeColor === 'function') changeColor('#feca57')"></div>
+          <div class="color-button" style="background: #ff9ff3;"
+            onclick="if(typeof changeColor === 'function') changeColor('#ff9ff3')"></div>
         </div>
 
         <div class="demo-item">
@@ -194,16 +201,18 @@
 
         <div class="instructions">
           <h4>How to Use the Pressed Effect Mixin:</h4>
-          <p>1. Import the mixin: <code>import PressedEffect from './mixins/pressed-effect/pressed-effect.js'</code></p>
-          <p>2. Extend your class: <code>class MyComponent extends PressedEffect(HTMLElement)</code></p>
+          <p>1. Import the mixin:
+            <code>import { PressedEffectMixin } from './mixins/pressed-effect/pressed-effect.js'</code>
+          </p>
+          <p>2. Extend your class: <code>class MyComponent extends PressedEffectMixin(HTMLElement)</code></p>
           <p>3. The effect is automatically applied in the constructor</p>
         </div>
 
         <div class="code-example">
           // Basic usage with a custom element
-          import PressedEffect from './mixins/pressed-effect/pressed-effect.js';
+          import { PressedEffectMixin } from './mixins/pressed-effect/pressed-effect.js';
 
-          class MyButton extends PressedEffect(HTMLElement) {
+          class MyButton extends PressedEffectMixin(HTMLElement) {
           constructor() {
           super();
           this.innerHTML = 'Click me!';
@@ -223,8 +232,8 @@
 
         <div class="code-example">
           // Usage with existing elements (alternative approach)
-          // Create a wrapper component that extends PressedEffect
-          class PressableDiv extends PressedEffect(HTMLElement) {
+          // Create a wrapper component that extends PressedEffectMixin
+          class PressableDiv extends PressedEffectMixin(HTMLElement) {
           constructor() {
           super();
           this.innerHTML = '&lt;div&gt;Pressable content&lt;/div&gt;';
@@ -275,7 +284,7 @@
 
   <!-- Load the mixin -->
   <script type="module">
-    import PressedEffect from '../pressed-effect.js';
+    import { PressedEffectMixin } from '../pressed-effect.js';
 
     // Apply pressed effect to demo elements
     const demoElements = document.querySelectorAll('.demo-button, .demo-card, .demo-icon');
@@ -330,7 +339,6 @@
 
       // Add event listeners for pressed effect
       let start = () => {
-        console.log('Pressed effect triggered for:', element);
         element._animate(500, 100);
         setTimeout(element._restoreButtonColor.bind(element), 500 + 1);
       };
@@ -380,6 +388,14 @@
         console.log(`Changed button color to: ${color}`);
       }
     };
+
+    // Ensure all functions are available when DOM is ready
+    document.addEventListener('DOMContentLoaded', function () {
+      // Re-expose all functions to ensure they're available
+      window.resetCounter = window.resetCounter;
+      window.logEffectDetails = window.logEffectDetails;
+      window.changeColor = window.changeColor;
+    });
   </script>
 </body>
 

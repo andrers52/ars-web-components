@@ -178,25 +178,29 @@
           <div class="dialog-type">
             <h4>📝 Input Dialog</h4>
             <p>Dialog with form input and confirmation buttons</p>
-            <button class="btn" onclick="showInputDialog()">Open Input Dialog</button>
+            <button class="btn" onclick="if(typeof showInputDialog === 'function') showInputDialog()">Open Input
+              Dialog</button>
           </div>
 
           <div class="dialog-type">
             <h4>⚠️ Confirmation Dialog</h4>
             <p>Dialog with yes/no confirmation options</p>
-            <button class="btn" onclick="showConfirmDialog()">Open Confirm Dialog</button>
+            <button class="btn" onclick="if(typeof showConfirmDialog === 'function') showConfirmDialog()">Open Confirm
+              Dialog</button>
           </div>
 
           <div class="dialog-type">
             <h4>ℹ️ Notification Dialog</h4>
             <p>Simple notification with OK button</p>
-            <button class="btn" onclick="showNotificationDialog()">Open Notification</button>
+            <button class="btn" onclick="if(typeof showNotificationDialog === 'function') showNotificationDialog()">Open
+              Notification</button>
           </div>
 
           <div class="dialog-type">
             <h4>📄 Rich Content Dialog</h4>
             <p>Dialog with complex HTML content</p>
-            <button class="btn" onclick="showRichContentDialog()">Open Rich Dialog</button>
+            <button class="btn" onclick="if(typeof showRichContentDialog === 'function') showRichContentDialog()">Open
+              Rich Dialog</button>
           </div>
 
         </div>
@@ -207,10 +211,14 @@
         <h3>⚡ Advanced Features</h3>
         <div class="dialog-demo">
           <div class="controls">
-            <button class="btn" onclick="showCustomStyledDialog()">🎨 Custom Styled</button>
-            <button class="btn" onclick="showLongContentDialog()">📜 Long Content</button>
-            <button class="btn" onclick="showFormDialog()">📋 Form Dialog</button>
-            <button class="btn-secondary" onclick="showMultipleDialogs()">🔗 Multiple Dialogs</button>
+            <button class="btn" onclick="if(typeof showCustomStyledDialog === 'function') showCustomStyledDialog()">🎨
+              Custom Styled</button>
+            <button class="btn" onclick="if(typeof showLongContentDialog === 'function') showLongContentDialog()">📜
+              Long Content</button>
+            <button class="btn" onclick="if(typeof showFormDialog === 'function') showFormDialog()">📋 Form
+              Dialog</button>
+            <button class="btn-secondary"
+              onclick="if(typeof showMultipleDialogs === 'function') showMultipleDialogs()">🔗 Multiple Dialogs</button>
           </div>
 
           <div class="dialog-result" id="dialogResult">
@@ -231,10 +239,14 @@
           </div>
 
           <div class="controls">
-            <button class="btn emerald-btn" onclick="showEmeraldDialog()">Emerald Dialog</button>
-            <button class="btn sapphire-btn" onclick="showSapphireDialog()">Sapphire Dialog</button>
-            <button class="btn onyx-btn" onclick="showOnyxDialog()">Onyx Dialog</button>
-            <button class="btn" onclick="showDefaultDialog()">🔄 Default Dialog</button>
+            <button class="btn emerald-btn"
+              onclick="if(typeof showEmeraldDialog === 'function') showEmeraldDialog()">Emerald Dialog</button>
+            <button class="btn sapphire-btn"
+              onclick="if(typeof showSapphireDialog === 'function') showSapphireDialog()">Sapphire Dialog</button>
+            <button class="btn onyx-btn" onclick="if(typeof showOnyxDialog === 'function') showOnyxDialog()">Onyx
+              Dialog</button>
+            <button class="btn" onclick="if(typeof showDefaultDialog === 'function') showDefaultDialog()">🔄 Default
+              Dialog</button>
           </div>
 
           <div class="localization-demo">
@@ -253,8 +265,9 @@
           <h4>Event Log:</h4>
           <div class="event-log" id="eventLog">Ready to capture dialog events...\n</div>
           <div class="controls">
-            <button class="btn-secondary" onclick="clearLog()">🗑️ Clear Log</button>
-            <button class="btn-secondary" onclick="exportLog()">📄 Export Log</button>
+            <button class="btn-secondary" onclick="if(typeof clearLog === 'function') clearLog()">🗑️ Clear Log</button>
+            <button class="btn-secondary" onclick="if(typeof exportLog === 'function') exportLog()">📄 Export
+              Log</button>
           </div>
         </div>
       </div>
@@ -317,6 +330,19 @@
         resultText.style.color = '#f44336';
       }
     }
+
+    // Make all functions available globally
+    window.ArsDialog = ArsDialog;
+    window.logEvent = logEvent;
+    window.updateResult = updateResult;
+
+    // Ensure all functions are available when DOM is ready
+    document.addEventListener('DOMContentLoaded', function () {
+      // Re-expose all functions to ensure they're available
+      window.ArsDialog = ArsDialog;
+      window.logEvent = logEvent;
+      window.updateResult = updateResult;
+    });
 
     // Themed dialog functions
     window.showEmeraldDialog = async function () {
@@ -764,7 +790,7 @@
       logEvent('ARS Dialog test page loaded');
     });
 
-    // Add priority range slider handler for rich content dialog
+    // Add priority range ider handler for rich content dialog
     document.addEventListener('input', function (e) {
       if (e.target.id === 'priority') {
         const label = document.getElementById('priorityLabel');
