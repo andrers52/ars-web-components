@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.4] - 2024-12-19
+
+### Fixed
+
+- **Missing Component Exports**: Added `ArsPage` and `ArsPageController` exports to the main index.js file, making them available for import in applications using the library.
+- **Router Integration**: Fixed issue where ars-page and ars-page-controller components were not accessible when imported from the main library entry point.
+
+### Added
+
+- **Component Exports**: `ArsPage` and `ArsPageController` are now properly exported from the main library index.js file.
+- **Enhanced Router Support**: Better integration support for applications using the ars-page components for client-side routing.
+
 ## [0.3.3] - 2024-07-01
 
 ### Changed

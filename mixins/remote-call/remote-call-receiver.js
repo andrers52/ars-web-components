@@ -32,13 +32,18 @@ const RemoteCallReceiverMixin = (BaseClass) => {
     }
 
     #handleRemoteCall(event) {
+      console.log("[RemoteCallReceiver] Received event:", event.detail);
       if (event.detail && event.detail.callId) {
+        console.log("[RemoteCallReceiver] Processing call with ID:", event.detail.callId);
         const response = this.processRemoteCall(event.detail);
         const responseEvent = this.#createResponseEvent(
           event.detail.callId,
           response,
         );
+        console.log("[RemoteCallReceiver] Dispatching response:", responseEvent.detail);
         document.dispatchEvent(responseEvent);
+      } else {
+        console.warn("[RemoteCallReceiver] Event missing callId:", event.detail);
       }
     }
 

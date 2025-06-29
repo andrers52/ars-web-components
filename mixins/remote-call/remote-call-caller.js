@@ -60,14 +60,18 @@ const RemoteCallCallerMixin = (BaseClass) =>
       const callId = this.#generateCallId();
       const timeout = this.#validateTimeout(timeoutMs) ? timeoutMs : 5000;
 
+      console.log("[RemoteCallCaller] Making remote call:", { callId, data, targetId });
+
       return new Promise((resolve, reject) => {
         const timeoutId = setTimeout(() => {
           this._pendingCalls.delete(callId);
+          console.error("[RemoteCallCaller] Call timed out:", callId);
           reject(new Error(`Remote call timeout after ${timeout}ms`));
         }, timeout);
 
         this._pendingCalls.set(callId, (result) => {
           clearTimeout(timeoutId);
+          console.log("[RemoteCallCaller] Call resolved:", callId, result);
           resolve(result);
         });
 
@@ -80,15 +84,20 @@ const RemoteCallCallerMixin = (BaseClass) =>
           composed: true,
         });
 
+        console.log("[RemoteCallCaller] Dispatching event:", event.detail);
+
         // Dispatch to the target element if provided, else document
         if (targetId) {
           const target = document.getElementById(targetId);
           if (target) {
+            console.log("[RemoteCallCaller] Dispatching to target:", targetId);
             target.dispatchEvent(event);
           } else {
+            console.warn("[RemoteCallCaller] Target not found, dispatching to document:", targetId);
             document.dispatchEvent(event);
           }
         } else {
+          console.log("[RemoteCallCaller] Dispatching to document");
           document.dispatchEvent(event);
         }
       });
@@ -158,10 +167,14 @@ const RemoteCallCallerMixin = (BaseClass) =>
     }
 
     _onRemoteCallResponse(event) {
+      console.log("[RemoteCallCaller] Received response:", event.detail);
       const { callId, result } = event.detail;
       if (this._pendingCalls.has(callId)) {
+        console.log("[RemoteCallCaller] Processing response for callId:", callId);
         this._pendingCalls.get(callId)(result);
         this._pendingCalls.delete(callId);
+      } else {
+        console.warn("[RemoteCallCaller] No pending call found for callId:", callId);
       }
     }
   };
