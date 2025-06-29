@@ -268,6 +268,48 @@ Color picker component with improved UI and UX.
 
 - `ars-color-select:change`: Fired when a color is selected or changed.
 
+### ArsPage & ArsPageController
+
+Component-based router and navigation controls for web applications, using the new remote-call API for inter-component communication.
+
+#### ArsPage
+
+```html
+<ars-page id="my-router" default-page="home">
+  <div id="home">Home page content</div>
+  <div id="about">About page content</div>
+  <div id="contact">Contact page content</div>
+</ars-page>
+```
+
+**Attributes:**
+
+- `default-page`: The page to show initially
+- `remote-call-id`: (optional) For remote-call targeting
+
+#### ArsPageController
+
+```html
+<ars-page-controller
+  target-page="my-router"
+  navigation-type="buttons"
+></ars-page-controller>
+```
+
+**Attributes:**
+
+- `target-page`: The ID of the `ars-page` component to control
+- `navigation-type`: `buttons`, `tabs`, or `dropdown` (default: `buttons`)
+- `show-current`: Whether to highlight the current page (default: `true`)
+
+**Features:**
+
+- Component-based routing
+- Multiple navigation types (buttons, tabs, dropdown)
+- Remote method calling (uses the new remote-call API)
+- Event-driven architecture
+- Easy to integrate
+
 ## Mixins
 
 ARS Web Components includes a collection of reusable mixins that can be applied to any web component to add specific functionality.

@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] - 2024-07-01
+
+### Changed
+
+- **Remote Call API Modernization**: All remote call events now use `remote-call-result` with a `result` property for responses, replacing the old `remote-call-response`/`data` pattern.
+- **Auto-generated callId**: Each remote call now uses a unique, auto-generated callId, preventing collisions and supporting concurrent calls.
+- **Robust Navigation**: Navigation components now update reliably after page changes, with improved event bubbling and promise resolution.
+- **Event Handling**: All event dispatching and listening is now consistent and robust across shadow DOM and document scopes.
+
+### Fixed
+
+- **Timeouts and UI Sync**: Fixed remote call timeouts and UI sync issues by ensuring correct event propagation and callId usage.
+
+## [0.3.2] - 2024-07-01
+
+### Added
+
+- **Modern Color Palette UI**: Color blocks are now displayed in a responsive grid with borders, shadows, and animated hover effects.
+- **Dismiss on Overlay Click**: The color palette overlay can be dismissed by clicking outside the color blocks.
+- **Event-driven Integration**: Demo and documentation now show how to update UI text in response to color changes using the `ars-color-select:change` event.
+
+### Changed
+
+- **Improved Accessibility and Usability**: Larger, touch-friendly color blocks with reduced spacing and better alignment.
+- **Demo Page**: Updated to show best practices for integrating the color picker and updating UI on color change.
+
+## [0.3.1] - 2024-06-27
+
+### Added
+
+- Minimal, intent-revealing demo for Show If Property True Mixin: each property toggle controls a single bar/button.
+- `keep-space-when-hidden` attribute: allows elements to remain in the layout (using `visibility: hidden`) when hidden.
+- Improved documentation and usage examples for the mixin.
+
+### Changed
+
+- Demo refactored for clarity and simplicity.
+
 ## [0.3.0] - 2025-01-27
 
 ### Added
@@ -188,28 +226,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multiple mixins: Localized, PressedEffect, RemoteCallCaller, etc.
 - Basic ES module support
 - Initial test pages for all components
-
-## [0.3.1] - 2024-06-27
-
-### Added
-
-- Minimal, intent-revealing demo for Show If Property True Mixin: each property toggle controls a single bar/button.
-- `keep-space-when-hidden` attribute: allows elements to remain in the layout (using `visibility: hidden`) when hidden.
-- Improved documentation and usage examples for the mixin.
-
-### Changed
-
-- Demo refactored for clarity and simplicity.
-
-## [0.3.2] - 2024-07-01
-
-### Added
-
-- **Modern Color Palette UI**: Color blocks are now displayed in a responsive grid with borders, shadows, and animated hover effects.
-- **Dismiss on Overlay Click**: The color palette overlay can be dismissed by clicking outside the color blocks.
-- **Event-driven Integration**: Demo and documentation now show how to update UI text in response to color changes using the `ars-color-select:change` event.
-
-### Changed
-
-- **Improved Accessibility and Usability**: Larger, touch-friendly color blocks with reduced spacing and better alignment.
-- **Demo Page**: Updated to show best practices for integrating the color picker and updating UI on color change.

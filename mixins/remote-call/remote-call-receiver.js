@@ -19,11 +19,11 @@ const RemoteCallReceiverMixin = (BaseClass) => {
       return typeof callId === "string" && callId.trim().length > 0;
     }
 
-    #createResponseEvent(callId, data = {}) {
-      return new CustomEvent("remote-call-response", {
+    #createResponseEvent(callId, result = {}) {
+      return new CustomEvent("remote-call-result", {
         detail: {
           callId,
-          data,
+          result,
           timestamp: Date.now(),
         },
         bubbles: true,
@@ -32,10 +32,10 @@ const RemoteCallReceiverMixin = (BaseClass) => {
     }
 
     #handleRemoteCall(event) {
-      if (event.detail && event.detail.callId === this._remoteCallId) {
-        const response = this.processRemoteCall(event.detail.data);
+      if (event.detail && event.detail.callId) {
+        const response = this.processRemoteCall(event.detail);
         const responseEvent = this.#createResponseEvent(
-          this._remoteCallId,
+          event.detail.callId,
           response,
         );
         document.dispatchEvent(responseEvent);

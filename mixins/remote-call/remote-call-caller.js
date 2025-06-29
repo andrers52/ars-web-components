@@ -1,12 +1,14 @@
 // Remote Call Caller Mixin
 // Provides functionality to make remote calls to other components
 
-const RemoteCallCallerMixin = (BaseClass) => {
-  return class extends BaseClass {
+const RemoteCallCallerMixin = (BaseClass) =>
+  class extends BaseClass {
     constructor() {
       super();
       this._remoteCallId = null;
       this._remoteCallTimeout = null;
+      this._pendingCalls = new Map();
+      this._responseHandler = this._onRemoteCallResponse.bind(this);
     }
 
     // Public static methods
@@ -54,30 +56,41 @@ const RemoteCallCallerMixin = (BaseClass) => {
     #responseHandler = null;
 
     // Public instance methods
-    async makeRemoteCall(data = {}, timeoutMs = 5000) {
+    async makeRemoteCall(data = {}, timeoutMs = 5000, targetId = null) {
       const callId = this.#generateCallId();
       const timeout = this.#validateTimeout(timeoutMs) ? timeoutMs : 5000;
 
       return new Promise((resolve, reject) => {
         const timeoutId = setTimeout(() => {
-          document.removeEventListener(
-            "remote-call-response",
-            this.#responseHandler,
-          );
+          this._pendingCalls.delete(callId);
           reject(new Error(`Remote call timeout after ${timeout}ms`));
         }, timeout);
 
-        this.#responseHandler = (event) => {
-          this.#handleCallResponse(event, callId, resolve, reject, timeoutId);
-        };
+        this._pendingCalls.set(callId, (result) => {
+          clearTimeout(timeoutId);
+          resolve(result);
+        });
 
-        document.addEventListener(
-          "remote-call-response",
-          this.#responseHandler,
-        );
+        const event = new CustomEvent("remote-call", {
+          detail: {
+            callId,
+            ...data,
+          },
+          bubbles: true,
+          composed: true,
+        });
 
-        const event = this.#createCustomEvent(callId, data);
-        document.dispatchEvent(event);
+        // Dispatch to the target element if provided, else document
+        if (targetId) {
+          const target = document.getElementById(targetId);
+          if (target) {
+            target.dispatchEvent(event);
+          } else {
+            document.dispatchEvent(event);
+          }
+        } else {
+          document.dispatchEvent(event);
+        }
       });
     }
 
@@ -106,9 +119,8 @@ const RemoteCallCallerMixin = (BaseClass) => {
 
     // Lifecycle methods
     connectedCallback() {
-      if (super.connectedCallback) {
-        super.connectedCallback();
-      }
+      document.addEventListener("remote-call-result", this._responseHandler);
+      if (super.connectedCallback) super.connectedCallback();
 
       const callId = this.getAttribute("remote-call-id");
       if (this.#validateCallId(callId)) {
@@ -122,9 +134,8 @@ const RemoteCallCallerMixin = (BaseClass) => {
     }
 
     disconnectedCallback() {
-      if (super.disconnectedCallback) {
-        super.disconnectedCallback();
-      }
+      document.removeEventListener("remote-call-result", this._responseHandler);
+      if (super.disconnectedCallback) super.disconnectedCallback();
 
       if (this._remoteCallTimeout) {
         clearTimeout(this._remoteCallTimeout);
@@ -145,8 +156,15 @@ const RemoteCallCallerMixin = (BaseClass) => {
         this._remoteCallTimeout = parseInt(newValue);
       }
     }
+
+    _onRemoteCallResponse(event) {
+      const { callId, result } = event.detail;
+      if (this._pendingCalls.has(callId)) {
+        this._pendingCalls.get(callId)(result);
+        this._pendingCalls.delete(callId);
+      }
+    }
   };
-};
 
 // Export for use in other modules
 if (typeof module !== "undefined" && module.exports) {
