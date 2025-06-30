@@ -1,89 +1,21 @@
 // Remote Call Receiver Mixin
 // Provides functionality to receive and handle remote calls from other components
 
+import { Assert } from 'arslib';
+
 const RemoteCallReceiverMixin = (BaseClass) => {
   return class extends BaseClass {
     constructor() {
       super();
-      this._remoteCallId = null;
-      this._isListening = false;
-    }
-
-    // Public static methods
-    static get observedAttributes() {
-      return ["remote-call-id"];
-    }
-
-    // Private utility functions
-    #validateCallId(callId) {
-      return typeof callId === "string" && callId.trim().length > 0;
-    }
-
-    #createResponseEvent(callId, result = {}) {
-      return new CustomEvent("remote-call-result", {
-        detail: {
-          callId,
-          result,
-          timestamp: Date.now(),
-        },
-        bubbles: true,
-        composed: true,
-      });
-    }
-
-    #handleRemoteCall(event) {
-      console.log("[RemoteCallReceiver] Received event:", event.detail);
-      if (event.detail && event.detail.callId) {
-        console.log("[RemoteCallReceiver] Processing call with ID:", event.detail.callId);
-        const response = this.processRemoteCall(event.detail);
-        const responseEvent = this.#createResponseEvent(
-          event.detail.callId,
-          response,
-        );
-        console.log("[RemoteCallReceiver] Dispatching response:", responseEvent.detail);
-        document.dispatchEvent(responseEvent);
-      } else {
-        console.warn("[RemoteCallReceiver] Event missing callId:", event.detail);
-      }
-    }
-
-    #startListening() {
-      if (!this._isListening) {
-        document.addEventListener(
-          "remote-call",
-          this.#handleRemoteCall.bind(this),
-        );
-        this._isListening = true;
-      }
-    }
-
-    #stopListening() {
-      if (this._isListening) {
-        document.removeEventListener(
-          "remote-call",
-          this.#handleRemoteCall.bind(this),
-        );
-        this._isListening = false;
-      }
-    }
-
-    // Public instance methods - override this in your component
-    processRemoteCall(data) {
-      // Default implementation - override in your component
-      console.log("Remote call received:", data);
-      return { success: true, message: "Call processed" };
+      // Ensure the component has an ID for remote calling
+      Assert.assertIsString(this.id, "RemoteCallReceiver components must have an ID attribute");
+      Assert.assertIsNotEmptyArray([this.id], "RemoteCallReceiver component ID cannot be empty");
     }
 
     // Lifecycle methods
     connectedCallback() {
       if (super.connectedCallback) {
         super.connectedCallback();
-      }
-
-      const callId = this.getAttribute("remote-call-id");
-      if (this.#validateCallId(callId)) {
-        this._remoteCallId = callId;
-        this.#startListening();
       }
 
       // Set up event listener for method calls using component ID
@@ -123,29 +55,10 @@ const RemoteCallReceiverMixin = (BaseClass) => {
         super.disconnectedCallback();
       }
 
-      this.#stopListening();
-
       // Clean up method call event listener
       if (this.id && this._methodCallHandler) {
         document.removeEventListener(this.id, this._methodCallHandler);
         this._methodCallHandler = null;
-      }
-    }
-
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (super.attributeChangedCallback) {
-        super.attributeChangedCallback(name, oldValue, newValue);
-      }
-
-      if (name === "remote-call-id") {
-        this.#stopListening();
-
-        if (this.#validateCallId(newValue)) {
-          this._remoteCallId = newValue;
-          this.#startListening();
-        } else {
-          this._remoteCallId = null;
-        }
       }
     }
   };

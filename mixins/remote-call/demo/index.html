@@ -310,7 +310,7 @@
         <p>This mixin enables components to call methods on other components remotely using custom events. It consists
           of two parts: <strong>RemoteCallCaller</strong> for sending method calls and
           <strong>RemoteCallReceiver</strong> for receiving and executing them. Perfect for decoupled component
-          communication.
+          communication using component IDs.
         </p>
       </div>
 
@@ -488,8 +488,11 @@
           </p>
           <p>2. Extend your caller class: <code>class MyCaller extends RemoteCallCaller(HTMLElement)</code></p>
           <p>3. Extend your receiver class: <code>class MyReceiver extends RemoteCallReceiver(HTMLElement)</code></p>
-          <p>4. Call remote methods: <code>this._callRemote('receiver-component', 'methodName', arg1, arg2)</code></p>
-          <p>5. Remember to call <code>super.connectedCallback()</code> and <code>super.disconnectedCallback()</code> in
+          <p>4. Give your receiver component an ID:
+            <code>&lt;my-receiver id="my-receiver"&gt;&lt;/my-receiver&gt;</code>
+          </p>
+          <p>5. Call remote methods: <code>this._callRemote('my-receiver', 'methodName', arg1, arg2)</code></p>
+          <p>6. Remember to call <code>super.connectedCallback()</code> and <code>super.disconnectedCallback()</code> in
             receiver components</p>
         </div>
 
@@ -535,6 +538,9 @@
           }
 
           customElements.define('my-receiver', MyReceiver);
+
+          // Usage in HTML:
+          // &lt;my-receiver id="my-receiver"&gt;&lt;/my-receiver&gt;
         </div>
       </div>
 
@@ -545,11 +551,12 @@
           <h4>What the Remote Call Mixin Provides:</h4>
           <ul>
             <li><strong>Decoupled Communication:</strong> Components can communicate without direct references</li>
-            <li><strong>Method Calling:</strong> Call any public method on any component by name</li>
+            <li><strong>Method Calling:</strong> Call any public method on any component by ID</li>
             <li><strong>Argument Passing:</strong> Pass multiple arguments to remote methods</li>
             <li><strong>Security:</strong> Private methods (starting with _) are automatically blocked</li>
             <li><strong>Error Handling:</strong> Graceful error handling for non-existent methods</li>
             <li><strong>Event-Based:</strong> Uses custom events for reliable communication</li>
+            <li><strong>Simple Setup:</strong> Just extend the mixin and give your receiver an ID</li>
             <li><strong>Lifecycle Management:</strong> Proper cleanup in disconnectedCallback</li>
           </ul>
         </div>

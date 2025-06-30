@@ -368,7 +368,7 @@ class LocalizedComponent extends LocalizedMixin(HTMLElement) {
 
 ### RemoteCall Mixin
 
-Enables inter-component communication through method calls and event dispatching.
+Enables inter-component communication through method calls and event dispatching **using only component IDs**. The `remote-call-id` attribute is no longer required or supported.
 
 ```javascript
 import {
@@ -376,26 +376,28 @@ import {
   RemoteCallReceiverMixin,
 } from "ars-web-components";
 
-// Receiver component
+// Receiver component (must have an id!)
 class MyReceiver extends RemoteCallReceiverMixin(HTMLElement) {
   constructor() {
     super();
-    this.exposeMethod("greet", (name) => `Hello ${name}!`);
+    this.id = "my-receiver"; // REQUIRED
+    this.exposeMethod("greet", (name) => `Hello ${name}!");
   }
 }
 
 // Caller component
 class MyCaller extends RemoteCallCallerMixin(HTMLElement) {
-  async callRemote() {
-    const result = await this.callRemote("receiver-id", "greet", "World");
-    console.log(result); // "Hello World!"
+  callRemoteGreet() {
+    this._callRemote("my-receiver", "greet", "World");
   }
 }
 ```
 
+**Important:** Components using these mixins must have a unique `id` attribute.
+
 **Features:**
 
-- Component ID-based targeting
+- Component ID-based targeting (no more remote-call-id)
 - Method call with parameters
 - Error handling and validation
 - Real-time logging

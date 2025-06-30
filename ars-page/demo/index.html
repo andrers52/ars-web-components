@@ -6,6 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ARS Page Router - Demo</title>
 
+  <!-- Import Map for module resolution -->
+  <script type="importmap">
+    {
+      "imports": {
+        "arslib": "../../node_modules/arslib/index.js"
+      }
+    }
+  </script>
+
   <!-- Common CSS -->
   <link rel="stylesheet" href="../../css/base.css">
   <link rel="stylesheet" href="../../css/components.css">
@@ -14,10 +23,11 @@
   <style>
     /* Component-specific styles */
     .demo-container {
-      display: grid;
-      grid-template-columns: 1fr 2fr;
-      gap: 30px;
-      margin: 20px 0;
+      /* Remove grid, make content full width */
+      width: 100%;
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 10px;
     }
 
     .controls-panel {
@@ -88,18 +98,6 @@
       color: #555;
       line-height: 1.6;
       margin-bottom: 15px;
-    }
-
-    .page-content-indicator {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #667eea;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      font-weight: bold;
     }
 
     .control-section {
@@ -231,6 +229,42 @@
       margin: 0;
     }
 
+    /* Navigation bar styles */
+    .custom-nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: flex-start;
+    }
+
+    .nav-btn {
+      padding: 8px 18px;
+      border: 1px solid #667eea;
+      border-radius: 6px;
+      background: #f5f7ff;
+      color: #333;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, border 0.2s;
+    }
+
+    .nav-btn:hover,
+    .nav-btn:focus {
+      background: #e0e7ff;
+      /* lighter blue for hover */
+      color: #333;
+      border-color: #667eea;
+      outline: none;
+    }
+
+    .nav-btn.active {
+      background: #3b5bdb;
+      /* deeper blue for active */
+      color: #fff;
+      border-color: #3b5bdb;
+    }
+
   </style>
 </head>
 
@@ -246,8 +280,10 @@
 
       <div class="info-box">
         <h4>About ARS Page Router</h4>
-        <p>This component provides routing functionality for web applications using the remote-call mixin for
-          inter-component communication. It consists of two parts: <strong>ars-page</strong> for content routing and
+        <p>
+          This component provides routing functionality for web applications using the remote-call mixin for
+          inter-component communication. It consists of two parts:
+          <strong>ars-page</strong> for content routing and
           <strong>ars-page-controller</strong> for navigation controls.
         </p>
       </div>
@@ -262,73 +298,20 @@
 
       <!-- Main Demo -->
       <div class="demo-container">
-        <!-- Controls Panel -->
-        <div class="controls-panel">
-          <div class="panel-header">
-            <h3>🎮 Navigation Controls</h3>
-          </div>
-
-          <!-- Navigation Type Selection -->
-          <div class="control-section">
-            <h4>📋 Navigation Type</h4>
-            <div class="control-buttons">
-              <button class="btn btn-small" onclick="setNavigationType('buttons')">Buttons</button>
-              <button class="btn btn-small" onclick="setNavigationType('tabs')">Tabs</button>
-              <button class="btn btn-small" onclick="setNavigationType('dropdown')">Dropdown</button>
-            </div>
-          </div>
-
-          <!-- Direct Navigation -->
-          <div class="control-section">
-            <h4>🎯 Direct Navigation</h4>
-            <div class="control-buttons">
-              <button class="btn btn-small" onclick="navigateToPage('home')">🏠 Home</button>
-              <button class="btn btn-small" onclick="navigateToPage('about')">ℹ️ About</button>
-              <button class="btn btn-small" onclick="navigateToPage('services')">🔧 Services</button>
-              <button class="btn btn-small" onclick="navigateToPage('contact')">📞 Contact</button>
-            </div>
-          </div>
-
-          <!-- Page Management -->
-          <div class="control-section">
-            <h4>⚙️ Page Management</h4>
-            <div class="control-buttons">
-              <button class="btn btn-small" onclick="showAllPages()">👁️ Show All</button>
-              <button class="btn btn-small" onclick="hideAllPages()">🙈 Hide All</button>
-              <button class="btn btn-small" onclick="refreshPageInfo()">🔄 Refresh Info</button>
-            </div>
-          </div>
-
-          <!-- Individual Page Controls -->
-          <div class="control-section">
-            <h4>🎛️ Individual Page Controls</h4>
-            <div class="control-buttons">
-              <button class="btn-secondary btn-small" onclick="hidePage('home')">Hide Home</button>
-              <button class="btn-secondary btn-small" onclick="hidePage('about')">Hide About</button>
-              <button class="btn-secondary btn-small" onclick="hidePage('services')">Hide Services</button>
-              <button class="btn-secondary btn-small" onclick="hidePage('contact')">Hide Contact</button>
-            </div>
-          </div>
-
-          <!-- Event Log -->
-          <div class="log-container" id="eventLog">
-            <div class="log-entry info">ARS Page Router demo initialized</div>
-          </div>
-        </div>
-
-        <!-- Page Content -->
+        <!-- Page Content (full width now) -->
         <div class="page-content">
-          <div class="page-content-indicator" id="pageIndicator">Loading...</div>
-
-          <!-- Navigation Components -->
-          <div class="navigation-demo">
-            <h4>🧭 Navigation Components</h4>
-            <ars-page-controller id="demo-controller" target-page="demo-router" remote-call-id="demo-router"
-              navigation-type="buttons"></ars-page-controller>
-          </div>
+          <!-- Navigation Bar (inside ars-page-controller) -->
+          <ars-page-controller id="demo-controller" target-page="demo-router">
+            <nav class="custom-nav">
+              <button class="nav-btn" data-page="home">🏠 Home</button>
+              <button class="nav-btn" data-page="about">ℹ️ About</button>
+              <button class="nav-btn" data-page="services">🔧 Services</button>
+              <button class="nav-btn" data-page="contact">📞 Contact</button>
+            </nav>
+          </ars-page-controller>
 
           <!-- Page Router -->
-          <ars-page id="demo-router" remote-call-id="demo-router" default-page="home">
+          <ars-page id="demo-router" default-page="home">
             <div id="home" class="page">
               <h2>🏠 Home Page</h2>
               <p>Welcome to the ARS Page Router demo! This is the home page content.</p>
@@ -405,13 +388,24 @@
 
         <div class="instructions">
           <h4>How to Use ARS Page Router:</h4>
+          <p>
+            <strong>Usage:</strong> Wrap your custom navigation HTML (e.g., <code>&lt;nav&gt;</code> with
+            <code>&lt;button data-page="home"&gt;</code>) inside <code>&lt;ars-page-controller&gt;</code>. The
+            controller will listen for clicks on any child with a <code>data-page</code> attribute and trigger
+            navigation accordingly.
+          </p>
+          <p>
+            <strong>Convention:</strong> Use <code>data-page="pageId"</code> on navigation elements to indicate the
+            target page. The controller will automatically add the <code>active</code> class to the button for the
+            current page.
+          </p>
           <p>1. Import the components: <code>import './ars-page.js'</code> and
             <code>import './ars-page-controller.js'</code>
           </p>
           <p>2. Create your page router: <code>&lt;ars-page id="my-router" default-page="home"&gt;</code></p>
           <p>3. Add page content as direct children with IDs</p>
           <p>4. Create a controller:
-            <code>&lt;ars-page-controller target-page="my-router" navigation-type="buttons"&gt;</code>
+            <code>&lt;ars-page-controller target-page="my-router"&gt;...&lt;/ars-page-controller&gt;</code>
           </p>
           <p>5. The components will automatically communicate via the remote-call mixin</p>
         </div>
@@ -488,15 +482,16 @@
     const currentPageDisplay = document.getElementById('currentPageDisplay');
     const availablePagesDisplay = document.getElementById('availablePagesDisplay');
     const totalPagesDisplay = document.getElementById('totalPagesDisplay');
-    const pageIndicator = document.getElementById('pageIndicator');
 
     // Logging function
     function log(message, type = 'info') {
       const entry = document.createElement('div');
       entry.className = `log-entry ${type}`;
       entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-      eventLog.appendChild(entry);
-      eventLog.scrollTop = eventLog.scrollHeight;
+      if (eventLog) {
+        eventLog.appendChild(entry);
+        eventLog.scrollTop = eventLog.scrollHeight;
+      }
     }
 
     // Update status display
@@ -505,14 +500,14 @@
       const controller = document.getElementById('demo-controller');
 
       if (router && controller) {
-        controller.getCurrentPage().then(info => {
-          if (info) {
-            currentPageDisplay.textContent = info.currentPage || 'None';
-            availablePagesDisplay.textContent = info.availablePages.join(', ');
-            totalPagesDisplay.textContent = info.availablePages.length;
-            pageIndicator.textContent = info.currentPage || 'None';
-          }
-        });
+        const currentPage = controller.getCurrentPage();
+        const pageInfo = router.getPageInfo();
+
+        if (pageInfo) {
+          currentPageDisplay.textContent = currentPage || 'None';
+          availablePagesDisplay.textContent = pageInfo.availablePages.join(', ');
+          totalPagesDisplay.textContent = pageInfo.availablePages.length;
+        }
       }
     }
 
@@ -528,56 +523,52 @@
     window.navigateToPage = function (pageId) {
       const controller = document.getElementById('demo-controller');
       if (controller) {
-        controller.navigateToPage(pageId).then(success => {
-          if (success) {
-            log(`Navigated to page: ${pageId}`, 'success');
-            updateStatus();
-          } else {
-            log(`Failed to navigate to page: ${pageId}`, 'error');
-          }
-        });
+        const success = controller.navigateToPage(pageId);
+        if (success) {
+          log(`Navigated to page: ${pageId}`, 'success');
+          updateStatus();
+        } else {
+          log(`Failed to navigate to page: ${pageId}`, 'error');
+        }
       }
     };
 
     window.hidePage = function (pageId) {
-      const controller = document.getElementById('demo-controller');
-      if (controller) {
-        controller.hidePage(pageId).then(success => {
-          if (success) {
-            log(`Hidden page: ${pageId}`, 'success');
-            updateStatus();
-          } else {
-            log(`Failed to hide page: ${pageId}`, 'error');
-          }
-        });
+      const router = document.getElementById('demo-router');
+      if (router) {
+        const result = router.hidePage(pageId);
+        if (result && result.success) {
+          log(`Hidden page: ${pageId}`, 'success');
+          updateStatus();
+        } else {
+          log(`Failed to hide page: ${pageId}`, 'error');
+        }
       }
     };
 
     window.showAllPages = function () {
-      const controller = document.getElementById('demo-controller');
-      if (controller) {
-        controller.showAllPages().then(success => {
-          if (success) {
-            log('Showed all pages', 'success');
-            updateStatus();
-          } else {
-            log('Failed to show all pages', 'error');
-          }
-        });
+      const router = document.getElementById('demo-router');
+      if (router) {
+        const result = router.showAllPages();
+        if (result && result.success) {
+          log('Showed all pages', 'success');
+          updateStatus();
+        } else {
+          log('Failed to show all pages', 'error');
+        }
       }
     };
 
     window.hideAllPages = function () {
-      const controller = document.getElementById('demo-controller');
-      if (controller) {
-        controller.hideAllPages().then(success => {
-          if (success) {
-            log('Hidden all pages', 'success');
-            updateStatus();
-          } else {
-            log('Failed to hide all pages', 'error');
-          }
-        });
+      const router = document.getElementById('demo-router');
+      if (router) {
+        const result = router.hideAllPages();
+        if (result && result.success) {
+          log('Hidden all pages', 'success');
+          updateStatus();
+        } else {
+          log('Failed to hide all pages', 'error');
+        }
       }
     };
 
@@ -592,16 +583,18 @@
       const controller = document.getElementById('demo-controller');
 
       // Listen for page changes
-      router.addEventListener('ars-page:page-changed', function (event) {
-        log(`Page changed from '${event.detail.previousPage}' to '${event.detail.currentPage}'`, 'info');
-        updateStatus();
-      });
-
-      // Listen for navigation events
-      controller.addEventListener('ars-page-controller:navigated', function (event) {
-        log(`Controller navigated to: ${event.detail.pageId}`, 'info');
-        updateStatus();
-      });
+      if (router) {
+        router.addEventListener('ars-page:page-changed', function (event) {
+          log(`Page changed from '${event.detail.previousPage}' to '${event.detail.currentPage}'`, 'info');
+          updateStatus();
+        });
+      }
+      if (controller) {
+        controller.addEventListener('ars-page-controller:navigated', function (event) {
+          log(`Controller navigated to: ${event.detail.pageId}`, 'info');
+          updateStatus();
+        });
+      }
 
       // Initial status update
       setTimeout(updateStatus, 100);

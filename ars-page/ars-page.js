@@ -14,6 +14,7 @@
 // - showAllPages(): Shows all pages
 // - hideAllPages(): Hides all pages
 // - getCurrentPage(): Returns the ID of the currently visible page
+// - getPageInfo(): Returns information about the current page and available pages
 
 import { RemoteCallReceiverMixin } from "../mixins/remote-call/remote-call-receiver.js";
 
@@ -123,51 +124,7 @@ class ArsPage extends RemoteCallReceiverMixin(HTMLElement) {
     return true;
   }
 
-  // Remote call methods (called by ars-page-controller)
-  processRemoteCall(eventOrData) {
-    const data =
-      eventOrData && eventOrData.detail ? eventOrData.detail : eventOrData;
-    if (!data) {
-      console.warn(
-        "[ars-page] processRemoteCall called with no data!",
-        eventOrData,
-      );
-      return { success: false, error: "No data provided to processRemoteCall" };
-    }
-    console.log("[ars-page] processRemoteCall", data);
-
-    let result = { success: false, error: "Invalid remote call data" };
-    if (data && data.method) {
-      const methodName = data.method;
-      const args = data.args || [];
-      if (typeof this[methodName] === "function") {
-        try {
-          result = this[methodName](...args);
-        } catch (error) {
-          console.error(`Error calling method ${methodName}:`, error);
-          result = { success: false, error: error.message };
-        }
-      } else {
-        console.error(
-          `Method ${methodName} does not exist on ars-page component`,
-        );
-        result = { success: false, error: `Method ${methodName} not found` };
-      }
-    }
-
-    // Always respond with the callId if present
-    if (data.callId) {
-      document.dispatchEvent(
-        new CustomEvent("remote-call-result", {
-          detail: { callId: data.callId, result },
-          bubbles: true,
-          composed: true,
-        }),
-      );
-    }
-    return result;
-  }
-
+  // Public methods (called by ars-page-controller via _callRemote)
   showPage(pageId) {
     const success = this._showPage(pageId);
     return { success, pageId, currentPage: this._currentPage };

@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.5] - 2024-07-02
+
+### Changed
+
+- **Remote Call System**: Now uses only component IDs for all remote method calls. The `remote-call-id` attribute is no longer required or supported.
+- **Mixins Simplified**: `RemoteCallCallerMixin` and `RemoteCallReceiverMixin` have been refactored to remove all `remote-call-id` and timeout logic. Communication is now strictly ID-based.
+- **API Consistency**: All related demos and documentation updated to use the new ID-based API for remote calls.
+
+### Added
+
+- **Assertions**: Components using remote call mixins now assert that they have a valid `id` attribute at runtime, improving reliability and developer feedback.
+
+### Removed
+
+- **Legacy Code**: All code and documentation related to `remote-call-id`, promise-based remote calls, and unnecessary lifecycle/attribute handling have been removed for clarity and simplicity.
+
 ## [0.3.4] - 2024-12-19
 
 ### Fixed
