@@ -294,12 +294,55 @@
           </p>
         </div>
       </div>
+
+      <!-- Attribute-based Localization Demo (ars-calendar) -->
+      <div class="demo-section">
+        <h3>📅 Attribute-based Localization (ars-calendar)</h3>
+        <p>
+          <strong>Demo:</strong> The calendar below is localized using <code>&lt;localized-mixin&gt;</code> and the <code>data-localize-map</code> convention.<br>
+          Use the language selector below to see the calendar update its day and month names!
+        </p>
+
+        <!-- Language Selector for Calendar Demo -->
+        <div class="localization-demo">
+          <h4>Language Selector:</h4>
+          <div class="controls">
+            <button class="btn" onclick="setCalendarLanguage('en')">🇺🇸 English</button>
+            <button class="btn" onclick="setCalendarLanguage('es')">🇪🇸 Español</button>
+            <button class="btn" onclick="setCalendarLanguage('pt')">🇵🇹 Português</button>
+            <button class="btn" onclick="setCalendarLanguage('fr')">🇫🇷 Français</button>
+            <button class="btn" onclick="setCalendarLanguage('de')">🇩🇪 Deutsch</button>
+          </div>
+          <p><strong>Current Language:</strong> <span id="currentCalendarLanguage">English</span></p>
+        </div>
+
+        <localized-mixin locale="en" id="calendar-mixin">
+          <ars-calendar data-localize-map='{"localized_abbreviated_days":["days.sun","days.mon","days.tue","days.wed","days.thu","days.fri","days.sat"],"localized_months":["months.jan","months.feb","months.mar","months.apr","months.may","months.jun","months.jul","months.aug","months.sep","months.oct","months.nov","months.dec"],"localized_today":"today"}'></ars-calendar>
+        </localized-mixin>
+        <div class="instructions">
+          <h4>How it works:</h4>
+          <ul>
+            <li>The <code>&lt;ars-calendar&gt;</code> component declares which attributes it wants localized and which translation keys to use via <code>data-localize-map</code>.</li>
+            <li>The <code>&lt;localized-mixin&gt;</code> detects this and sets the appropriate attributes based on the current language.</li>
+            <li>This pattern is generic and works for any component that follows the convention.</li>
+          </ul>
+        </div>
+        <div class="code-example">
+          &lt;localized-mixin locale="en"&gt;<br>
+          &nbsp;&nbsp;&lt;ars-calendar <br>
+          &nbsp;&nbsp;&nbsp;&nbsp;data-localize-map='{"localized_abbreviated_days":["days.sun","days.mon","days.tue","days.wed","days.thu","days.fri","days.sat"],<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;"localized_months":["months.jan","months.feb","months.mar","months.apr","months.may","months.jun","months.jul","months.aug","months.sep","months.oct","months.nov","months.dec"],<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;"localized_today":"today"}'&gt;&lt;/ars-calendar&gt;<br>
+          &lt;/localized-mixin&gt;
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Load the components -->
   <script type="module" src="../ars-calendar.js"></script>
   <script type="module" src="../../ars-color-select/ars-color-select.js"></script>
+  <script type="module" src="../../mixins/localized-mixin/localized-mixin.js"></script>
 
   <!-- Test scripts -->
   <script>
@@ -572,7 +615,104 @@
       const timestamp = new Date().toLocaleTimeString();
       eventLog.textContent += `[${timestamp}] ARS Calendar test page loaded\n`;
       eventLog.scrollTop = eventLog.scrollHeight;
+
+      // Initialize calendar localization
+      initializeCalendarLocalization();
     });
+
+    // Calendar Localization Functions
+    function initializeCalendarLocalization() {
+      // Set up global translations for the calendar demo
+      window.globalTranslations = {
+        en: {
+          days: {
+            sun: "Sun", mon: "Mon", tue: "Tue", wed: "Wed",
+            thu: "Thu", fri: "Fri", sat: "Sat"
+          },
+          months: {
+            jan: "January", feb: "February", mar: "March", apr: "April",
+            may: "May", jun: "June", jul: "July", aug: "August",
+            sep: "September", oct: "October", nov: "November", dec: "December"
+          },
+          today: "Today"
+        },
+        es: {
+          days: {
+            sun: "Dom", mon: "Lun", tue: "Mar", wed: "Mié",
+            thu: "Jue", fri: "Vie", sat: "Sáb"
+          },
+          months: {
+            jan: "Enero", feb: "Febrero", mar: "Marzo", apr: "Abril",
+            may: "Mayo", jun: "Junio", jul: "Julio", aug: "Agosto",
+            sep: "Septiembre", oct: "Octubre", nov: "Noviembre", dec: "Diciembre"
+          },
+          today: "Hoy"
+        },
+        pt: {
+          days: {
+            sun: "Dom", mon: "Seg", tue: "Ter", wed: "Qua",
+            thu: "Qui", fri: "Sex", sat: "Sáb"
+          },
+          months: {
+            jan: "Janeiro", feb: "Fevereiro", mar: "Março", apr: "Abril",
+            may: "Maio", jun: "Junho", jul: "Julho", aug: "Agosto",
+            sep: "Setembro", oct: "Outubro", nov: "Novembro", dec: "Dezembro"
+          },
+          today: "Hoje"
+        },
+        fr: {
+          days: {
+            sun: "Dim", mon: "Lun", tue: "Mar", wed: "Mer",
+            thu: "Jeu", fri: "Ven", sat: "Sam"
+          },
+          months: {
+            jan: "Janvier", feb: "Février", mar: "Mars", apr: "Avril",
+            may: "Mai", jun: "Juin", jul: "Juillet", aug: "Août",
+            sep: "Septembre", oct: "Octobre", nov: "Novembre", dec: "Décembre"
+          },
+          today: "Aujourd'hui"
+        },
+        de: {
+          days: {
+            sun: "So", mon: "Mo", tue: "Di", wed: "Mi",
+            thu: "Do", fri: "Fr", sat: "Sa"
+          },
+          months: {
+            jan: "Januar", feb: "Februar", mar: "März", apr: "April",
+            may: "Mai", jun: "Juni", jul: "Juli", aug: "August",
+            sep: "September", oct: "Oktober", nov: "November", dec: "Dezember"
+          },
+          today: "Heute"
+        }
+      };
+
+      // Set initial language
+      setCalendarLanguage('en');
+    }
+
+    function setCalendarLanguage(lang) {
+      const calendarMixin = document.getElementById('calendar-mixin');
+      const languageDisplay = document.getElementById('currentCalendarLanguage');
+
+      if (calendarMixin && window.globalTranslations[lang]) {
+        calendarMixin.setAttribute('locale', lang);
+
+        // Update language display
+        const languageNames = {
+          en: 'English',
+          es: 'Español',
+          pt: 'Português',
+          fr: 'Français',
+          de: 'Deutsch'
+        };
+        languageDisplay.textContent = languageNames[lang] || lang;
+
+        // Log the language change
+        const timestamp = new Date().toLocaleTimeString();
+        eventLog.textContent += `[${timestamp}] Calendar language changed to: ${languageNames[lang]}\n`;
+        eventLog.scrollTop = eventLog.scrollHeight;
+      }
+    }
   </script>
 </body>
 

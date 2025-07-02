@@ -87,7 +87,7 @@ npm start
 ### Method 1: ES Module Import (Recommended)
 
 ```javascript
-import { ArsButton } from "ars-web-components";
+import { ArsCalendar } from "ars-web-components";
 ```
 
 ### Method 2: Direct Script Import
@@ -99,29 +99,6 @@ For projects that need to load components directly without bundling:
 ```
 
 ## Components
-
-### ArsButton
-
-Enhanced button with custom events and pressed effects.
-
-```html
-<button
-  is="ars-button"
-  id="myButton"
-  class="my-button-style"
-  effect-color="#00d4ff"
->
-  Click me!
-</button>
-```
-
-**Attributes:**
-
-- `effect-color`: Color for the pressed animation effect (optional)
-
-**Events:**
-
-- `ars-button:${id}:click`: Fired when button is clicked
 
 ### ArsCalendar
 
@@ -186,7 +163,7 @@ Modal dialog component for user interactions. Supports custom content, styling w
 // Open a dialog with confirmation buttons and custom content
 const result = await ArsDialog.dialog(
   `<form><label>Name: <input id='name'></label></form>`,
-  "Dialog Title",
+  "Dialog Title"
 );
 if (result) {
   const name = result.querySelector("#name").value;
@@ -336,7 +313,7 @@ class MyButton extends PressedEffectMixin(HTMLElement) {
 - Works with solid background colors
 - Touch and mouse support
 
-**Demo:** http://localhost:8080/mixins/pressed-effect/demo/
+**Demo:** http://localhost:8080/mixins/pressed-effect-mixin/demo/
 
 ### Localized Mixin
 
@@ -364,7 +341,7 @@ class LocalizedComponent extends LocalizedMixin(HTMLElement) {
 - Event-driven updates
 - Mock localization system for testing
 
-**Demo:** http://localhost:8080/mixins/localized/demo/
+**Demo:** http://localhost:8080/mixins/localized-mixin/demo/
 
 ### RemoteCall Mixin
 
@@ -403,7 +380,7 @@ class MyCaller extends RemoteCallCallerMixin(HTMLElement) {
 - Real-time logging
 - Support for multiple receiver instances
 
-**Demo:** http://localhost:8080/mixins/remote-call/demo/
+**Demo:** http://localhost:8080/mixins/remote-call-mixin/demo/
 
 ### ShowIfPropertyTrue Mixin
 
@@ -420,7 +397,7 @@ class ConditionalComponent extends ShowIfPropertyTrueMixin(HTMLElement) {
 }
 ```
 
-**Demo:** http://localhost:8080/mixins/show-if-property-true/demo/
+**Demo:** http://localhost:8080/mixins/show-if-property-true-mixin/demo/
 
 ### Swipeable Mixin
 
@@ -438,7 +415,25 @@ class SwipeableComponent extends SwipeableMixin(HTMLElement) {
 }
 ```
 
-**Demo:** http://localhost:8080/mixins/swipeable/demo/
+**Demo:** http://localhost:8080/mixins/swipeable-mixin/demo/
+
+### Roll Mixin
+
+Adds roll animation effects to components.
+
+```javascript
+import { RollMixin } from "ars-web-components";
+
+class RollableComponent extends RollMixin(HTMLElement) {
+  constructor() {
+    super();
+    this.onRollStart = () => console.log("Roll started!");
+    this.onRollEnd = () => console.log("Roll ended!");
+  }
+}
+```
+
+**Demo:** http://localhost:8080/mixins/roll-mixin/demo/
 
 ## Show If Property True Mixin
 
@@ -454,7 +449,7 @@ This mixin allows you to show or hide a custom element based on a boolean proper
 ```
 
 ```js
-import { ShowIfPropertyTrueMixin } from "./mixins/show-if-property-true/show-if-property-true.js";
+import { ShowIfPropertyTrueMixin } from "./mixins/show-if-property-true-mixin/show-if-property-true-mixin.js";
 
 class ConditionalElement extends ShowIfPropertyTrueMixin(HTMLElement) {}
 customElements.define("conditional-element", ConditionalElement);
@@ -503,7 +498,6 @@ Once the server is running, you can access:
 
 - **Main Demo Gallery**: http://localhost:8080/
 - **Individual Components**:
-  - **ars-button**: http://localhost:8080/ars-button/test/
   - **ars-calendar**: http://localhost:8080/ars-calendar/test/
   - **ars-dialog**: http://localhost:8080/ars-dialog/test/
 
@@ -521,19 +515,21 @@ ln -s ../../../../ars-web-components ars-web-components-dev
 Check `index.js` in the package root for all available imports:
 
 ```javascript
-export { ArsButton } from "./ars-button/ars-button.js";
 export { ArsCalendar } from "./ars-calendar/ars-calendar.js";
 export { ArsColorSelect } from "./ars-color-select/ars-color-select.js";
 export { ArsDialog } from "./ars-dialog/ars-dialog.js";
+export { ArsPageController } from "./ars-page/ars-page-controller.js";
+export { ArsPage } from "./ars-page/ars-page.js";
 export { WebComponentBase } from "./web-component-base/web-component-base.js";
 
 // Mixins
-export { LocalizedMixin } from "./mixins/localized/localized.js";
-export { PressedEffectMixin } from "./mixins/pressed-effect/pressed-effect.js";
-export { RemoteCallCallerMixin } from "./mixins/remote-call/remote-call-caller.js";
-export { RemoteCallReceiverMixin } from "./mixins/remote-call/remote-call-receiver.js";
-export { ShowIfPropertyTrueMixin } from "./mixins/show-if-property-true/show-if-property-true.js";
-export { SwipeableMixin } from "./mixins/swipeable/swipeable.js";
+export { LocalizedMixin } from "./mixins/localized-mixin/localized-mixin.js";
+export { PressedEffectMixin } from "./mixins/pressed-effect-mixin/pressed-effect-mixin.js";
+export { RemoteCallCallerMixin } from "./mixins/remote-call-mixin/remote-call-caller-mixin.js";
+export { RemoteCallReceiverMixin } from "./mixins/remote-call-mixin/remote-call-receiver-mixin.js";
+export { RollMixin } from "./mixins/roll-mixin/roll-mixin.js";
+export { ShowIfPropertyTrueMixin } from "./mixins/show-if-property-true-mixin/show-if-property-true-mixin.js";
+export { SwipeableMixin } from "./mixins/swipeable-mixin/swipeable-mixin.js";
 ```
 
 ## Requirements

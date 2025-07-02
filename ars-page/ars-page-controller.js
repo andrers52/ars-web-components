@@ -18,136 +18,86 @@
 // Attributes:
 // - target-page: ID of the ars-page component to control
 //
-// The controller no longer generates its own UI (tabs, buttons, dropdown).
+// This component internally uses the remote-call-caller-mixin to communicate with the page router.
 
-import { RemoteCallCallerMixin } from "../mixins/remote-call/remote-call-caller.js";
+import "./ars-page-controller-internal.js";
+import "../mixins/remote-call-mixin/remote-call-caller-mixin.js";
 
-class ArsPageController extends RemoteCallCallerMixin(HTMLElement) {
+class ArsPageController extends HTMLElement {
   constructor() {
     super();
-    this._targetPage = null;
-    this._currentPage = null;
-    this._availablePages = [];
-    this._navClickHandler = this._onNavClick.bind(this);
-  }
-
-  static get observedAttributes() {
-    return ["target-page"];
-  }
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (name === "target-page" && newValue) {
-      this._targetPage = newValue;
-      this._refreshPageInfo();
-    }
+    this._targetPage = this.getAttribute("target-page") || "";
   }
 
   connectedCallback() {
-    super.connectedCallback && super.connectedCallback();
-    this._targetPage = this.getAttribute("target-page") || this._targetPage;
-    this._setupNavListeners();
-    setTimeout(() => this._refreshPageInfo(), 100);
+    // Create the mixin wrapper directly without shadow DOM
+    const mixinWrapper = document.createElement('remote-call-caller-mixin');
+    mixinWrapper.setAttribute('target-id', this.getAttribute('target-page') || '');
+    mixinWrapper.setAttribute('method', 'showPage');
+    mixinWrapper.setAttribute('listen', 'nav-click');
+    mixinWrapper.setAttribute('args-map', '{"pageId": 0}');
+
+    // Create the internal component
+    const internalComponent = document.createElement('ars-page-controller-internal');
+    internalComponent.setAttribute('target-page', this.getAttribute('target-page') || '');
+
+    // Move all child nodes to the internal component
+    while (this.firstChild) {
+      internalComponent.appendChild(this.firstChild);
+    }
+
+    // Add the internal component to the mixin wrapper
+    mixinWrapper.appendChild(internalComponent);
+
+    // Replace this element's content with the mixin wrapper
+    this.innerHTML = '';
+    this.appendChild(mixinWrapper);
+
+    console.log('ArsPageController connectedCallback - Mixin wrapper created');
+    console.log('Navigation content moved to internal component');
+
+    // Forward all attributes to the internal component
+    this._forwardAttributes();
+
+    // Wait for the router to be fully initialized before setting up the controller
+    setTimeout(() => {
+      const internalComponent = this.querySelector('ars-page-controller-internal');
+      if (internalComponent) {
+        console.log('ArsPageController: Router should be ready, triggering internal component setup');
+        // Trigger a re-initialization of the internal component
+        internalComponent.reinitialize();
+      }
+    }, 500);
   }
 
-  disconnectedCallback() {
-    super.disconnectedCallback && super.disconnectedCallback();
-    this._removeNavListeners();
-  }
-
-  _setupNavListeners() {
-    this._removeNavListeners();
-    // Listen for clicks on any child with data-page
-    this._navLinks = Array.from(this.querySelectorAll('[data-page]'));
-    this._navLinks.forEach(link => {
-      link.addEventListener('click', this._navClickHandler);
-    });
-  }
-
-  _removeNavListeners() {
-    if (this._navLinks) {
-      this._navLinks.forEach(link => {
-        link.removeEventListener('click', this._navClickHandler);
+  _forwardAttributes() {
+    const internalComponent = this.querySelector('ars-page-controller-internal');
+    if (internalComponent) {
+      // Forward all attributes except target-page (already set)
+      Array.from(this.attributes).forEach(attr => {
+        if (attr.name !== 'target-page') {
+          internalComponent.setAttribute(attr.name, attr.value);
+        }
       });
     }
-    this._navLinks = [];
   }
 
-  _onNavClick(e) {
-    e.preventDefault();
-    const link = e.currentTarget;
-    const pageId = link.getAttribute('data-page');
-    if (pageId) {
-      this.navigateToPage(pageId);
-      // Update active class
-      this._navLinks.forEach(l => l.classList.remove('active'));
-      link.classList.add('active');
-    }
-  }
-
-  _refreshPageInfo() {
-    if (!this._targetPage) return;
-
-    // Use the simplified _callRemote method
-    this._callRemote(this._targetPage, 'getPageInfo');
-
-    // Since we can't get a return value directly, we'll listen for the page change event
-    // to update our state
-    this._updateActiveState();
-  }
-
-  _updateActiveState() {
-    // Update active class based on current page
-    this._navLinks?.forEach(link => {
-      const pageId = link.getAttribute('data-page');
-      // We'll get the current page from the target component
-      const targetComponent = document.getElementById(this._targetPage);
-      if (targetComponent && targetComponent._currentPage === pageId) {
-        link.classList.add('active');
-      } else {
-        link.classList.remove('active');
-      }
-    });
-  }
-
-  // Public methods
-  navigateToPage(pageId) {
-    if (!this._targetPage) {
-      console.error("ARS Page Controller: No target page specified");
-      return false;
-    }
-
-    // Use the simplified _callRemote method
-    this._callRemote(this._targetPage, 'showPage', pageId);
-
-    // Update active state after a short delay to allow the page to change
-    setTimeout(() => {
-      this._updateActiveState();
-    }, 50);
-
-    // Dispatch navigation event
-    this.dispatchEvent(
-      new CustomEvent("ars-page-controller:navigated", {
-        detail: {
-          pageId,
-          previousPage: this._currentPage,
-          success: true,
-        },
-        bubbles: true,
-        composed: true,
-      }),
-    );
-
-    return true;
-  }
-
+  // Forward methods to the internal component
   getCurrentPage() {
-    if (!this._targetPage) return null;
+    const internalComponent = this.querySelector('ars-page-controller-internal');
+    return internalComponent ? internalComponent.getCurrentPage() : null;
+  }
 
-    const targetComponent = document.getElementById(this._targetPage);
-    if (targetComponent) {
-      return targetComponent._currentPage;
+  navigateToPage(pageId) {
+    const internalComponent = this.querySelector('ars-page-controller-internal');
+    return internalComponent ? internalComponent.navigateToPage(pageId) : false;
+  }
+
+  setNavigationType(type) {
+    const internalComponent = this.querySelector('ars-page-controller-internal');
+    if (internalComponent) {
+      internalComponent.setNavigationType(type);
     }
-    return null;
   }
 }
 

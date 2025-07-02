@@ -16,9 +16,7 @@
 // - getCurrentPage(): Returns the ID of the currently visible page
 // - getPageInfo(): Returns information about the current page and available pages
 
-import { RemoteCallReceiverMixin } from "../mixins/remote-call/remote-call-receiver.js";
-
-class ArsPage extends RemoteCallReceiverMixin(HTMLElement) {
+class ArsPage extends HTMLElement {
   constructor() {
     super();
     this._currentPage = null;
@@ -37,7 +35,6 @@ class ArsPage extends RemoteCallReceiverMixin(HTMLElement) {
   }
 
   connectedCallback() {
-    super.connectedCallback();
     console.log("[ars-page] connectedCallback");
     this._initializePages();
 
@@ -59,7 +56,6 @@ class ArsPage extends RemoteCallReceiverMixin(HTMLElement) {
   }
 
   disconnectedCallback() {
-    super.disconnectedCallback();
     this._pages.clear();
   }
 

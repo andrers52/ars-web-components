@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pressed Effect Mixin - Demo</title>
+
+  <!-- Common CSS -->
+  <link rel="stylesheet" href="../../../css/base.css">
+  <link rel="stylesheet" href="../../../css/components.css">
+  <link rel="stylesheet" href="../../../css/buttons.css">
+
+  <!-- Import Map for module resolution -->
+  <script type="importmap">
+    {
+      "imports": {
+        "arslib": "../../../node_modules/arslib/index.js"
+      }
+    }
+  </script>
+
+  <style>
+    /* Component-specific styles */
+    .demo-button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin: 10px;
+      transition: transform 0.2s ease;
+    }
+
+    .demo-button:hover {
+      transform: translateY(-2px);
+    }
+
+    .demo-card {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .demo-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .demo-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin: 10px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .demo-icon:hover {
+      transform: scale(1.1);
+    }
+
+    .effect-counter {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      padding: 10px;
+      margin: 10px 0;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+
+    .color-palette {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+
+    .color-button {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      border: 2px solid #fff;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .instructions {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      padding: 15px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+    }
+
+    .instructions h4 {
+      color: #1976d2;
+      margin-bottom: 10px;
+    }
+
+    .code-example {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.9rem;
+      margin: 10px 0;
+      overflow-x: auto;
+    }
+
+    /* default pressed visual */
+    .pressed {
+      transform: scale(0.95);
+      transition: transform 0.15s ease;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎯 Pressed Effect Mixin</h1>
+      <p>Add Touch & Mouse Press Animations to Any Element</p>
+    </div>
+
+    <div class="content">
+      <a href="../../../" class="back-link">← Back to Demo Page</a>
+
+      <div class="info-box">
+        <h4>About Pressed Effect Mixin</h4>
+        <p>This mixin adds beautiful press animations to any element. It creates a radial gradient effect that spreads
+          from elment's center point,
+          providing visual feedback for both touch and mouse interactions. Perfect for buttons, cards, and interactive
+          elements.</p>
+      </div>
+
+      <!-- Basic Usage -->
+      <div class="demo-section">
+        <h3>Basic Usage</h3>
+        <div class="demo-grid">
+          <pressed-effect-mixin>
+            <button class="demo-button"
+              style="background-color: #667eea; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer;">
+              Press Me!
+            </button>
+          </pressed-effect-mixin>
+          <pressed-effect-mixin>
+            <div class="demo-card"
+              style="background-color: #f093fb; color: white; padding: 20px; border-radius: 12px; cursor: pointer; text-align: center;">
+              <h4>Card Element</h4>
+              <p>Click to see pressed effect</p>
+            </div>
+          </pressed-effect-mixin>
+          <pressed-effect-mixin>
+            <div class="demo-icon"
+              style="background-color: #4facfe; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px;">
+              ⭐
+            </div>
+          </pressed-effect-mixin>
+        </div>
+      </div>
+
+      <!-- Effect Counter -->
+      <div class="demo-section">
+        <h3>📊 Effect Counter</h3>
+        <p>Track how many times the pressed effect has been triggered:</p>
+
+        <div class="effect-counter">
+          <strong>Press Count:</strong> <span id="pressCount">0</span>
+        </div>
+
+        <div class="controls">
+          <button class="btn" onclick="if(typeof resetCounter === 'function') resetCounter()">🔄 Reset Counter</button>
+          <button class="btn-secondary" onclick="if(typeof logEffectDetails === 'function') logEffectDetails()">📝 Log
+            Details</button>
+        </div>
+      </div>
+
+      <!-- Color Variations -->
+      <div class="demo-section">
+        <h3>🎨 Color Variations</h3>
+        <p>Try different background colors to see how the effect adapts:</p>
+
+        <div class="color-palette">
+          <div class="color-button" style="background: #ff6b6b;"
+            onclick="if(typeof changeColor === 'function') changeColor('#ff6b6b')"></div>
+          <div class="color-button" style="background: #4ecdc4;"
+            onclick="if(typeof changeColor === 'function') changeColor('#4ecdc4')"></div>
+          <div class="color-button" style="background: #45b7d1;"
+            onclick="if(typeof changeColor === 'function') changeColor('#45b7d1')"></div>
+          <div class="color-button" style="background: #96ceb4;"
+            onclick="if(typeof changeColor === 'function') changeColor('#96ceb4')"></div>
+          <div class="color-button" style="background: #feca57;"
+            onclick="if(typeof changeColor === 'function') changeColor('#feca57')"></div>
+          <div class="color-button" style="background: #ff9ff3;"
+            onclick="if(typeof changeColor === 'function') changeColor('#ff9ff3')"></div>
+        </div>
+
+        <div class="demo-item">
+          <label>Test Element (Click to change color)</label>
+          <pressed-effect-mixin>
+            <button id="colorTestButton" class="demo-button" style="background: #667eea;">Change My Color!</button>
+          </pressed-effect-mixin>
+        </div>
+      </div>
+
+      <!-- Implementation Guide -->
+      <div class="demo-section">
+        <h3>📖 Implementation Guide</h3>
+
+        <div class="instructions">
+          <h4>How to Use the Pressed Effect Mixin:</h4>
+          <p>1. Import the custom element (this registers &lt;pressed-effect-mixin&gt; automatically):
+            <code>import './mixins/pressed-effect-mixin/pressed-effect-mixin.js';</code>
+          </p>
+          <p>2. Wrap any element you want to make press-responsive:</p>
+          <code class="code-example no-margin">&lt;pressed-effect-mixin&gt;
+            &lt;button&gt;Press me!&lt;/button&gt;
+          &lt;/pressed-effect-mixin&gt;</code>
+          <p>3. Optionally style the <code>.pressed</code> class in CSS for additional scale/transform.</p>
+        </div>
+
+        <div class="code-example">
+          // Example with native HTML only – no JS required
+          &lt;pressed-effect-mixin&gt;
+            &lt;div class="demo-card"&gt;Pressable content&lt;/div&gt;
+          &lt;/pressed-effect-mixin&gt;
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div class="demo-section">
+        <h3>✨ Features</h3>
+        <div class="info-box">
+          <h4>What the Pressed Effect Mixin Provides:</h4>
+          <ul>
+            <li><strong>Touch Support:</strong> Works on mobile devices with touch events</li>
+            <li><strong>Mouse Support:</strong> Works on desktop with mouse events</li>
+            <li><strong>Radial Animation:</strong> Creates a spreading effect from element's center point</li>
+            <li><strong>Automatic Color Detection:</strong> Detects the element's background color</li>
+            <li><strong>Fixed 700&nbsp;ms Duration:</strong> Consistent timing across all elements</li>
+            <li><strong>Non-Intrusive:</strong> Doesn't interfere with existing event handlers</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Advanced Usage -->
+      <div class="demo-section">
+        <h3>Advanced Usage</h3>
+        <div class="demo-grid">
+          <pressed-effect-mixin>
+            <button class="demo-button"
+              style="background-color: #43e97b; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer;">
+              Change My Color!
+            </button>
+          </pressed-effect-mixin>
+          <pressed-effect-mixin>
+            <div class="demo-card"
+              style="background-color: #fa709a; color: white; padding: 20px; border-radius: 12px; cursor: pointer; text-align: center;">
+              <h4>Another Card</h4>
+              <p>With different color</p>
+            </div>
+          </pressed-effect-mixin>
+          <pressed-effect-mixin>
+            <div class="demo-icon"
+              style="background-color: #a8edea; color: #333; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px;">
+              🎯
+            </div>
+          </pressed-effect-mixin>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load the pressed-effect-mixin mixin and simple counter script -->
+  <script type="module">
+    import '../pressed-effect-mixin.js'; // auto-registers <pressed-effect-mixin>
+
+    const countEl = document.getElementById('pressCount');
+    let presses = 0;
+
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('pressed-effect-mixin')) {
+        countEl.textContent = ++presses;
+      }
+    });
+
+    window.resetCounter = () => { presses = 0; countEl.textContent = 0; };
+    window.logEffectDetails = () => console.log('Pressed effect mixin in action');
+    window.changeColor = (c) => {
+      document.getElementById('colorTestButton').style.background = c;
+    };
+  </script>
+</body>
+
+</html>

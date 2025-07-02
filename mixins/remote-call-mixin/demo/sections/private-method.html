@@ -1,0 +1,16 @@
+<div class="method-call">
+  <h4>🚫 Call Private Method (Should Fail)</h4>
+  <p>Attempts to call _privateMethod() which should be blocked</p>
+  <div class="receiver-buttons">
+    <remote-call-caller-mixin target-id="demo-receiver-1" method="_privateMethod" listen="click">
+      <button class="receiver-btn receiver-1">Receiver #1</button>
+    </remote-call-caller-mixin>
+
+    <remote-call-caller-mixin target-id="demo-receiver-2" method="_privateMethod" listen="click">
+      <button class="receiver-btn receiver-2">Receiver #2</button>
+    </remote-call-caller-mixin>
+
+    <button class="receiver-btn both"
+      onclick="if(typeof callPrivateMethodBoth === 'function') callPrivateMethodBoth()">Call Both</button>
+  </div>
+</div>

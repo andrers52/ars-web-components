@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2024-12-19
+
+### Added
+
+- **New Roll Mixin**: Added `RollMixin` for adding roll animation effects to components
+- **Enhanced Demo System**: Comprehensive demo pages for all mixins with interactive examples
+- **Mixin Base Utility**: New `mixin-base.js` common utility for shared mixin functionality
+- **ArsPage Debug Tools**: New debug and test pages for ars-page components (`debug.html`, `minimal-test.html`, `test.html`)
+- **ArsCalendar Documentation**: Added comprehensive README.md for the calendar component
+- **Stop Script**: Added `npm run stop` command to kill the development server
+- **Enhanced Remote Call Demo**: New comprehensive demo with multiple sections and real-time logging
+
+### Changed
+
+- **BREAKING**: Complete mixin directory restructuring - all mixins moved to `-mixin` suffix directories
+  - `mixins/localized/` → `mixins/localized-mixin/`
+  - `mixins/pressed-effect/` → `mixins/pressed-effect-mixin/`
+  - `mixins/remote-call/` → `mixins/remote-call-mixin/`
+  - `mixins/show-if-property-true/` → `mixins/show-if-property-true-mixin/`
+  - `mixins/swipeable/` → `mixins/swipeable-mixin/`
+- **BREAKING**: Removed `ArsButton` component entirely (component and demo files deleted)
+- **Enhanced Mixin Architecture**: All mixins refactored with improved structure and better demo integration
+- **Improved Demo Experience**: All mixin demos now feature comprehensive examples with better UI/UX
+
+### Removed
+
+- **ArsButton Component**: Complete removal of button component and related files
+- **Legacy Mixin Directories**: All old mixin directories and files removed
+- **VSCode Launch Configuration**: Removed development-specific launch.json file
+
+### Technical Improvements
+
+- **Better Organization**: Consistent naming convention with `-mixin` suffix for all mixin directories
+- **Enhanced Demos**: Interactive demos with real-time feedback and comprehensive examples
+- **Improved Maintainability**: Better separation of concerns and cleaner architecture
+
 ## [0.3.5] - 2024-07-02
 
 ### Changed
@@ -251,6 +287,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ArsDialog modal component
 - ArsColorSelect color picker component
 - WebComponentBase foundation class
-- Multiple mixins: Localized, PressedEffect, RemoteCallCaller, etc.
+- Multiple mixins: Localized, PressedEffect, RemoteCallCallerMixin, etc.
 - Basic ES module support
 - Initial test pages for all components

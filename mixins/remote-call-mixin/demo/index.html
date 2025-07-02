@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remote Call Mixin - Demo</title>
+
+  <!-- Import Map for module resolution -->
+  <script type="importmap">
+    {
+      "imports": {
+        "arslib": "../../../node_modules/arslib/index.js"
+      }
+    }
+    </script>
+
+  <!-- Common CSS -->
+  <link rel="stylesheet" href="../../../css/base.css">
+  <link rel="stylesheet" href="../../../css/components.css">
+  <link rel="stylesheet" href="../../../css/buttons.css">
+
+  <style>
+    /* Component-specific styles */
+    .demo-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin: 20px 0;
+    }
+
+    .caller-panel,
+    .receiver-panel {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .caller-panel {
+      border-color: #667eea;
+    }
+
+    .receiver-panel {
+      border-color: #43e97b;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .panel-header h3 {
+      margin: 0;
+      color: #333;
+    }
+
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ccc;
+    }
+
+    .status-indicator.active {
+      background: #43e97b;
+    }
+
+    .status-indicator.inactive {
+      background: #ff6b6b;
+    }
+
+    .method-call {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .method-call:hover {
+      background: #e9ecef;
+      border-color: #adb5bd;
+    }
+
+    .method-call h4 {
+      margin: 0 0 8px 0;
+      color: #495057;
+      font-size: 1rem;
+    }
+
+    .method-call p {
+      margin: 0;
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+
+    .method-call.success {
+      background: #d4edda;
+      border-color: #c3e6cb;
+      color: #155724;
+    }
+
+    .method-call.error {
+      background: #f8d7da;
+      border-color: #f5c6cb;
+      color: #721c24;
+    }
+
+    .log-container {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.85rem;
+    }
+
+    .log-entry {
+      margin: 5px 0;
+      padding: 5px;
+      border-radius: 4px;
+    }
+
+    .log-entry.info {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    .log-entry.success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .log-entry.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .log-entry.warning {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .counter-display {
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      color: #667eea;
+      margin: 20px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .color-display {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin: 20px auto;
+      border: 3px solid #dee2e6;
+      transition: all 0.3s ease;
+    }
+
+    .text-display {
+      text-align: center;
+      font-size: 1.2rem;
+      margin: 20px 0;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .control-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+
+    .btn-small {
+      padding: 8px 16px;
+      font-size: 0.9rem;
+    }
+
+    .receiver-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .receiver-btn {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      border-radius: 4px;
+      border: 1px solid #dee2e6;
+      background: #f8f9fa;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .receiver-btn:hover {
+      background: #e9ecef;
+      border-color: #adb5bd;
+    }
+
+    .receiver-btn.receiver-1 {
+      background: #d4edda;
+      border-color: #c3e6cb;
+      color: #155724;
+    }
+
+    .receiver-btn.receiver-1:hover {
+      background: #c3e6cb;
+    }
+
+    .receiver-btn.receiver-2 {
+      background: #f8d7da;
+      border-color: #f5c6cb;
+      color: #721c24;
+    }
+
+    .receiver-btn.receiver-2:hover {
+      background: #f5c6cb;
+    }
+
+    .receiver-btn.both {
+      background: #d1ecf1;
+      border-color: #bee5eb;
+      color: #0c5460;
+    }
+
+    .receiver-btn.both:hover {
+      background: #bee5eb;
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 15px 0;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 6px;
+    }
+
+    .connection-status.connected {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .connection-status.disconnected {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .code-example {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.9rem;
+      margin: 10px 0;
+      overflow-x: auto;
+    }
+
+    .instructions {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      padding: 15px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+    }
+
+    .instructions h4 {
+      color: #1976d2;
+      margin-bottom: 10px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📡 Remote Call Mixin</h1>
+      <p>Inter-Component Communication for Web Components</p>
+    </div>
+
+    <div class="content">
+      <a href="../../../" class="back-link">← Back to Demo Page</a>
+
+      <div class="info-box">
+        <h4>About Remote Call Mixin</h4>
+        <p>This mixin enables components to call methods on other components remotely using custom events. It consists
+          of two parts: <strong>RemoteCallCallerMixin</strong> for sending method calls and
+          <strong>RemoteCallReceiverMixin</strong> for receiving and executing them. Perfect for decoupled component
+          communication using component IDs.
+        </p>
+      </div>
+
+      <!-- Connection Status -->
+      <div class="demo-section">
+        <h3>🔗 Connection Status</h3>
+        <div class="connection-status" id="connectionStatus">
+          <div class="status-indicator" id="statusIndicator"></div>
+          <span id="statusText">Checking connection...</span>
+        </div>
+      </div>
+
+      <!-- Main Demo -->
+      <div class="demo-container">
+        <!-- Caller Panel -->
+        <div class="caller-panel">
+          <div class="panel-header">
+            <div class="status-indicator active"></div>
+            <h3>📤 Caller Component</h3>
+          </div>
+          <p>Click the buttons below to call methods on the receiver component:</p>
+
+          <!-- Fragment content will be loaded here -->
+          <div id="callerMethods"></div>
+
+        </div>
+
+        <!-- Receiver Panel -->
+        <div id="receiverPanel"></div>
+      </div>
+
+      <!-- Implementation Guide -->
+      <div class="demo-section">
+        <h3>📖 Implementation Guide</h3>
+
+        <div class="instructions">
+          <h4>How to Use the Remote Call Mixin:</h4>
+          <p>1. Import the mixins: <code>import RemoteCallCallerMixin from './remote-call-caller-mixin.js'</code> and
+            <code>import RemoteCallReceiverMixin from './remote-call-receiver-mixin.js'</code>
+          </p>
+          <p>2. Extend your caller class: <code>class MyCaller extends RemoteCallCallerMixin(HTMLElement)</code></p>
+          <p>3. Extend your receiver class: <code>class MyReceiver extends RemoteCallReceiverMixin(HTMLElement)</code>
+          </p>
+          <p>4. Give your receiver component an ID:
+            <code>&lt;my-receiver id="my-receiver"&gt;&lt;/my-receiver&gt;</code>
+          </p>
+          <p>5. Call remote methods: <code>this.callRemote('my-receiver', 'methodName', arg1, arg2)</code></p>
+          <p>6. Remember to call <code>super.connectedCallback()</code> and <code>super.disconnectedCallback()</code> in
+            receiver components</p>
+        </div>
+
+        <div class="code-example">
+          // Caller Component
+          import RemoteCallCallerMixin from './remote-call-caller-mixin.js';
+
+          class MyCaller extends RemoteCallCallerMixin(HTMLElement) {
+          constructor() {
+          super();
+          this.innerHTML = '&lt;button onclick="this.callRemote(\'my-receiver\',
+          \'increment\')"&gt;Increment&lt;/button&gt;';
+          }
+          }
+
+          customElements.define('my-caller', MyCaller);
+        </div>
+
+        <div class="code-example">
+          // Receiver Component
+          import RemoteCallReceiverMixin from './remote-call-receiver-mixin.js';
+
+          class MyReceiver extends RemoteCallReceiverMixin(HTMLElement) {
+          constructor() {
+          super();
+          this.counter = 0;
+          this.innerHTML = `&lt;div&gt;Counter: &lt;span id="counter"&gt;${this.counter}&lt;/span&gt;&lt;/div&gt;`;
+          }
+
+          connectedCallback() {
+          super.connectedCallback(); // Important!
+          }
+
+          increment() {
+          this.counter++;
+          this.querySelector('#counter').textContent = this.counter;
+          }
+
+          decrement() {
+          this.counter--;
+          this.querySelector('#counter').textContent = this.counter;
+          }
+          }
+
+          customElements.define('my-receiver', MyReceiver);
+
+          // Usage in HTML:
+          // &lt;my-receiver id="my-receiver"&gt;&lt;/my-receiver&gt;
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div class="demo-section">
+        <h3>✨ Features</h3>
+        <div class="info-box">
+          <h4>What the Remote Call Mixin Provides:</h4>
+          <ul>
+            <li><strong>Decoupled Communication:</strong> Components can communicate without direct references</li>
+            <li><strong>Method Calling:</strong> Call any public method on any component by ID</li>
+            <li><strong>Argument Passing:</strong> Pass multiple arguments to remote methods</li>
+            <li><strong>Security:</strong> Private methods (starting with _) are automatically blocked</li>
+            <li><strong>Error Handling:</strong> Graceful error handling for non-existent methods</li>
+            <li><strong>Event-Based:</strong> Uses custom events for reliable communication</li>
+            <li><strong>Simple Setup:</strong> Just extend the mixin and give your receiver an ID</li>
+            <li><strong>Lifecycle Management:</strong> Proper cleanup in disconnectedCallback</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load the mixins and demo -->
+  <script type="module">
+    // Import mixin components
+    import '../remote-call-caller-mixin.js';
+    import '../remote-call-receiver-mixin.js';
+    import './demo-receiver.js';
+
+    // Import fragment loader and demo setup
+    import { loadFragment } from './fragment-loader.js';
+    import { initializeDemo } from './demo-setup.js';
+
+    // Wait for custom elements to be defined
+    async function waitForCustomElements() {
+      const elements = ['remote-call-caller-mixin', 'remote-call-receiver-mixin'];
+      await Promise.all(elements.map(tagName =>
+        customElements.whenDefined(tagName)
+      ));
+    }
+
+    // Load fragments
+    document.addEventListener('DOMContentLoaded', async function () {
+      try {
+        console.log('Starting to load fragments...');
+
+        // Wait for custom elements to be defined
+        console.log('Waiting for custom elements...');
+        await waitForCustomElements();
+        console.log('Custom elements defined');
+
+        // Load receiver components section
+        console.log('Loading receiver-components...');
+        await loadFragment('./sections/receiver-components.html', '#receiverPanel');
+
+        // Load all method call sections
+        console.log('Loading increment-counter...');
+        await loadFragment('./sections/increment-counter.html', '#callerMethods');
+
+        console.log('Loading decrement-counter...');
+        await loadFragment('./sections/decrement-counter.html', '#callerMethods');
+
+        console.log('Loading set-counter...');
+        await loadFragment('./sections/set-counter.html', '#callerMethods');
+
+        console.log('Loading change-color...');
+        await loadFragment('./sections/change-color.html', '#callerMethods');
+
+        console.log('Loading set-text...');
+        await loadFragment('./sections/set-text.html', '#callerMethods');
+
+        console.log('Loading private-method...');
+        await loadFragment('./sections/private-method.html', '#callerMethods');
+
+        console.log('Loading non-existent-method...');
+        await loadFragment('./sections/non-existent-method.html', '#callerMethods');
+
+        // Initialize demo components
+        console.log('Initializing demo components...');
+        initializeDemo();
+
+        console.log('Remote Call Demo initialized with all fragments');
+      } catch (error) {
+        console.error('Error initializing demo:', error);
+      }
+    });
+  </script>
+</body>
+
+</html>

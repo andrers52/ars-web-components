@@ -1,5 +1,4 @@
 import { EObject } from "arslib";
-import { SwipeableMixin } from "../mixins/swipeable/swipeable.js";
 import WebComponentBase from "../web-component-base/web-component-base.js";
 
 // CSS for the calendar component
@@ -149,8 +148,8 @@ const createPieChart = (width, height, colors) => {
 let cellWidth = 30;
 let cellHeight = 30;
 
-// Apply SwipeableMixin to the base class
-const ArsCalendarBase = SwipeableMixin(WebComponentBase);
+// Use only WebComponentBase
+const ArsCalendarBase = WebComponentBase;
 
 class ArsCalendar extends ArsCalendarBase {
   // ---- PRIVATE STATIC UTILITY METHODS ----
@@ -363,13 +362,6 @@ class ArsCalendar extends ArsCalendarBase {
     return (e) => {
       if (e.detail.id !== calendar.id) return;
       calendar.render();
-    };
-  }
-
-  static #createSwipeHandlers(calendar) {
-    return {
-      onSwipeRight: () => calendar.previousMonth(),
-      onSwipeLeft: () => calendar.nextMonth(),
     };
   }
 
@@ -642,10 +634,6 @@ class ArsCalendar extends ArsCalendarBase {
       "ars-calendar:refresh",
       ArsCalendar.#createRefreshHandler(this),
     );
-
-    // Add swipe support - the mixin is already applied to the class
-    const swipeHandlers = ArsCalendar.#createSwipeHandlers(this);
-    Object.assign(this, swipeHandlers);
   }
 
   connectedCallback() {
@@ -791,15 +779,6 @@ class ArsCalendar extends ArsCalendarBase {
   onDayClicked(daySlot) {
     if (!this.daySlots[daySlot]) return;
     this.selectDate(this.daySlots[daySlot], this.monthToShow, this.yearToShow);
-  }
-
-  // Override the onSwipe method from SwipeableMixin
-  onSwipe(direction, details) {
-    if (direction === "left") {
-      this.nextMonth();
-    } else if (direction === "right") {
-      this.previousMonth();
-    }
   }
 }
 

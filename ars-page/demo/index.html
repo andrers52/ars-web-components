@@ -296,6 +296,8 @@
         <p><strong>Total Pages:</strong> <span id="totalPagesDisplay">Loading...</span></p>
       </div>
 
+
+
       <!-- Main Demo -->
       <div class="demo-container">
         <!-- Page Content (full width now) -->
@@ -311,74 +313,76 @@
           </ars-page-controller>
 
           <!-- Page Router -->
-          <ars-page id="demo-router" default-page="home">
-            <div id="home" class="page">
-              <h2>🏠 Home Page</h2>
-              <p>Welcome to the ARS Page Router demo! This is the home page content.</p>
-              <p>The ARS Page Router provides a simple and efficient way to handle page navigation in web applications
-                using web components and the remote-call mixin for inter-component communication.</p>
-              <p><strong>Features:</strong></p>
-              <ul>
-                <li>Component-based routing</li>
-                <li>Multiple navigation types (buttons, tabs, dropdown)</li>
-                <li>Remote method calling</li>
-                <li>Event-driven architecture</li>
-                <li>Easy to integrate</li>
-              </ul>
-            </div>
+          <remote-call-receiver-mixin id="demo-router" allow="showPage,hidePage,showAllPages,hideAllPages,getCurrentPage,getPageInfo">
+            <ars-page id="demo-router" default-page="home">
+              <div id="home" class="page">
+                <h2>🏠 Home Page</h2>
+                <p>Welcome to the ARS Page Router demo! This is the home page content.</p>
+                <p>The ARS Page Router provides a simple and efficient way to handle page navigation in web applications
+                  using web components and the remote-call mixin for inter-component communication.</p>
+                <p><strong>Features:</strong></p>
+                <ul>
+                  <li>Component-based routing</li>
+                  <li>Multiple navigation types (buttons, tabs, dropdown)</li>
+                  <li>Remote method calling</li>
+                  <li>Event-driven architecture</li>
+                  <li>Easy to integrate</li>
+                </ul>
+              </div>
 
-            <div id="about" class="page">
-              <h2>ℹ️ About Page</h2>
-              <p>This is the about page content. The ARS Page Router is part of the ARS Web Components library.</p>
-              <p><strong>How it works:</strong></p>
-              <ol>
-                <li>The <code>ars-page</code> component wraps your page content</li>
-                <li>Each page is a direct child with a unique ID</li>
-                <li>The <code>ars-page-controller</code> provides navigation controls</li>
-                <li>Components communicate via the remote-call mixin</li>
-                <li>Only one page is visible at a time (unless you show all)</li>
-              </ol>
-              <p>This approach provides clean separation of concerns and makes your application more maintainable.</p>
-            </div>
+              <div id="about" class="page">
+                <h2>ℹ️ About Page</h2>
+                <p>This is the about page content. The ARS Page Router is part of the ARS Web Components library.</p>
+                <p><strong>How it works:</strong></p>
+                <ol>
+                  <li>The <code>ars-page</code> component wraps your page content</li>
+                  <li>Each page is a direct child with a unique ID</li>
+                  <li>The <code>ars-page-controller</code> provides navigation controls</li>
+                  <li>Components communicate via the remote-call mixin</li>
+                  <li>Only one page is visible at a time (unless you show all)</li>
+                </ol>
+                <p>This approach provides clean separation of concerns and makes your application more maintainable.</p>
+              </div>
 
-            <div id="services" class="page">
-              <h2>🔧 Services Page</h2>
-              <p>This is the services page content. Here you can showcase your services or features.</p>
-              <p><strong>Available Services:</strong></p>
-              <div class="feature-grid">
-                <div class="feature-card">
-                  <h5>🚀 Web Components</h5>
-                  <p>Custom HTML elements with encapsulated functionality</p>
-                </div>
-                <div class="feature-card">
-                  <h5>🔗 Remote Communication</h5>
-                  <p>Inter-component communication via custom events</p>
-                </div>
-                <div class="feature-card">
-                  <h5>🎨 Styling Agnostic</h5>
-                  <p>Works with any CSS framework or custom styles</p>
-                </div>
-                <div class="feature-card">
-                  <h5>📱 Responsive Design</h5>
-                  <p>Mobile-friendly navigation and layouts</p>
+              <div id="services" class="page">
+                <h2>🔧 Services Page</h2>
+                <p>This is the services page content. Here you can showcase your services or features.</p>
+                <p><strong>Available Services:</strong></p>
+                <div class="feature-grid">
+                  <div class="feature-card">
+                    <h5>🚀 Web Components</h5>
+                    <p>Custom HTML elements with encapsulated functionality</p>
+                  </div>
+                  <div class="feature-card">
+                    <h5>🔗 Remote Communication</h5>
+                    <p>Inter-component communication via custom events</p>
+                  </div>
+                  <div class="feature-card">
+                    <h5>🎨 Styling Agnostic</h5>
+                    <p>Works with any CSS framework or custom styles</p>
+                  </div>
+                  <div class="feature-card">
+                    <h5>📱 Responsive Design</h5>
+                    <p>Mobile-friendly navigation and layouts</p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div id="contact" class="page">
-              <h2>📞 Contact Page</h2>
-              <p>This is the contact page content. Here you can provide contact information or a contact form.</p>
-              <p><strong>Contact Information:</strong></p>
-              <ul>
-                <li><strong>Email:</strong> contact@arswebcomponents.com</li>
-                <li><strong>GitHub:</strong> <a href="https://github.com/andrers52/ars-web-components"
-                    target="_blank">ars-web-components</a></li>
-                <li><strong>Documentation:</strong> Available in the component demos</li>
-              </ul>
-              <p>The ARS Page Router is designed to be simple yet powerful, providing all the routing functionality
-                you need for modern web applications without the complexity of large frameworks.</p>
-            </div>
-          </ars-page>
+              <div id="contact" class="page">
+                <h2>📞 Contact Page</h2>
+                <p>This is the contact page content. Here you can provide contact information or a contact form.</p>
+                <p><strong>Contact Information:</strong></p>
+                <ul>
+                  <li><strong>Email:</strong> contact@arswebcomponents.com</li>
+                  <li><strong>GitHub:</strong> <a href="https://github.com/andrers52/ars-web-components"
+                      target="_blank">ars-web-components</a></li>
+                  <li><strong>Documentation:</strong> Available in the component demos</li>
+                </ul>
+                <p>The ARS Page Router is designed to be simple yet powerful, providing all the routing functionality
+                  you need for modern web applications without the complexity of large frameworks.</p>
+              </div>
+            </ars-page>
+          </remote-call-receiver-mixin>
         </div>
       </div>
 
@@ -478,35 +482,44 @@
 
   <!-- Demo scripts -->
   <script>
-    const eventLog = document.getElementById('eventLog');
     const currentPageDisplay = document.getElementById('currentPageDisplay');
     const availablePagesDisplay = document.getElementById('availablePagesDisplay');
     const totalPagesDisplay = document.getElementById('totalPagesDisplay');
 
     // Logging function
     function log(message, type = 'info') {
-      const entry = document.createElement('div');
-      entry.className = `log-entry ${type}`;
-      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-      if (eventLog) {
-        eventLog.appendChild(entry);
-        eventLog.scrollTop = eventLog.scrollHeight;
-      }
+      // Just log to console since we removed the visual log
+      console.log(`[${new Date().toLocaleTimeString()}] ${message}`);
     }
 
     // Update status display
     function updateStatus() {
-      const router = document.getElementById('demo-router');
+      const routerWrapper = document.getElementById('demo-router');
       const controller = document.getElementById('demo-controller');
 
-      if (router && controller) {
-        const currentPage = controller.getCurrentPage();
-        const pageInfo = router.getPageInfo();
+      console.log('updateStatus called', { routerWrapper, controller });
 
-        if (pageInfo) {
-          currentPageDisplay.textContent = currentPage || 'None';
-          availablePagesDisplay.textContent = pageInfo.availablePages.join(', ');
-          totalPagesDisplay.textContent = pageInfo.availablePages.length;
+      if (routerWrapper && controller) {
+        // Get the actual ars-page component from inside the wrapper
+        const router = routerWrapper.querySelector('ars-page');
+        const currentPage = controller.getCurrentPage();
+
+        console.log('Found components', { router, currentPage });
+
+        if (router) {
+          const pageInfo = router.getPageInfo();
+          console.log('Page info retrieved', pageInfo);
+
+          if (pageInfo) {
+            currentPageDisplay.textContent = currentPage || 'None';
+            availablePagesDisplay.textContent = pageInfo.availablePages.join(', ');
+            totalPagesDisplay.textContent = pageInfo.availablePages.length;
+            console.log('Status updated', {
+              currentPage: currentPageDisplay.textContent,
+              availablePages: availablePagesDisplay.textContent,
+              totalPages: totalPagesDisplay.textContent
+            });
+          }
         }
       }
     }
@@ -526,7 +539,7 @@
         const success = controller.navigateToPage(pageId);
         if (success) {
           log(`Navigated to page: ${pageId}`, 'success');
-          updateStatus();
+          setTimeout(updateStatus, 100);
         } else {
           log(`Failed to navigate to page: ${pageId}`, 'error');
         }
@@ -534,40 +547,49 @@
     };
 
     window.hidePage = function (pageId) {
-      const router = document.getElementById('demo-router');
-      if (router) {
-        const result = router.hidePage(pageId);
-        if (result && result.success) {
-          log(`Hidden page: ${pageId}`, 'success');
-          updateStatus();
-        } else {
-          log(`Failed to hide page: ${pageId}`, 'error');
+      const routerWrapper = document.getElementById('demo-router');
+      if (routerWrapper) {
+        const router = routerWrapper.querySelector('ars-page');
+        if (router) {
+          const result = router.hidePage(pageId);
+          if (result && result.success) {
+            log(`Hidden page: ${pageId}`, 'success');
+            setTimeout(updateStatus, 100);
+          } else {
+            log(`Failed to hide page: ${pageId}`, 'error');
+          }
         }
       }
     };
 
     window.showAllPages = function () {
-      const router = document.getElementById('demo-router');
-      if (router) {
-        const result = router.showAllPages();
-        if (result && result.success) {
-          log('Showed all pages', 'success');
-          updateStatus();
-        } else {
-          log('Failed to show all pages', 'error');
+      const routerWrapper = document.getElementById('demo-router');
+      if (routerWrapper) {
+        const router = routerWrapper.querySelector('ars-page');
+        if (router) {
+          const result = router.showAllPages();
+          if (result && result.success) {
+            log('Showed all pages', 'success');
+            setTimeout(updateStatus, 100);
+          } else {
+            log('Failed to show all pages', 'error');
+          }
         }
       }
     };
 
     window.hideAllPages = function () {
-      const router = document.getElementById('demo-router');
-      if (router) {
-        const result = router.hideAllPages();
-        if (result && result.success) {
-          log('Hidden all pages', 'success');
-          updateStatus();
-        } else {
-          log('Failed to hide all pages', 'error');
+      const routerWrapper = document.getElementById('demo-router');
+      if (routerWrapper) {
+        const router = routerWrapper.querySelector('ars-page');
+        if (router) {
+          const result = router.hideAllPages();
+          if (result && result.success) {
+            log('Hidden all pages', 'success');
+            setTimeout(updateStatus, 100);
+          } else {
+            log('Failed to hide all pages', 'error');
+          }
         }
       }
     };
@@ -579,15 +601,18 @@
 
     // Event listeners
     document.addEventListener('DOMContentLoaded', function () {
-      const router = document.getElementById('demo-router');
+      const routerWrapper = document.getElementById('demo-router');
       const controller = document.getElementById('demo-controller');
 
       // Listen for page changes
-      if (router) {
-        router.addEventListener('ars-page:page-changed', function (event) {
-          log(`Page changed from '${event.detail.previousPage}' to '${event.detail.currentPage}'`, 'info');
-          updateStatus();
-        });
+      if (routerWrapper) {
+        const router = routerWrapper.querySelector('ars-page');
+        if (router) {
+          router.addEventListener('ars-page:page-changed', function (event) {
+            log(`Page changed from '${event.detail.previousPage}' to '${event.detail.currentPage}'`, 'info');
+            updateStatus();
+          });
+        }
       }
       if (controller) {
         controller.addEventListener('ars-page-controller:navigated', function (event) {

@@ -18,9 +18,9 @@
 // by puting them in the "css/components/ars-dialog.css" file
 // or setting the attribute "extra-css-file"
 
-import "../ars-button/ars-button.js";
 import WebComponentBase from "../web-component-base/web-component-base.js";
 import { DEFAULT_CSS } from "./ars-dialog-css.js";
+import "../mixins/pressed-effect-mixin/pressed-effect-mixin.js";
 
 class ArsDialog extends WebComponentBase {
   constructor() {
@@ -151,20 +151,26 @@ class ArsDialog extends WebComponentBase {
 
   static #createConfirmButtonsHTML(component) {
     return `
-      <button is="ars-button" id="dialog_button_yes:${
-        component.id
-      }"> ${ArsDialog.#getLocalizedYes(component)} </button>
-      <button is="ars-button" id="dialog_button_no:${
-        component.id
-      }" style="margin-left: 5px"> ${ArsDialog.#getLocalizedNo(
+      <pressed-effect-mixin>
+        <button id="dialog_button_yes:${
+          component.id
+        }"> ${ArsDialog.#getLocalizedYes(component)} </button>
+      </pressed-effect-mixin>
+      <pressed-effect-mixin>
+        <button id="dialog_button_no:${
+          component.id
+        }" style="margin-left: 5px"> ${ArsDialog.#getLocalizedNo(
       component,
     )} </button>
+      </pressed-effect-mixin>
     `;
   }
 
   static #createOkButtonHTML(component) {
     return `
-      <button is="ars-button" id="dialog_button_ok:${component.id}"> Ok </button>
+      <pressed-effect-mixin>
+        <button id="dialog_button_ok:${component.id}"> Ok </button>
+      </pressed-effect-mixin>
     `;
   }
 

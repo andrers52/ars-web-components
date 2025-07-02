@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Show If Property True Mixin - Demo</title>
+
+  <!-- Common CSS -->
+  <link rel="stylesheet" href="../../../css/base.css">
+  <link rel="stylesheet" href="../../../css/components.css">
+  <link rel="stylesheet" href="../../../css/buttons.css">
+
+    <!-- Import Map for module resolution -->
+    <script type="importmap">
+      {
+        "imports": {
+          "arslib": "../../../node_modules/arslib/index.js"
+        }
+      }
+    </script>
+
+  <style>
+    /* Component-specific styles */
+    .demo-container {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e9ecef;
+    }
+
+    .property-controls {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      border: 1px solid #dee2e6;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin: 10px 0;
+      flex-wrap: wrap;
+    }
+
+    .control-group label {
+      font-weight: bold;
+      min-width: 120px;
+    }
+
+    .control-group input[type="checkbox"] {
+      transform: scale(1.2);
+    }
+
+    .control-group input[type="text"] {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      width: 150px;
+    }
+
+    .demo-element {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 10px 0;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .demo-element.hidden {
+      opacity: 0.3;
+      transform: scale(0.95);
+    }
+
+    .demo-element.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .status-indicator.true {
+      background: #28a745;
+    }
+
+    .status-indicator.false {
+      background: #dc3545;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .demo-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e9ecef;
+    }
+
+    .demo-card h4 {
+      margin-top: 0;
+      color: #333;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 10px;
+    }
+
+    .conditional-element {
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      color: white;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 10px 0;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .conditional-element.hidden {
+      opacity: 0.3;
+      transform: scale(0.9);
+    }
+
+    .conditional-element.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .instructions {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      padding: 15px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+    }
+
+    .instructions h4 {
+      color: #1976d2;
+      margin-bottom: 10px;
+    }
+
+    .code-example {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.9rem;
+      margin: 10px 0;
+      overflow-x: auto;
+    }
+
+    .property-log {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+
+    .log-entry {
+      padding: 5px;
+      margin: 2px 0;
+      border-radius: 4px;
+      border-left: 3px solid #007bff;
+    }
+
+    .log-entry.property-change {
+      border-left-color: #28a745;
+    }
+
+    .log-entry.visibility-change {
+      border-left-color: #ffc107;
+    }
+
+    .toggle-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+
+    .toggle-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-btn.true {
+      background: #28a745;
+      color: white;
+    }
+
+    .toggle-btn.false {
+      background: #dc3545;
+      color: white;
+    }
+
+    .toggle-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .colored-bar {
+      width: 100%;
+      height: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 6px 6px 0 0;
+      margin-bottom: 8px;
+    }
+
+    .bar {
+      display: block;
+      width: 100%;
+      height: 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 8px;
+      text-align: center;
+      line-height: 40px;
+      margin: 0 0 20px 0;
+      font-weight: bold;
+      font-size: 1.1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      transition: opacity 0.2s;
+    }
+
+    .bars-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .bar-label {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 2px;
+      margin-top: 10px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>👁️ Show If Property True Mixin</h1>
+      <p>Conditional Visibility Based on Property Values</p>
+    </div>
+
+    <div class="content">
+      <a href="../../../" class="back-link">← Back to Demo Page</a>
+
+      <div class="info-box">
+        <h4>About Show If Property True Mixin</h4>
+        <p>This mixin automatically shows or hides elements based on property values. It supports boolean properties,
+          data attributes, and regular attributes. Perfect for dynamic interfaces where visibility depends on state.</p>
+        <p><strong>💡 Tip:</strong> The mixin preserves the original display style and restores it when the property
+          becomes true again!</p>
+      </div>
+
+      <!-- Property Controls -->
+      <div class="demo-section">
+        <h3>🎛️ Property Controls</h3>
+        <p>Toggle these properties to show or hide the corresponding bar below:</p>
+        <div class="property-controls">
+          <div class="control-group">
+            <label for="isVisible">isVisible:</label>
+            <input type="checkbox" id="isVisible" checked>
+            <span class="status-indicator true" id="isVisibleStatus"></span>
+            <span id="isVisibleValue">true</span>
+          </div>
+          <div class="control-group">
+            <label for="isEnabled">isEnabled:</label>
+            <input type="checkbox" id="isEnabled" checked>
+            <span class="status-indicator true" id="isEnabledStatus"></span>
+            <span id="isEnabledValue">true</span>
+          </div>
+          <div class="control-group">
+            <label for="isActive">isActive:</label>
+            <input type="checkbox" id="isActive">
+            <span class="status-indicator false" id="isActiveStatus"></span>
+            <span id="isActiveValue">false</span>
+          </div>
+          <div class="control-group">
+            <label for="showAdvanced">showAdvanced:</label>
+            <input type="checkbox" id="showAdvanced">
+            <span class="status-indicator false" id="showAdvancedStatus"></span>
+            <span id="showAdvancedValue">false</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bars Demo -->
+      <div class="demo-section">
+        <h3>🎯 Bars Demo</h3>
+        <p>Each bar below is controlled by its corresponding property above:</p>
+        <div class="bars-list">
+          <div class="bar-label">isVisible Bar</div>
+          <show-if-property-true-mixin show-if-property="isVisible">
+            <div class="bar">isVisible Bar</div>
+          </show-if-property-true-mixin>
+          <div class="bar-label">isEnabled Bar</div>
+          <show-if-property-true-mixin show-if-property="isEnabled">
+            <div class="bar">isEnabled Bar</div>
+          </show-if-property-true-mixin>
+          <div class="bar-label">isActive Bar</div>
+          <show-if-property-true-mixin show-if-property="isActive">
+            <div class="bar">isActive Bar</div>
+          </show-if-property-true-mixin>
+          <div class="bar-label">showAdvanced Bar</div>
+          <show-if-property-true-mixin show-if-property="showAdvanced">
+            <div class="bar">showAdvanced Bar</div>
+          </show-if-property-true-mixin>
+        </div>
+      </div>
+
+      <!-- Property Log -->
+      <div class="demo-section">
+        <h3>📜 Property Change Log</h3>
+        <div class="property-log" id="propertyLog">
+          <div class="log-entry">Property change log will appear here...</div>
+        </div>
+        <div class="controls">
+          <button class="btn-secondary" onclick="clearLog()">Clear Log</button>
+        </div>
+      </div>
+
+      <!-- Implementation Guide -->
+      <div class="demo-section">
+        <h3>📖 Implementation Guide</h3>
+
+        <div class="instructions">
+          <h4>How to Use the Show If Property True Mixin:</h4>
+          <p>1. Use the mixin element: <code>&lt;show-if-property-true-mixin show-if-property="myProperty"&gt;content&lt;/show-if-property-true-mixin&gt;</code></p>
+          <p>2. Set the property to control visibility: <code>show-if-property="myProperty"</code></p>
+          <p>3. The mixin will automatically show/hide based on the property value</p>
+        </div>
+
+        <div class="code-example">
+          // Using the show-if-property-true-mixin element
+          &lt;show-if-property-true-mixin show-if-property="isVisible"&gt;
+          &lt;div style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4); color: white; padding: 20px; border-radius: 8px;"&gt;
+          This element shows/hides based on the isVisible property
+          &lt;/div&gt;
+          &lt;/show-if-property-true-mixin&gt;
+        </div>
+
+        <div class="code-example">
+          // Programmatic control
+          const mixin = document.querySelector('show-if-property-true-mixin');
+
+          // Set the property to control visibility
+          mixin.setShowProperty('isEnabled');
+
+          // Update the property value on the target element
+          const targetElement = mixin.firstElementChild;
+          targetElement.isEnabled = true; // Shows the element
+          targetElement.isEnabled = false; // Hides the element
+
+          // Refresh visibility manually
+          mixin.refreshVisibility();
+        </div>
+
+        <div class="code-example">
+          // Using data attributes
+          &lt;div show-if-property="data-is-visible" data-is-visible="true"&gt;
+          This element is controlled by a data attribute
+          &lt;/div&gt;
+
+          // Using regular attributes
+          &lt;div show-if-property="hidden" hidden="false"&gt;
+          This element is controlled by a regular attribute
+          &lt;/div&gt;
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div class="demo-section">
+        <h3>✨ Features</h3>
+        <div class="info-box">
+          <h4>What the Show If Property True Mixin Provides:</h4>
+          <ul>
+            <li><strong>Property Detection:</strong> Automatically detects boolean properties, data attributes, and
+              regular attributes</li>
+            <li><strong>Display Preservation:</strong> Remembers and restores the original display style</li>
+            <li><strong>Dynamic Updates:</strong> Responds to property changes in real-time</li>
+            <li><strong>Multiple Sources:</strong> Supports element properties, data attributes, and regular attributes
+            </li>
+            <li><strong>Programmatic Control:</strong> API methods for setting properties and refreshing visibility</li>
+            <li><strong>Attribute Support:</strong> Works with HTML attributes for declarative usage</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load the mixin -->
+  <script type="module">
+    import { ShowIfPropertyTrueMixin } from '../show-if-property-true-mixin.js';
+
+    console.log('ShowIfPropertyTrueMixin imported successfully');
+
+    console.log('ShowIfPropertyTrueMixin imported successfully');
+
+    // Property management
+    let properties = {
+      isVisible: true,
+      isEnabled: true,
+      isActive: false,
+      showAdvanced: false,
+      dynamicValue: true
+    };
+
+    // Log management
+    function addToLog(message, type = 'property-change') {
+      const log = document.getElementById('propertyLog');
+      if (!log) return;
+
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+
+      const timestamp = new Date().toLocaleTimeString();
+      entry.textContent = `[${timestamp}] ${message}`;
+
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+
+      // Keep only last 20 entries
+      while (log.children.length > 20) {
+        log.removeChild(log.firstChild);
+      }
+    }
+
+    // Update status indicators
+    function updateStatusIndicators() {
+      Object.keys(properties).forEach(prop => {
+        const checkbox = document.getElementById(prop);
+        const status = document.getElementById(`${prop}Status`);
+        const value = document.getElementById(`${prop}Value`);
+
+        if (checkbox && status && value) {
+          const isTrue = properties[prop];
+          checkbox.checked = isTrue;
+          status.className = `status-indicator ${isTrue ? 'true' : 'false'}`;
+          value.textContent = isTrue ? 'true' : 'false';
+        }
+      });
+    }
+
+    // Toggle property function
+    window.toggleProperty = function (propertyName, value) {
+      if (properties.hasOwnProperty(propertyName)) {
+        const oldValue = properties[propertyName];
+        properties[propertyName] = value;
+
+        // Update all elements with this property
+        const mixins = document.querySelectorAll(`show-if-property-true-mixin[show-if-property="${propertyName}"]`);
+        mixins.forEach(mixin => {
+          const targetElement = mixin.firstElementChild;
+          if (targetElement) {
+            targetElement[propertyName] = value;
+            if (typeof mixin.refreshVisibility === 'function') {
+              mixin.refreshVisibility();
+            }
+          }
+        });
+
+        addToLog(`${propertyName}: ${oldValue} → ${value}`, 'property-change');
+        updateStatusIndicators();
+      }
+    };
+
+    // Set custom property
+    window.setCustomProperty = function () {
+      const input = document.getElementById('customProperty');
+      const propertyName = input.value.trim();
+
+      if (propertyName) {
+        // Create a new conditional element
+        const container = document.querySelector('.demo-section:last-of-type');
+        const demoContainer = document.createElement('div');
+        demoContainer.className = 'demo-container';
+        demoContainer.innerHTML = `
+          <h4>Custom Property: ${propertyName}</h4>
+          <div class="conditional-element" show-if-property="${propertyName}">
+            <h5>🎯 Custom Element</h5>
+            <p>This element is controlled by the "${propertyName}" property</p>
+          </div>
+          <div class="toggle-buttons">
+            <button class="toggle-btn true" onclick="toggleCustomProperty('${propertyName}', true)">Set True</button>
+            <button class="toggle-btn false" onclick="toggleCustomProperty('${propertyName}', false)">Set False</button>
+          </div>
+        `;
+
+        container.appendChild(demoContainer);
+        addToLog(`Created custom property: ${propertyName}`, 'property-change');
+        input.value = '';
+      }
+    };
+
+    // Toggle custom property
+    window.toggleCustomProperty = function (propertyName, value) {
+      properties[propertyName] = value;
+
+              const mixins = document.querySelectorAll(`show-if-property-true-mixin[show-if-property="${propertyName}"]`);
+        mixins.forEach(mixin => {
+          const targetElement = mixin.firstElementChild;
+          if (targetElement) {
+            targetElement[propertyName] = value;
+            if (typeof mixin.refreshVisibility === 'function') {
+              mixin.refreshVisibility();
+            }
+          }
+        });
+
+      addToLog(`${propertyName}: ${value}`, 'property-change');
+    };
+
+    // Set dynamic property
+    window.setDynamicProperty = function () {
+      const nameInput = document.getElementById('dynamicPropertyName');
+      const valueInput = document.getElementById('dynamicPropertyValue');
+      const propertyName = nameInput.value.trim();
+      const propertyValue = valueInput.value === 'true';
+
+      if (propertyName) {
+        properties[propertyName] = propertyValue;
+
+        const mixins = document.querySelectorAll(`show-if-property-true-mixin[show-if-property="${propertyName}"]`);
+        mixins.forEach(mixin => {
+          const targetElement = mixin.firstElementChild;
+          if (targetElement) {
+            targetElement[propertyName] = propertyValue;
+            if (typeof mixin.refreshVisibility === 'function') {
+              mixin.refreshVisibility();
+            }
+          }
+        });
+
+        const valueDisplay = document.getElementById('dynamicElementValue');
+        if (valueDisplay) {
+          valueDisplay.textContent = propertyValue ? 'true' : 'false';
+        }
+
+        addToLog(`Dynamic property ${propertyName}: ${propertyValue}`, 'property-change');
+      }
+    };
+
+    // Clear log
+    window.clearLog = function () {
+      const log = document.getElementById('propertyLog');
+      if (log) {
+        log.innerHTML = '<div class="log-entry">Log cleared...</div>';
+      }
+    };
+
+    // Initialize demo
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log('DOM loaded, initializing show-if-property demo...');
+
+      try {
+        // Set up property watchers
+        Object.keys(properties).forEach(prop => {
+          const checkbox = document.getElementById(prop);
+          if (checkbox) {
+            checkbox.addEventListener('change', function () {
+              toggleProperty(prop, this.checked);
+            });
+          }
+        });
+
+        // Initialize status indicators
+        updateStatusIndicators();
+
+        // --- FIX: Sync initial property values to mixin children and refresh visibility ---
+        Object.keys(properties).forEach(prop => {
+          const mixins = document.querySelectorAll(`show-if-property-true-mixin[show-if-property="${prop}"]`);
+          mixins.forEach(mixin => {
+            const targetElement = mixin.firstElementChild;
+            if (targetElement) {
+              targetElement[prop] = properties[prop];
+              if (typeof mixin.refreshVisibility === 'function') {
+                mixin.refreshVisibility();
+              }
+            }
+          });
+        });
+        // ------------------------------------------------------------------------------
+
+        // Set up dynamic property watcher
+        const dynamicValueInput = document.getElementById('dynamicPropertyValue');
+        if (dynamicValueInput) {
+          dynamicValueInput.addEventListener('change', function () {
+            setDynamicProperty();
+          });
+        }
+
+        addToLog('Demo initialized successfully', 'property-change');
+        console.log('Show-if-property demo initialized successfully');
+      } catch (error) {
+        console.error('Error initializing show-if-property demo:', error);
+      }
+    });
+  </script>
+</body>
+
+</html>

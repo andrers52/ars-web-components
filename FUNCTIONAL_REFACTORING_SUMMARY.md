@@ -17,8 +17,8 @@ Successfully refactored all web components and mixins to use functional programm
 ### **Mixins Refactored:**
 
 - ✅ `PressedEffect` - 12 pure functions extracted
-- ✅ `RemoteCallCaller` - 4 pure functions extracted
-- ✅ `RemoteCallReceiver` - 15 pure functions extracted
+- ✅ `RemoteCallCallerMixin` - 4 pure functions extracted
+- ✅ `RemoteCallReceiverMixin` - 15 pure functions extracted
 - ✅ `ShowIfPropertyTrue` - 3 pure functions extracted
 - ✅ `Swipeable` - 12 pure functions extracted
 

@@ -1,0 +1,16 @@
+<div class="method-call">
+  <h4>🔢 Decrement Counter</h4>
+  <p>Calls the decrement() method on the receivers</p>
+  <div class="receiver-buttons">
+    <remote-call-caller-mixin target-id="demo-receiver-1" method="decrement" listen="click">
+      <button class="receiver-btn receiver-1">Receiver #1</button>
+    </remote-call-caller-mixin>
+
+    <remote-call-caller-mixin target-id="demo-receiver-2" method="decrement" listen="click">
+      <button class="receiver-btn receiver-2">Receiver #2</button>
+    </remote-call-caller-mixin>
+
+    <button class="receiver-btn both" onclick="if(typeof callDecrementBoth === 'function') callDecrementBoth()">Call
+      Both</button>
+  </div>
+</div>

@@ -1,0 +1,16 @@
+<div class="method-call">
+  <h4>🔢 Increment Counter (mixin demo)</h4>
+  <p>Calls increment() on each receiver via <code>&lt;remote-call-caller-mixin&gt;</code></p>
+  <div class="receiver-buttons">
+    <remote-call-caller-mixin target-id="demo-receiver-1" method="increment" listen="click">
+      <button class="receiver-btn receiver-1">Receiver #1</button>
+    </remote-call-caller-mixin>
+
+    <remote-call-caller-mixin target-id="demo-receiver-2" method="increment" listen="click">
+      <button class="receiver-btn receiver-2">Receiver #2</button>
+    </remote-call-caller-mixin>
+
+    <button class="receiver-btn both" onclick="if(typeof callIncrementBoth === 'function') callIncrementBoth()">Call
+      Both</button>
+  </div>
+</div>

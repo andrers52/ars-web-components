@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Page Controller Debug</title>
+  <style>
+    .nav-btn {
+      padding: 8px 18px;
+      border: 1px solid #667eea;
+      border-radius: 6px;
+      background: #f5f7ff;
+      color: #333;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .nav-btn.active {
+      background: #3b5bdb;
+      color: #fff;
+    }
+    .page {
+      padding: 20px;
+      border: 1px solid #ccc;
+      margin: 10px 0;
+      display: none;
+    }
+    .page.active {
+      display: block;
+    }
+    .debug-info {
+      background: #f0f0f0;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>ARS Page Controller Debug</h1>
+
+  <div class="debug-info" id="debug-info">
+    Loading...
+  </div>
+
+  <!-- Page Controller -->
+  <ars-page-controller target-page="debug-router">
+    <nav>
+      <button class="nav-btn" data-page="home">Home</button>
+      <button class="nav-btn" data-page="about">About</button>
+      <button class="nav-btn" data-page="contact">Contact</button>
+    </nav>
+  </ars-page-controller>
+
+  <!-- Page Router -->
+  <remote-call-receiver-mixin id="debug-router" allow="showPage">
+    <ars-page id="debug-router" default-page="home">
+      <div id="home" class="page active">
+        <h2>Home Page</h2>
+        <p>This is the home page content.</p>
+      </div>
+      <div id="about" class="page">
+        <h2>About Page</h2>
+        <p>This is the about page content.</p>
+      </div>
+      <div id="contact" class="page">
+        <h2>Contact Page</h2>
+        <p>This is the contact page content.</p>
+      </div>
+    </ars-page>
+  </remote-call-receiver-mixin>
+
+  <script type="module" src="../ars-page.js"></script>
+  <script type="module" src="../ars-page-controller.js"></script>
+
+  <script>
+    function updateDebugInfo() {
+      const debugInfo = document.getElementById('debug-info');
+      const controller = document.querySelector('ars-page-controller');
+      const router = document.querySelector('#debug-router ars-page');
+      const navButtons = document.querySelectorAll('.nav-btn');
+
+      let info = '';
+      info += `Controller: ${controller ? 'Found' : 'Not found'}\n`;
+      info += `Router: ${router ? 'Found' : 'Not found'}\n`;
+      info += `Nav buttons: ${navButtons.length}\n`;
+
+      if (controller) {
+        info += `Controller current page: ${controller.getCurrentPage()}\n`;
+      }
+
+      if (router) {
+        const pageInfo = router.getPageInfo();
+        info += `Router current page: ${pageInfo.currentPage}\n`;
+        info += `Available pages: ${pageInfo.availablePages.join(', ')}\n`;
+      }
+
+      navButtons.forEach((btn, index) => {
+        const pageId = btn.getAttribute('data-page');
+        const isActive = btn.classList.contains('active');
+        info += `Button ${index + 1}: ${pageId} (active: ${isActive})\n`;
+      });
+
+      debugInfo.textContent = info;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Debug page loaded');
+
+      // Update debug info every second
+      setInterval(updateDebugInfo, 1000);
+
+      // Initial update
+      setTimeout(updateDebugInfo, 500);
+
+      // Test navigation after 2 seconds
+      setTimeout(() => {
+        const controller = document.querySelector('ars-page-controller');
+        if (controller) {
+          console.log('Testing navigation to about page');
+          controller.navigateToPage('about');
+        }
+      }, 2000);
+    });
+  </script>
+</body>
+</html>

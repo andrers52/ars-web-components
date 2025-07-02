@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Localized Mixin - Demo</title>
+
+  <!-- Import Map for module resolution -->
+  <script type="importmap">
+    {
+      "imports": {
+        "arslib": "../../../node_modules/arslib/index.js"
+      }
+    }
+    </script>
+
+  <!-- Common CSS -->
+  <link rel="stylesheet" href="../../../css/base.css">
+  <link rel="stylesheet" href="../../../css/components.css">
+  <link rel="stylesheet" href="../../../css/buttons.css">
+  <link rel="stylesheet" href="demo.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🌍 Localized Mixin</h1>
+      <p>Internationalization Support for Web Components</p>
+    </div>
+
+    <div class="content">
+      <a href="../../../" class="back-link">← Back to Demo Page</a>
+
+      <div class="info-box">
+        <h4>About Localized Mixin</h4>
+        <p>This mixin provides internationalization (i18n) support for web components. It integrates with the arslib
+          Localization system
+          to automatically translate text content based on the specified language. Perfect for creating multi-language
+          applications.</p>
+      </div>
+
+      <!-- Language Selector -->
+      <div class="demo-section">
+        <h3>🌐 Language Selector</h3>
+        <p>Choose a language to see the localized components update:</p>
+
+        <div class="language-selector">
+          <div class="language-buttons">
+            <button class="lang-btn active" onclick="changeLanguage('en')">🇺🇸 English</button>
+            <button class="lang-btn" onclick="changeLanguage('es')">🇪🇸 Español</button>
+            <button class="lang-btn" onclick="changeLanguage('fr')">🇫🇷 Français</button>
+            <button class="lang-btn" onclick="changeLanguage('de')">🇩🇪 Deutsch</button>
+            <button class="lang-btn" onclick="changeLanguage('pt')">🇧🇷 Português</button>
+            <button class="lang-btn" onclick="changeLanguage('ja')">🇯🇵 日本語</button>
+          </div>
+
+          <div class="form-group">
+            <label>Current Language:</label>
+            <input type="text" id="currentLang" value="en" readonly>
+          </div>
+        </div>
+      </div>
+
+      <!-- Localized Components Demo -->
+      <div class="demo-section">
+        <h3>📝 Localized Components</h3>
+        <p>These components automatically update their text based on the selected language:</p>
+
+        <div class="localized-component">
+          <h4>Welcome Component</h4>
+          <localized-mixin locale="en" id="welcome-mixin">
+            <div>
+              <div class="localized-text">[[localization.welcome]]</div>
+              <div class="localized-text">[[localization.description]]</div>
+            </div>
+          </localized-mixin>
+        </div>
+
+        <div class="localized-component">
+          <h4>Form Component</h4>
+          <localized-mixin locale="en" id="form-mixin">
+            <div class="demo-form">
+              <div class="form-group">
+                <label>[[localization.name]]:</label>
+                <input type="text" placeholder="[[localization.namePlaceholder]]">
+              </div>
+              <div class="form-group">
+                <label>[[localization.email]]:</label>
+                <input type="email" placeholder="[[localization.emailPlaceholder]]">
+              </div>
+              <div class="form-group">
+                <label>[[localization.country]]:</label>
+                <select>
+                  <option value="">[[localization.selectCountry]]</option>
+                  <option value="us">[[localization.countries.us]]</option>
+                  <option value="es">[[localization.countries.es]]</option>
+                  <option value="fr">[[localization.countries.fr]]</option>
+                  <option value="de">[[localization.countries.de]]</option>
+                </select>
+              </div>
+              <button class="btn">[[localization.submit]]</button>
+            </div>
+          </localized-mixin>
+        </div>
+      </div>
+
+      <!-- Translation Table -->
+      <div class="demo-section">
+        <h3>📋 Translation Reference</h3>
+        <p>Reference table showing all available translations:</p>
+
+        <div class="translation-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>English</th>
+                <th>Español</th>
+                <th>Français</th>
+                <th>Deutsch</th>
+                <th>Português</th>
+                <th>日本語</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>welcome</code></td>
+                <td>Welcome to our application!</td>
+                <td>¡Bienvenido a nuestra aplicación!</td>
+                <td>Bienvenue dans notre application !</td>
+                <td>Willkommen in unserer Anwendung!</td>
+                <td>Bem-vindo ao nosso aplicativo!</td>
+                <td>アプリケーションへようこそ！</td>
+              </tr>
+              <tr>
+                <td><code>description</code></td>
+                <td>This is a localized component demo</td>
+                <td>Este es un demo de componente localizado</td>
+                <td>Ceci est une démo de composant localisé</td>
+                <td>Dies ist eine Demo einer lokalisierten Komponente</td>
+                <td>Este é um demo de componente localizado</td>
+                <td>これはローカライズされたコンポーネントのデモです</td>
+              </tr>
+              <tr>
+                <td><code>name</code></td>
+                <td>Name</td>
+                <td>Nombre</td>
+                <td>Nom</td>
+                <td>Name</td>
+                <td>Nome</td>
+                <td>名前</td>
+              </tr>
+              <tr>
+                <td><code>email</code></td>
+                <td>Email</td>
+                <td>Correo electrónico</td>
+                <td>Email</td>
+                <td>E-Mail</td>
+                <td>Email</td>
+                <td>メール</td>
+              </tr>
+              <tr>
+                <td><code>submit</code></td>
+                <td>Submit</td>
+                <td>Enviar</td>
+                <td>Soumettre</td>
+                <td>Absenden</td>
+                <td>Enviar</td>
+                <td>送信</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Implementation Guide -->
+      <div class="demo-section">
+        <h3>📖 Implementation Guide</h3>
+
+        <div class="instructions">
+          <h4>How to Use the Localized Mixin:</h4>
+          <p>1. Use the mixin element: <code>&lt;localized-mixin&gt;content&lt;/localized-mixin&gt;</code></p>
+          <p>2. Use <code>[[localization.key]]</code> syntax in your HTML content</p>
+          <p>3. Set the locale attribute: <code>locale="en"</code></p>
+        </div>
+
+        <div class="code-example">
+          // Using the localized-mixin element
+          &lt;localized-mixin locale="en"&gt;
+          &lt;div&gt;
+          &lt;h2&gt;[[localization.welcome]]&lt;/h2&gt;
+          &lt;p&gt;[[localization.description]]&lt;/p&gt;
+          &lt;button&gt;[[localization.submit]]&lt;/button&gt;
+          &lt;/div&gt;
+          &lt;/localized-mixin&gt;
+        </div>
+
+        <div class="code-example">
+          // Adding translations programmatically
+          const mixin = document.querySelector('localized-mixin');
+          mixin.addTranslations('en', {
+          welcome: 'Custom Welcome',
+          description: 'Custom Description'
+          });
+        </div>
+
+      </div>
+
+      <!-- Features -->
+      <div class="demo-section">
+        <h3>✨ Features</h3>
+        <div class="info-box">
+          <h4>What the Localized Mixin Provides:</h4>
+          <ul>
+            <li><strong>Declarative Element:</strong> Use <code>&lt;localized-mixin&gt;</code> for easy
+              localization</li>
+            <li><strong>Multi-language Support:</strong> Easy switching between languages</li>
+            <li><strong>Template Syntax:</strong> Use <code>[[localization.key]]</code> in HTML</li>
+            <li><strong>Automatic Updates:</strong> Content updates when language changes</li>
+            <li><strong>Custom Translations:</strong> Add or override translations programmatically</li>
+            <li><strong>Fallback Support:</strong> Graceful fallback to base locale and English</li>
+            <li><strong>Parameter Interpolation:</strong> Support for dynamic values in translations</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Simple Attribute-based Localization Demo -->
+      <div class="demo-section">
+        <h3>🔤 Simple Attribute-based Localization</h3>
+        <p>
+          <strong>Demo:</strong> The element below is localized using <code>&lt;localized-mixin&gt;</code> and the <code>data-localize-map</code> convention.<br>
+          Change the language above to see the title and button label update!
+        </p>
+        <localized-mixin locale="en" id="simple-mixin">
+          <simple-localized-element data-localize-map='{"title":"simple.title","button-label":"simple.button"}'></simple-localized-element>
+        </localized-mixin>
+        <div class="instructions">
+          <h4>How it works:</h4>
+          <ul>
+            <li>The <code>&lt;simple-localized-element&gt;</code> component declares which attributes it wants localized and which translation keys to use via <code>data-localize-map</code>.</li>
+            <li>The <code>&lt;localized-mixin&gt;</code> detects this and sets the appropriate attributes based on the current language.</li>
+            <li>This pattern is generic and works for any component that follows the convention.</li>
+          </ul>
+        </div>
+        <div class="code-example">
+          &lt;localized-mixin locale="en"&gt;<br>
+          &nbsp;&nbsp;&lt;simple-localized-element <br>
+          &nbsp;&nbsp;&nbsp;&nbsp;data-localize-map='{"title":"simple.title","button-label":"simple.button"}'&gt;&lt;/simple-localized-element&gt;<br>
+          &lt;/localized-mixin&gt;
+        </div>
+      </div>
+
+      <!-- Attribute-based Localization Demo -->
+      <div class="demo-section">
+        <h3>🔤 Attribute-based Localization (Simple Example)</h3>
+        <p>
+          <strong>Demo:</strong> The element below is localized using <code>&lt;localized-mixin&gt;</code> and the <code>data-localize-map</code> convention.<br>
+          Change the language above to see the title and button label update!
+        </p>
+        <localized-mixin locale="en" id="simple-attr-mixin">
+          <simple-localized-element data-localize-map='{"title":"simple.title","button-label":"simple.button"}'></simple-localized-element>
+        </localized-mixin>
+        <div class="instructions">
+          <h4>How it works:</h4>
+          <ul>
+            <li>The <code>&lt;simple-localized-element&gt;</code> component declares which attributes it wants localized and which translation keys to use via <code>data-localize-map</code>.</li>
+            <li>The <code>&lt;localized-mixin&gt;</code> detects this and sets the appropriate attributes based on the current language.</li>
+            <li>This pattern is generic and works for any component that follows the convention.</li>
+          </ul>
+        </div>
+        <div class="code-example">
+          &lt;localized-mixin locale="en"&gt;<br>
+          &nbsp;&nbsp;&lt;simple-localized-element <br>
+          &nbsp;&nbsp;&nbsp;&nbsp;data-localize-map='{"title":"simple.title","button-label":"simple.button"}'&gt;&lt;/simple-localized-element&gt;<br>
+          &lt;/localized-mixin&gt;
+        </div>
+      </div>
+
+      <!-- Per-mixin Translations Demo -->
+      <div class="demo-section">
+        <h3>🗂️ Per-mixin (Instance) Translations</h3>
+        <p>
+          <strong>Demo:</strong> The element below uses a <code>translations</code> attribute on <code>&lt;localized-mixin&gt;</code> to provide a custom translation table, independent of the global one.<br>
+          Use the language selector below to change only this instance!
+        </p>
+        <div style="margin-bottom: 10px;">
+          <label for="custom-mixin-lang"><strong>Language for this instance:</strong></label>
+          <select id="custom-mixin-lang" onchange="document.getElementById('custom-mixin').setLocale(this.value)">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+          </select>
+        </div>
+        <localized-mixin
+          locale="en"
+          id="custom-mixin"
+          translations='{"en":{"simple":{"title":"Custom Title!","button":"Custom Button"}},"es":{"simple":{"title":"¡Título Personalizado!","button":"Botón Personalizado"}}}'
+        >
+          <simple-localized-element data-localize-map='{"title":"simple.title","button-label":"simple.button"}'></simple-localized-element>
+        </localized-mixin>
+        <div class="instructions">
+          <h4>How it works:</h4>
+          <ul>
+            <li>The <code>translations</code> attribute provides a translation table just for this mixin instance.</li>
+            <li>The language selector above only affects this instance, not the others on the page.</li>
+            <li>This is useful for widgets, micro-frontends, or testing with custom translations.</li>
+          </ul>
+        </div>
+        <div class="code-example">
+          &lt;!-- Language selector for this instance --&gt;<br>
+          &lt;select onchange="document.getElementById('custom-mixin').setLocale(this.value)"&gt;<br>
+          &nbsp;&nbsp;&lt;option value="en"&gt;English&lt;/option&gt;<br>
+          &nbsp;&nbsp;&lt;option value="es"&gt;Español&lt;/option&gt;<br>
+          &lt;/select&gt;<br>
+          &lt;localized-mixin<br>
+          &nbsp;&nbsp;locale="en"<br>
+          &nbsp;&nbsp;translations='{"en":{"simple":{"title":"Custom Title!","button":"Custom Button"}},<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;"es":{"simple":{"title":"¡Título Personalizado!","button":"Botón Personalizado"}}}'<br>
+          &gt;<br>
+          &nbsp;&nbsp;&lt;simple-localized-element <br>
+          &nbsp;&nbsp;&nbsp;&nbsp;data-localize-map='{"title":"simple.title","button-label":"simple.button"}'&gt;&lt;/simple-localized-element&gt;<br>
+          &lt;/localized-mixin&gt;
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load the mixin and demo -->
+  <script type="module">
+    import { LocalizedMixin } from '../localized-mixin.js';
+
+    // Global translations object - automatically picked up by Mixins
+    window.globalTranslations = {
+      en: {
+        welcome: 'Welcome to our application!',
+        description: 'This is a localized component demo',
+        name: 'Name',
+        namePlaceholder: 'Enter your name',
+        email: 'Email',
+        emailPlaceholder: 'Enter your email',
+        country: 'Country',
+        selectCountry: 'Select a country',
+        submit: 'Submit',
+        nav: {
+          home: 'Home',
+          about: 'About',
+          contact: 'Contact',
+          settings: 'Settings'
+        },
+        countries: {
+          us: 'United States',
+          es: 'Spain',
+          fr: 'France',
+          de: 'Germany'
+        },
+        today: 'Today',
+        days: { sun: 'Sun', mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat' },
+        months: { jan: 'January', feb: 'February', mar: 'March', apr: 'April', may: 'May', jun: 'June', jul: 'July', aug: 'August', sep: 'September', oct: 'October', nov: 'November', dec: 'December' },
+        simple: { title: 'Welcome!', button: 'Click Me' },
+      },
+      es: {
+        welcome: '¡Bienvenido a nuestra aplicación!',
+        description: 'Este es un demo de componente localizado',
+        name: 'Nombre',
+        namePlaceholder: 'Ingresa tu nombre',
+        email: 'Correo electrónico',
+        emailPlaceholder: 'Ingresa tu correo',
+        country: 'País',
+        selectCountry: 'Selecciona un país',
+        submit: 'Enviar',
+        nav: {
+          home: 'Inicio',
+          about: 'Acerca de',
+          contact: 'Contacto',
+          settings: 'Configuración'
+        },
+        countries: {
+          us: 'Estados Unidos',
+          es: 'España',
+          fr: 'Francia',
+          de: 'Alemania'
+        },
+        today: 'Hoy',
+        days: { sun: 'Dom', mon: 'Lun', tue: 'Mar', wed: 'Mié', thu: 'Jue', fri: 'Vie', sat: 'Sáb' },
+        months: { jan: 'Enero', feb: 'Febrero', mar: 'Marzo', apr: 'Abril', may: 'Mayo', jun: 'Junio', jul: 'Julio', aug: 'Agosto', sep: 'Septiembre', oct: 'Octubre', nov: 'Noviembre', dec: 'Diciembre' },
+        simple: { title: '¡Bienvenido!', button: 'Haz clic' },
+      },
+      fr: {
+        welcome: 'Bienvenue dans notre application !',
+        description: 'Ceci est une démo de composant localisé',
+        name: 'Nom',
+        namePlaceholder: 'Entrez votre nom',
+        email: 'Email',
+        emailPlaceholder: 'Entrez votre email',
+        country: 'Pays',
+        selectCountry: 'Sélectionnez un pays',
+        submit: 'Soumettre',
+        nav: {
+          home: 'Accueil',
+          about: 'À propos',
+          contact: 'Contact',
+          settings: 'Paramètres'
+        },
+        countries: {
+          us: 'États-Unis',
+          es: 'Espagne',
+          fr: 'France',
+          de: 'Allemagne'
+        },
+        today: 'Aujourd\'hui',
+        days: { sun: 'Dim', mon: 'Lun', tue: 'Mar', wed: 'Mer', thu: 'Jeu', fri: 'Ven', sat: 'Sam' },
+        months: { jan: 'Janvier', feb: 'Février', mar: 'Mars', apr: 'Avril', may: 'Mai', jun: 'Juin', jul: 'Juillet', aug: 'Août', sep: 'Septembre', oct: 'Octobre', nov: 'Novembre', dec: 'Décembre' },
+        simple: { title: 'Bienvenue!', button: 'Cliquez-moi' },
+      },
+      de: {
+        welcome: 'Willkommen in unserer Anwendung!',
+        description: 'Dies ist eine Demo einer lokalisierten Komponente',
+        name: 'Name',
+        namePlaceholder: 'Geben Sie Ihren Namen ein',
+        email: 'E-Mail',
+        emailPlaceholder: 'Geben Sie Ihre E-Mail ein',
+        country: 'Land',
+        selectCountry: 'Wählen Sie ein Land',
+        submit: 'Absenden',
+        nav: {
+          home: 'Startseite',
+          about: 'Über uns',
+          contact: 'Kontakt',
+          settings: 'Einstellungen'
+        },
+        countries: {
+          us: 'Vereinigte Staaten',
+          es: 'Spanien',
+          fr: 'Frankreich',
+          de: 'Deutschland'
+        },
+        today: 'Heute',
+        days: { sun: 'Son', mon: 'Mon', tue: 'Die', wed: 'Mit', thu: 'Don', fri: 'Fre', sat: 'Sam' },
+        months: { jan: 'Januar', feb: 'Februar', mar: 'März', apr: 'April', may: 'Mai', jun: 'Juni', jul: 'Juli', aug: 'August', sep: 'September', oct: 'Oktober', nov: 'November', dec: 'Dezember' },
+        simple: { title: 'Willkommen!', button: 'Klick mich' },
+      },
+      pt: {
+        welcome: 'Bem-vindo ao nosso aplicativo!',
+        description: 'Este é um demo de componente localizado',
+        name: 'Nome',
+        namePlaceholder: 'Digite seu nome',
+        email: 'Email',
+        emailPlaceholder: 'Digite seu email',
+        country: 'País',
+        selectCountry: 'Selecione um país',
+        submit: 'Enviar',
+        nav: {
+          home: 'Início',
+          about: 'Sobre',
+          contact: 'Contato',
+          settings: 'Configurações'
+        },
+        countries: {
+          us: 'Estados Unidos',
+          es: 'Espanha',
+          fr: 'França',
+          de: 'Alemanha'
+        },
+        today: 'Hoje',
+        days: { sun: 'Dom', mon: 'Seg', tue: 'Ter', wed: 'Qua', thu: 'Qui', fri: 'Sex', sat: 'Sáb' },
+        months: { jan: 'Janeiro', feb: 'Fevereiro', mar: 'Março', apr: 'Abril', may: 'Maio', jun: 'Junho', jul: 'Julho', aug: 'Agosto', sep: 'Setembro', oct: 'Outubro', nov: 'Novembro', dec: 'Dezembro' },
+        simple: { title: 'Bem-vindo!', button: 'Clique em mim' },
+      },
+      ja: {
+        welcome: 'アプリケーションへようこそ！',
+        description: 'これはローカライズされたコンポーネントのデモです',
+        name: '名前',
+        namePlaceholder: '名前を入力してください',
+        email: 'メール',
+        emailPlaceholder: 'メールアドレスを入力してください',
+        country: '国',
+        selectCountry: '国を選択してください',
+        submit: '送信',
+        nav: {
+          home: 'ホーム',
+          about: '概要',
+          contact: 'お問い合わせ',
+          settings: '設定'
+        },
+        countries: {
+          us: 'アメリカ合衆国',
+          es: 'スペイン',
+          fr: 'フランス',
+          de: 'ドイツ'
+        },
+        today: '今日',
+        days: { sun: '日', mon: '月', tue: '火', wed: '水', thu: '木', fri: '金', sat: '土' },
+        months: { jan: '1月', feb: '2月', mar: '3月', apr: '4月', may: '5月', jun: '6月', jul: '7月', aug: '8月', sep: '9月', oct: '10月', nov: '11月', dec: '12月' },
+        simple: { title: 'ようこそ！', button: 'クリックして' },
+      }
+    };
+
+    // Define changeLanguage function
+    window.changeLanguage = function (lang) {
+      console.log(`[Demo] changeLanguage called with: ${lang}`);
+
+      // Update active button
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      // Update current language display
+      document.getElementById('currentLang').value = lang;
+
+      // Update all localized Mixins
+      const Mixins = document.querySelectorAll('localized-mixin');
+      console.log(`[Demo] Found ${Mixins.length} localized-mixin elements:`, Mixins);
+      Mixins.forEach((mixin, index) => {
+        console.log(`[Demo] Calling setLocale on mixin ${index}:`, mixin);
+        mixin.setLocale(lang);
+      });
+
+      console.log(`[Demo] Language change completed: ${lang}`);
+    };
+
+    // Initialize mixins with translations
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log('Localized Mixin Demo initialized');
+
+      // Reload translations in all mixins after globalTranslations is set
+      setTimeout(() => {
+        const mixins = document.querySelectorAll('localized-mixin');
+        console.log(`[Demo] Reloading translations in ${mixins.length} mixins`);
+        mixins.forEach((mixin, index) => {
+          console.log(`[Demo] Reloading translations in mixin ${index}`);
+          mixin.reloadTranslations();
+        });
+      }, 50);
+    });
+  </script>
+
+  <script type="module" src="simple-localized-element.js"></script>
+</body>
+
+</html>
