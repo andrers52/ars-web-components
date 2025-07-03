@@ -4,7 +4,7 @@ A collection of reusable web components built with vanilla JavaScript and ES mod
 
 ## 🚀 Live Demo
 
-Check out the (live demo)[https://andrers52.github.io/src/projects/ars-web-components/].
+Check out the [live demo](https://andrers52.github.io/src/projects/ars-web-components/).
 
 **Alternative:** Download the repository and open `index.html` in a local web server.
 
