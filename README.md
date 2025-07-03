@@ -4,16 +4,7 @@ A collection of reusable web components built with vanilla JavaScript and ES mod
 
 ## 🚀 Live Demo
 
-**Quick Start (Recommended):**
-
-```bash
-git clone https://github.com/andrers52/ars-web-components.git
-cd ars-web-components
-npm install
-npm start
-```
-
-This will automatically open the demo in your browser at `http://localhost:8080`
+Check out the (live demo)[https://andrers52.github.io/src/projects/ars-web-components/].
 
 **Alternative:** Download the repository and open `index.html` in a local web server.
 
@@ -74,12 +65,6 @@ class MyComponent extends HTMLElement {
 
 ```bash
 npm install ars-web-components
-```
-
-## Demo
-
-```bash
-npm start
 ```
 
 ## Usage
