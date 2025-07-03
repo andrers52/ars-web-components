@@ -5,7 +5,7 @@
 //   </roll-mixin>
 // Provides roll(), setRollDuration(), etc.
 
-import WebComponentBase from '../../web-component-base/web-component-base.js';
+import WebComponentBase from '../../components/web-component-base/web-component-base.js';
 
 class RollMixin extends WebComponentBase {
   static get observedAttributes() { return ['roll-duration']; }

@@ -1,4 +1,4 @@
-import WebComponentBase from '../../web-component-base/web-component-base.js';
+import WebComponentBase from '../../components/web-component-base/web-component-base.js';
 import { MixinBase } from '../common/mixin-base.js';
 
 // SwipeableMixin - declarative web component for swipe gesture detection

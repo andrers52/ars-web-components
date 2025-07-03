@@ -20,7 +20,7 @@
 
 import WebComponentBase from "../web-component-base/web-component-base.js";
 import { DEFAULT_CSS } from "./ars-dialog-css.js";
-import "../mixins/pressed-effect-mixin/pressed-effect-mixin.js";
+import "../../mixins/pressed-effect-mixin/pressed-effect-mixin.js";
 
 class ArsDialog extends WebComponentBase {
   constructor() {

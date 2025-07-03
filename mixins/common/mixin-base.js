@@ -15,7 +15,7 @@
 //   };
 
 import {Assert} from 'arslib';
-import WebComponentBase from '../../web-component-base/web-component-base.js';
+import WebComponentBase from '../../components/web-component-base/web-component-base.js';
 
 const MixinBase = (BaseClass = WebComponentBase) => class extends BaseClass {
   constructor() {

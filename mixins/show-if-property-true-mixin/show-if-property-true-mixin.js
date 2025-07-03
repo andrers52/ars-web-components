@@ -5,7 +5,7 @@
 //   </show-if-property-true-mixin>
 // Provides setShowProperty(), getShowProperty(), refreshVisibility(), etc.
 
-import WebComponentBase from '../../web-component-base/web-component-base.js';
+import WebComponentBase from '../../components/web-component-base/web-component-base.js';
 
 class ShowIfPropertyTrueMixin extends WebComponentBase {
   static get observedAttributes() { return ['show-if-property']; }

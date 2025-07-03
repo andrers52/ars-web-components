@@ -21,7 +21,7 @@
 // This component internally uses the remote-call-caller-mixin to communicate with the page router.
 
 import "./ars-page-controller-internal.js";
-import "../mixins/remote-call-mixin/remote-call-caller-mixin.js";
+import "../../mixins/remote-call-mixin/remote-call-caller-mixin.js";
 
 class ArsPageController extends HTMLElement {
   constructor() {

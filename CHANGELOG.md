@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.0] - 2024-12-19
+## [0.4.1] - 2025-07-03
+
+- Moving components to its own dir
+
+## [0.4.0] - 2025-07-03
 
 ### Added
 
@@ -41,7 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Enhanced Demos**: Interactive demos with real-time feedback and comprehensive examples
 - **Improved Maintainability**: Better separation of concerns and cleaner architecture
 
-## [0.3.5] - 2024-07-02
+## [0.3.5] - 2025-06-30
 
 ### Changed
 
@@ -57,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Legacy Code**: All code and documentation related to `remote-call-id`, promise-based remote calls, and unnecessary lifecycle/attribute handling have been removed for clarity and simplicity.
 
-## [0.3.4] - 2024-12-19
+## [0.3.4] - 2025-06-29
 
 ### Fixed
 
@@ -69,7 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Component Exports**: `ArsPage` and `ArsPageController` are now properly exported from the main library index.js file.
 - **Enhanced Router Support**: Better integration support for applications using the ars-page components for client-side routing.
 
-## [0.3.3] - 2024-07-01
+## [0.3.3] - 2025-06-29
 
 ### Changed
 
@@ -82,7 +86,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Timeouts and UI Sync**: Fixed remote call timeouts and UI sync issues by ensuring correct event propagation and callId usage.
 
-## [0.3.2] - 2024-07-01
+## [0.3.2] - 2025-06-29
 
 ### Added
 
@@ -95,7 +99,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Improved Accessibility and Usability**: Larger, touch-friendly color blocks with reduced spacing and better alignment.
 - **Demo Page**: Updated to show best practices for integrating the color picker and updating UI on color change.
 
-## [0.3.1] - 2024-06-27
+## [0.3.1] - 2025-06-29
 
 ### Added
 
@@ -107,7 +111,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Demo refactored for clarity and simplicity.
 
-## [0.3.0] - 2025-01-27
+## [0.3.0] - 2025-06-27
 
 ### Added
 
@@ -145,7 +149,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Code Quality**: Improved maintainability through better function organization
 - **Development Experience**: Cleaner console output and better error handling in demos
 
-## [0.2.4] - 2025-01-27
+## [0.2.4] - 2025-06-27
 
 ### Changed
 
@@ -164,7 +168,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Demo Access**: Resolved issue where users couldn't view demo due to ES module requirements
 - **Documentation**: Fixed demo link that pointed to non-existent GitHub Pages setup
 
-## [0.2.3] - 2025-01-27
+## [0.2.3] - 2025-06-27
 
 ### Fixed
 
