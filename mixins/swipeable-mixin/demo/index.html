@@ -6,6 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Swipeable Mixin - Demo</title>
 
+  <script>
+    // Log page load
+    window.addEventListener('DOMContentLoaded', function() {
+      console.log('=== [swipeable-mixin/demo/index.html] HTML loaded and script running ===');
+    });
+  </script>
+
   <!-- Common CSS -->
   <link rel="stylesheet" href="../../../css/base.css">
   <link rel="stylesheet" href="../../../css/components.css">
@@ -541,121 +548,122 @@
     };
 
     // Initialize demo
-    document.addEventListener('DOMContentLoaded', function () {
-      console.log('DOM loaded, initializing swipeable demo...');
+    // Not waiting for DOMContentLoaded because it's not working
+    // on mobile.
+    console.log('DOM loaded, initializing swipeable demo...');
 
-      try {
-        // Attach swipe event listeners to static elements
-        let swipeCounts = { left: 0, right: 0, up: 0, down: 0 };
+    try {
+      // Attach swipe event listeners to static elements
+      let swipeCounts = { left: 0, right: 0, up: 0, down: 0 };
 
-        // Simple Test
-        const testSwipeable = document.getElementById('testSwipeable');
-        if (testSwipeable) {
-          testSwipeable.addEventListener('swipe', (e) => {
-            const direction = e.detail.direction;
-            const details = e.detail;
-            // Change background color based on direction
-            const colors = {
-              left: 'blue',
-              right: 'green',
-              up: 'orange',
-              down: 'purple'
-            };
-            testSwipeable.style.background = colors[direction] || 'red';
-            testSwipeable.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-              testSwipeable.style.background = 'red';
-              testSwipeable.style.transform = 'scale(1)';
-            }, 1000);
-            addToHistory(direction, details, 'test');
-          });
-        }
-
-        // Main Swipe Demo
-        const mainSwipeable = document.getElementById('mainSwipeable');
-        if (mainSwipeable) {
-          mainSwipeable.addEventListener('swipe', (e) => {
-            const direction = e.detail.direction;
-            const details = e.detail;
-            swipeCounts[direction]++;
-            const countElement = document.getElementById(`${direction}Count`);
-            if (countElement) {
-              countElement.textContent = swipeCounts[direction];
-            }
-            const distanceElement = document.getElementById('swipeDistance');
-            const timeElement = document.getElementById('swipeTime');
-            const directionElement = document.getElementById('swipeDirectionText');
-            if (distanceElement) distanceElement.textContent = Math.round(details.distance);
-            if (timeElement) timeElement.textContent = details.time;
-            if (directionElement) directionElement.textContent = direction;
-            const iconElement = mainSwipeable.querySelector('.swipe-direction');
-            if (iconElement) {
-              const directionIcons = {
-                left: '👈',
-                right: '👉',
-                up: '👆',
-                down: '👇'
-              };
-              iconElement.textContent = directionIcons[direction] || '👆';
-              iconElement.className = `swipe-direction ${direction}`;
-            }
-            mainSwipeable.classList.add('swiped');
-            setTimeout(() => mainSwipeable.classList.remove('swiped'), 500);
-            addToHistory(direction, details);
-          });
-        }
-
-        // Card 1
-        const swipeCard1 = document.getElementById('swipeCard1');
-        if (swipeCard1) {
-          swipeCard1.addEventListener('swipe', (e) => {
-            const direction = e.detail.direction;
-            const details = e.detail;
-            swipeCard1.classList.add('swiped');
-            setTimeout(() => swipeCard1.classList.remove('swiped'), 600);
-            const directionElement = swipeCard1.querySelector('.swipe-direction');
-            if (directionElement) {
-              const directionIcons = {
-                left: '⬅️',
-                right: '➡️',
-                up: '⬆️',
-                down: '⬇️'
-              };
-              directionElement.textContent = directionIcons[direction] || '🔄';
-              directionElement.className = `swipe-direction ${direction}`;
-            }
-            addToHistory(direction, details, 'swipeCard1');
-          });
-        }
-
-        // Card 2
-        const swipeCard2 = document.getElementById('swipeCard2');
-        if (swipeCard2) {
-          swipeCard2.addEventListener('swipe', (e) => {
-            const direction = e.detail.direction;
-            const details = e.detail;
-            swipeCard2.classList.add('swiped');
-            setTimeout(() => swipeCard2.classList.remove('swiped'), 600);
-            const directionElement = swipeCard2.querySelector('.swipe-direction');
-            if (directionElement) {
-              const directionIcons = {
-                left: '⬅️',
-                right: '➡️',
-                up: '⬆️',
-                down: '⬇️'
-              };
-              directionElement.textContent = directionIcons[direction] || '🎯';
-              directionElement.className = `swipe-direction ${direction}`;
-            }
-            addToHistory(direction, details, 'swipeCard2');
-          });
-        }
-
-        console.log('Swipeable demo initialized successfully');
-      } catch (error) {
-        console.error('Error initializing swipeable demo:', error);
+      // Simple Test
+      const testSwipeable = document.getElementById('testSwipeable');
+      if (testSwipeable) {
+        testSwipeable.addEventListener('swipe', (e) => {
+          console.log('SWIPE EVENT HANDLER FIRED: ' + JSON.stringify(e.detail));
+          const direction = e.detail.direction;
+          const details = e.detail;
+          // Change background color based on direction
+          const colors = {
+            left: 'blue',
+            right: 'green',
+            up: 'orange',
+            down: 'purple'
+          };
+          testSwipeable.style.background = colors[direction] || 'red';
+          testSwipeable.style.transform = 'scale(0.95)';
+          setTimeout(() => {
+            testSwipeable.style.background = 'red';
+            testSwipeable.style.transform = 'scale(1)';
+          }, 1000);
+          addToHistory(direction, details, 'test');
+        });
       }
-    });
+
+      // Main Swipe Demo
+      const mainSwipeable = document.getElementById('mainSwipeable');
+      if (mainSwipeable) {
+        mainSwipeable.addEventListener('swipe', (e) => {
+          const direction = e.detail.direction;
+          const details = e.detail;
+          swipeCounts[direction]++;
+          const countElement = document.getElementById(`${direction}Count`);
+          if (countElement) {
+            countElement.textContent = swipeCounts[direction];
+          }
+          const distanceElement = document.getElementById('swipeDistance');
+          const timeElement = document.getElementById('swipeTime');
+          const directionElement = document.getElementById('swipeDirectionText');
+          if (distanceElement) distanceElement.textContent = Math.round(details.distance);
+          if (timeElement) timeElement.textContent = details.time;
+          if (directionElement) directionElement.textContent = direction;
+          const iconElement = mainSwipeable.querySelector('.swipe-direction');
+          if (iconElement) {
+            const directionIcons = {
+              left: '👈',
+              right: '👉',
+              up: '👆',
+              down: '👇'
+            };
+            iconElement.textContent = directionIcons[direction] || '👆';
+            iconElement.className = `swipe-direction ${direction}`;
+          }
+          mainSwipeable.classList.add('swiped');
+          setTimeout(() => mainSwipeable.classList.remove('swiped'), 500);
+          addToHistory(direction, details);
+        });
+      }
+
+      // Card 1
+      const swipeCard1 = document.getElementById('swipeCard1');
+      if (swipeCard1) {
+        swipeCard1.addEventListener('swipe', (e) => {
+          const direction = e.detail.direction;
+          const details = e.detail;
+          swipeCard1.classList.add('swiped');
+          setTimeout(() => swipeCard1.classList.remove('swiped'), 600);
+          const directionElement = swipeCard1.querySelector('.swipe-direction');
+          if (directionElement) {
+            const directionIcons = {
+              left: '⬅️',
+              right: '➡️',
+              up: '⬆️',
+              down: '⬇️'
+            };
+            directionElement.textContent = directionIcons[direction] || '🔄';
+            directionElement.className = `swipe-direction ${direction}`;
+          }
+          addToHistory(direction, details, 'swipeCard1');
+        });
+      }
+
+      // Card 2
+      const swipeCard2 = document.getElementById('swipeCard2');
+      if (swipeCard2) {
+        swipeCard2.addEventListener('swipe', (e) => {
+          const direction = e.detail.direction;
+          const details = e.detail;
+          swipeCard2.classList.add('swiped');
+          setTimeout(() => swipeCard2.classList.remove('swiped'), 600);
+          const directionElement = swipeCard2.querySelector('.swipe-direction');
+          if (directionElement) {
+            const directionIcons = {
+              left: '⬅️',
+              right: '➡️',
+              up: '⬆️',
+              down: '⬇️'
+            };
+            directionElement.textContent = directionIcons[direction] || '🎯';
+            directionElement.className = `swipe-direction ${direction}`;
+          }
+          addToHistory(direction, details, 'swipeCard2');
+        });
+      }
+
+      console.log('Swipeable demo initialized successfully');
+    } catch (error) {
+      console.error('Error initializing swipeable demo:', error);
+    }
   </script>
 </body>
 

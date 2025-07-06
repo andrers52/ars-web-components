@@ -40,9 +40,15 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
 
   _getTouchCoordinates(event) {
     if (event.touches && event.touches.length > 0) {
-      const touch = event.touches[0] || event.changedTouches[0];
+      // Touch start or move
+      const touch = event.touches[0];
+      return { x: touch.clientX, y: touch.clientY };
+    } else if (event.changedTouches && event.changedTouches.length > 0) {
+      // Touch end
+      const touch = event.changedTouches[0];
       return { x: touch.clientX, y: touch.clientY };
     } else {
+      // Mouse event fallback
       return { x: event.clientX, y: event.clientY };
     }
   }
@@ -76,18 +82,32 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
   }
 
   _handleTouchStart = (event) => {
+    event.preventDefault();
     const coords = this._getTouchCoordinates(event);
     this._touchStartX = coords.x;
     this._touchStartY = coords.y;
     this._touchStartTime = Date.now();
+    console.log('Touch start:', this._touchStartX, this._touchStartY);
+  };
+
+  _handleTouchMove = (event) => {
+    event.preventDefault();
+    // Prevent scrolling during swipe
   };
 
   _handleTouchEnd = (event) => {
+    event.preventDefault();
+    console.log('_handleTouchEnd');
     const coords = this._getTouchCoordinates(event);
     this._touchEndX = coords.x;
     this._touchEndY = coords.y;
     const { deltaX, deltaY, distance } = this._calculateSwipeDistance();
     const time = this._calculateSwipeTime();
+    console.log('Touch start:', this._touchStartX, this._touchStartY);
+    console.log('Touch end:', this._touchEndX, this._touchEndY);
+    console.log('Delta X:', deltaX, 'Delta Y:', deltaY, 'Distance:', distance);
+    console.log('Time:', time, 'Min distance:', this._minSwipeDistance, 'Max time:', this._maxSwipeTime);
+    console.log('this._isValidSwipe(distance, time)', this._isValidSwipe(distance, time));
     if (this._isValidSwipe(distance, time)) {
       const direction = this._determineSwipeDirection(deltaX, deltaY);
       this.onSwipe(direction, { deltaX, deltaY, distance, time });
@@ -102,6 +122,7 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
   };
 
   _handleMouseEnd = (event) => {
+    console.log('_handleMouseEnd');
     const coords = this._getTouchCoordinates(event);
     this._touchEndX = coords.x;
     this._touchEndY = coords.y;
@@ -127,12 +148,14 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
   }
 
   onSwipe(direction, details) {
-    // Default implementation: dispatch a custom event
+    // Always dispatch from the host element, not from shadowRoot or a child
     this.dispatchEvent(new CustomEvent("swipe", {
       detail: { direction, ...details },
       bubbles: true,
       composed: true,
     }));
+    // Optionally, also log for debugging
+    if (window.debugLog) window.debugLog('CustomEvent "swipe" dispatched from host');
   }
 
   connectedCallback() {
@@ -146,10 +169,10 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
     if (this._validateTime(time)) {
       this._maxSwipeTime = parseInt(time);
     }
-    // Touch events for mobile
-    this.addEventListener("touchstart", this._handleTouchStart);
-    this.addEventListener("touchend", this._handleTouchEnd);
-    // Mouse events for desktop
+    // Attach events to the host element for iOS compatibility
+    this.addEventListener("touchstart", this._handleTouchStart, { passive: false });
+    this.addEventListener("touchmove", this._handleTouchMove, { passive: false });
+    this.addEventListener("touchend", this._handleTouchEnd, { passive: false });
     this.addEventListener("mousedown", this._handleMouseStart);
     this.addEventListener("mouseup", this._handleMouseEnd);
     this.addEventListener("mouseleave", this._handleMouseEnd);
@@ -158,6 +181,7 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
   disconnectedCallback() {
     if (super.disconnectedCallback) super.disconnectedCallback();
     this.removeEventListener("touchstart", this._handleTouchStart);
+    this.removeEventListener("touchmove", this._handleTouchMove);
     this.removeEventListener("touchend", this._handleTouchEnd);
     this.removeEventListener("mousedown", this._handleMouseStart);
     this.removeEventListener("mouseup", this._handleMouseEnd);
