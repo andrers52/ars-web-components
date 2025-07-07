@@ -275,9 +275,6 @@ export const DEFAULT_CSS = `
       padding-right: 16px;
     }
 
-    .footer {
-      flex-direction: column;
-    }
 
     .footer button {
       width: 100%;

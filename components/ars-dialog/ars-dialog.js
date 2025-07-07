@@ -2,7 +2,7 @@
 
 // -- DIALOG --
 // const result = await ArsDialog.dialog(`content: <br> <input id='test'></input>`,'dialog_tittle')
-// if(!result) {console.log('no data returned'); return}
+// if(!result) {console.log('cancel data returned'); return}
 // // this is an example of how to retrieve information from the dialog
 // console.log(`data inside input is ${result.querySelector('input').value}`)
 
@@ -35,7 +35,7 @@ class ArsDialog extends WebComponentBase {
   }
 
   static get observedAttributes() {
-    return ["open", "localizedYes", "localizedNo", "custom-css", "css-vars"];
+    return ["open", "localizedOk", "localizedCancel", "custom-css", "css-vars"];
   }
 
   attributeChangedCallback(attrName, oldVal, newVal) {
@@ -94,16 +94,16 @@ class ArsDialog extends WebComponentBase {
     title = "",
     cssVars = {},
     customCSS = "",
-    localizedYes = "Yes",
-    localizedNo = "No",
+    localizedOk = "Ok",
+    localizedCancel = "Cancel",
   ) {
     return ArsDialog.#createDialogPromise(
       content,
       title,
       cssVars,
       customCSS,
-      localizedYes,
-      localizedNo,
+      localizedOk,
+      localizedCancel,
     );
   }
 
@@ -120,12 +120,12 @@ class ArsDialog extends WebComponentBase {
     return component.getAttribute("showConfirmButtons") === "true";
   }
 
-  static #getLocalizedYes(component) {
-    return component.localizedYes || "Yes";
+  static #getLocalizedOk(component) {
+    return component.localizedOk || "Ok";
   }
 
-  static #getLocalizedNo(component) {
-    return component.localizedNo || "No";
+  static #getLocalizedCancel(component) {
+    return component.localizedCancel || "Cancel";
   }
 
   static #createCSSVarsString(cssVars) {
@@ -152,16 +152,16 @@ class ArsDialog extends WebComponentBase {
   static #createConfirmButtonsHTML(component) {
     return `
       <pressed-effect-mixin>
-        <button id="dialog_button_yes:${
-          component.id
-        }"> ${ArsDialog.#getLocalizedYes(component)} </button>
+        <button id="dialog_button_ok:${component.id}">
+          ${ArsDialog.#getLocalizedOk(component)}
+        </button>
       </pressed-effect-mixin>
       <pressed-effect-mixin>
-        <button id="dialog_button_no:${
-          component.id
-        }" style="margin-left: 5px"> ${ArsDialog.#getLocalizedNo(
-      component,
-    )} </button>
+        <button
+          id="dialog_button_cancel:${component.id}"
+          style="margin-left: 5px">
+          ${ArsDialog.#getLocalizedCancel(component)}
+        </button>
       </pressed-effect-mixin>
     `;
   }
@@ -206,12 +206,12 @@ class ArsDialog extends WebComponentBase {
 
   static #createButtonHandler(component, action) {
     return () => {
-      if (action === "yes") {
+      if (action === "ok") {
         const content = component.shadowRoot.getElementById("content");
         component.onbuttonclick && component.onbuttonclick(content);
       } else if (action === "ok") {
         component.onbuttonclick && component.onbuttonclick(true);
-      } else if (action === "no") {
+      } else if (action === "cancel") {
         component.onbuttonclick && component.onbuttonclick(false);
       }
       component.#deactivate();
@@ -219,21 +219,18 @@ class ArsDialog extends WebComponentBase {
   }
 
   static #setupButtonHandlers(component) {
-    const yesButton = component.shadowRoot.getElementById(
-      `dialog_button_yes:${component.id}`,
-    );
-    if (yesButton)
-      yesButton.onclick = ArsDialog.#createButtonHandler(component, "yes");
     const okButton = component.shadowRoot.getElementById(
       `dialog_button_ok:${component.id}`,
     );
-    if (okButton)
+    if (okButton) {
       okButton.onclick = ArsDialog.#createButtonHandler(component, "ok");
-    const noButton = component.shadowRoot.getElementById(
-      `dialog_button_no:${component.id}`,
+    }
+
+    const cancelButton = component.shadowRoot.getElementById(
+      `dialog_button_cancel:${component.id}`,
     );
-    if (noButton)
-      noButton.onclick = ArsDialog.#createButtonHandler(component, "no");
+    if (cancelButton)
+      cancelButton.onclick = ArsDialog.#createButtonHandler(component, "cancel");
   }
 
   static #showOverlay(component) {
@@ -257,8 +254,8 @@ class ArsDialog extends WebComponentBase {
     content,
     title,
     showConfirmButtons,
-    localizedYes,
-    localizedNo,
+    localizedOk,
+    localizedCancel,
     customCSS,
     cssVars,
   ) {
@@ -271,8 +268,8 @@ class ArsDialog extends WebComponentBase {
     dialog.setAttribute("showConfirmButtons", showConfirmButtons);
     dialog.setAttribute("title", title);
     if (showConfirmButtons) {
-      dialog.setAttribute("localizedYes", localizedYes);
-      dialog.setAttribute("localizedNo", localizedNo);
+      dialog.setAttribute("localizedOk", localizedOk);
+      dialog.setAttribute("localizedCancel", localizedCancel);
     }
     return dialog;
   }
@@ -307,8 +304,8 @@ class ArsDialog extends WebComponentBase {
     title,
     cssVars,
     customCSS,
-    localizedYes,
-    localizedNo,
+    localizedOk,
+    localizedCancel,
   ) {
     return new Promise(function (resolve) {
       const dialog = ArsDialog.#createDialogElement(
@@ -316,8 +313,8 @@ class ArsDialog extends WebComponentBase {
         content,
         title,
         true,
-        localizedYes,
-        localizedNo,
+        localizedOk,
+        localizedCancel,
         customCSS,
         cssVars,
       );
