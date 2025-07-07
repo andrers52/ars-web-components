@@ -140,3 +140,9 @@
   border-color: #667eea;
   box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
 }
+
+@media (max-width: 640px) {
+  .translation-reference-section {
+    display: none !important;
+  }
+}

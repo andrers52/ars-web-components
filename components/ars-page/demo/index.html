@@ -235,6 +235,8 @@
       gap: 10px;
       margin-bottom: 20px;
       justify-content: flex-start;
+      flex-wrap: wrap; /* <-- Add this line */
+      width: 100%;     /* <-- Optional: ensures nav doesn't overflow */
     }
 
     .nav-btn {
@@ -247,6 +249,9 @@
       font-weight: 500;
       cursor: pointer;
       transition: background 0.2s, color 0.2s, border 0.2s;
+      max-width: 100%;
+      flex: 1 1 120px; /* allows buttons to shrink/grow and wrap nicely */
+      box-sizing: border-box;
     }
 
     .nav-btn:hover,
