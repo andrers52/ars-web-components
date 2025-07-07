@@ -18,51 +18,55 @@
 // customElements.define('demo-receiver', DemoReceiver);
 
 // Global functions for demo controls
+function getCallerMixin() {
+  return document.querySelector('remote-call-caller-mixin');
+}
+
 window.callIncrement = function (receiverId) {
-  const caller = document.querySelector('demo-caller');
+  const caller = getCallerMixin();
   if (caller) {
     caller.callRemote(receiverId, 'increment');
-    caller.log(`Called increment() on ${receiverId}`, 'info');
+    logCaller(`Called increment() on ${receiverId}`, 'info');
   } else {
     console.error('Caller component not found');
   }
 };
 
 window.callDecrement = function (receiverId) {
-  const caller = document.querySelector('demo-caller');
+  const caller = getCallerMixin();
   if (caller) {
     caller.callRemote(receiverId, 'decrement');
-    caller.log(`Called decrement() on ${receiverId}`, 'info');
+    logCaller(`Called decrement() on ${receiverId}`, 'info');
   } else {
     console.error('Caller component not found');
   }
 };
 
 window.callSetCounter = function (receiverId) {
-  const caller = document.querySelector('demo-caller');
+  const caller = getCallerMixin();
   if (caller) {
     const randomValue = Math.floor(Math.random() * 100);
     caller.callRemote(receiverId, 'setCounter', randomValue);
-    caller.log(`Called setCounter(${randomValue}) on ${receiverId}`, 'info');
+    logCaller(`Called setCounter(${randomValue}) on ${receiverId}`, 'info');
   } else {
     console.error('Caller component not found');
   }
 };
 
 window.callChangeColor = function (receiverId) {
-  const caller = document.querySelector('demo-caller');
+  const caller = getCallerMixin();
   if (caller) {
     const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd'];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
     caller.callRemote(receiverId, 'changeColor', randomColor);
-    caller.log(`Called changeColor(${randomColor}) on ${receiverId}`, 'info');
+    logCaller(`Called changeColor(${randomColor}) on ${receiverId}`, 'info');
   } else {
     console.error('Caller component not found');
   }
 };
 
 window.callSetText = function (receiverId) {
-  const caller = document.querySelector('demo-caller');
+  const caller = getCallerMixin();
   if (caller) {
     const messages = [
       'Hello from caller!',
@@ -73,27 +77,27 @@ window.callSetText = function (receiverId) {
     ];
     const randomMessage = messages[Math.floor(Math.random() * messages.length)];
     caller.callRemote(receiverId, 'setText', randomMessage);
-    caller.log(`Called setText("${randomMessage}") on ${receiverId}`, 'info');
+    logCaller(`Called setText("${randomMessage}") on ${receiverId}`, 'info');
   } else {
     console.error('Caller component not found');
   }
 };
 
 window.callPrivateMethod = function (receiverId) {
-  const caller = document.querySelector('demo-caller');
+  const caller = getCallerMixin();
   if (caller) {
     caller.callRemote(receiverId, '_privateMethod');
-    caller.log(`Attempted to call private method on ${receiverId} (should fail)`, 'warning');
+    logCaller(`Attempted to call private method on ${receiverId} (should fail)`, 'warning');
   } else {
     console.error('Caller component not found');
   }
 };
 
 window.callNonExistentMethod = function (receiverId) {
-  const caller = document.querySelector('demo-caller');
+  const caller = getCallerMixin();
   if (caller) {
     caller.callRemote(receiverId, 'nonExistentMethod');
-    caller.log(`Attempted to call non-existent method on ${receiverId} (should fail)`, 'warning');
+    logCaller(`Attempted to call non-existent method on ${receiverId} (should fail)`, 'warning');
   } else {
     console.error('Caller component not found');
   }
@@ -108,54 +112,54 @@ window.clearReceiverLog = function () {
 
 // Call Both functions
 window.callIncrementBoth = function () {
-  const caller = document.querySelector('demo-caller');
+  const caller = getCallerMixin();
   if (caller) {
     caller.callRemote('demo-receiver-1', 'increment');
     caller.callRemote('demo-receiver-2', 'increment');
-    caller.log('Called increment() on both receivers', 'info');
+    logCaller('Called increment() on both receivers', 'info');
   } else {
     console.error('Caller component not found');
   }
 };
 
 window.callDecrementBoth = function () {
-  const caller = document.querySelector('demo-caller');
+  const caller = getCallerMixin();
   if (caller) {
     caller.callRemote('demo-receiver-1', 'decrement');
     caller.callRemote('demo-receiver-2', 'decrement');
-    caller.log('Called decrement() on both receivers', 'info');
+    logCaller('Called decrement() on both receivers', 'info');
   } else {
     console.error('Caller component not found');
   }
 };
 
 window.callSetCounterBoth = function () {
-  const caller = document.querySelector('demo-caller');
+  const caller = getCallerMixin();
   if (caller) {
     const randomValue = Math.floor(Math.random() * 100);
     caller.callRemote('demo-receiver-1', 'setCounter', randomValue);
     caller.callRemote('demo-receiver-2', 'setCounter', randomValue);
-    caller.log(`Called setCounter(${randomValue}) on both receivers`, 'info');
+    logCaller(`Called setCounter(${randomValue}) on both receivers`, 'info');
   } else {
     console.error('Caller component not found');
   }
 };
 
 window.callChangeColorBoth = function () {
-  const caller = document.querySelector('demo-caller');
+  const caller = getCallerMixin();
   if (caller) {
     const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd'];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
     caller.callRemote('demo-receiver-1', 'changeColor', randomColor);
     caller.callRemote('demo-receiver-2', 'changeColor', randomColor);
-    caller.log(`Called changeColor(${randomColor}) on both receivers`, 'info');
+    logCaller(`Called changeColor(${randomColor}) on both receivers`, 'info');
   } else {
     console.error('Caller component not found');
   }
 };
 
 window.callSetTextBoth = function () {
-  const caller = document.querySelector('demo-caller');
+  const caller = getCallerMixin();
   if (caller) {
     const messages = [
       'Hello from caller!',
@@ -167,33 +171,45 @@ window.callSetTextBoth = function () {
     const randomMessage = messages[Math.floor(Math.random() * messages.length)];
     caller.callRemote('demo-receiver-1', 'setText', randomMessage);
     caller.callRemote('demo-receiver-2', 'setText', randomMessage);
-    caller.log(`Called setText("${randomMessage}") on both receivers`, 'info');
+    logCaller(`Called setText("${randomMessage}") on both receivers`, 'info');
   } else {
     console.error('Caller component not found');
   }
 };
 
 window.callPrivateMethodBoth = function () {
-  const caller = document.querySelector('demo-caller');
+  const caller = getCallerMixin();
   if (caller) {
     caller.callRemote('demo-receiver-1', '_privateMethod');
     caller.callRemote('demo-receiver-2', '_privateMethod');
-    caller.log('Attempted to call private method on both receivers (should fail)', 'warning');
+    logCaller('Attempted to call private method on both receivers (should fail)', 'warning');
   } else {
     console.error('Caller component not found');
   }
 };
 
 window.callNonExistentMethodBoth = function () {
-  const caller = document.querySelector('demo-caller');
+  const caller = getCallerMixin();
   if (caller) {
     caller.callRemote('demo-receiver-1', 'nonExistentMethod');
     caller.callRemote('demo-receiver-2', 'nonExistentMethod');
-    caller.log('Attempted to call non-existent method on both receivers (should fail)', 'warning');
+    logCaller('Attempted to call non-existent method on both receivers (should fail)', 'warning');
   } else {
     console.error('Caller component not found');
   }
 };
+
+function logCaller(message, type = 'info') {
+  const logEl = document.getElementById('callerLog');
+  if (logEl) {
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}`;
+    entry.textContent = message;
+    logEl.appendChild(entry);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  console[type === 'error' ? 'error' : 'log']('[RemoteCallCallerMixin]', message);
+}
 
 // Initialize demo components
 export function initializeDemo() {
@@ -201,8 +217,8 @@ export function initializeDemo() {
 
   // Create the caller component only if not present
   const callerContainer = document.querySelector('.caller-panel');
-  if (callerContainer && !callerContainer.querySelector('demo-caller')) {
-    const caller = document.createElement('demo-caller');
+  if (callerContainer && !callerContainer.querySelector('remote-call-caller-mixin')) {
+    const caller = document.createElement('remote-call-caller-mixin');
     caller.id = 'demo-caller-1';
     callerContainer.appendChild(caller);
     console.log('✅ Caller component created and added');

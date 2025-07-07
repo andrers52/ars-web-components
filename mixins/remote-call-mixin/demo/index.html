@@ -292,6 +292,19 @@
       margin-bottom: 10px;
     }
 
+    @media (max-width: 700px) {
+      .demo-container {
+        display: flex;
+        flex-direction: column;
+      }
+      .receiver-panel {
+        order: 1;
+      }
+      .caller-panel {
+        order: 2;
+      }
+    }
+
   </style>
 </head>
 
@@ -335,7 +348,7 @@
 
           <!-- Fragment content will be loaded here -->
           <div id="callerMethods"></div>
-
+          <div class="log-container" id="callerLog"></div>
         </div>
 
         <!-- Receiver Panel -->

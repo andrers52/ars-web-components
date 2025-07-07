@@ -224,7 +224,7 @@
       <!-- Basic Roll Demo -->
       <div class="demo-section">
         <h3>🎯 Basic Roll Demo</h3>
-        <p>Hover over this button to see it roll 360°:</p>
+        <p id="rollInstruction">Hover over this button to see it roll 360°:</p>
 
         <roll-mixin roll-duration="1000">
           <button class="btn-primary" id="rollButton">Roll Me! 🎲</button>
@@ -238,12 +238,12 @@
       <!-- Duration Control Demo -->
       <div class="demo-section">
         <h3>⚡ Duration Control Demo</h3>
-        <p>Adjust the roll duration and see the difference:</p>
+        <p id="durationInstruction">Adjust the roll duration and see the difference:</p>
 
         <roll-mixin roll-duration="500" id="durationDemo">
           <div class="animated-element">
             <h4>Adjustable Roll Speed</h4>
-            <p>Hover to roll • Current duration: <span id="currentDuration">500</span>ms</p>
+            <p id="adjustableRollText">Hover to roll • Current duration: <span id="currentDuration">500</span>ms</p>
           </div>
         </roll-mixin>
 
@@ -266,7 +266,7 @@
             <roll-mixin roll-duration="800">
               <div class="card">
                 <h5>📄 Document Card</h5>
-                <p>Hover to roll this card</p>
+                <p class="roll-card-text">Hover to roll this card</p>
               </div>
             </roll-mixin>
           </div>
@@ -276,7 +276,7 @@
             <roll-mixin roll-duration="1200">
               <div class="animated-element">
                 <h5>🎨 Custom Element</h5>
-                <p>Rolls on hover</p>
+                <p class="roll-custom-text">Rolls on hover</p>
               </div>
             </roll-mixin>
           </div>
@@ -342,7 +342,55 @@
 
     console.log('RollMixin imported successfully');
 
+    // Utility to update all "hover" texts to "tap" on mobile
+    function updateRollTextsForMobile() {
+      const isMobile = window.matchMedia('(max-width: 700px)').matches;
+      // Basic roll demo
+      const instruction = document.getElementById('rollInstruction');
+      if (instruction) instruction.textContent = isMobile ? 'Tap the button to roll 360°:' : 'Hover over this button to see it roll 360°:';
+      // Duration control demo
+      const adjustableRollText = document.getElementById('adjustableRollText');
+      if (adjustableRollText) {
+        adjustableRollText.innerHTML = isMobile ? 'Tap to roll • Current duration: <span id="currentDuration">' + document.getElementById('currentDuration').textContent + '</span>ms' : 'Hover to roll • Current duration: <span id="currentDuration">' + document.getElementById('currentDuration').textContent + '</span>ms';
+      }
+      // Card component
+      document.querySelectorAll('.roll-card-text').forEach(el => {
+        el.textContent = isMobile ? 'Tap to roll this card' : 'Hover to roll this card';
+      });
+      // Custom element
+      document.querySelectorAll('.roll-custom-text').forEach(el => {
+        el.textContent = isMobile ? 'Rolls on tap' : 'Rolls on hover';
+      });
+    }
 
+
+    // Detect mobile
+    function isMobile() {
+      return window.matchMedia('(max-width: 700px)').matches;
+    }
+
+    // On mobile, change instruction and add touch event
+    function setupMobileRoll() {
+      if (isMobile()) {
+        const instruction = document.getElementById('rollInstruction');
+        if (instruction) {
+          instruction.textContent = 'Tap the button to roll 360°:';
+        }
+        const button = document.getElementById('rollButton');
+        const mixin = button?.closest('roll-mixin');
+        if (button && mixin && mixin.roll) {
+          // Remove hover effect if any
+          button.onmouseenter = null;
+          // Add touch event
+          button.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            mixin.roll();
+          }, {passive: false});
+        }
+      }
+    }
+
+    window.addEventListener('resize', setupMobileRoll);
 
     // Log management
     function addToLog(message, type = 'roll-started') {
@@ -447,6 +495,8 @@
         });
       });
     });
+    // let's just call it directly since OnDOMContentLoaded is not working
+    updateRollTextsForMobile();
   </script>
 </body>
 

@@ -125,21 +125,6 @@ class RemoteCallCallerMixin extends MixinBase() {
 }
 
 customElements.define('remote-call-caller-mixin', RemoteCallCallerMixin);
-// Alias for legacy demo code using a subclass to avoid reusing constructor
-class DemoCaller extends RemoteCallCallerMixin {
-  log(message, type='info') {
-    const logEl = document.getElementById('callerLog');
-    if (logEl) {
-      const entry = document.createElement('div');
-      entry.className = `log-entry ${type}`;
-      entry.textContent = message;
-      logEl.appendChild(entry);
-      logEl.scrollTop = logEl.scrollHeight;
-    }
-    console[type==='error'?'error':'log']('[DemoCaller]', message);
-  }
-}
-customElements.define('demo-caller', DemoCaller);
 
 if (typeof module !== 'undefined') {
   module.exports = { RemoteCallCallerMixin };
