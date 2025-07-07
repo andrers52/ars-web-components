@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Data Roller - Test Page</title>
+
+  <!-- Import Map for module resolution -->
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "../../../node_modules/arslib/index.js"
+    }
+  }
+  </script>
+
+  <!-- Common CSS -->
+  <link rel="stylesheet" href="../../../css/base.css">
+  <link rel="stylesheet" href="../../../css/components.css">
+  <link rel="stylesheet" href="../../../css/buttons.css">
+
+  <style>
+    /* Component-specific styles */
+    .roller-display {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 10px 0;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .data-preview {
+      background: #f1f3f4;
+      border-radius: 4px;
+      padding: 10px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.8rem;
+      max-height: 150px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .control-panel {
+      background: #e3f2fd;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+
+    .control-group {
+      margin-bottom: 15px;
+    }
+
+    .control-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #1976d2;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .status-active {
+      background: #4caf50;
+      color: white;
+    }
+
+    .status-paused {
+      background: #ff9800;
+      color: white;
+    }
+
+    .status-stopped {
+      background: #f44336;
+      color: white;
+    }
+
+    .example-card {
+      background: white;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .example-card h4 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+    }
+
+    .example-description {
+      color: #666;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔄 ARS Data Roller</h1>
+      <p>Animated Data Display Component Test</p>
+    </div>
+
+    <div class="content">
+      <a href="../../../" class="back-link">← Back to Demo Page</a>
+
+      <div class="info-box">
+        <h4>About ARS Data Roller</h4>
+        <p>A dynamic component that displays an array of data items one by one with smooth 3D rotation animations. Perfect for showing changing information like status updates, statistics, or rotating content.</p>
+      </div>
+
+      <!-- Basic Usage -->
+      <div class="demo-section">
+        <h3>🎯 Basic Usage</h3>
+        <div class="example-card">
+          <h4>Simple String Array</h4>
+          <div class="example-description">Display a simple array of strings with default settings.</div>
+          <div class="roller-display">
+            <ars-data-roller id="basicRoller" data='["Hello World", "Welcome to ARS", "Data Roller Demo", "Smooth Animations"]'></ars-data-roller>
+          </div>
+          <div class="controls">
+            <button class="btn" onclick="toggleBasicRoller()">⏸️ Toggle Rolling</button>
+            <button class="btn-secondary" onclick="nextBasicItem()">⏭️ Next Item</button>
+            <span class="status-indicator status-active" id="basicStatus">Active</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Object Data Examples -->
+      <div class="demo-section">
+        <h3>📊 Object Data Examples</h3>
+
+        <div class="example-card">
+          <h4>Title-Value Pairs</h4>
+          <div class="example-description">Display objects with title and value properties for clean formatting.</div>
+          <div class="roller-display">
+            <ars-data-roller id="titleValueRoller" data='[{"title": "CPU Usage", "value": "45%"}, {"title": "Memory", "value": "2.3GB"}, {"title": "Network", "value": "1.2MB/s"}, {"title": "Disk Space", "value": "75%"}]'></ars-data-roller>
+          </div>
+          <div class="controls">
+            <button class="btn" onclick="toggleTitleValueRoller()">⏸️ Toggle Rolling</button>
+            <button class="btn-secondary" onclick="changeTitleValueInterval()">⚡ Change Speed</button>
+            <span class="status-indicator status-active" id="titleValueStatus">Active</span>
+          </div>
+        </div>
+
+        <div class="example-card">
+          <h4>Key-Value Objects</h4>
+          <div class="example-description">Display any object with automatic key-value formatting.</div>
+          <div class="roller-display">
+            <ars-data-roller id="keyValueRoller" data='[{"name": "John Doe", "age": 30, "city": "New York"}, {"name": "Jane Smith", "age": 25, "city": "Los Angeles"}, {"name": "Bob Johnson", "age": 35, "city": "Chicago"}]'></ars-data-roller>
+          </div>
+          <div class="controls">
+            <button class="btn" onclick="toggleKeyValueRoller()">⏸️ Toggle Rolling</button>
+            <button class="btn-secondary" onclick="updateKeyValueData()">🔄 Update Data</button>
+            <span class="status-indicator status-active" id="keyValueStatus">Active</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customization Examples -->
+      <div class="demo-section">
+        <h3>⚙️ Customization Examples</h3>
+
+        <div class="example-card">
+          <h4>Fast Animation (1 second interval)</h4>
+          <div class="example-description">Quick transitions with 1-second intervals and 300ms animations.</div>
+          <div class="roller-display">
+            <ars-data-roller id="fastRoller" data='["Fast", "Quick", "Rapid", "Swift", "Speedy"]' interval="1000" animation-duration="300"></ars-data-roller>
+          </div>
+          <div class="controls">
+            <button class="btn" onclick="toggleFastRoller()">⏸️ Toggle Rolling</button>
+            <span class="status-indicator status-active" id="fastStatus">Active</span>
+          </div>
+        </div>
+
+        <div class="example-card">
+          <h4>Slow Animation (5 second interval)</h4>
+          <div class="example-description">Slow, relaxed transitions with 5-second intervals and 800ms animations.</div>
+          <div class="roller-display">
+            <ars-data-roller id="slowRoller" data='["Relaxed", "Calm", "Peaceful", "Tranquil", "Serene"]' interval="5000" animation-duration="800"></ars-data-roller>
+          </div>
+          <div class="controls">
+            <button class="btn" onclick="toggleSlowRoller()">⏸️ Toggle Rolling</button>
+            <span class="btn-secondary" onclick="nextSlowItem()">⏭️ Next Item</button>
+            <span class="status-indicator status-active" id="slowStatus">Active</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Control Panel -->
+      <div class="demo-section">
+        <h3>🎮 Interactive Control Panel</h3>
+        <div class="control-panel">
+          <h4>Dynamic Data Roller</h4>
+          <p>Create and control your own data roller with custom settings.</p>
+
+          <div class="control-group">
+            <label for="customData">Data (JSON Array):</label>
+            <textarea id="customData" class="form-input" rows="4" placeholder='["Item 1", "Item 2", {"title": "Custom", "value": "Data"}]'>["Welcome", "to", "ARS", "Data", "Roller", {"title": "Custom", "value": "Object"}]</textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="customInterval">Interval (ms):</label>
+              <input type="number" id="customInterval" class="form-input" value="2000" min="500" max="10000">
+            </div>
+            <div class="form-group">
+              <label for="customDuration">Animation Duration (ms):</label>
+              <input type="number" id="customDuration" class="form-input" value="500" min="100" max="2000">
+            </div>
+          </div>
+
+          <div class="controls">
+            <button class="btn" onclick="updateCustomRoller()">🔄 Update Roller</button>
+            <button class="btn" onclick="toggleCustomRoller()">⏸️ Toggle Rolling</button>
+            <button class="btn-secondary" onclick="nextCustomItem()">⏭️ Next Item</button>
+            <button class="btn-secondary" onclick="resetCustomRoller()">🔄 Reset</button>
+            <span class="status-indicator status-active" id="customStatus">Active</span>
+          </div>
+
+          <div class="roller-display">
+            <ars-data-roller id="customRoller" data='["Welcome", "to", "ARS", "Data", "Roller"]' interval="2000" animation-duration="500"></ars-data-roller>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-world Examples -->
+      <div class="demo-section">
+        <h3>🌍 Real-world Examples</h3>
+
+        <div class="example-card">
+          <h4>📈 Trading Statistics</h4>
+          <div class="example-description">Display trading statistics with real-time feel.</div>
+          <div class="roller-display">
+            <ars-data-roller id="tradingRoller" data='[{"title": "BTC Price", "value": "$45,230"}, {"title": "24h Volume", "value": "$2.1B"}, {"title": "Market Cap", "value": "$890B"}, {"title": "Change 24h", "value": "+2.3%"}]' interval="2500"></ars-data-roller>
+          </div>
+        </div>
+
+        <div class="example-card">
+          <h4>🖥️ System Monitor</h4>
+          <div class="example-description">System monitoring information display.</div>
+          <div class="roller-display">
+            <ars-data-roller id="systemRoller" data='[{"title": "CPU", "value": "23%"}, {"title": "RAM", "value": "4.2GB"}, {"title": "Disk", "value": "156GB"}, {"title": "Network", "value": "45MB/s"}]' interval="3000"></ars-data-roller>
+          </div>
+        </div>
+
+        <div class="example-card">
+          <h4>📱 Social Media Feed</h4>
+          <div class="example-description">Social media status updates.</div>
+          <div class="roller-display">
+            <ars-data-roller id="socialRoller" data='["New post from @technews", "3 new followers", "Like from @developer", "Comment on your photo", "Trending: #WebComponents"]' interval="4000"></ars-data-roller>
+          </div>
+        </div>
+      </div>
+
+      <!-- Usage Instructions -->
+      <div class="demo-section">
+        <h3>📖 Usage Instructions</h3>
+        <div class="info-box">
+          <h4>HTML Usage:</h4>
+          <p><strong>&lt;ars-data-roller data='["item1", "item2"]' interval="3000" animation-duration="500"&gt;&lt;/ars-data-roller&gt;</strong></p>
+        </div>
+
+        <div class="info-box">
+          <h4>Attributes:</h4>
+          <p><strong>data:</strong> JSON array of items to display (required)<br>
+          <strong>interval:</strong> Milliseconds between transitions (optional, default: 3000)<br>
+          <strong>animation-duration:</strong> Milliseconds for animation (optional, default: 500)</p>
+        </div>
+
+        <div class="info-box">
+          <h4>Data Formats:</h4>
+          <p><strong>Strings:</strong> Simple text display<br>
+          <strong>Title-Value Objects:</strong> {"title": "Label", "value": "Data"}<br>
+          <strong>Key-Value Objects:</strong> {"key1": "value1", "key2": "value2"}</p>
+        </div>
+
+        <div class="info-box">
+          <h4>JavaScript API:</h4>
+          <p><strong>startRolling():</strong> Start the automatic rotation<br>
+          <strong>stopRolling():</strong> Stop the automatic rotation<br>
+          <strong>nextItem():</strong> Manually advance to next item<br>
+          <strong>setData(array):</strong> Update the data array<br>
+          <strong>setInterval(ms):</strong> Change the interval</p>
+        </div>
+      </div>
+
+      <!-- Styling Example -->
+      <div class="demo-section">
+        <h3>🎨 Styling the Data Roller</h3>
+        <div class="info-box">
+          <h4>Customizing with CSS Variables</h4>
+          <p>You can style <strong>ars-data-roller</strong> using CSS variables for background, text color, border radius, font size, and label color. Example:</p>
+          <div class="code" style="margin-bottom:10px;">
+            ars-data-roller.custom-theme {
+              --ars-roller-bg: #222;
+              --ars-roller-color: #fff;
+              --ars-roller-radius: 16px;
+              --ars-roller-font-size: 1.2em;
+              --ars-roller-label-color: #90caf9;
+            }
+          </div>
+          <p>Just add a class to your roller and style it in your CSS!</p>
+        </div>
+        <div class="roller-display">
+          <ars-data-roller class="custom-theme" data='[{"title": "Styled!", "value": "🎨"}, {"title": "Dark Mode", "value": "Enabled"}, {"title": "Font Size", "value": "1.2em"}]' interval="2000"></ars-data-roller>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load the component -->
+  <script type="module" src="../ars-data-roller.js"></script>
+
+  <!-- Test scripts -->
+  <script>
+    // Basic roller controls
+    let basicRollerActive = true;
+    function toggleBasicRoller() {
+      const roller = document.getElementById('basicRoller');
+      const status = document.getElementById('basicStatus');
+      if (basicRollerActive) {
+        roller.stopRolling();
+        status.textContent = 'Paused';
+        status.className = 'status-indicator status-paused';
+      } else {
+        roller.startRolling();
+        status.textContent = 'Active';
+        status.className = 'status-indicator status-active';
+      }
+      basicRollerActive = !basicRollerActive;
+    }
+
+    function nextBasicItem() {
+      document.getElementById('basicRoller').nextItem();
+    }
+
+    // Title-value roller controls
+    let titleValueRollerActive = true;
+    function toggleTitleValueRoller() {
+      const roller = document.getElementById('titleValueRoller');
+      const status = document.getElementById('titleValueStatus');
+      if (titleValueRollerActive) {
+        roller.stopRolling();
+        status.textContent = 'Paused';
+        status.className = 'status-indicator status-paused';
+      } else {
+        roller.startRolling();
+        status.textContent = 'Active';
+        status.className = 'status-indicator status-active';
+      }
+      titleValueRollerActive = !titleValueRollerActive;
+    }
+
+    function changeTitleValueInterval() {
+      const roller = document.getElementById('titleValueRoller');
+      const currentInterval = parseInt(roller.getAttribute('interval'));
+      const newInterval = currentInterval === 3000 ? 1500 : 3000;
+      roller.setInterval(newInterval);
+    }
+
+    // Key-value roller controls
+    let keyValueRollerActive = true;
+    function toggleKeyValueRoller() {
+      const roller = document.getElementById('keyValueRoller');
+      const status = document.getElementById('keyValueStatus');
+      if (keyValueRollerActive) {
+        roller.stopRolling();
+        status.textContent = 'Paused';
+        status.className = 'status-indicator status-paused';
+      } else {
+        roller.startRolling();
+        status.textContent = 'Active';
+        status.className = 'status-indicator status-active';
+      }
+      keyValueRollerActive = !keyValueRollerActive;
+    }
+
+    function updateKeyValueData() {
+      const roller = document.getElementById('keyValueRoller');
+      const newData = [
+        {"name": "Alice Brown", "age": 28, "city": "Boston"},
+        {"name": "Charlie Wilson", "age": 32, "city": "Seattle"},
+        {"name": "Diana Davis", "age": 29, "city": "Miami"}
+      ];
+      roller.setData(newData);
+    }
+
+    // Fast roller controls
+    let fastRollerActive = true;
+    function toggleFastRoller() {
+      const roller = document.getElementById('fastRoller');
+      const status = document.getElementById('fastStatus');
+      if (fastRollerActive) {
+        roller.stopRolling();
+        status.textContent = 'Paused';
+        status.className = 'status-indicator status-paused';
+      } else {
+        roller.startRolling();
+        status.textContent = 'Active';
+        status.className = 'status-indicator status-active';
+      }
+      fastRollerActive = !fastRollerActive;
+    }
+
+    // Slow roller controls
+    let slowRollerActive = true;
+    function toggleSlowRoller() {
+      const roller = document.getElementById('slowRoller');
+      const status = document.getElementById('slowStatus');
+      if (slowRollerActive) {
+        roller.stopRolling();
+        status.textContent = 'Paused';
+        status.className = 'status-indicator status-paused';
+      } else {
+        roller.startRolling();
+        status.textContent = 'Active';
+        status.className = 'status-indicator status-active';
+      }
+      slowRollerActive = !slowRollerActive;
+    }
+
+    function nextSlowItem() {
+      document.getElementById('slowRoller').nextItem();
+    }
+
+    // Custom roller controls
+    let customRollerActive = true;
+    function updateCustomRoller() {
+      const roller = document.getElementById('customRoller');
+      const dataInput = document.getElementById('customData');
+      const intervalInput = document.getElementById('customInterval');
+      const durationInput = document.getElementById('customDuration');
+
+      try {
+        const newData = JSON.parse(dataInput.value);
+        roller.setData(newData);
+        roller.setInterval(parseInt(intervalInput.value));
+        roller.setAnimationDuration(parseInt(durationInput.value));
+      } catch (error) {
+        alert('Invalid JSON data: ' + error.message);
+      }
+    }
+
+    function toggleCustomRoller() {
+      const roller = document.getElementById('customRoller');
+      const status = document.getElementById('customStatus');
+      if (customRollerActive) {
+        roller.stopRolling();
+        status.textContent = 'Paused';
+        status.className = 'status-indicator status-paused';
+      } else {
+        roller.startRolling();
+        status.textContent = 'Active';
+        status.className = 'status-indicator status-active';
+      }
+      customRollerActive = !customRollerActive;
+    }
+
+    function nextCustomItem() {
+      document.getElementById('customRoller').nextItem();
+    }
+
+    function resetCustomRoller() {
+      const roller = document.getElementById('customRoller');
+      const dataInput = document.getElementById('customData');
+      const intervalInput = document.getElementById('customInterval');
+      const durationInput = document.getElementById('customDuration');
+
+      dataInput.value = '["Welcome", "to", "ARS", "Data", "Roller"]';
+      intervalInput.value = '2000';
+      durationInput.value = '500';
+
+      roller.setData(["Welcome", "to", "ARS", "Data", "Roller"]);
+      roller.setInterval(2000);
+      roller.setAnimationDuration(500);
+    }
+
+    // Initialize page
+    window.addEventListener('load', function () {
+      console.log('ARS Data Roller test page loaded');
+    });
+  </script>
+</body>
+
+</html>

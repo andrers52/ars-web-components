@@ -1,6 +1,6 @@
 {
     "name": "ars-web-components",
-    "version": "0.4.10",
+    "version": "0.5.0",
     "description": "A collection of reusable web components built with vanilla JavaScript and ES modules",
     "repository": "https://github.com/andrers52/ars-web-components.git",
     "main": "index.js",

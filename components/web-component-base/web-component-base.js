@@ -30,7 +30,10 @@ const createPropertyDescriptor = (propKey) => ({
     return getAttributeValue(this, propKey);
   },
   set(value) {
-    setAttributeValue(this, propKey, value);
+    const current = getAttributeValue(this, propKey);
+    if (JSON.stringify(current) !== JSON.stringify(value)) {
+      setAttributeValue(this, propKey, value);
+    }
   },
 });
 
@@ -142,7 +145,7 @@ class WebComponentBase extends HTMLElement {
     }
 
     if (this._waitingOnAttr.length === 0 && !this.alreadyMappedAttributes) {
-      mapPropertiesToAttributes(this, Object.keys(this._attributesMap));
+      // mapPropertiesToAttributes(this, Object.keys(this._attributesMap)); // Removed to prevent recursion
       this.allAttributesChangedCallback(this._attributesMap);
       this.alreadyMappedAttributes = true;
     }

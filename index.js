@@ -1,5 +1,6 @@
 export { ArsCalendar } from "./components/ars-calendar/ars-calendar.js";
 export { ArsColorSelect } from "./components/ars-color-select/ars-color-select.js";
+export { ArsDataRoller } from "./components/ars-data-roller/ars-data-roller.js";
 export { ArsDialog } from "./components/ars-dialog/ars-dialog.js";
 export { ArsPageController } from "./components/ars-page/ars-page-controller.js";
 export { ArsPage } from "./components/ars-page/ars-page.js";
