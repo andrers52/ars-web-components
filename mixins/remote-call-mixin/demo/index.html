@@ -449,51 +449,50 @@
       ));
     }
 
-    // Load fragments
-    document.addEventListener('DOMContentLoaded', async function () {
-      try {
-        console.log('Starting to load fragments...');
+    // Load fragments.
+    // Not waiting on DOMContentLoaded. Because it is not working on mobile.
+    try {
+      console.log('Starting to load fragments...');
 
-        // Wait for custom elements to be defined
-        console.log('Waiting for custom elements...');
-        await waitForCustomElements();
-        console.log('Custom elements defined');
+      // Wait for custom elements to be defined
+      console.log('Waiting for custom elements...');
+      await waitForCustomElements();
+      console.log('Custom elements defined');
 
-        // Load receiver components section
-        console.log('Loading receiver-components...');
-        await loadFragment('./sections/receiver-components.html', '#receiverPanel');
+      // Load receiver components section
+      console.log('Loading receiver-components...');
+      await loadFragment('./sections/receiver-components.html', '#receiverPanel');
 
-        // Load all method call sections
-        console.log('Loading increment-counter...');
-        await loadFragment('./sections/increment-counter.html', '#callerMethods');
+      // Load all method call sections
+      console.log('Loading increment-counter...');
+      await loadFragment('./sections/increment-counter.html', '#callerMethods');
 
-        console.log('Loading decrement-counter...');
-        await loadFragment('./sections/decrement-counter.html', '#callerMethods');
+      console.log('Loading decrement-counter...');
+      await loadFragment('./sections/decrement-counter.html', '#callerMethods');
 
-        console.log('Loading set-counter...');
-        await loadFragment('./sections/set-counter.html', '#callerMethods');
+      console.log('Loading set-counter...');
+      await loadFragment('./sections/set-counter.html', '#callerMethods');
 
-        console.log('Loading change-color...');
-        await loadFragment('./sections/change-color.html', '#callerMethods');
+      console.log('Loading change-color...');
+      await loadFragment('./sections/change-color.html', '#callerMethods');
 
-        console.log('Loading set-text...');
-        await loadFragment('./sections/set-text.html', '#callerMethods');
+      console.log('Loading set-text...');
+      await loadFragment('./sections/set-text.html', '#callerMethods');
 
-        console.log('Loading private-method...');
-        await loadFragment('./sections/private-method.html', '#callerMethods');
+      console.log('Loading private-method...');
+      await loadFragment('./sections/private-method.html', '#callerMethods');
 
-        console.log('Loading non-existent-method...');
-        await loadFragment('./sections/non-existent-method.html', '#callerMethods');
+      console.log('Loading non-existent-method...');
+      await loadFragment('./sections/non-existent-method.html', '#callerMethods');
 
-        // Initialize demo components
-        console.log('Initializing demo components...');
-        initializeDemo();
+      // Initialize demo components
+      console.log('Initializing demo components...');
+      initializeDemo();
 
-        console.log('Remote Call Demo initialized with all fragments');
-      } catch (error) {
-        console.error('Error initializing demo:', error);
-      }
-    });
+      console.log('Remote Call Demo initialized with all fragments');
+    } catch (error) {
+      console.error('Error initializing demo:', error);
+    }
   </script>
 </body>
 
