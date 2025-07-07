@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.5.0] - 2025-07-07
 
+- Added new ars-data-roller component
+- Removed a checking with mapping from web-component-base that was
+  causing recursion.
+
 ## [0.4.10] - 2025-07-07
 
 - Fixed remote-call-mixin and roll-mixin demos layout on mobile
