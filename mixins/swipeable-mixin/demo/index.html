@@ -313,9 +313,9 @@
         <h3>🧪 Simple Test</h3>
         <p>Try swiping this red box first to test basic functionality (use touch on mobile or mouse drag on desktop):
         </p>
-        <swipeable-mixin id="testSwipeable" style="background:red;padding:20px;margin:10px 0;color:white;text-align:center;cursor:pointer;user-select:none;border-radius:8px;transition:all 0.3s ease;display:block;">
+        <swipeable-mixin id="testSwipeable" min-swipe-distance="1" max-swipe-time="2000" style="background:red;padding:20px;margin:10px 0;color:white;text-align:center;cursor:pointer;user-select:none;border-radius:8px;transition:all 0.3s ease;display:block;">
           <h4>Simple Test Element</h4>
-          <p>Touch/swipe or mouse drag this red box to test basic functionality</p>
+          <p>Touch/swipe or mouse drag this red box to test basic functionality (min distance: 1px)</p>
         </swipeable-mixin>
       </div>
 
@@ -456,11 +456,14 @@
     </div>
   </div>
 
-  <!-- Load the mixin -->
   <script type="module">
     import { SwipeableMixin } from '../swipeable-mixin.js';
 
     console.log('Swipeable mixin imported successfully');
+    
+    // Debug: Check for multiple custom element definitions
+    console.log('[swipeable-mixin-demo] customElements.get("swipeable-mixin"):', customElements.get('swipeable-mixin'));
+    console.log('[swipeable-mixin-demo] SwipeableMixin constructor:', customElements.get('swipeable-mixin')?.constructor?.name);
 
     // Test if touch events are working
     document.addEventListener('touchstart', (e) => {

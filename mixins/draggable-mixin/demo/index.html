@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Draggable Mixin - Demo</title>
+
+  <script>
+    // Log page load
+    window.addEventListener('DOMContentLoaded', function() {
+      console.log('=== [draggable-mixin/demo/index.html] HTML loaded and script running ===');
+    });
+  </script>
+
+  <!-- Common CSS -->
+  <link rel="stylesheet" href="../../../css/base.css">
+  <link rel="stylesheet" href="../../../css/components.css">
+  <link rel="stylesheet" href="../../../css/buttons.css">
+
+  <!-- Import Map for module resolution -->
+  <script type="importmap">
+    {
+      "imports": {
+        "arslib": "../../../node_modules/arslib/index.js"
+      }
+    }
+    </script>
+
+  <style>
+    /* Component-specific styles */
+    .drag-container {
+      background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+      border-radius: 12px;
+      padding: 30px;
+      margin: 20px 0;
+      color: white;
+      text-align: center;
+      cursor: grab;
+      user-select: none;
+      transition: transform 0.2s ease;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .drag-container:active {
+      cursor: grabbing;
+    }
+
+    .drag-container.dragging {
+      transform: scale(1.05);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .drag-direction {
+      font-size: 3rem;
+      margin: 10px 0;
+      transition: transform 0.3s ease;
+    }
+
+    .drag-direction.left {
+      transform: translateX(-20px);
+    }
+
+    .drag-direction.right {
+      transform: translateX(20px);
+    }
+
+    .drag-direction.up {
+      transform: translateY(-20px);
+    }
+
+    .drag-direction.down {
+      transform: translateY(20px);
+    }
+
+    .drag-stats {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+
+    .drag-counter {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .event-counter {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      padding: 10px;
+      margin: 5px;
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .event-counter .count {
+      font-size: 1.5rem;
+      font-weight: bold;
+      display: block;
+    }
+
+    .event-counter .label {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    .drag-settings {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .setting-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin: 10px 0;
+      flex-wrap: wrap;
+    }
+
+    .setting-group label {
+      font-weight: bold;
+      min-width: 120px;
+    }
+
+    .setting-group input {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      width: 100px;
+    }
+
+    .drag-history {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+
+    .history-entry {
+      padding: 5px;
+      margin: 2px 0;
+      border-radius: 4px;
+      border-left: 3px solid #007bff;
+    }
+
+    .history-entry.dragstart {
+      border-left-color: #28a745;
+    }
+
+    .history-entry.dragmove {
+      border-left-color: #ffc107;
+    }
+
+    .history-entry.dragend {
+      border-left-color: #dc3545;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .demo-item {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .demo-item h4 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    .drag-card {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      border-radius: 12px;
+      padding: 30px;
+      margin: 15px 0;
+      color: white;
+      text-align: center;
+      cursor: grab;
+      user-select: none;
+      transition: all 0.3s ease;
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .drag-card:active {
+      cursor: grabbing;
+    }
+
+    .drag-card.dragging {
+      transform: scale(1.05) rotate(2deg);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+
+    .instructions {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      padding: 15px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+    }
+
+    .instructions h4 {
+      color: #1976d2;
+      margin-bottom: 10px;
+    }
+
+    .code-example {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.9rem;
+      margin: 10px 0;
+      overflow-x: auto;
+    }
+
+    .test-element {
+      background: #ff6b6b;
+      padding: 20px;
+      margin: 10px 0;
+      color: white;
+      text-align: center;
+      cursor: grab;
+      user-select: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .test-element:active {
+      cursor: grabbing;
+    }
+
+    .test-element.dragging {
+      background: #4ecdc4;
+      transform: scale(1.1);
+    }
+
+    .coordination-demo {
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      border-radius: 12px;
+      padding: 30px;
+      margin: 20px 0;
+      color: #333;
+      text-align: center;
+      cursor: grab;
+      user-select: none;
+      transition: all 0.3s ease;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .coordination-demo:active {
+      cursor: grabbing;
+    }
+
+    .coordination-demo.dragging {
+      transform: scale(1.05);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .coordination-demo.swiped {
+      animation: swipeFeedback 0.5s ease;
+    }
+
+    @keyframes swipeFeedback {
+      0% { transform: scale(1.05); }
+      50% { transform: scale(0.95); }
+      100% { transform: scale(1.05); }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🖱️ Draggable Mixin</h1>
+      <p>Add Drag Gesture Detection to Any Element</p>
+    </div>
+
+    <div class="content">
+      <a href="../../../" class="back-link">← Back to Demo Page</a>
+
+      <div class="info-box">
+        <h4>About Draggable Mixin</h4>
+        <p>This mixin adds drag gesture detection to any web component. It supports drag start, move, and end events with customizable thresholds. Perfect for creating draggable interfaces and interactive elements.</p>
+        <p><strong>💡 Tip:</strong> This mixin coordinates with other mixins using the PointerCoordinator, so it can work alongside SwipeableMixin without conflicts!</p>
+      </div>
+
+      <!-- Simple Test Element -->
+      <div class="demo-section">
+        <h3>🧪 Simple Test</h3>
+        <p>Try dragging this red box first to test basic functionality (use mouse on desktop or touch on mobile):</p>
+        <draggable-mixin id="testDraggable" drag-threshold="5" style="background:#ff6b6b;padding:20px;margin:10px 0;color:white;text-align:center;cursor:grab;user-select:none;border-radius:8px;transition:all 0.3s ease;display:block;">
+          <h4>Simple Test Element</h4>
+          <p>Drag this red box to test basic functionality (threshold: 5px)</p>
+        </draggable-mixin>
+      </div>
+
+      <!-- Main Drag Demo -->
+      <div class="demo-section">
+        <h3>🎯 Interactive Drag Demo</h3>
+        <p>Try dragging the container below in different directions:</p>
+
+        <draggable-mixin id="mainDraggable" class="drag-container">
+          <div class="drag-direction" id="dragDirection">🖱️</div>
+          <h3>Drag Me!</h3>
+          <p>Use mouse or touch to drag this element</p>
+          <div class="drag-stats" id="dragStats">
+            <div>Distance: <span id="dragDistance">0</span>px</div>
+            <div>Direction: <span id="dragDirectionText">None</span></div>
+            <div>Status: <span id="dragStatus">Idle</span></div>
+          </div>
+        </draggable-mixin>
+
+        <!-- Event Counters -->
+        <div class="drag-counter">
+          <div class="event-counter">
+            <span class="count" id="dragStartCount">0</span>
+            <span class="label">Drag Start</span>
+          </div>
+          <div class="event-counter">
+            <span class="count" id="dragMoveCount">0</span>
+            <span class="label">Drag Move</span>
+          </div>
+          <div class="event-counter">
+            <span class="count" id="dragEndCount">0</span>
+            <span class="label">Drag End</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="demo-section">
+        <h3>⚙️ Drag Settings</h3>
+        <div class="drag-settings">
+          <div class="setting-group">
+            <label for="dragThreshold">Drag Threshold:</label>
+            <input type="number" id="dragThreshold" value="5" min="1" max="50">
+            <span>px (minimum distance to start dragging)</span>
+          </div>
+          <div class="controls">
+            <button class="btn" onclick="applySettings()">Apply Settings</button>
+            <button class="btn-secondary" onclick="resetCounters()">Reset Counters</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drag History -->
+      <div class="demo-section">
+        <h3>📜 Drag History</h3>
+        <div class="drag-history" id="dragHistory">
+          <div class="history-entry">Drag history will appear here...</div>
+        </div>
+        <div class="controls">
+          <button class="btn-secondary" onclick="clearHistory()">Clear History</button>
+        </div>
+      </div>
+
+      <!-- Multiple Elements Demo -->
+      <div class="demo-section">
+        <h3>🎨 Multiple Draggable Elements</h3>
+        <div class="demo-grid">
+          <div class="demo-item">
+            <h4>Card 1</h4>
+            <draggable-mixin id="dragCard1" class="drag-card">
+              <div class="drag-direction">🔄</div>
+              <p>Drag to interact</p>
+            </draggable-mixin>
+          </div>
+          <div class="demo-item">
+            <h4>Card 2</h4>
+            <draggable-mixin id="dragCard2" class="drag-card">
+              <div class="drag-direction">🎯</div>
+              <p>Different behavior</p>
+            </draggable-mixin>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coordination Demo -->
+      <div class="demo-section">
+        <h3>🤝 Mixin Coordination Demo</h3>
+        <p>This element has both DraggableMixin and SwipeableMixin. Try dragging and swiping to see how they coordinate:</p>
+        
+        <draggable-mixin id="coordinationDemo" class="coordination-demo">
+          <swipeable-mixin min-swipe-distance="30" max-swipe-time="800">
+            <div class="drag-direction" id="coordDirection">🤝</div>
+            <h3>Drag + Swipe</h3>
+            <p>Drag to move, swipe for quick gestures</p>
+            <div class="drag-stats">
+              <div>Last Action: <span id="lastAction">None</span></div>
+              <div>Drag Events: <span id="dragEvents">0</span></div>
+              <div>Swipe Events: <span id="swipeEvents">0</span></div>
+            </div>
+          </swipeable-mixin>
+        </draggable-mixin>
+      </div>
+
+      <!-- Scroll Test Demo -->
+      <div class="demo-section">
+        <h3>📜 Scroll Prevention Test</h3>
+        <p>This area is scrollable. Try scrolling normally, then try dragging/swiping the colored boxes to see how scroll prevention works:</p>
+        
+        <div style="height: 300px; overflow-y: auto; border: 2px solid #ddd; border-radius: 8px; padding: 20px; background: #f9f9f9;">
+          <div style="height: 1000px; padding: 20px;">
+            <p>Scrollable content starts here...</p>
+            <p>Scroll down to see more content...</p>
+            
+            <div style="margin: 50px 0;">
+              <h4>Test Area 1 - Draggable Element</h4>
+              <draggable-mixin drag-threshold="10" style="background: #ff6b6b; padding: 20px; margin: 10px 0; color: white; text-align: center; cursor: grab; user-select: none; border-radius: 8px; display: block;">
+                <strong>Drag this box</strong><br>
+                <small>Scroll prevention should activate when dragging</small>
+              </draggable-mixin>
+            </div>
+            
+            <div style="margin: 50px 0;">
+              <h4>Test Area 2 - Swipeable Element</h4>
+              <swipeable-mixin min-swipe-distance="30" max-swipe-time="800" style="background: #4ecdc4; padding: 20px; margin: 10px 0; color: white; text-align: center; cursor: pointer; user-select: none; border-radius: 8px; display: block;">
+                <strong>Swipe this box</strong><br>
+                <small>Scroll prevention should activate when swiping</small>
+              </swipeable-mixin>
+            </div>
+            
+            <div style="margin: 50px 0;">
+              <h4>Test Area 3 - Combined Element</h4>
+              <draggable-mixin drag-threshold="10" style="background: #667eea; padding: 20px; margin: 10px 0; color: white; text-align: center; cursor: grab; user-select: none; border-radius: 8px; display: block;">
+                <swipeable-mixin min-swipe-distance="30" max-swipe-time="800">
+                  <strong>Drag or Swipe this box</strong><br>
+                  <small>Both gestures should work and prevent scrolling</small>
+                </swipeable-mixin>
+              </draggable-mixin>
+            </div>
+            
+            <p>More scrollable content...</p>
+            <p>Scroll up to see the test elements again...</p>
+          </div>
+        </div>
+        
+        <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 6px; font-size: 0.9rem;">
+          <strong>💡 How it works:</strong><br>
+          • Normal scrolling works when not interacting with mixins<br>
+          • Scroll prevention activates only when gestures are detected<br>
+          • Scroll prevention deactivates when gestures end<br>
+          • Multiple mixins coordinate through PointerCoordinator
+        </div>
+      </div>
+
+      <!-- Implementation Guide -->
+      <div class="demo-section">
+        <h3>📖 Implementation Guide</h3>
+
+        <div class="instructions">
+          <h4>How to Use the Draggable Mixin:</h4>
+          <p>1. Use the element: <code>&lt;draggable-mixin&gt;...content...&lt;/draggable-mixin&gt;</code></p>
+          <p>2. Set optional attributes: <code>drag-threshold</code></p>
+          <p>3. Listen for events: <code>dragstart</code>, <code>dragmove</code>, <code>dragend</code></p>
+        </div>
+
+        <div class="code-example">
+          // Basic usage
+          &lt;draggable-mixin drag-threshold="5"&gt;
+            &lt;div&gt;Drag me!&lt;/div&gt;
+          &lt;/draggable-mixin&gt;
+
+          // JavaScript: listen for drag events
+          const draggable = document.querySelector('draggable-mixin');
+          draggable.addEventListener('dragstart', (e) => {
+            console.log('Drag started:', e.detail);
+          });
+          draggable.addEventListener('dragmove', (e) => {
+            console.log('Dragging:', e.detail);
+          });
+          draggable.addEventListener('dragend', (e) => {
+            console.log('Drag ended:', e.detail);
+          });
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div class="demo-section">
+        <h3>✨ Features</h3>
+        <div class="info-box">
+          <h4>What the Draggable Mixin Provides:</h4>
+          <ul>
+            <li><strong>Drag Detection:</strong> Detects when dragging starts, moves, and ends</li>
+            <li><strong>Customizable Threshold:</strong> Adjustable minimum distance to start dragging</li>
+            <li><strong>Direction Detection:</strong> Tracks drag direction (left, right, up, down)</li>
+            <li><strong>Event Dispatching:</strong> Automatically dispatches drag events</li>
+            <li><strong>Mixin Coordination:</strong> Works with other mixins using PointerCoordinator</li>
+            <li><strong>Performance Optimized:</strong> Efficient pointer event handling</li>
+            <li><strong>Easy Integration:</strong> Simple mixin pattern for any component</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { DraggableMixin } from '../draggable-mixin.js';
+    import { SwipeableMixin } from '../../swipeable-mixin/swipeable-mixin.js';
+
+    console.log('Draggable mixin imported successfully');
+    
+    // Event counters
+    let eventCounts = { dragstart: 0, dragmove: 0, dragend: 0 };
+    let dragEvents = 0;
+    let swipeEvents = 0;
+
+    // History management
+    function addToHistory(eventType, details, elementId = 'main') {
+      const history = document.getElementById('dragHistory');
+      if (!history) {
+        console.warn('History element not found');
+        return;
+      }
+
+      const entry = document.createElement('div');
+      entry.className = `history-entry ${eventType}`;
+
+      const timestamp = new Date().toLocaleTimeString();
+      const distance = Math.round(details.distance || 0);
+      const direction = details.direction || 'none';
+
+      entry.textContent = `[${timestamp}] ${elementId}: ${eventType.toUpperCase()} ${direction.toUpperCase()} (${distance}px)`;
+
+      history.appendChild(entry);
+      history.scrollTop = history.scrollHeight;
+
+      // Keep only last 20 entries
+      while (history.children.length > 20) {
+        history.removeChild(history.firstChild);
+      }
+    }
+
+    // Global functions for demo controls
+    window.applySettings = function () {
+      console.log('Applying settings...');
+      const threshold = parseInt(document.getElementById('dragThreshold').value);
+
+      const containers = document.querySelectorAll('draggable-mixin');
+      console.log('Found containers:', containers.length);
+      containers.forEach(container => {
+        container.setDragThreshold(threshold);
+      });
+
+      addToHistory('settings', { distance: threshold }, 'settings');
+    };
+
+    window.resetCounters = function () {
+      console.log('Resetting counters...');
+      eventCounts = { dragstart: 0, dragmove: 0, dragend: 0 };
+      dragEvents = 0;
+      swipeEvents = 0;
+      
+      const elements = ['dragStartCount', 'dragMoveCount', 'dragEndCount'];
+      elements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = '0';
+      });
+      
+      document.getElementById('dragEvents').textContent = '0';
+      document.getElementById('swipeEvents').textContent = '0';
+    };
+
+    window.clearHistory = function () {
+      console.log('Clearing history...');
+      const history = document.getElementById('dragHistory');
+      if (history) {
+        history.innerHTML = '<div class="history-entry">History cleared...</div>';
+      }
+    };
+
+    // Initialize demo
+    console.log('DOM loaded, initializing draggable demo...');
+
+    try {
+      // Simple Test
+      const testDraggable = document.getElementById('testDraggable');
+      if (testDraggable) {
+        testDraggable.addEventListener('dragstart', (e) => {
+          console.log('DRAG START EVENT:', e.detail);
+          testDraggable.classList.add('dragging');
+          testDraggable.style.background = '#4ecdc4';
+          addToHistory('dragstart', e.detail, 'test');
+        });
+        
+        testDraggable.addEventListener('dragmove', (e) => {
+          console.log('DRAG MOVE EVENT:', e.detail);
+          addToHistory('dragmove', e.detail, 'test');
+        });
+        
+        testDraggable.addEventListener('dragend', (e) => {
+          console.log('DRAG END EVENT:', e.detail);
+          testDraggable.classList.remove('dragging');
+          testDraggable.style.background = '#ff6b6b';
+          addToHistory('dragend', e.detail, 'test');
+        });
+      }
+
+      // Main Drag Demo
+      const mainDraggable = document.getElementById('mainDraggable');
+      if (mainDraggable) {
+        mainDraggable.addEventListener('dragstart', (e) => {
+          const details = e.detail;
+          eventCounts.dragstart++;
+          document.getElementById('dragStartCount').textContent = eventCounts.dragstart;
+          
+          const directionElement = mainDraggable.querySelector('.drag-direction');
+          if (directionElement) {
+            const directionIcons = {
+              left: '⬅️',
+              right: '➡️',
+              up: '⬆️',
+              down: '⬇️'
+            };
+            directionElement.textContent = directionIcons[details.direction] || '🖱️';
+            directionElement.className = `drag-direction ${details.direction}`;
+          }
+          
+          mainDraggable.classList.add('dragging');
+          document.getElementById('dragStatus').textContent = 'Dragging';
+          addToHistory('dragstart', details);
+        });
+        
+        mainDraggable.addEventListener('dragmove', (e) => {
+          const details = e.detail;
+          eventCounts.dragmove++;
+          document.getElementById('dragMoveCount').textContent = eventCounts.dragmove;
+          
+          document.getElementById('dragDistance').textContent = Math.round(details.distance);
+          document.getElementById('dragDirectionText').textContent = details.direction;
+          addToHistory('dragmove', details);
+        });
+        
+        mainDraggable.addEventListener('dragend', (e) => {
+          const details = e.detail;
+          eventCounts.dragend++;
+          document.getElementById('dragEndCount').textContent = eventCounts.dragend;
+          
+          mainDraggable.classList.remove('dragging');
+          document.getElementById('dragStatus').textContent = 'Idle';
+          addToHistory('dragend', details);
+        });
+      }
+
+      // Card 1
+      const dragCard1 = document.getElementById('dragCard1');
+      if (dragCard1) {
+        dragCard1.addEventListener('dragstart', (e) => {
+          dragCard1.classList.add('dragging');
+          addToHistory('dragstart', e.detail, 'dragCard1');
+        });
+        
+        dragCard1.addEventListener('dragend', (e) => {
+          dragCard1.classList.remove('dragging');
+          addToHistory('dragend', e.detail, 'dragCard1');
+        });
+      }
+
+      // Card 2
+      const dragCard2 = document.getElementById('dragCard2');
+      if (dragCard2) {
+        dragCard2.addEventListener('dragstart', (e) => {
+          dragCard2.classList.add('dragging');
+          addToHistory('dragstart', e.detail, 'dragCard2');
+        });
+        
+        dragCard2.addEventListener('dragend', (e) => {
+          dragCard2.classList.remove('dragging');
+          addToHistory('dragend', e.detail, 'dragCard2');
+        });
+      }
+
+      // Coordination Demo
+      const coordinationDemo = document.getElementById('coordinationDemo');
+      if (coordinationDemo) {
+        // Drag events
+        coordinationDemo.addEventListener('dragstart', (e) => {
+          dragEvents++;
+          document.getElementById('dragEvents').textContent = dragEvents;
+          document.getElementById('lastAction').textContent = 'Drag Start';
+          coordinationDemo.classList.add('dragging');
+          addToHistory('dragstart', e.detail, 'coordination');
+        });
+        
+        coordinationDemo.addEventListener('dragmove', (e) => {
+          document.getElementById('lastAction').textContent = 'Dragging';
+          addToHistory('dragmove', e.detail, 'coordination');
+        });
+        
+        coordinationDemo.addEventListener('dragend', (e) => {
+          document.getElementById('lastAction').textContent = 'Drag End';
+          coordinationDemo.classList.remove('dragging');
+          addToHistory('dragend', e.detail, 'coordination');
+        });
+        
+        // Swipe events (from nested SwipeableMixin)
+        coordinationDemo.addEventListener('swipe', (e) => {
+          swipeEvents++;
+          document.getElementById('swipeEvents').textContent = swipeEvents;
+          document.getElementById('lastAction').textContent = `Swipe ${e.detail.direction}`;
+          coordinationDemo.classList.add('swiped');
+          setTimeout(() => coordinationDemo.classList.remove('swiped'), 500);
+          addToHistory('swipe', e.detail, 'coordination');
+        });
+      }
+
+      // Add scroll prevention status monitoring
+      async function updateScrollStatus() {
+        try {
+          const { PointerCoordinator } = await import('../../common/pointer-coordinator.js');
+          const debugInfo = PointerCoordinator.getDebugInfo();
+          
+          // Log scroll prevention status
+          if (debugInfo.isScrollPrevented) {
+            console.log('🔒 Scroll prevention ACTIVE -', debugInfo);
+          } else if (debugInfo.scrollPreventionEnabled) {
+            console.log('⚠️ Scroll prevention ENABLED but no active captures -', debugInfo);
+          } else {
+            console.log('✅ Scroll prevention INACTIVE -', debugInfo);
+          }
+        } catch (error) {
+          console.log('Scroll prevention status check failed:', error);
+        }
+      }
+
+      // Monitor scroll prevention status
+      setInterval(updateScrollStatus, 1000);
+
+      console.log('Draggable demo initialized successfully');
+    } catch (error) {
+      console.error('Error initializing draggable demo:', error);
+    }
+  </script>
+</body>
+
+</html> 
