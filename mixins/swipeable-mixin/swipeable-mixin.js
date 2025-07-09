@@ -208,58 +208,73 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
   }
 
   _handlePointerDown = (event) => {
-    // Skip if this is a redispatched event
-    if (PointerCoordinator.isRedispatchedEvent(event)) {
-      return;
-    }
-    
     console.log('[swipeable-mixin] _handlePointerDown called', {
       pointerId: event.pointerId,
       pointerDown: this._pointerDown,
+      isRedispatched: PointerCoordinator.isRedispatchedEvent(event),
       event
     });
     
     if (this._pointerDown) return; // Only track one pointer
     
-    // Try to capture the pointer
-    if (!PointerCoordinator.capturePointer(this, event.pointerId)) {
-      console.log('[swipeable-mixin] Failed to capture pointer, will listen for redispatched events');
-      return; // Another mixin captured it, we'll listen for redispatched events
+    // Try to capture the pointer (only for non-redispatched events)
+    if (!PointerCoordinator.isRedispatchedEvent(event)) {
+      if (!PointerCoordinator.capturePointer(this, event.pointerId)) {
+        console.log('[swipeable-mixin] Failed to capture pointer, will listen for redispatched events');
+        return; // Another mixin captured it, we'll listen for redispatched events
+      }
+      
+      // Redispatch the event so other mixins can receive it
+      PointerCoordinator.redispatchPointerEvent(this, event);
     }
     
-    this._pointerDown = true;
-    this._pointerId = event.pointerId;
-    this._touchStartX = event.clientX;
-    this._touchStartY = event.clientY;
-    this._touchStartTime = Date.now();
-    
-    // Redispatch the event so other mixins can receive it
-    PointerCoordinator.redispatchPointerEvent(this, event);
-    
-    // Debug: Log bounding rect and start coordinates
-    const rect = this.getBoundingClientRect();
-    console.log('[swipeable-mixin] Bounding rect:', rect);
-    console.log('[swipeable-mixin] Start coordinates:', { x: this._touchStartX, y: this._touchStartY });
+    // Process the event (only if we captured it OR if it's a redispatched event from another element)
+    if (PointerCoordinator.isRedispatchedEvent(event) || PointerCoordinator.hasPointerCapture(this, event.pointerId)) {
+      // If we captured the pointer, only process direct events (not redispatched ones)
+      if (PointerCoordinator.hasPointerCapture(this, event.pointerId) && PointerCoordinator.isRedispatchedEvent(event)) {
+        return;
+      }
+      
+      this._pointerDown = true;
+      this._pointerId = event.pointerId;
+      this._touchStartX = event.clientX;
+      this._touchStartY = event.clientY;
+      this._touchStartTime = Date.now();
+      
+      // Debug: Log bounding rect and start coordinates
+      const rect = this.getBoundingClientRect();
+      console.log('[swipeable-mixin] Bounding rect:', rect);
+      console.log('[swipeable-mixin] Start coordinates:', { x: this._touchStartX, y: this._touchStartY });
+    }
   };
 
   _handlePointerMove = (event) => {
-    // Skip if this is a redispatched event
-    if (PointerCoordinator.isRedispatchedEvent(event)) {
-      return;
-    }
-    
     console.log('[swipeable-mixin] _handlePointerMove called', {
       pointerId: event.pointerId,
       trackingPointerId: this._pointerId,
       pointerDown: this._pointerDown,
+      isRedispatched: PointerCoordinator.isRedispatchedEvent(event),
       event
     });
     
     if (!this._pointerDown || event.pointerId !== this._pointerId) return;
+    
+    // Only process if we captured the pointer or it's a redispatched event from another element
+    if (!PointerCoordinator.isRedispatchedEvent(event) && !PointerCoordinator.hasPointerCapture(this, event.pointerId)) {
+      return;
+    }
+    
+    // If we captured the pointer, only process direct events (not redispatched ones)
+    if (PointerCoordinator.hasPointerCapture(this, event.pointerId) && PointerCoordinator.isRedispatchedEvent(event)) {
+      return;
+    }
+    
     console.log('[swipeable-mixin] pointermove', event.type, event.pointerId, event.clientX, event.clientY);
     
-    // Redispatch the event so other mixins can receive it
-    PointerCoordinator.redispatchPointerEvent(this, event);
+    // Redispatch the event (only for non-redispatched events)
+    if (!PointerCoordinator.isRedispatchedEvent(event)) {
+      PointerCoordinator.redispatchPointerEvent(this, event);
+    }
     
     // Calculate current drag distance and direction
     const deltaX = event.clientX - this._touchStartX;
@@ -287,23 +302,32 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
   };
 
   _handlePointerUp = (event) => {
-    // Skip if this is a redispatched event
-    if (PointerCoordinator.isRedispatchedEvent(event)) {
-      return;
-    }
-    
     console.log('[swipeable-mixin] _handlePointerUp called', {
       pointerId: event.pointerId,
       trackingPointerId: this._pointerId,
       pointerDown: this._pointerDown,
+      isRedispatched: PointerCoordinator.isRedispatchedEvent(event),
       event
     });
     
     if (!this._pointerDown || event.pointerId !== this._pointerId) return;
+    
+    // Only process if we captured the pointer or it's a redispatched event from another element
+    if (!PointerCoordinator.isRedispatchedEvent(event) && !PointerCoordinator.hasPointerCapture(this, event.pointerId)) {
+      return;
+    }
+    
+    // If we captured the pointer, only process direct events (not redispatched ones)
+    if (PointerCoordinator.hasPointerCapture(this, event.pointerId) && PointerCoordinator.isRedispatchedEvent(event)) {
+      return;
+    }
+    
     console.log('[swipeable-mixin] pointerup', event.type, event.pointerId, event.clientX, event.clientY);
     
-    // Redispatch the event so other mixins can receive it
-    PointerCoordinator.redispatchPointerEvent(this, event);
+    // Redispatch the event (only for non-redispatched events)
+    if (!PointerCoordinator.isRedispatchedEvent(event)) {
+      PointerCoordinator.redispatchPointerEvent(this, event);
+    }
     
     this._pointerDown = false;
     PointerCoordinator.releasePointer(this, this._pointerId);

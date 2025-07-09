@@ -76,6 +76,16 @@ class PointerCoordinator {
   }
   
   /**
+   * Check if an element has captured a specific pointer
+   * @param {HTMLElement} element - The element to check
+   * @param {number} pointerId - The pointer ID to check
+   * @returns {boolean} - True if the element has captured the pointer
+   */
+  static hasPointerCapture(element, pointerId) {
+    return this._capturedPointers.get(pointerId) === element;
+  }
+  
+  /**
    * Check if an event has already been redispatched to prevent loops
    * @param {Event} event - The event to check
    * @returns {boolean} - True if event is already redispatched

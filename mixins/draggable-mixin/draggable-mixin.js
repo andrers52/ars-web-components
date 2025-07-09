@@ -127,55 +127,69 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
   }
 
   _handlePointerDown = (event) => {
-    // Skip if this is a redispatched event
-    if (PointerCoordinator.isRedispatchedEvent(event)) {
-      return;
-    }
-    
     console.log('[draggable-mixin] _handlePointerDown called', {
       pointerId: event.pointerId,
       pointerDown: this._pointerDown,
+      isRedispatched: PointerCoordinator.isRedispatchedEvent(event),
       event
     });
     
     if (this._pointerDown) return; // Only track one pointer
     
-    // Try to capture the pointer
-    if (!PointerCoordinator.capturePointer(this, event.pointerId)) {
-      console.log('[draggable-mixin] Failed to capture pointer, will listen for redispatched events');
-      return; // Another mixin captured it, we'll listen for redispatched events
+    // Try to capture the pointer (only for non-redispatched events)
+    if (!PointerCoordinator.isRedispatchedEvent(event)) {
+      if (!PointerCoordinator.capturePointer(this, event.pointerId)) {
+        console.log('[draggable-mixin] Failed to capture pointer, will listen for redispatched events');
+        return; // Another mixin captured it, we'll listen for redispatched events
+      }
+      
+      // Redispatch the event so other mixins can receive it
+      PointerCoordinator.redispatchPointerEvent(this, event);
     }
     
-    this._pointerDown = true;
-    this._pointerId = event.pointerId;
-    this._dragStartX = event.clientX;
-    this._dragStartY = event.clientY;
-    this._isDragging = false;
-    this._dragDistance = 0;
-    
-    // Redispatch the event so other mixins can receive it
-    PointerCoordinator.redispatchPointerEvent(this, event);
-    
-    console.log('[draggable-mixin] Drag started at:', { x: this._dragStartX, y: this._dragStartY });
+    // Process the event (only if we captured it OR if it's a redispatched event from another element)
+    if (PointerCoordinator.isRedispatchedEvent(event) || PointerCoordinator.hasPointerCapture(this, event.pointerId)) {
+      // If we captured the pointer, only process direct events (not redispatched ones)
+      if (PointerCoordinator.hasPointerCapture(this, event.pointerId) && PointerCoordinator.isRedispatchedEvent(event)) {
+        return;
+      }
+      
+      this._pointerDown = true;
+      this._pointerId = event.pointerId;
+      this._dragStartX = event.clientX;
+      this._dragStartY = event.clientY;
+      this._isDragging = false;
+      this._dragDistance = 0;
+      
+      console.log('[draggable-mixin] Drag started at:', { x: this._dragStartX, y: this._dragStartY });
+    }
   };
 
   _handlePointerMove = (event) => {
-    // Skip if this is a redispatched event
-    if (PointerCoordinator.isRedispatchedEvent(event)) {
-      return;
-    }
-    
     console.log('[draggable-mixin] _handlePointerMove called', {
       pointerId: event.pointerId,
       trackingPointerId: this._pointerId,
       pointerDown: this._pointerDown,
+      isRedispatched: PointerCoordinator.isRedispatchedEvent(event),
       event
     });
     
     if (!this._pointerDown || event.pointerId !== this._pointerId) return;
     
-    // Redispatch the event so other mixins can receive it
-    PointerCoordinator.redispatchPointerEvent(this, event);
+    // Only process if we captured the pointer or it's a redispatched event from another element
+    if (!PointerCoordinator.isRedispatchedEvent(event) && !PointerCoordinator.hasPointerCapture(this, event.pointerId)) {
+      return;
+    }
+    
+    // If we captured the pointer, only process direct events (not redispatched ones)
+    if (PointerCoordinator.hasPointerCapture(this, event.pointerId) && PointerCoordinator.isRedispatchedEvent(event)) {
+      return;
+    }
+    
+    // Redispatch the event (only for non-redispatched events)
+    if (!PointerCoordinator.isRedispatchedEvent(event)) {
+      PointerCoordinator.redispatchPointerEvent(this, event);
+    }
     
     const currentDistance = this._calculateDragDistance(event.clientX, event.clientY);
     const deltaX = event.clientX - this._dragStartX;
@@ -219,22 +233,30 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
   };
 
   _handlePointerUp = (event) => {
-    // Skip if this is a redispatched event
-    if (PointerCoordinator.isRedispatchedEvent(event)) {
-      return;
-    }
-    
     console.log('[draggable-mixin] _handlePointerUp called', {
       pointerId: event.pointerId,
       trackingPointerId: this._pointerId,
       pointerDown: this._pointerDown,
+      isRedispatched: PointerCoordinator.isRedispatchedEvent(event),
       event
     });
     
     if (!this._pointerDown || event.pointerId !== this._pointerId) return;
     
-    // Redispatch the event so other mixins can receive it
-    PointerCoordinator.redispatchPointerEvent(this, event);
+    // Only process if we captured the pointer or it's a redispatched event from another element
+    if (!PointerCoordinator.isRedispatchedEvent(event) && !PointerCoordinator.hasPointerCapture(this, event.pointerId)) {
+      return;
+    }
+    
+    // If we captured the pointer, only process direct events (not redispatched ones)
+    if (PointerCoordinator.hasPointerCapture(this, event.pointerId) && PointerCoordinator.isRedispatchedEvent(event)) {
+      return;
+    }
+    
+    // Redispatch the event (only for non-redispatched events)
+    if (!PointerCoordinator.isRedispatchedEvent(event)) {
+      PointerCoordinator.redispatchPointerEvent(this, event);
+    }
     
     this._pointerDown = false;
     PointerCoordinator.releasePointer(this, this._pointerId);

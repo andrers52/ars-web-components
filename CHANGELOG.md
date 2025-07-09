@@ -8,6 +8,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.6.1] - 2025-07-09
+
+### Fixed
+
+- **Mixin Coordination**: Fixed double-counting issue in gesture mixins
+  - SwipeableMixin and DraggableMixin now properly handle redispatched events
+  - Each mixin processes events exactly once, preventing duplicate event counts
+  - Improved logic to distinguish between direct and redispatched events
+  - Added `hasPointerCapture()` method to PointerCoordinator for better event filtering
+
+- **Event Processing**: Enhanced event handling logic
+  - Mixins that capture pointers only process direct events (not redispatched ones)
+  - Mixins that don't capture pointers only process redispatched events
+  - Prevents infinite loops and double processing
+  - Maintains proper coordination regardless of mixin order (parent/child)
+
+### Technical Improvements
+
+- **PointerCoordinator**: Added `hasPointerCapture(element, pointerId)` method
+- **Event Filtering**: Improved logic to prevent mixins from processing their own redispatched events
+- **Order Independence**: Coordination system now works regardless of mixin nesting order
+- **Demo Enhancement**: Added reversed order coordination demo to test mixin order flexibility
+
 ## [0.6.0] - 2025-07-09
 
 ### Added

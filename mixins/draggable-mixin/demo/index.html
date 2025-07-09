@@ -298,6 +298,10 @@
       100% { transform: scale(1.05); }
     }
 
+    #reversedCoordinationDemo {
+      background: linear-gradient(135deg, #fed6e3 0%, #a8edea 100%);
+    }
+
   </style>
 </head>
 
@@ -427,6 +431,25 @@
         </draggable-mixin>
       </div>
 
+      <!-- Reversed Order Coordination Demo -->
+      <div class="demo-section">
+        <h3>🔄 Reversed Order Coordination Demo</h3>
+        <p>This element has SwipeableMixin as parent and DraggableMixin as child. Test if coordination works in reverse order:</p>
+        
+        <swipeable-mixin id="reversedCoordinationDemo" min-swipe-distance="30" max-swipe-time="800" class="coordination-demo">
+          <draggable-mixin>
+            <div class="drag-direction" id="reversedCoordDirection">🔄</div>
+            <h3>Swipe + Drag (Reversed)</h3>
+            <p>Swipe for quick gestures, drag to move</p>
+            <div class="drag-stats">
+              <div>Last Action: <span id="reversedLastAction">None</span></div>
+              <div>Drag Events: <span id="reversedDragEvents">0</span></div>
+              <div>Swipe Events: <span id="reversedSwipeEvents">0</span></div>
+            </div>
+          </draggable-mixin>
+        </swipeable-mixin>
+      </div>
+
       <!-- Scroll Test Demo -->
       <div class="demo-section">
         <h3>📜 Scroll Prevention Test</h3>
@@ -537,6 +560,8 @@
     let eventCounts = { dragstart: 0, dragmove: 0, dragend: 0 };
     let dragEvents = 0;
     let swipeEvents = 0;
+    let reversedDragEvents = 0;
+    let reversedSwipeEvents = 0;
 
     // History management
     function addToHistory(eventType, details, elementId = 'main') {
@@ -583,6 +608,8 @@
       eventCounts = { dragstart: 0, dragmove: 0, dragend: 0 };
       dragEvents = 0;
       swipeEvents = 0;
+      reversedDragEvents = 0;
+      reversedSwipeEvents = 0;
       
       const elements = ['dragStartCount', 'dragMoveCount', 'dragEndCount'];
       elements.forEach(id => {
@@ -592,6 +619,8 @@
       
       document.getElementById('dragEvents').textContent = '0';
       document.getElementById('swipeEvents').textContent = '0';
+      document.getElementById('reversedDragEvents').textContent = '0';
+      document.getElementById('reversedSwipeEvents').textContent = '0';
     };
 
     window.clearHistory = function () {
@@ -706,7 +735,7 @@
       // Coordination Demo
       const coordinationDemo = document.getElementById('coordinationDemo');
       if (coordinationDemo) {
-        // Drag events
+        // Drag events - listen on the draggable-mixin element
         coordinationDemo.addEventListener('dragstart', (e) => {
           dragEvents++;
           document.getElementById('dragEvents').textContent = dragEvents;
@@ -726,15 +755,55 @@
           addToHistory('dragend', e.detail, 'coordination');
         });
         
-        // Swipe events (from nested SwipeableMixin)
-        coordinationDemo.addEventListener('swipe', (e) => {
-          swipeEvents++;
-          document.getElementById('swipeEvents').textContent = swipeEvents;
-          document.getElementById('lastAction').textContent = `Swipe ${e.detail.direction}`;
-          coordinationDemo.classList.add('swiped');
-          setTimeout(() => coordinationDemo.classList.remove('swiped'), 500);
-          addToHistory('swipe', e.detail, 'coordination');
+        // Swipe events - listen on the nested swipeable-mixin element
+        const nestedSwipeable = coordinationDemo.querySelector('swipeable-mixin');
+        if (nestedSwipeable) {
+          nestedSwipeable.addEventListener('swipe', (e) => {
+            swipeEvents++;
+            document.getElementById('swipeEvents').textContent = swipeEvents;
+            document.getElementById('lastAction').textContent = `Swipe ${e.detail.direction}`;
+            coordinationDemo.classList.add('swiped');
+            setTimeout(() => coordinationDemo.classList.remove('swiped'), 500);
+            addToHistory('swipe', e.detail, 'coordination');
+          });
+        }
+      }
+
+      // Reversed Order Coordination Demo
+      const reversedCoordinationDemo = document.getElementById('reversedCoordinationDemo');
+      if (reversedCoordinationDemo) {
+        // Swipe events - listen on the swipeable-mixin element (parent)
+        reversedCoordinationDemo.addEventListener('swipe', (e) => {
+          reversedSwipeEvents++;
+          document.getElementById('reversedSwipeEvents').textContent = reversedSwipeEvents;
+          document.getElementById('reversedLastAction').textContent = `Swipe ${e.detail.direction}`;
+          reversedCoordinationDemo.classList.add('swiped');
+          setTimeout(() => reversedCoordinationDemo.classList.remove('swiped'), 500);
+          addToHistory('swipe', e.detail, 'reversedCoordination');
         });
+        
+        // Drag events - listen on the nested draggable-mixin element (child)
+        const nestedDraggable = reversedCoordinationDemo.querySelector('draggable-mixin');
+        if (nestedDraggable) {
+          nestedDraggable.addEventListener('dragstart', (e) => {
+            reversedDragEvents++;
+            document.getElementById('reversedDragEvents').textContent = reversedDragEvents;
+            document.getElementById('reversedLastAction').textContent = 'Drag Start';
+            nestedDraggable.classList.add('dragging');
+            addToHistory('dragstart', e.detail, 'reversedCoordination');
+          });
+          
+          nestedDraggable.addEventListener('dragmove', (e) => {
+            document.getElementById('reversedLastAction').textContent = 'Dragging';
+            addToHistory('dragmove', e.detail, 'reversedCoordination');
+          });
+          
+          nestedDraggable.addEventListener('dragend', (e) => {
+            document.getElementById('reversedLastAction').textContent = 'Drag End';
+            nestedDraggable.classList.remove('dragging');
+            addToHistory('dragend', e.detail, 'reversedCoordination');
+          });
+        }
       }
 
       // Add scroll prevention status monitoring
