@@ -1,6 +1,6 @@
 {
     "name": "ars-web-components",
-    "version": "0.6.1",
+    "version": "0.6.2",
     "description": "A collection of reusable web components built with vanilla JavaScript and ES modules",
     "repository": "https://github.com/andrers52/ars-web-components.git",
     "main": "index.js",
@@ -22,7 +22,7 @@
         "reusable-components"
     ],
     "dependencies": {
-        "arslib": "0.6.1"
+        "arslib": "0.6.2"
     },
     "author": "Andre Rodrigues da Silva",
     "license": "MIT"
