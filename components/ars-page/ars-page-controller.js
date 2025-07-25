@@ -18,10 +18,9 @@
 // Attributes:
 // - target-page: ID of the ars-page component to control
 //
-// This component internally uses the remote-call-caller-mixin to communicate with the page router.
+// This component internally uses the ars-page-controller-internal component.
 
 import "./ars-page-controller-internal.js";
-import "../../mixins/remote-call-mixin/remote-call-caller-mixin.js";
 
 class ArsPageController extends HTMLElement {
   constructor() {
@@ -30,13 +29,6 @@ class ArsPageController extends HTMLElement {
   }
 
   connectedCallback() {
-    // Create the mixin wrapper directly without shadow DOM
-    const mixinWrapper = document.createElement('remote-call-caller-mixin');
-    mixinWrapper.setAttribute('target-id', this.getAttribute('target-page') || '');
-    mixinWrapper.setAttribute('method', 'showPage');
-    mixinWrapper.setAttribute('listen', 'nav-click');
-    mixinWrapper.setAttribute('args-map', '{"pageId": 0}');
-
     // Create the internal component
     const internalComponent = document.createElement('ars-page-controller-internal');
     internalComponent.setAttribute('target-page', this.getAttribute('target-page') || '');
@@ -46,14 +38,11 @@ class ArsPageController extends HTMLElement {
       internalComponent.appendChild(this.firstChild);
     }
 
-    // Add the internal component to the mixin wrapper
-    mixinWrapper.appendChild(internalComponent);
-
-    // Replace this element's content with the mixin wrapper
+    // Replace this element's content with the internal component
     this.innerHTML = '';
-    this.appendChild(mixinWrapper);
+    this.appendChild(internalComponent);
 
-    console.log('ArsPageController connectedCallback - Mixin wrapper created');
+    console.log('ArsPageController connectedCallback - Internal component created');
     console.log('Navigation content moved to internal component');
 
     // Forward all attributes to the internal component

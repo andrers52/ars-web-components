@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2025-07-09
+
+- ars-page now synchronizes with the browser's url
 
 ## [0.6.2] - 2025-07-09
 
@@ -15,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Mixin Coordination**: Fixed double-counting issue in gesture mixins
+
   - SwipeableMixin and DraggableMixin now properly handle redispatched events
   - Each mixin processes events exactly once, preventing duplicate event counts
   - Improved logic to distinguish between direct and redispatched events
@@ -38,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **New DraggableMixin**: Complete drag gesture detection system with customizable thresholds
+
   - Drag start, move, and end events with detailed coordinate data
   - Direction detection (left, right, up, down) with distance tracking
   - Configurable drag threshold via `drag-threshold` attribute
@@ -45,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Comprehensive demo page with interactive examples
 
 - **New PointerCoordinator**: Shared coordination system for multiple mixins
+
   - Prevents conflicts when multiple mixins try to capture the same pointer
   - Event redispatching system to prevent infinite loops
   - Smart scroll prevention that only activates during active gestures
@@ -52,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Debug tools and status monitoring for development
 
 - **Enhanced SwipeableMixin**: Refactored to use PointerCoordinator
+
   - Removed built-in drag functionality (now separate DraggableMixin)
   - Improved coordination with other mixins
   - Better mobile scroll prevention during swipe gestures
@@ -67,6 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **BREAKING**: SwipeableMixin no longer includes drag functionality
+
   - Drag events moved to new DraggableMixin
   - SwipeableMixin now focuses purely on swipe detection
   - Both mixins can be used together on the same element
