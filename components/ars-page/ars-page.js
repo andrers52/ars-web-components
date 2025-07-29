@@ -218,6 +218,17 @@ class ArsPage extends WebComponentBase {
     return null;
   }
 
+  _isNestedRouteForPage(path, pageId) {
+    const directRoute = this._getRouteFromPageId(pageId);
+    if (!directRoute) return false;
+    
+    // Check if the path is a nested route for this page
+    // For example, if pageId is 'configs' and directRoute is '/configs',
+    // then '/configs/system' would be a nested route
+    const directRoutePath = directRoute.replace(this._basePath, '');
+    return path.startsWith(directRoutePath) && path !== directRoutePath;
+  }
+
   _updateBrowserUrl(route) {
     if (route) {
       const abs = this._basePath + route;
@@ -267,8 +278,20 @@ class ArsPage extends WebComponentBase {
 
     // Update browser URL if requested
     if (updateUrl) {
-      const route = this._getRouteFromPageId(pageId);
-      this._updateBrowserUrl(route);
+      // For nested routes, preserve the original route if it's more specific
+      const currentPath = window.location.pathname;
+      const directRoute = this._getRouteFromPageId(pageId);
+      
+      // Check if current path is a nested route for this page
+      const isNestedRoute = this._isNestedRouteForPage(currentPath, pageId);
+      
+      if (isNestedRoute) {
+        // Preserve the nested route
+        this._updateBrowserUrl(currentPath);
+      } else {
+        // Use the direct route
+        this._updateBrowserUrl(directRoute);
+      }
     }
 
     this.dispatchEvent(
