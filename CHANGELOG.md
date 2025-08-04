@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.2] - 2025-08-04
+
+### Added
+
+- **Dialog Event System**: Added `dialog-activated` event to ArsDialog component
+  - Dialog now emits a custom event when fully activated and rendered
+  - Event includes dialog ID in detail for component identification
+  - Enables reliable timing for post-render operations like scrolling
+  - Bubbles through shadow DOM for easy event listening
+
+### Changed
+
+- **Dialog Activation**: Enhanced dialog activation process with event emission
+  - Event fired after shadow DOM creation, rendering, and overlay display
+  - Provides reliable signal for when dialog content is ready for manipulation
+  - Supports complex dialog interactions that require precise timing
+
+### Technical Improvements
+
+- **Event-driven Architecture**: Better separation of concerns with event-based communication
+- **Reliable Timing**: Eliminates need for arbitrary timeouts in dialog-dependent code
+- **Component Integration**: Enables other components to react to dialog state changes
+
 ## [0.7.1] - 2025-07-29
 
 - ars-page: checking nested route

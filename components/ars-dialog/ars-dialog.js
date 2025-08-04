@@ -70,6 +70,12 @@ class ArsDialog extends WebComponentBase {
     this.#render();
     ArsDialog.#showOverlay(this);
     ArsDialog.#setupButtonHandlers(this);
+    
+    // Emit a custom event when dialog is fully activated
+    this.dispatchEvent(new CustomEvent('dialog-activated', {
+      bubbles: true,
+      detail: { dialogId: this.id }
+    }));
   }
 
   #deactivate() {
