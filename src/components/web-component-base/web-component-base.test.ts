@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Import the module
-import { WebComponentBase } from '../src/components/web-component-base/web-component-base.js';
+import { WebComponentBase } from './web-component-base.js';
 
 // Generate unique component names for each test
 let counter = 0;

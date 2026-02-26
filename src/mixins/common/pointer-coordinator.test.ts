@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 
 // Import the module
-import { PointerCoordinator } from '../src/mixins/common/pointer-coordinator.js';
+import { PointerCoordinator } from './pointer-coordinator.js';
 
 describe('PointerCoordinator', () => {
   let mockElement;

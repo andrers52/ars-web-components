@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, vi, vi } from 'vitest';
 
 // Import the module
-import { RollMixin } from '../src/mixins/roll-mixin/roll-mixin.js';
+import { RollMixin } from './roll-mixin.js';
 
 describe('RollMixin', () => {
   let element;

@@ -45,7 +45,7 @@ ars-web-components/
 │   │   └── swipeable-mixin/
 │   └── css/                # Shared CSS for demos
 ├── dist/                   # Compiled JavaScript output (generated)
-├── test/                   # Vitest test files
+├── test/                   # Shared Vitest setup and mocks
 ├── tsconfig.json
 ├── vitest.config.ts
 └── server.js               # Express dev server
@@ -75,6 +75,162 @@ class MyComponent extends WebComponentBase {
 ```bash
 npm install ars-web-components
 ```
+
+## Development Workflow
+
+### Live-reload demo development (recommended while editing)
+
+Use Vite to serve the demos with automatic reload from `src/` (no rebuild required on each edit):
+
+```bash
+npm run dev
+```
+
+Then open the printed local URL (for example `http://127.0.0.1:8080/` or `http://127.0.0.1:8081/`).
+
+Notes:
+- The demo pages still reference `/dist/...` paths, but the Vite dev server rewrites them to `/src/...` during development.
+- This keeps the demo HTML stable while enabling fast iteration.
+
+### Dist build verification (release/package path)
+
+When you want to verify the published package output, rebuild the package:
+
+```bash
+npm run build
+```
+
+This regenerates `dist/`, which is what external consumers import.
+
+### Tests
+
+Run the test suite:
+
+```bash
+npm test
+```
+
+Test files live alongside the source they cover (for easier navigation while editing components/mixins). Shared Vitest setup and mocks remain in `test/`.
+
+## Design System Compatibility (Design-Agnostic by Default)
+
+`ars-web-components` is intended to be **design-system agnostic**.
+
+- It should work with your own CSS/theme variables.
+- In the Dark Factory ecosystem (internal usage), the default pairing is the private `ars-design-system`.
+- If no design system is used, you can start from one of the lightweight fallback theme templates shipped in this package.
+
+### Recommended pairing (Dark Factory / internal usage)
+
+Import order:
+
+```ts
+import "ars-design-system/styles.css";
+import "ars-web-components/styles.css";
+```
+
+Then initialize the component library with your design adapter:
+
+```ts
+import { initializeArsWebComponents } from "ars-web-components";
+
+initializeArsWebComponents({
+  designAdapter: {
+    rootAttributes: { "data-theme": "my-app-theme" },
+    cssVariables: {
+      "--arswc-color-accent": "#2563eb"
+    }
+  }
+});
+```
+
+The adapter contract is intentionally small and generic so applications can supply any design system.
+
+### Explicit default adapter (no external design system)
+
+If you want an explicit non-Dark-Factory setup without custom adapters:
+
+```ts
+import { getArsWebComponentsDefaultAdapter, initializeArsWebComponents } from "ars-web-components";
+
+initializeArsWebComponents({
+  designAdapter: getArsWebComponentsDefaultAdapter("dark"),
+});
+```
+
+This keeps initialization explicit while still providing a simple starter theme.
+
+### Custom Design System Contract (`--arswc-*`)
+
+`ars-web-components` components read library-level design variables (`--arswc-*`) set by the active design adapter.
+
+When a custom design system initializes the library, it should set some or all of these variables on the document root (or another shared scope):
+
+Recommended core variables:
+
+- `--arswc-color-bg`
+- `--arswc-color-surface`
+- `--arswc-color-border`
+- `--arswc-color-text`
+- `--arswc-color-muted`
+- `--arswc-color-accent`
+- `--arswc-color-accent-contrast`
+- `--arswc-radius-sm`
+- `--arswc-radius-md`
+- `--arswc-shadow-sm`
+- `--arswc-font-family-sans`
+- `--arswc-font-family-mono`
+
+Resolution priority in components:
+
+1. component-specific CSS variables (for example `--ars-calendar-*`)
+2. library design variables (`--arswc-*`) from the active adapter
+3. hardcoded component fallback values
+
+This makes the library design-system agnostic while keeping integration predictable.
+
+### Design Contract Coverage (Current Components)
+
+The following components already resolve their default styling through the library design contract (`--arswc-*`) before falling back to hardcoded values:
+
+- `ars-calendar`
+- `ars-dialog`
+- `ars-color-select`
+- `ars-data-roller`
+
+Common `--arswc-*` variables currently used across these components:
+
+- `--arswc-color-bg`
+- `--arswc-color-surface`
+- `--arswc-color-border`
+- `--arswc-color-text`
+- `--arswc-color-muted`
+- `--arswc-color-accent`
+- `--arswc-color-accent-contrast`
+- `--arswc-radius-sm`
+- `--arswc-radius-md`
+- `--arswc-shadow-sm`
+- `--arswc-font-family-sans`
+
+Components remain independently overridable through their own component-specific CSS variables (for example `--ars-calendar-*`).
+
+### Fallback templates (no design system)
+
+Choose one small generic template and then override values in your app:
+
+```ts
+import "ars-web-components/theme-default-dark.css";
+import "ars-web-components/styles.css";
+```
+
+or
+
+```ts
+import "ars-web-components/theme-default-light.css";
+import "ars-web-components/styles.css";
+```
+
+These fallback templates are intentionally minimal. They exist to make adoption easy, not to define a complete visual identity.
 
 ## Usage
 

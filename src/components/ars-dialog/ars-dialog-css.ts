@@ -4,7 +4,7 @@
 export const DEFAULT_CSS = `
   :host {
     display: block;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: var(--arswc-font-family-sans, "Helvetica Neue", Helvetica, Arial, sans-serif);
     font-size: 14px;
     line-height: 1.5;
   }
@@ -18,7 +18,7 @@ export const DEFAULT_CSS = `
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--ars-dialog-overlay-bg, rgba(0, 0, 0, 0.4));
+    background-color: var(--ars-dialog-overlay-bg, color-mix(in srgb, var(--arswc-color-text, #000) 35%, transparent));
     z-index: var(--ars-dialog-z-index, 1000);
     cursor: pointer;
     display: flex;
@@ -36,9 +36,9 @@ export const DEFAULT_CSS = `
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    background: var(--ars-dialog-bg, #ffffff);
-    border-radius: var(--ars-dialog-border-radius, 12px);
-    box-shadow: var(--ars-dialog-shadow, 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04));
+    background: var(--ars-dialog-bg, var(--arswc-color-bg, #ffffff));
+    border-radius: var(--ars-dialog-border-radius, var(--arswc-radius-md, 12px));
+    box-shadow: var(--ars-dialog-shadow, var(--arswc-shadow-sm, 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)));
     border: var(--ars-dialog-border, none);
     cursor: default;
     transform: scale(0.95);
@@ -58,10 +58,10 @@ export const DEFAULT_CSS = `
     padding: var(--ars-dialog-title-padding, 24px 24px 0 24px);
     font-size: var(--ars-dialog-title-font-size, 1.25rem);
     font-weight: var(--ars-dialog-title-font-weight, 600);
-    color: var(--ars-dialog-title-color, #1f2937);
+    color: var(--ars-dialog-title-color, var(--arswc-color-text, #1f2937));
     background: var(--ars-dialog-title-bg, transparent);
     border-bottom: var(--ars-dialog-title-border, none);
-    border-radius: var(--ars-dialog-border-radius, 12px) var(--ars-dialog-border-radius, 12px) 0 0;
+    border-radius: var(--ars-dialog-border-radius, var(--arswc-radius-md, 12px)) var(--ars-dialog-border-radius, var(--arswc-radius-md, 12px)) 0 0;
   }
 
   .content {
@@ -70,7 +70,7 @@ export const DEFAULT_CSS = `
     max-width: 100%;
     padding: var(--ars-dialog-content-padding, 24px);
     overflow-y: auto;
-    color: var(--ars-dialog-content-color, #4b5563);
+    color: var(--ars-dialog-content-color, var(--arswc-color-muted, #4b5563));
     line-height: var(--ars-dialog-content-line-height, 1.6);
     box-sizing: border-box;
   }
@@ -86,14 +86,14 @@ export const DEFAULT_CSS = `
     gap: var(--ars-dialog-footer-gap, 12px);
     background: var(--ars-dialog-footer-bg, transparent);
     border-top: var(--ars-dialog-footer-border, none);
-    border-radius: 0 0 var(--ars-dialog-border-radius, 12px) var(--ars-dialog-border-radius, 12px);
+    border-radius: 0 0 var(--ars-dialog-border-radius, var(--arswc-radius-md, 12px)) var(--ars-dialog-border-radius, var(--arswc-radius-md, 12px));
     min-width: 0;
   }
 
   .footer button {
     min-width: var(--ars-dialog-button-min-width, 80px);
     padding: var(--ars-dialog-button-padding, 8px 16px);
-    border-radius: var(--ars-dialog-button-border-radius, 6px);
+    border-radius: var(--ars-dialog-button-border-radius, var(--arswc-radius-sm, 6px));
     font-size: var(--ars-dialog-button-font-size, 0.875rem);
     font-weight: var(--ars-dialog-button-font-weight, 500);
     cursor: pointer;
@@ -103,33 +103,33 @@ export const DEFAULT_CSS = `
   }
 
   .footer button:focus {
-    box-shadow: var(--ars-dialog-button-focus-shadow, 0 0 0 3px rgba(59, 130, 246, 0.5));
+    box-shadow: var(--ars-dialog-button-focus-shadow, 0 0 0 3px color-mix(in srgb, var(--arswc-color-accent, #3b82f6) 50%, transparent));
   }
 
   /* Primary button (Yes/OK) */
   .footer button:first-child {
-    background: var(--ars-dialog-primary-button-bg, #3b82f6);
-    color: var(--ars-dialog-primary-button-color, #ffffff);
-    border: var(--ars-dialog-primary-button-border, 1px solid #3b82f6);
+    background: var(--ars-dialog-primary-button-bg, var(--arswc-color-accent, #3b82f6));
+    color: var(--ars-dialog-primary-button-color, var(--arswc-color-accent-contrast, #ffffff));
+    border: var(--ars-dialog-primary-button-border, 1px solid var(--arswc-color-accent, #3b82f6));
   }
 
   .footer button:first-child:hover {
-    background: var(--ars-dialog-primary-button-hover-bg, #2563eb);
-    border-color: var(--ars-dialog-primary-button-hover-border, #2563eb);
+    background: var(--ars-dialog-primary-button-hover-bg, var(--arswc-color-accent, #2563eb));
+    border-color: var(--ars-dialog-primary-button-hover-border, var(--arswc-color-accent, #2563eb));
     transform: translateY(-1px);
   }
 
   /* Secondary button (No/Cancel) */
   .footer button:last-child {
     background: var(--ars-dialog-secondary-button-bg, transparent);
-    color: var(--ars-dialog-secondary-button-color, #6b7280);
-    border: var(--ars-dialog-secondary-button-border, 1px solid #d1d5db);
+    color: var(--ars-dialog-secondary-button-color, var(--arswc-color-muted, #6b7280));
+    border: var(--ars-dialog-secondary-button-border, 1px solid var(--arswc-color-border, #d1d5db));
   }
 
   .footer button:last-child:hover {
-    background: var(--ars-dialog-secondary-button-hover-bg, #f9fafb);
-    border-color: var(--ars-dialog-secondary-button-hover-border, #9ca3af);
-    color: var(--ars-dialog-secondary-button-hover-color, #374151);
+    background: var(--ars-dialog-secondary-button-hover-bg, var(--arswc-color-surface, #f9fafb));
+    border-color: var(--ars-dialog-secondary-button-hover-border, var(--arswc-color-border, #9ca3af));
+    color: var(--ars-dialog-secondary-button-hover-color, var(--arswc-color-text, #374151));
   }
 
   /* Form elements styling */
@@ -140,12 +140,12 @@ export const DEFAULT_CSS = `
     max-width: 100%;
     padding: var(--ars-dialog-input-padding, 8px 12px);
     margin: var(--ars-dialog-input-margin, 4px 0 8px 0);
-    border: var(--ars-dialog-input-border, 1px solid #d1d5db);
-    border-radius: var(--ars-dialog-input-border-radius, 6px);
+    border: var(--ars-dialog-input-border, 1px solid var(--arswc-color-border, #d1d5db));
+    border-radius: var(--ars-dialog-input-border-radius, var(--arswc-radius-sm, 6px));
     font-size: var(--ars-dialog-input-font-size, 0.875rem);
     font-family: inherit;
-    background: var(--ars-dialog-input-bg, #ffffff);
-    color: var(--ars-dialog-input-color, #374151);
+    background: var(--ars-dialog-input-bg, var(--arswc-color-bg, #ffffff));
+    color: var(--ars-dialog-input-color, var(--arswc-color-text, #374151));
     box-sizing: border-box;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
@@ -153,9 +153,9 @@ export const DEFAULT_CSS = `
   input:focus,
   select:focus,
   textarea:focus {
-    border-color: var(--ars-dialog-input-focus-border, #3b82f6);
+    border-color: var(--ars-dialog-input-focus-border, var(--arswc-color-accent, #3b82f6));
     outline: none;
-    box-shadow: var(--ars-dialog-input-focus-shadow, 0 0 0 3px rgba(59, 130, 246, 0.1));
+    box-shadow: var(--ars-dialog-input-focus-shadow, 0 0 0 3px color-mix(in srgb, var(--arswc-color-accent, #3b82f6) 15%, transparent));
   }
 
   textarea {
@@ -169,7 +169,7 @@ export const DEFAULT_CSS = `
     display: block;
     font-weight: var(--ars-dialog-label-font-weight, 500);
     font-size: var(--ars-dialog-label-font-size, 0.875rem);
-    color: var(--ars-dialog-label-color, #374151);
+    color: var(--ars-dialog-label-color, var(--arswc-color-text, #374151));
     margin: var(--ars-dialog-label-margin, 12px 0 4px 0);
   }
 
@@ -181,8 +181,8 @@ export const DEFAULT_CSS = `
   input[type="range"] {
     width: 100%;
     height: 6px;
-    border-radius: 3px;
-    background: var(--ars-dialog-range-bg, #e5e7eb);
+    border-radius: var(--ars-dialog-range-border-radius, var(--arswc-radius-sm, 3px));
+    background: var(--ars-dialog-range-bg, var(--arswc-color-border, #e5e7eb));
     outline: none;
     padding: 0;
     margin: 8px 0;
@@ -193,20 +193,20 @@ export const DEFAULT_CSS = `
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: var(--ars-dialog-range-thumb-bg, #3b82f6);
+    background: var(--ars-dialog-range-thumb-bg, var(--arswc-color-accent, #3b82f6));
     cursor: pointer;
-    border: 2px solid #ffffff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 2px solid var(--arswc-color-bg, #ffffff);
+    box-shadow: var(--ars-dialog-range-thumb-shadow, var(--arswc-shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.1)));
   }
 
   input[type="range"]::-moz-range-thumb {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: var(--ars-dialog-range-thumb-bg, #3b82f6);
+    background: var(--ars-dialog-range-thumb-bg, var(--arswc-color-accent, #3b82f6));
     cursor: pointer;
-    border: 2px solid #ffffff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 2px solid var(--arswc-color-bg, #ffffff);
+    box-shadow: var(--ars-dialog-range-thumb-shadow, var(--arswc-shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.1)));
   }
 
   /* Form layout helpers */
@@ -230,7 +230,7 @@ export const DEFAULT_CSS = `
 
   .form-row .range-value {
     font-weight: 600;
-    color: var(--ars-dialog-range-value-color, #3b82f6);
+    color: var(--ars-dialog-range-value-color, var(--arswc-color-accent, #3b82f6));
     min-width: 30px;
     text-align: center;
   }

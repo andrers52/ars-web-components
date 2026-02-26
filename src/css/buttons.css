@@ -1,29 +1,44 @@
 /* Button and control styles */
 .btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
+  background: linear-gradient(
+    135deg,
+    var(--arswc-button-primary-bg-start, #3b82f6) 0%,
+    var(--arswc-button-primary-bg-end, #2563eb) 100%
+  );
+  color: var(--arswc-button-primary-color, var(--arswc-color-accent-contrast, white));
+  border: 1px solid var(--arswc-button-primary-border, var(--arswc-color-accent, #2563eb));
   padding: 10px 20px;
-  border-radius: 5px;
+  border-radius: var(--arswc-radius-sm, 5px);
   cursor: pointer;
   font-size: 0.9rem;
   transition: all 0.3s ease;
 }
 
 .btn:hover {
+  background: linear-gradient(
+    135deg,
+    var(--arswc-button-primary-hover-bg-start, var(--arswc-button-primary-bg-start, #60a5fa)) 0%,
+    var(--arswc-button-primary-hover-bg-end, var(--arswc-button-primary-bg-end, #3b82f6)) 100%
+  );
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: var(--arswc-shadow-sm, 0 5px 15px rgba(102, 126, 234, 0.4));
+  filter: brightness(1.03) saturate(1.05);
 }
 
 .btn-secondary {
-  background: white;
-  color: #667eea;
-  border: 2px solid #667eea;
+  background: var(--arswc-button-secondary-bg, var(--arswc-color-bg, white));
+  color: var(--arswc-button-secondary-color, var(--arswc-color-text, #1b2430));
+  border: 1px solid var(--arswc-button-secondary-border, var(--arswc-color-border, #d5dde8));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--arswc-color-bg, #fff) 50%, transparent);
 }
 
 .btn-secondary:hover {
-  background: #667eea;
-  color: white;
+  background: var(--arswc-button-secondary-hover-bg, color-mix(in srgb, var(--arswc-color-accent, #667eea) 12%, var(--arswc-color-surface, #f6f8fb)));
+  color: var(--arswc-button-secondary-hover-color, var(--arswc-button-secondary-color, var(--arswc-color-text, #1b2430)));
+  border-color: var(--arswc-button-secondary-hover-border, var(--arswc-color-accent, #667eea));
+  box-shadow:
+    var(--arswc-shadow-sm, 0 1px 2px rgb(0 0 0 / 0.12)),
+    inset 0 0 0 1px color-mix(in srgb, var(--arswc-color-accent, #667eea) 18%, transparent);
 }
 
 .btn-large {
@@ -34,6 +49,7 @@
 .btn-small {
   padding: 5px 10px;
   font-size: 0.8rem;
+  border-radius: var(--arswc-radius-sm, 5px);
 }
 
 /* Form controls */
@@ -45,23 +61,26 @@
   display: block;
   margin-bottom: 5px;
   font-weight: 500;
-  color: #333;
+  color: var(--arswc-color-text, #333);
 }
 
 .form-input {
   width: 100%;
   padding: 10px;
-  border: 2px solid #e9ecef;
-  border-radius: 5px;
+  border: 2px solid var(--arswc-color-border, #e9ecef);
+  border-radius: var(--arswc-radius-sm, 5px);
   font-size: 0.9rem;
+  background: var(--arswc-color-bg, #fff);
+  color: var(--arswc-color-text, #1b2430);
   transition: border-color 0.3s ease;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--arswc-color-accent, #667eea);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--arswc-color-accent, #667eea) 18%, transparent);
 }
 
 .form-input::placeholder {
-  color: #999;
+  color: var(--arswc-color-muted, #999);
 }

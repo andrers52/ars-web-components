@@ -6,8 +6,8 @@
 import { describe, it, expect, beforeEach, vi, vi } from 'vitest';
 
 // Import the module
-import { SwipeableMixin } from '../src/mixins/swipeable-mixin/swipeable-mixin.js';
-import { PointerCoordinator } from '../src/mixins/common/pointer-coordinator.js';
+import { SwipeableMixin } from './swipeable-mixin.js';
+import { PointerCoordinator } from '../common/pointer-coordinator.js';
 
 describe('SwipeableMixin', () => {
   let element;

@@ -13,3 +13,5 @@ export { RemoteCallReceiverMixin } from "./mixins/remote-call-mixin/remote-call-
 export { RollMixin } from "./mixins/roll-mixin/roll-mixin.js";
 export { ShowIfPropertyTrueMixin } from "./mixins/show-if-property-true-mixin/show-if-property-true-mixin.js";
 export { SwipeableMixin } from "./mixins/swipeable-mixin/swipeable-mixin.js";
+export type { ArsDesignAdapter, InitializeArsWebComponentsOptions } from "./design-system.js";
+export { getArsWebComponentsDefaultAdapter, initializeArsWebComponents } from "./design-system.js";

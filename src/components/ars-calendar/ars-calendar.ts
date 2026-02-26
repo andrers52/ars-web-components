@@ -5,15 +5,15 @@ import WebComponentBase from "../web-component-base/web-component-base.js";
 const DEFAULT_CSS = `
   :host {
     display: block;
-    font-family: Arial, sans-serif;
-    background: var(--ars-calendar-bg, white);
-    border-radius: var(--ars-calendar-border-radius, 8px);
-    box-shadow: var(--ars-calendar-shadow, 0 2px 10px rgba(0, 0, 0, 0.1));
+    font-family: var(--arswc-font-family-sans, Arial, sans-serif);
+    background: var(--ars-calendar-bg, var(--arswc-color-surface, white));
+    border-radius: var(--ars-calendar-border-radius, var(--arswc-radius-md, 8px));
+    box-shadow: var(--ars-calendar-shadow, var(--arswc-shadow-sm, 0 2px 10px rgba(0, 0, 0, 0.1)));
     overflow: hidden;
   }
   .calendar-header {
-    background: var(--ars-calendar-header-bg, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
-    color: var(--ars-calendar-header-color, white);
+    background: var(--ars-calendar-header-bg, var(--arswc-color-accent, linear-gradient(135deg, #667eea 0%, #764ba2 100%)));
+    color: var(--ars-calendar-header-color, var(--arswc-color-accent-contrast, white));
     padding: 15px;
     text-align: center;
     position: relative;
@@ -30,14 +30,14 @@ const DEFAULT_CSS = `
     transform: translateY(-50%);
     background: rgba(255, 255, 255, 0.2);
     border: none;
-    color: var(--ars-calendar-header-color, white);
+    color: var(--ars-calendar-header-color, var(--arswc-color-accent-contrast, white));
     padding: 8px 12px;
     border-radius: 4px;
     cursor: pointer;
     transition: background 0.3s;
   }
   .calendar-nav:hover {
-    background: var(--ars-calendar-button-hover-bg, rgba(255, 255, 255, 0.3));
+    background: var(--ars-calendar-button-hover-bg, color-mix(in srgb, var(--arswc-color-accent-contrast, #ffffff) 30%, transparent));
   }
   .calendar-nav.prev {
     left: 15px;
@@ -54,25 +54,25 @@ const DEFAULT_CSS = `
   .calendar-weekdays {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    background: var(--ars-calendar-weekdays-bg, #f8f9fa);
+    background: var(--ars-calendar-weekdays-bg, var(--arswc-color-surface, #f8f9fa));
     border-bottom: 1px solid #e9ecef;
   }
   .calendar-weekday {
     padding: 10px;
     text-align: center;
     font-weight: bold;
-    color: var(--ars-calendar-days-header-color, #6c757d);
+    color: var(--ars-calendar-days-header-color, var(--arswc-color-muted, #6c757d));
     font-size: 0.9em;
   }
   .calendar-body {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 1px;
-    background: var(--ars-calendar-body-bg, #e9ecef);
+    background: var(--ars-calendar-body-bg, var(--arswc-color-border, #e9ecef));
   }
   .calendar-day {
-    background: var(--ars-calendar-cell-bg, white);
-    color: var(--ars-calendar-cell-color, inherit);
+    background: var(--ars-calendar-cell-bg, var(--arswc-color-bg, white));
+    color: var(--ars-calendar-cell-color, var(--arswc-color-text, inherit));
     padding: 10px;
     text-align: center;
     cursor: pointer;
@@ -85,18 +85,18 @@ const DEFAULT_CSS = `
     border: var(--ars-calendar-cell-border, none);
   }
   .calendar-day:hover {
-    background: var(--ars-calendar-cell-hover-bg, #f8f9fa);
+    background: var(--ars-calendar-cell-hover-bg, var(--arswc-color-surface, #f8f9fa));
     transform: scale(1.05);
     box-shadow: var(--ars-calendar-cell-hover-shadow, none);
   }
   .calendar-day.selected {
-    background: var(--ars-calendar-selected-bg, #667eea);
-    color: var(--ars-calendar-selected-color, white);
+    background: var(--ars-calendar-selected-bg, var(--arswc-color-accent, #667eea));
+    color: var(--ars-calendar-selected-color, var(--arswc-color-accent-contrast, white));
     font-weight: bold;
     box-shadow: var(--ars-calendar-selected-shadow, none);
   }
   .calendar-day.other-month {
-    color: var(--ars-calendar-other-month-color, #adb5bd);
+    color: var(--ars-calendar-other-month-color, var(--arswc-color-muted, #adb5bd));
   }
   .calendar-day.has-events::after {
     content: '';
@@ -106,7 +106,7 @@ const DEFAULT_CSS = `
     transform: translateX(-50%);
     width: 4px;
     height: 4px;
-    background: var(--ars-calendar-event-indicator-color, #28a745);
+    background: var(--ars-calendar-event-indicator-color, var(--arswc-color-accent, #28a745));
     border-radius: 50%;
   }
   .calendar-day.selected.has-events::after {

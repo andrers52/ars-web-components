@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, vi, vi } from 'vitest';
 
 // Import the module
-import { ArsColorSelect } from '../src/components/ars-color-select/ars-color-select.js';
+import { ArsColorSelect } from './ars-color-select.js';
 
 describe('ArsColorSelect', () => {
   let element;

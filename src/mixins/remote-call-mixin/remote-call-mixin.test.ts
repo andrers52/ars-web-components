@@ -6,8 +6,8 @@
 import { describe, it, expect, beforeEach, vi, vi } from 'vitest';
 
 // Import the modules
-import { RemoteCallCallerMixin } from '../src/mixins/remote-call-mixin/remote-call-caller-mixin.js';
-import { RemoteCallReceiverMixin } from '../src/mixins/remote-call-mixin/remote-call-receiver-mixin.js';
+import { RemoteCallCallerMixin } from './remote-call-caller-mixin.js';
+import { RemoteCallReceiverMixin } from './remote-call-receiver-mixin.js';
 
 describe('RemoteCallCallerMixin', () => {
   let element;

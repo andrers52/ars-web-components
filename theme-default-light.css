@@ -1,0 +1,16 @@
+/* Optional fallback theme template for ars-web-components consumers without a full design system.
+   This is intentionally small and generic. Override in app code or replace with ars-design-system. */
+:root {
+  --arswc-color-bg: #ffffff;
+  --arswc-color-surface: #f6f8fb;
+  --arswc-color-border: #d5dde8;
+  --arswc-color-text: #1b2430;
+  --arswc-color-muted: #64748b;
+  --arswc-color-accent: #2563eb;
+  --arswc-color-accent-contrast: #ffffff;
+  --arswc-radius-sm: 6px;
+  --arswc-radius-md: 10px;
+  --arswc-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.12);
+  --arswc-font-family-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --arswc-font-family-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}

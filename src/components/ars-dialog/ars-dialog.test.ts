@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, vi, vi } from 'vitest';
 
 // Import the module
-import { ArsDialog } from '../src/components/ars-dialog/ars-dialog.js';
+import { ArsDialog } from './ars-dialog.js';
 
 describe('ArsDialog', () => {
   let element;

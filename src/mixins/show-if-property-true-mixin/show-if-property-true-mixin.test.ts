@@ -7,7 +7,7 @@
 import { describe, it, expect, beforeEach, vi, vi } from 'vitest';
 
 // Import the module
-import { ShowIfPropertyTrueMixin } from '../src/mixins/show-if-property-true-mixin/show-if-property-true-mixin.js';
+import { ShowIfPropertyTrueMixin } from './show-if-property-true-mixin.js';
 
 describe('ShowIfPropertyTrueMixin', () => {
   let element;

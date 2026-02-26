@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, vi, vi } from 'vitest';
 
 // Import the module
-import { ArsCalendar } from '../src/components/ars-calendar/ars-calendar.js';
+import { ArsCalendar } from './ars-calendar.js';
 
 describe('ArsCalendar', () => {
   let element;

@@ -161,7 +161,7 @@ class ArsColorSelect extends WebComponentBase {
           left: 0;
           right: 0;
           bottom: 0;
-          background-color: rgba(0,0,0,0.4);
+          background-color: var(--ars-color-select-overlay-bg, color-mix(in srgb, var(--arswc-color-text, #000) 35%, transparent));
           z-index: 2;
           cursor: pointer;
         }
@@ -189,16 +189,16 @@ class ArsColorSelect extends WebComponentBase {
         .flex-container > div {
           width: 44px;
           height: 44px;
-          border-radius: 6px;
-          border: 2px solid #fff;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+          border-radius: var(--ars-color-select-swatch-radius, var(--arswc-radius-sm, 6px));
+          border: var(--ars-color-select-swatch-border, 2px solid var(--arswc-color-bg, #fff));
+          box-shadow: var(--ars-color-select-swatch-shadow, var(--arswc-shadow-sm, 0 1px 4px rgba(0,0,0,0.10)));
           cursor: pointer;
           transition: transform 0.18s cubic-bezier(.4,2,.6,1), box-shadow 0.18s;
           background-clip: padding-box;
         }
         .flex-container > div:hover {
           transform: translateY(-6px) scale(1.08);
-          box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+          box-shadow: var(--ars-color-select-swatch-hover-shadow, var(--arswc-shadow-sm, 0 6px 16px rgba(0,0,0,0.18)));
           z-index: 1;
         }
         .colorSelector {
@@ -206,15 +206,15 @@ class ArsColorSelect extends WebComponentBase {
           height: 40px;
           margin: auto;
           background-color: blue;
-          border-radius: 5px;
+          border-radius: var(--ars-color-select-selector-radius, var(--arswc-radius-sm, 5px));
           cursor: pointer;
-          border: 2px solid #ccc;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          border: var(--ars-color-select-selector-border, 2px solid var(--arswc-color-border, #ccc));
+          box-shadow: var(--ars-color-select-selector-shadow, var(--arswc-shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.1)));
           transition: all 0.2s ease;
         }
         .colorSelector:hover {
           transform: scale(1.05);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          box-shadow: var(--ars-color-select-selector-hover-shadow, var(--arswc-shadow-sm, 0 4px 8px rgba(0, 0, 0, 0.2)));
         }
       </style>
       <div id="colorSelector" class="colorSelector" style="visibility: visible;"> &nbsp; </div>

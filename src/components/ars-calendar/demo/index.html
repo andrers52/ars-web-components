@@ -213,10 +213,9 @@
           </div>
 
           <div class="controls">
-            <button class="btn emerald-btn" onclick="applyEmeraldTheme()">Emerald Theme</button>
-            <button class="btn sapphire-btn" onclick="applySapphireTheme()">Sapphire Theme</button>
-            <button class="btn onyx-btn" onclick="applyOnyxTheme()">Onyx Theme</button>
-            <button class="btn" onclick="resetTheme()">🔄 Reset Theme</button>
+            <button class="btn sapphire-btn" onclick="applyDefaultLightTemplate()">Default Light Template</button>
+            <button class="btn onyx-btn" onclick="applyDefaultDarkTemplate()">Default Dark Template</button>
+            <button class="btn emerald-btn" onclick="resetTheme()">Reset Calendar Overrides</button>
           </div>
 
           <ars-calendar id='customizedCalendar'></ars-calendar>
@@ -235,7 +234,7 @@
           <button class="btn" onclick="addSampleEvent()">📝 Add Sample Event</button>
           <button class="btn" onclick="clearEvents()">🗑️ Clear All Events</button>
           <button class="btn" onclick="goToToday()">📅 Go to Today</button>
-          <button class="btn-secondary" onclick="exportEvents()">📄 Export Events</button>
+          <button class="btn btn-secondary" onclick="exportEvents()">📄 Export Events</button>
         </div>
 
         <div class="demo-output">
@@ -258,8 +257,8 @@
           <h4>Event Log:</h4>
           <div class="event-log" id="eventLog">Ready to capture calendar events...\n</div>
           <div class="controls">
-            <button class="btn-secondary" onclick="clearLog()">🗑️ Clear Log</button>
-            <button class="btn-secondary" onclick="exportLog()">📄 Export Log</button>
+            <button class="btn btn-secondary" onclick="clearLog()">🗑️ Clear Log</button>
+            <button class="btn btn-secondary" onclick="exportLog()">📄 Export Log</button>
           </div>
         </div>
       </div>
@@ -339,6 +338,24 @@
   </div>
 
   <!-- Load the components -->
+  <script type="module">
+    import { getArsWebComponentsDefaultAdapter, initializeArsWebComponents } from "/dist/design-system.js";
+
+    window.__arswcInitLight = function () {
+      initializeArsWebComponents({
+        designAdapter: getArsWebComponentsDefaultAdapter("light"),
+      });
+    };
+
+    window.__arswcInitDark = function () {
+      initializeArsWebComponents({
+        designAdapter: getArsWebComponentsDefaultAdapter("dark"),
+      });
+    };
+
+    // Demo default: explicit dark template.
+    window.__arswcInitDark();
+  </script>
   <script type="module" src="/dist/components/ars-calendar/ars-calendar.js"></script>
   <script type="module" src="/dist/components/ars-color-select/ars-color-select.js"></script>
   <script type="module" src="/dist/mixins/localized-mixin/localized-mixin.js"></script>
@@ -507,84 +524,60 @@
     }
 
     // CSS Customization functions
-    function applyEmeraldTheme() {
+    function applyDefaultLightTemplate() {
+      if (window.__arswcInitLight) {
+        window.__arswcInitLight();
+      }
       const customizedCalendar = document.getElementById('customizedCalendar');
       const cssVars = {
-        'ars-calendar-bg': '#ecfdf5',
-        'ars-calendar-header-bg': 'linear-gradient(135deg, #10b981, #059669)',
-        'ars-calendar-header-color': '#ffffff',
-        'ars-calendar-cell-bg': '#ffffff',
-        'ars-calendar-cell-color': '#065f46',
-        'ars-calendar-days-header-color': '#6b7280',
-        'ars-calendar-selected-bg': '#10b981',
-        'ars-calendar-selected-color': '#ffffff',
-        'ars-calendar-selected-shadow': '0 0 12px rgba(16, 185, 129, 0.4)',
-        'ars-calendar-button-hover-bg': 'rgba(16, 185, 129, 0.3)',
-        'ars-calendar-border-radius': '8px',
-        'ars-calendar-shadow': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        'ars-calendar-event-indicator-color': '#059669'
-      };
-
-      customizedCalendar.setCSSVars(cssVars);
-      updateCSSVarsDisplay(cssVars);
-
-      const timestamp = new Date().toLocaleTimeString();
-      eventLog.textContent += `[${timestamp}] Emerald theme applied\n`;
-      eventLog.scrollTop = eventLog.scrollHeight;
-    }
-
-    function applySapphireTheme() {
-      const customizedCalendar = document.getElementById('customizedCalendar');
-      const cssVars = {
-        'ars-calendar-bg': '#eff6ff',
+        'ars-calendar-bg': '#ffffff',
         'ars-calendar-header-bg': 'linear-gradient(135deg, #2563eb, #1d4ed8)',
         'ars-calendar-header-color': '#ffffff',
         'ars-calendar-cell-bg': '#ffffff',
-        'ars-calendar-cell-color': '#1e3a8a',
-        'ars-calendar-days-header-color': '#6b7280',
+        'ars-calendar-cell-color': '#1b2430',
+        'ars-calendar-days-header-color': '#64748b',
         'ars-calendar-selected-bg': '#2563eb',
         'ars-calendar-selected-color': '#ffffff',
-        'ars-calendar-selected-shadow': '0 0 12px rgba(37, 99, 235, 0.4)',
-        'ars-calendar-button-hover-bg': 'rgba(37, 99, 235, 0.3)',
-        'ars-calendar-border-radius': '12px',
-        'ars-calendar-shadow': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        'ars-calendar-event-indicator-color': '#1d4ed8'
+        'ars-calendar-selected-shadow': '0 0 12px rgba(37, 99, 235, 0.25)',
+        'ars-calendar-button-hover-bg': 'rgba(37, 99, 235, 0.16)',
+        'ars-calendar-border-radius': '10px',
+        'ars-calendar-shadow': '0 4px 10px rgba(0, 0, 0, 0.08)',
+        'ars-calendar-event-indicator-color': '#2563eb'
       };
-
       customizedCalendar.setCSSVars(cssVars);
       updateCSSVarsDisplay(cssVars);
-
       const timestamp = new Date().toLocaleTimeString();
-      eventLog.textContent += `[${timestamp}] Sapphire theme applied\n`;
+      eventLog.textContent += `[${timestamp}] ars-web-components default LIGHT template applied\n`;
       eventLog.scrollTop = eventLog.scrollHeight;
     }
 
-    function applyOnyxTheme() {
+    function applyDefaultDarkTemplate() {
+      if (window.__arswcInitDark) {
+        window.__arswcInitDark();
+      }
       const customizedCalendar = document.getElementById('customizedCalendar');
       const cssVars = {
-        'ars-calendar-bg': '#18181b',
-        'ars-calendar-header-bg': 'linear-gradient(135deg, #09090b, #18181b)',
-        'ars-calendar-header-color': '#fafafa',
-        'ars-calendar-header-text-shadow': '0 1px 2px rgba(0, 0, 0, 0.8)',
-        'ars-calendar-cell-bg': '#27272a',
-        'ars-calendar-cell-color': '#e4e4e7',
-        'ars-calendar-days-header-color': '#a1a1aa',
-        'ars-calendar-selected-bg': '#facc15',
-        'ars-calendar-selected-color': '#18181b',
-        'ars-calendar-selected-shadow': '0 0 16px rgba(250, 204, 21, 0.5)',
-        'ars-calendar-button-hover-bg': 'rgba(250, 204, 21, 0.2)',
-        'ars-calendar-border-radius': '8px',
-        'ars-calendar-shadow': '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
-        'ars-calendar-cell-hover-shadow': '0 0 8px rgba(250, 204, 21, 0.3)',
-        'ars-calendar-cell-border': '1px solid #3f3f46',
-        'ars-calendar-event-indicator-color': '#facc15'
+        'ars-calendar-bg': '#121a2d',
+        'ars-calendar-header-bg': 'linear-gradient(135deg, #0b1220, #121a2d)',
+        'ars-calendar-header-color': '#e8eef9',
+        'ars-calendar-header-text-shadow': '0 1px 2px rgba(0, 0, 0, 0.5)',
+        'ars-calendar-cell-bg': '#1a2438',
+        'ars-calendar-cell-color': '#e8eef9',
+        'ars-calendar-days-header-color': '#9fb0cb',
+        'ars-calendar-selected-bg': '#3aa8ff',
+        'ars-calendar-selected-color': '#04101c',
+        'ars-calendar-selected-shadow': '0 0 14px rgba(58, 168, 255, 0.35)',
+        'ars-calendar-button-hover-bg': 'rgba(58, 168, 255, 0.16)',
+        'ars-calendar-border-radius': '10px',
+        'ars-calendar-shadow': '0 10px 22px rgba(0, 0, 0, 0.28)',
+        'ars-calendar-cell-hover-shadow': '0 0 6px rgba(58, 168, 255, 0.22)',
+        'ars-calendar-cell-border': '1px solid #29405f',
+        'ars-calendar-event-indicator-color': '#3aa8ff'
       };
-
       customizedCalendar.setCSSVars(cssVars);
       updateCSSVarsDisplay(cssVars);
-
       const timestamp = new Date().toLocaleTimeString();
-      eventLog.textContent += `[${timestamp}] Onyx theme applied\n`;
+      eventLog.textContent += `[${timestamp}] ars-web-components default DARK template applied\n`;
       eventLog.scrollTop = eventLog.scrollHeight;
     }
 
@@ -594,7 +587,7 @@
       updateCSSVarsDisplay({});
 
       const timestamp = new Date().toLocaleTimeString();
-      eventLog.textContent += `[${timestamp}] Theme reset to default\n`;
+      eventLog.textContent += `[${timestamp}] Calendar CSS variable overrides reset\n`;
       eventLog.scrollTop = eventLog.scrollHeight;
     }
 

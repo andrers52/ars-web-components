@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, vi, vi } from 'vitest';
 
 // Import the module
-import { PressedEffectMixin } from '../src/mixins/pressed-effect-mixin/pressed-effect-mixin.js';
+import { PressedEffectMixin } from './pressed-effect-mixin.js';
 
 describe('PressedEffectMixin', () => {
   let element;

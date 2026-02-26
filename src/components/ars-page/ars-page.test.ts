@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, vi, vi, afterEach } from 'vitest';
 
 // Import the module
-import { ArsPage } from '../src/components/ars-page/ars-page.js';
+import { ArsPage } from './ars-page.js';
 
 describe('ArsPage', () => {
   let element;

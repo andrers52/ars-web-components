@@ -34,8 +34,8 @@ class ArsDataRoller extends WebComponentBase {
           height: 2.5em;
           perspective: 600px;
           pointer-events: none;
-          background: var(--ars-roller-bg, transparent);
-          border-radius: var(--ars-roller-radius, 8px);
+          background: var(--ars-roller-bg, var(--arswc-color-surface, transparent));
+          border-radius: var(--ars-roller-radius, var(--arswc-radius-md, 8px));
         }
         .roller-container {
           display: flex;
@@ -55,7 +55,7 @@ class ArsDataRoller extends WebComponentBase {
           justify-content: center;
           transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
           pointer-events: none;
-          color: var(--ars-roller-color, inherit);
+          color: var(--ars-roller-color, var(--arswc-color-text, inherit));
           font-size: var(--ars-roller-font-size, 1em);
         }
         .roller-item.animate-out {
@@ -87,7 +87,7 @@ class ArsDataRoller extends WebComponentBase {
           font-weight: 500;
           opacity: 0.85;
           pointer-events: none;
-          color: var(--ars-roller-label-color, #2196f3);
+          color: var(--ars-roller-label-color, var(--arswc-color-accent, #2196f3));
         }
         .param-value-content {
           margin-left: 12px;

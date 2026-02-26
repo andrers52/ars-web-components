@@ -349,10 +349,6 @@
         <p><strong>Current Page:</strong> <span id="currentPageDisplay">Loading...</span></p>
         <p><strong>Current Route:</strong> <span id="currentRouteDisplay">Loading...</span></p>
         <p><strong>Available Pages:</strong> <span id="availablePagesDisplay">Loading...</span></p>
-        <div class="controls" style="margin-top: 10px;">
-          <button class="btn-small" onclick="refreshStatus()">🔄 Refresh Status</button>
-          <button class="btn-small" onclick="debugRouter()">🐛 Debug Router</button>
-        </div>
       </div>
 
       <!-- Main Demo -->
@@ -781,41 +777,6 @@
 
     window.goForward = function () {
       window.history.forward();
-    };
-
-    window.refreshStatus = function () {
-      console.log('Manual refresh requested');
-      updateStatus();
-      updateUrlDisplay();
-      updateRouteInfo();
-      updateRouteContent();
-    };
-
-    window.debugRouter = function () {
-      const router = document.querySelector('#main-router');
-      console.log('=== Router Debug Info ===');
-      console.log('Router element:', router);
-      console.log('Router type:', typeof router);
-      console.log('Router constructor:', router?.constructor?.name);
-      console.log('Router methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(router) || {}));
-      console.log('Router has getPageInfo:', typeof router?.getPageInfo);
-      console.log('Router has getCurrentRoute:', typeof router?.getCurrentRoute);
-
-      if (router) {
-        try {
-          const pageInfo = router.getPageInfo();
-          console.log('getPageInfo result:', pageInfo);
-        } catch (e) {
-          console.error('getPageInfo error:', e);
-        }
-
-        try {
-          const routeInfo = router.getCurrentRoute();
-          console.log('getCurrentRoute result:', routeInfo);
-        } catch (e) {
-          console.error('getCurrentRoute error:', e);
-        }
-      }
     };
 
     // Initialize displays

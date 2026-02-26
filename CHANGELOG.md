@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-02-26
+
+### Added
+
+- **Design Adapter Initialization API** for explicit, design-system-agnostic setup
+  - `initializeArsWebComponents(...)`
+  - `ArsDesignAdapter` contract
+  - `getArsWebComponentsDefaultAdapter("light" | "dark")`
+- **Vite Demo Dev Workflow**
+  - `npm run dev` serves demos with live reload from `src/`
+  - dev-only `/dist -> /src` request rewrites for existing demo pages
+- **Default Theme Templates (public)**
+  - `theme-default-light.css`
+  - `theme-default-dark.css`
+- **README documentation for custom design-system integration**
+  - `--arswc-*` variable contract
+  - explicit initialization examples
+  - design contract coverage section
+
+### Changed
+
+- **Design System Compatibility**: Components now resolve default styles through the library-level `--arswc-*` design contract (when available) before using hardcoded fallbacks.
+- **Demo Styling**: Shared demo buttons/forms now follow the active design adapter and default templates.
+- **Demo Test Layout**: Tests were moved to live alongside the source they cover (shared setup/mocks remain in `test/`).
+
+### Fixed
+
+- **Calendar Demo Theming**: Improved template switching behavior and dark-mode day-cell text visibility.
+- **Dialog Demo Layouts**: Fixed multiple theme/layout regressions in `ars-dialog` demos (input, rich content, custom styled, long content, form dialog width/overflow).
+- **Demo Button Consistency**: Fixed secondary actions in demos that were missing base `.btn` styling.
+- **Vite Dev Badge**: Prevented false positives under `npm start` by detecting real Vite dev context.
+
 ## [0.8.0] - 2026-02-25
 
 ### Added

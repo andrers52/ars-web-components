@@ -47,6 +47,28 @@
       opacity: 0.9;
     }
 
+    .dev-badge {
+      display: none;
+      margin: 14px auto 0;
+      width: fit-content;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #04101c;
+      background: linear-gradient(135deg, #67e8f9, #22d3ee);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      box-shadow: 0 4px 14px rgba(34, 211, 238, 0.35);
+    }
+
+    .dev-badge.visible {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .content {
       padding: 40px;
     }
@@ -197,6 +219,7 @@
     <div class="header">
       <h1>🚀 ARS Web Components</h1>
       <p>Components and MixinsDemo</p>
+      <div id="devModeBadge" class="dev-badge" aria-live="polite">🛠️ Dev Mode (Vite)</div>
     </div>
 
     <div class="content">
@@ -378,5 +401,19 @@
     </div>
   </div>
 </body>
+<script>
+  (function () {
+    const badge = document.getElementById('devModeBadge');
+    if (!badge) return;
+
+    const hasViteClientScript = !!document.querySelector('script[src^="/@vite/client"]');
+    const hasViteModulePreload = !!document.querySelector('link[href^="/@vite/client"]');
+    const isViteDev = hasViteClientScript || hasViteModulePreload;
+
+    if (isViteDev) {
+      badge.classList.add('visible');
+    }
+  })();
+</script>
 
 </html>

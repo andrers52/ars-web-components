@@ -217,7 +217,7 @@
               Long Content</button>
             <button class="btn" onclick="if(typeof showFormDialog === 'function') showFormDialog()">📋 Form
               Dialog</button>
-            <button class="btn-secondary"
+            <button class="btn btn-secondary"
               onclick="if(typeof showMultipleDialogs === 'function') showMultipleDialogs()">🔗 Multiple Dialogs</button>
           </div>
 
@@ -231,6 +231,11 @@
       <div class="demo-section">
         <h3>🎨 CSS Customization & Themes</h3>
         <div class="dialog-demo">
+          <div class="controls">
+            <button class="btn sapphire-btn" onclick="if(typeof applyDefaultLightTemplate === 'function') applyDefaultLightTemplate()">Default Light Template</button>
+            <button class="btn onyx-btn" onclick="if(typeof applyDefaultDarkTemplate === 'function') applyDefaultDarkTemplate()">Default Dark Template</button>
+          </div>
+
           <div class="localization-demo">
             <h4>Dialog Theming Features:</h4>
             <p><strong>CSS Variables:</strong> Theme using CSS custom properties</p>
@@ -265,8 +270,8 @@
           <h4>Event Log:</h4>
           <div class="event-log" id="eventLog">Ready to capture dialog events...\n</div>
           <div class="controls">
-            <button class="btn-secondary" onclick="if(typeof clearLog === 'function') clearLog()">🗑️ Clear Log</button>
-            <button class="btn-secondary" onclick="if(typeof exportLog === 'function') exportLog()">📄 Export
+            <button class="btn btn-secondary" onclick="if(typeof clearLog === 'function') clearLog()">🗑️ Clear Log</button>
+            <button class="btn btn-secondary" onclick="if(typeof exportLog === 'function') exportLog()">📄 Export
               Log</button>
           </div>
         </div>
@@ -309,7 +314,22 @@
 
   <!-- Load the component -->
   <script type="module">
+    import { getArsWebComponentsDefaultAdapter, initializeArsWebComponents } from "/dist/design-system.js";
     import ArsDialog from '/dist/components/ars-dialog/ars-dialog.js';
+
+    window.applyDefaultLightTemplate = function () {
+      initializeArsWebComponents({
+        designAdapter: getArsWebComponentsDefaultAdapter("light"),
+      });
+      logEvent?.('Applied ars-web-components default LIGHT template');
+    };
+
+    window.applyDefaultDarkTemplate = function () {
+      initializeArsWebComponents({
+        designAdapter: getArsWebComponentsDefaultAdapter("dark"),
+      });
+      logEvent?.('Applied ars-web-components default DARK template');
+    };
 
     const eventLog = document.getElementById('eventLog');
     const resultText = document.getElementById('resultText');
@@ -335,6 +355,9 @@
     window.ArsDialog = ArsDialog;
     window.logEvent = logEvent;
     window.updateResult = updateResult;
+
+    // Demo default: explicit dark template (after helpers/state are initialized)
+    window.applyDefaultDarkTemplate();
 
     // Ensure all functions are available when DOM is ready
     document.addEventListener('DOMContentLoaded', function () {
@@ -463,10 +486,18 @@
       logEvent('Opening input dialog...');
 
       const result = await ArsDialog.dialog(
-        `<div style="padding: 20px;">
+        `<div style="padding: 20px; text-align: left;">
           <p style="margin-bottom: 15px;">Please enter your information:</p>
-          <p><label>Name: <input id='userName' placeholder='Enter your name' style='margin-left: 10px; padding: 5px;'></label></p>
-          <p><label>Email: <input id='userEmail' type='email' placeholder='Enter your email' style='margin-left: 10px; padding: 5px; margin-top: 10px;'></label></p>
+          <div style="display: grid; gap: 12px;">
+            <div>
+              <label for="userName">Name:</label>
+              <input id="userName" type="text" placeholder="Enter your name">
+            </div>
+            <div>
+              <label for="userEmail">Email:</label>
+              <input id="userEmail" type="email" placeholder="Enter your email">
+            </div>
+          </div>
         </div>`,
         'User Information'
       );
@@ -524,10 +555,16 @@
       logEvent('Opening rich content dialog...');
 
       const result = await ArsDialog.dialog(
-        `<div style="padding: 20px;">
+        `<div style="padding: 20px; text-align: left;">
           <h3 style="margin-bottom: 15px;">🎨 Rich Content Example</h3>
-          <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-            <h4>Features:</h4>
+          <div style="
+            background: color-mix(in srgb, var(--arswc-color-surface, #f8fafc) 88%, transparent);
+            border: 1px solid var(--arswc-color-border, #d1d5db);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+          ">
+            <h4 style="margin: 0 0 10px 0;">Features:</h4>
             <ul style="margin-left: 20px; margin-top: 10px;">
               <li>✅ Custom HTML content</li>
               <li>✅ Multiple form elements</li>
@@ -535,21 +572,8 @@
               <li>✅ Interactive elements</li>
             </ul>
           </div>
-          <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <select id="category" style="
-              padding: 7px 28px 7px 12px;
-              border: 1.5px solid #bdbdbd;
-              border-radius: 6px;
-              background: #f5f5f5 url('data:image/svg+xml;utf8,<svg fill=\'%23666\' height=\'18\' viewBox=\'0 0 20 20\' width=\'18\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7.293 8.293a1 1 0 011.414 0L10 9.586l1.293-1.293a1 1 0 111.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z\'/></svg>') no-repeat right 10px center/18px 18px;
-              font-size: 1rem;
-              color: #333;
-              appearance: none;
-              -webkit-appearance: none;
-              -moz-appearance: none;
-              transition: border-color 0.2s, box-shadow 0.2s;
-              box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-              min-width: 120px;
-            " onfocus="this.style.borderColor='#2563eb';this.style.boxShadow='0 0 0 2px #2563eb33';" onblur="this.style.borderColor='#bdbdbd';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.04)';">
+          <div style="display: flex; gap: 12px; margin-bottom: 15px; align-items: center;">
+            <select id="category" style="min-width: 140px;">
               <option>General</option>
               <option>Technical</option>
               <option>Feedback</option>
@@ -560,22 +584,7 @@
           <textarea
             id="description"
             placeholder="Enter description..."
-            style="
-              width: 100%;
-              height: 80px;
-              padding: 10px 12px;
-              border: 1.5px solid #bdbdbd;
-              border-radius: 6px;
-              background: #f8fafc;
-              font-size: 1rem;
-              color: #22223b;
-              resize: vertical;
-              box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-              transition: border-color 0.2s, box-shadow 0.2s;
-              outline: none;
-            "
-            onfocus="this.style.borderColor='#2563eb';this.style.boxShadow='0 0 0 2px #2563eb33';"
-            onblur="this.style.borderColor='#bdbdbd';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.04)';"
+            style="width: 100%; min-height: 96px;"
           ></textarea>
         </div>`,
         'Advanced Form Dialog'
@@ -601,10 +610,21 @@
           <h3 style="margin-bottom: 20px; text-align: center;">🌟 Custom Styled Dialog</h3>
           <p style="margin-bottom: 15px;">This dialog demonstrates custom CSS styling capabilities.</p>
           <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-            <label style="display: block; margin-bottom: 5px;">Choose theme:</label>
-            <input type="radio" name="theme" value="light" id="light"> <label for="light">Light</label><br>
-            <input type="radio" name="theme" value="dark" id="dark"> <label for="dark">Dark</label><br>
-            <input type="radio" name="theme" value="auto" id="auto" checked> <label for="auto">Auto</label>
+            <div style="font-weight: 600; margin-bottom: 10px;">Choose theme:</div>
+            <div style="display: grid; gap: 10px;">
+              <label for="light" style="display: flex; align-items: center; gap: 8px; margin: 0; color: white;">
+                <input type="radio" name="theme" value="light" id="light" style="margin: 0; width: auto;">
+                <span>Light</span>
+              </label>
+              <label for="dark" style="display: flex; align-items: center; gap: 8px; margin: 0; color: white;">
+                <input type="radio" name="theme" value="dark" id="dark" style="margin: 0; width: auto;">
+                <span>Dark</span>
+              </label>
+              <label for="auto" style="display: flex; align-items: center; gap: 8px; margin: 0; color: white;">
+                <input type="radio" name="theme" value="auto" id="auto" checked style="margin: 0; width: auto;">
+                <span>Auto</span>
+              </label>
+            </div>
           </div>
         </div>`,
         'Custom Theme'
@@ -624,9 +644,17 @@
       logEvent('Opening long content dialog...');
 
       const longContent = `
-        <div style="padding: 20px;">
+        <div style="padding: 20px; text-align: left;">
           <h3>📜 Terms and Conditions</h3>
-          <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; margin: 15px 0; background: #f9f9f9;">
+          <div style="
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--arswc-color-border, #d1d5db);
+            padding: 15px;
+            margin: 15px 0;
+            background: color-mix(in srgb, var(--arswc-color-surface, #f8fafc) 88%, transparent);
+            border-radius: 8px;
+          ">
             <h4>1. Introduction</h4>
             <p>Welcome to our service. By using this application, you agree to these terms...</p>
             <h4>2. Data Collection</h4>
@@ -644,8 +672,9 @@
             <h4>8. Changes to Terms</h4>
             <p>We reserve the right to modify these terms at any time. Continued use constitutes acceptance...</p>
           </div>
-          <label>
-            <input type="checkbox" id="acceptTerms"> I have read and accept the terms and conditions
+          <label for="acceptTerms" style="display: flex; align-items: center; gap: 10px; margin: 0;">
+            <input type="checkbox" id="acceptTerms" style="margin: 0; width: auto;">
+            <span>I have read and accept the terms and conditions</span>
           </label>
         </div>
       `;
@@ -666,17 +695,17 @@
       logEvent('Opening form dialog...');
 
       const result = await ArsDialog.dialog(
-        `<form style="padding: 20px;">
+        `<form style="padding: 20px; width: 100%; max-width: 640px; box-sizing: border-box; text-align: left; margin: 0 auto;">
           <h3 style="margin-bottom: 20px;">📋 Contact Form</h3>
 
           <div style="margin-bottom: 15px;">
-            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Full Name:</label>
-            <input id="fullName" type="text" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <label for="fullName" style="margin-bottom: 6px; font-weight: 600;">Full Name:</label>
+            <input id="fullName" type="text" required style="width: 100%;">
           </div>
 
           <div style="margin-bottom: 15px;">
-            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Subject:</label>
-            <select id="subject" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <label for="subject" style="margin-bottom: 6px; font-weight: 600;">Subject:</label>
+            <select id="subject" style="width: 100%;">
               <option value="">Select a subject...</option>
               <option value="support">Technical Support</option>
               <option value="billing">Billing Question</option>
@@ -686,18 +715,33 @@
           </div>
 
           <div style="margin-bottom: 15px;">
-            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Message:</label>
-            <textarea id="message" required style="width: 100%; height: 100px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;" placeholder="Enter your message here..."></textarea>
+            <label for="message" style="margin-bottom: 6px; font-weight: 600;">Message:</label>
+            <textarea id="message" required style="width: 100%; min-height: 110px; resize: vertical;" placeholder="Enter your message here..."></textarea>
           </div>
 
-          <div style="margin-bottom: 15px;">
-            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Priority:</label>
-            <input type="radio" name="priority" value="low" id="pLow"> <label for="pLow">Low</label>
-            <input type="radio" name="priority" value="normal" id="pNormal" checked> <label for="pNormal">Normal</label>
-            <input type="radio" name="priority" value="high" id="pHigh"> <label for="pHigh">High</label>
+          <div style="margin-bottom: 8px;">
+            <div style="margin-bottom: 8px; font-weight: 600;">Priority:</div>
+            <div style="display: grid; gap: 8px;">
+              <label for="pLow" style="display: flex; align-items: center; gap: 8px; margin: 0;">
+                <input type="radio" name="priority" value="low" id="pLow" style="margin: 0; width: auto;">
+                <span>Low</span>
+              </label>
+              <label for="pNormal" style="display: flex; align-items: center; gap: 8px; margin: 0;">
+                <input type="radio" name="priority" value="normal" id="pNormal" checked style="margin: 0; width: auto;">
+                <span>Normal</span>
+              </label>
+              <label for="pHigh" style="display: flex; align-items: center; gap: 8px; margin: 0;">
+                <input type="radio" name="priority" value="high" id="pHigh" style="margin: 0; width: auto;">
+                <span>High</span>
+              </label>
+            </div>
           </div>
         </form>`,
-        'Contact Us'
+        'Contact Us',
+        {
+          "ars-dialog-min-width": "560px",
+          "ars-dialog-max-width": "760px"
+        }
       );
 
       if (result) {

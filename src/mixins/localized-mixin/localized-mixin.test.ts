@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, vi, vi } from 'vitest';
 
 // Import the module
-import { LocalizedMixin } from '../src/mixins/localized-mixin/localized-mixin.js';
+import { LocalizedMixin } from './localized-mixin.js';
 
 describe('LocalizedMixin', () => {
   let element;
