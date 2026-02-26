@@ -5,7 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.7.2] - 2025-02-24
+## [0.8.0] - 2026-02-25
+
+### Added
+
+- **TypeScript Migration**: Entire codebase ported from JavaScript to TypeScript
+  - All source files moved to `src/` directory and renamed from `.js` to `.ts`
+  - Full type declarations generated via `tsc` (`.d.ts` files in `dist/`)
+  - Source maps for debugging (`*.js.map` in `dist/`)
+- **Build Toolchain**: Added `tsc`-based build pipeline
+  - `npm run build` compiles TypeScript to `dist/`
+  - `tsconfig.json` configured with ESNext target, NodeNext modules, and strict-lite settings
+- **Vitest Testing**: Migrated test framework from Jest to Vitest
+  - All 323 tests passing
+  - `npm run test` — single run
+  - `npm run test:watch` — watch mode
+  - `npm run test:coverage` — coverage report
+  - `vitest.config.ts` with jsdom environment and custom setup
+  - `test/setup.ts` with mocks for `ResizeObserver`, `IntersectionObserver`, `matchMedia`, and `HTMLCanvasElement.getContext`
+- **WebComponentBase Inheritance**: `ArsPageController`, `DemoReceiver`, and `SimpleLocalizedElement` now extend `WebComponentBase` instead of raw `HTMLElement`
+
+### Changed
+
+- **BREAKING — Directory Structure**: Source files moved from root to `src/` directory
+  - Components: `src/components/`
+  - Mixins: `src/mixins/`
+  - CSS: `src/css/`
+- **BREAKING — Build Output**: Compiled JavaScript now emitted to `dist/` directory
+  - `package.json` `main` → `dist/index.js`
+  - `package.json` `types` → `dist/index.d.ts`
+- **Module System**: `package.json` `"type": "module"` with `server.js` updated to ES module imports
+- **Demo Pages**: All demo `index.html` files updated with:
+  - Absolute `/dist/` paths for compiled component scripts
+  - Absolute `/src/css/` paths for stylesheets
+  - Import maps for `arslib` browser bundle resolution
+  - Correct navigation links between demos and the main gallery
+
+### Fixed
+
+- **Demo Navigation**: All 12 component and mixin demo links now work correctly from the main gallery page
+- **Demo Interactivity**: All demos fully functional with proper script loading from the `dist/` build output
+
+### Technical Improvements
+
+- **Type Safety**: TypeScript compilation catches errors at build time
+- **Source Maps**: Full source map support for debugging compiled output
+- **Test Infrastructure**: Comprehensive mock setup for browser APIs in jsdom environment
+- **`.gitignore`**: Added `dist/` to keep build artifacts out of version control
+
+## [0.7.3] - 2025-02-24
 
 ### Added
 

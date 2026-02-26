@@ -1,6 +1,6 @@
 # ARS Web Components
 
-A collection of reusable web components built with vanilla JavaScript and ES modules.
+A collection of reusable web components built with TypeScript and ES modules.
 
 ## 🚀 Live Demo
 
@@ -10,56 +10,63 @@ Check out the [live demo](https://andrers52.github.io/src/projects/ars-web-compo
 
 ## Features
 
-- **🎯 Pure JavaScript**: No framework dependencies, works with any modern web project
+- **🎯 TypeScript**: Full type safety with generated `.d.ts` declarations
 - **🎨 CSS-friendly**: Components are styling-agnostic, use your own CSS classes
 - **⚡ ES Modules**: Modern module system with proper imports/exports
 - **🔧 Interactive Effects**: Built-in pressed effects and animations
 - **📱 Touch Support**: Full mobile and desktop interaction support
-- **🧪 Functional Architecture**: Pure functions and functional programming principles for better testability
+- **🧪 Vitest Testing**: 323 tests with jsdom environment
 - **🔒 Proper Encapsulation**: Private methods and static utilities for clean API design
 - **🤝 Mixin Coordination**: Smart pointer coordination system for multiple gesture mixins
 - **📜 Mobile Scroll Management**: Intelligent scroll prevention during gesture interactions
 
 ## Architecture
 
-### Functional Programming Design
+### Project Structure
 
-ARS Web Components uses functional programming principles while maintaining the class structure required by the Custom Elements API:
+```
+ars-web-components/
+├── src/                    # TypeScript source files
+│   ├── components/         # Web components
+│   │   ├── ars-calendar/
+│   │   ├── ars-color-select/
+│   │   ├── ars-dialog/
+│   │   ├── ars-page/
+│   │   ├── ars-data-roller/
+│   │   └── web-component-base/
+│   ├── mixins/             # Reusable mixins
+│   │   ├── common/
+│   │   ├── draggable-mixin/
+│   │   ├── localized-mixin/
+│   │   ├── pressed-effect-mixin/
+│   │   ├── remote-call-mixin/
+│   │   ├── roll-mixin/
+│   │   ├── show-if-property-true-mixin/
+│   │   └── swipeable-mixin/
+│   └── css/                # Shared CSS for demos
+├── dist/                   # Compiled JavaScript output (generated)
+├── test/                   # Vitest test files
+├── tsconfig.json
+├── vitest.config.ts
+└── server.js               # Express dev server
+```
 
-- **Pure Functions**: Utility functions are extracted as pure functions for better testability
-- **Private Methods**: Internal logic uses proper private methods (`#methodName`) for encapsulation
-- **Static Utilities**: Helper functions are organized as private static methods (`static #methodName`)
-- **Public API**: Only methods meant to be called externally are exposed as public static methods
+### TypeScript + Web Components
 
-### Method Organization
+All components extend `WebComponentBase` (which extends `HTMLElement`) and are compiled from TypeScript to ES modules with full type declarations:
 
-```javascript
-class MyComponent extends HTMLElement {
-  // Public static methods - meant to be called from outside
+```typescript
+import WebComponentBase from "../web-component-base/web-component-base.js";
+
+class MyComponent extends WebComponentBase {
   static get observedAttributes() {
     return ["attr1", "attr2"];
   }
 
-  // Private static methods - internal utilities
-  static #validateInput(input) {
-    /* validation logic */
-  }
-  static #createElement(tag, props) {
-    /* element creation */
-  }
+  connectedCallback() { /* lifecycle */ }
+  attributeChangedCallback(name: string, oldVal: string, newVal: string) { /* ... */ }
 
-  // Private instance methods - internal component logic
-  #handleClick() {
-    /* click handling */
-  }
-  #updateDisplay() {
-    /* display updates */
-  }
-
-  // Public instance methods - component API
-  publicMethod() {
-    /* public functionality */
-  }
+  publicMethod() { /* component API */ }
 }
 ```
 
@@ -73,7 +80,7 @@ npm install ars-web-components
 
 ### Method 1: ES Module Import (Recommended)
 
-```javascript
+```typescript
 import { ArsCalendar } from "ars-web-components";
 ```
 
@@ -82,7 +89,7 @@ import { ArsCalendar } from "ars-web-components";
 For projects that need to load components directly without bundling:
 
 ```html
-<script type="module" src="./node_modules/ars-web-components/index.js"></script>
+<script type="module" src="./node_modules/ars-web-components/dist/index.js"></script>
 ```
 
 ## Components
@@ -300,7 +307,7 @@ class MyButton extends PressedEffectMixin(HTMLElement) {
 - Works with solid background colors
 - Touch and mouse support
 
-**Demo:** http://localhost:8080/mixins/pressed-effect-mixin/demo/
+**Demo:** http://localhost:8080/src/mixins/pressed-effect-mixin/demo/
 
 ### Localized Mixin
 
@@ -328,7 +335,7 @@ class LocalizedComponent extends LocalizedMixin(HTMLElement) {
 - Event-driven updates
 - Mock localization system for testing
 
-**Demo:** http://localhost:8080/mixins/localized-mixin/demo/
+**Demo:** http://localhost:8080/src/mixins/localized-mixin/demo/
 
 ### RemoteCall Mixin
 
@@ -367,7 +374,7 @@ class MyCaller extends RemoteCallCallerMixin(HTMLElement) {
 - Real-time logging
 - Support for multiple receiver instances
 
-**Demo:** http://localhost:8080/mixins/remote-call-mixin/demo/
+**Demo:** http://localhost:8080/src/mixins/remote-call-mixin/demo/
 
 ### ShowIfPropertyTrue Mixin
 
@@ -384,7 +391,7 @@ class ConditionalComponent extends ShowIfPropertyTrueMixin(HTMLElement) {
 }
 ```
 
-**Demo:** http://localhost:8080/mixins/show-if-property-true-mixin/demo/
+**Demo:** http://localhost:8080/src/mixins/show-if-property-true-mixin/demo/
 
 ### Swipeable Mixin
 
@@ -409,7 +416,7 @@ class SwipeableComponent extends SwipeableMixin(HTMLElement) {
 - Works seamlessly with other mixins using PointerCoordinator
 - **Order-independent**: Can be nested in any order with other gesture mixins
 
-**Demo:** http://localhost:8080/mixins/swipeable-mixin/demo/
+**Demo:** http://localhost:8080/src/mixins/swipeable-mixin/demo/
 
 ### Draggable Mixin
 
@@ -436,7 +443,7 @@ class DraggableComponent extends DraggableMixin(HTMLElement) {
 - Works seamlessly with other mixins using PointerCoordinator
 - **Order-independent**: Can be nested in any order with other gesture mixins
 
-**Demo:** http://localhost:8080/mixins/draggable-mixin/demo/
+**Demo:** http://localhost:8080/src/mixins/draggable-mixin/demo/
 
 ### Roll Mixin
 
@@ -454,7 +461,7 @@ class RollableComponent extends RollMixin(HTMLElement) {
 }
 ```
 
-**Demo:** http://localhost:8080/mixins/roll-mixin/demo/
+**Demo:** http://localhost:8080/src/mixins/roll-mixin/demo/
 
 ## Mixin Coordination
 
@@ -560,28 +567,44 @@ Add the `keep-space-when-hidden` attribute to keep the element's space in the la
 
 ### Quick Start
 
-Start the development server with all component demos:
-
 ```bash
 cd ars-web-components
 npm install
-npm start
+npm run build   # Compile TypeScript → dist/
+npm run test    # Run all 323 tests
+npm start       # Start dev server on port 8080
 ```
 
-This will:
+### Scripts
 
-- Start an HTTP server on port 8080
-- Open your browser automatically
-- Display a demo of the available components and mixins
+| Script | Description |
+|---|---|
+| `npm run build` | Compile TypeScript to `dist/` via `tsc` |
+| `npm run test` | Run all tests (Vitest, single run) |
+| `npm run test:watch` | Run tests in watch mode |
+| `npm run test:coverage` | Run tests with coverage report |
+| `npm start` | Start Express dev server on port 8080 |
+| `npm stop` | Stop the dev server |
 
-### Eperimenting with Components and mixins
+### Experimenting with Components and Mixins
 
 Once the server is running, you can access:
 
 - **Main Demo Gallery**: http://localhost:8080/
 - **Individual Components**:
-  - **ars-calendar**: http://localhost:8080/components/ars-calendar/demo/
-  - **ars-dialog**: http://localhost:8080/components/ars-dialog/demo/
+  - **ars-calendar**: http://localhost:8080/src/components/ars-calendar/demo/
+  - **ars-color-select**: http://localhost:8080/src/components/ars-color-select/demo/
+  - **ars-dialog**: http://localhost:8080/src/components/ars-dialog/demo/
+  - **ars-page**: http://localhost:8080/src/components/ars-page/demo/
+  - **ars-data-roller**: http://localhost:8080/src/components/ars-data-roller/demo/
+- **Individual Mixins**:
+  - **pressed-effect**: http://localhost:8080/src/mixins/pressed-effect-mixin/demo/
+  - **localized**: http://localhost:8080/src/mixins/localized-mixin/demo/
+  - **remote-call**: http://localhost:8080/src/mixins/remote-call-mixin/demo/
+  - **swipeable**: http://localhost:8080/src/mixins/swipeable-mixin/demo/
+  - **draggable**: http://localhost:8080/src/mixins/draggable-mixin/demo/
+  - **show-if-property-true**: http://localhost:8080/src/mixins/show-if-property-true-mixin/demo/
+  - **roll**: http://localhost:8080/src/mixins/roll-mixin/demo/
 
 ### Co-development Setup
 
@@ -594,9 +617,9 @@ ln -s ../../../../ars-web-components ars-web-components-dev
 
 ### Available Exports
 
-Check `index.js` in the package root for all available imports:
+Check `src/index.ts` for all available imports:
 
-```javascript
+```typescript
 export { ArsCalendar } from "./components/ars-calendar/ars-calendar.js";
 export { ArsColorSelect } from "./components/ars-color-select/ars-color-select.js";
 export { ArsDialog } from "./components/ars-dialog/ars-dialog.js";
@@ -618,6 +641,7 @@ export { DraggableMixin } from "./mixins/draggable-mixin/draggable-mixin.js";
 ## Requirements
 
 - Modern browser with ES module support
+- Node.js (for building and testing)
 - `arslib` dependency (automatically installed)
 
 ## License

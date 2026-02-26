@@ -1,0 +1,5 @@
+/* Package-level CSS entrypoint for consumers.
+   Keep source paths internal to this package so consuming apps can import from `ars-web-components/...`. */
+@import "./src/css/base.css";
+@import "./src/css/buttons.css";
+@import "./src/css/components.css";

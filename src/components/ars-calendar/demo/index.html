@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Calendar - Test Page</title>
+
+  <!-- Import Map for module resolution -->
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <!-- Common CSS -->
+  <link rel="stylesheet" href="/src/css/base.css">
+  <link rel="stylesheet" href="/src/css/components.css">
+  <link rel="stylesheet" href="/src/css/buttons.css">
+
+  <style>
+    /* Component-specific styles */
+    .calendar-demo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .event-form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .event-preview {
+      background: white;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 10px 0;
+      min-height: 60px;
+    }
+
+    .selected-date {
+      font-weight: bold;
+      color: #667eea;
+      font-size: 1.1rem;
+    }
+
+    .localization-demo {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+
+    /* Jewel theme button styles */
+    .emerald-btn,
+    .sapphire-btn,
+    .onyx-btn {
+      position: relative;
+      padding-left: 40px;
+      /* Space for icon */
+      line-height: 20px;
+    }
+
+    .emerald-btn::before,
+    .sapphire-btn::before,
+    .onyx-btn::before {
+      content: '';
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .emerald-btn::before {
+      background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M8 2H20L26 8V20L20 26H8L2 20V8L8 2Z' fill='%2310B981' stroke='%23065F46' stroke-width='2'/%3e%3cpath d='M8 2L20 26M20 2L8 26M2 8L26 20M2 20L26 8' stroke='rgba(255,255,255,0.3)' stroke-width='1'/%3e%3c/svg%3e");
+    }
+
+    .sapphire-btn::before {
+      background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M14 2L2 10L14 26L26 10L14 2Z' fill='%232563EB' stroke='%231E3A8A' stroke-width='2'/%3e%3cpath d='M2 10L26 10M14 2L7 10L14 14L21 10L14 2Z' stroke='rgba(255,255,255,0.5)' stroke-width='1.5'/%3e%3c/svg%3e");
+    }
+
+    .onyx-btn::before {
+      background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='14' cy='14' r='12' fill='%2318181B' stroke='%233F3F46' stroke-width='2'/%3e%3cpath d='M8 8 A 10 10, 0, 0, 1, 20 20' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='2'/%3e%3c/svg%3e");
+    }
+
+    .emerald-btn {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      border: 2px solid #065f46;
+      box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+    }
+
+    .emerald-btn:hover {
+      background: linear-gradient(135deg, #34d399, #10b981);
+      box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .sapphire-btn {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      border: 2px solid #1e3a8a;
+      box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+    }
+
+    .sapphire-btn:hover {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      box-shadow: 0 6px 12px rgba(37, 99, 235, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .onyx-btn {
+      background: linear-gradient(135deg, #18181b, #09090b);
+      color: #facc15;
+      border: 2px solid #3f3f46;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .onyx-btn:hover {
+      background: linear-gradient(135deg, #27272a, #18181b);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
+      transform: translateY(-1px);
+      color: #fbbf24;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📅 ARS Calendar</h1>
+      <p>Interactive Calendar Component Test</p>
+    </div>
+
+    <div class="content">
+      <a href="/" class="back-link">← Back to Demo Page</a>
+
+      <div class="info-box">
+        <h4>About ARS Calendar</h4>
+        <p>Interactive calendar component for date selection and event management. Fully customizable with CSS styling
+          and localization support.</p>
+      </div>
+
+      <!-- Basic Usage -->
+      <div class="demo-section">
+        <h3>🎯 Basic Calendar</h3>
+        <div class="calendar-demo">
+          <p style="color: #666; text-align: center; margin-bottom: 15px;">
+            To add events set the event and color, then
+            cick the date in the calendar.
+          </p>
+
+          <div class="event-form">
+            <div class="form-group">
+              <label class="form-label">Event Text:</label>
+              <input id="eventText" class="form-input" placeholder="Enter event description" style="width: 200px;">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Event Color:</label>
+              <ars-color-select id="eventColorSelect" color="blue"></ars-color-select>
+            </div>
+          </div>
+
+          <ars-calendar id='basicCalendar'></ars-calendar>
+
+          <div class="event-preview" id="eventPreview">
+            <strong>Selected Date:</strong> <span id="selectedDate">None selected</span><br>
+            <strong>Event Preview:</strong> <span id="previewText">Enter event details above</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Localized Calendar -->
+      <div class="demo-section">
+        <h3>🌍 Localized Calendar (Portuguese)</h3>
+        <div class="calendar-demo">
+          <div class="localization-demo">
+            <h4>Localization Features:</h4>
+            <p><strong>Days:</strong> Dom, Seg, Ter, Qua, Qui, Sex, Sab</p>
+            <p><strong>Months:</strong> Janeiro, Fevereiro, Março, etc.</p>
+          </div>
+
+          <ars-calendar id='localizedCalendar' localized_abbreviated_days='["Dom","Seg","Ter","Qua","Qui","Sex","Sab"]'
+            localized_months='["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]'>
+          </ars-calendar>
+        </div>
+      </div>
+
+      <!-- CSS Customization -->
+      <div class="demo-section">
+        <h3>🎨 CSS Customization</h3>
+        <div class="calendar-demo">
+          <div class="localization-demo">
+            <h4>Customization Features:</h4>
+            <p><strong>CSS Variables:</strong> Theme using CSS custom properties</p>
+            <p><strong>Custom CSS:</strong> Add your own styles</p>
+            <p><strong>Custom Template:</strong> Completely override HTML structure</p>
+          </div>
+
+          <div class="controls">
+            <button class="btn emerald-btn" onclick="applyEmeraldTheme()">Emerald Theme</button>
+            <button class="btn sapphire-btn" onclick="applySapphireTheme()">Sapphire Theme</button>
+            <button class="btn onyx-btn" onclick="applyOnyxTheme()">Onyx Theme</button>
+            <button class="btn" onclick="resetTheme()">🔄 Reset Theme</button>
+          </div>
+
+          <ars-calendar id='customizedCalendar'></ars-calendar>
+
+          <div class="localization-demo">
+            <h4>Current CSS Variables:</h4>
+            <div id="cssVarsDisplay">Default theme active</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Features -->
+      <div class="demo-section">
+        <h3>⚡ Interactive Features</h3>
+        <div class="controls">
+          <button class="btn" onclick="addSampleEvent()">📝 Add Sample Event</button>
+          <button class="btn" onclick="clearEvents()">🗑️ Clear All Events</button>
+          <button class="btn" onclick="goToToday()">📅 Go to Today</button>
+          <button class="btn-secondary" onclick="exportEvents()">📄 Export Events</button>
+        </div>
+
+        <div class="demo-output">
+          <h4>Calendar Controls:</h4>
+          <div class="controls">
+            <button class="btn-small" onclick="previousMonth()">⬅️ Previous Month</button>
+            <button class="btn-small" onclick="nextMonth()">➡️ Next Month</button>
+            <button class="btn-small" onclick="goToMonth(0)">January</button>
+            <button class="btn-small" onclick="goToMonth(11)">December</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Event Monitoring -->
+      <div class="demo-section">
+        <h3>📡 Event Monitoring</h3>
+        <p style="margin-bottom: 15px; color: #666;">All calendar interactions are logged below.</p>
+
+        <div class="demo-output">
+          <h4>Event Log:</h4>
+          <div class="event-log" id="eventLog">Ready to capture calendar events...\n</div>
+          <div class="controls">
+            <button class="btn-secondary" onclick="clearLog()">🗑️ Clear Log</button>
+            <button class="btn-secondary" onclick="exportLog()">📄 Export Log</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Usage Instructions -->
+      <div class="demo-section">
+        <h3>📖 Usage Instructions</h3>
+        <div class="info-box">
+          <h4>HTML Usage:</h4>
+          <p><strong>&lt;ars-calendar id="myCalendar"&gt;&lt;/ars-calendar&gt;</strong></p>
+        </div>
+
+        <div class="info-box">
+          <h4>Event Handling:</h4>
+          <p><strong>Event:</strong> ars-calendar:daySelected<br>
+            <strong>Detail:</strong> { day: number, month: number, year: number }
+          </p>
+        </div>
+
+        <div class="info-box">
+          <h4>Localization Attributes:</h4>
+          <p><strong>localized_abbreviated_days:</strong> JSON array of abbreviated day names<br>
+            <strong>localized_months:</strong> JSON array of month names
+          </p>
+        </div>
+
+        <div class="info-box">
+          <h4>Methods:</h4>
+          <p><strong>addEvent(eventData):</strong> Add event to selected date<br>
+            <strong>Event Data:</strong> { text: string, color: string, day: number, month: number, year: number }
+          </p>
+        </div>
+      </div>
+
+      <!-- Attribute-based Localization Demo (ars-calendar) -->
+      <div class="demo-section">
+        <h3>📅 Attribute-based Localization (ars-calendar)</h3>
+        <p>
+          <strong>Demo:</strong> The calendar below is localized using <code>&lt;localized-mixin&gt;</code> and the <code>data-localize-map</code> convention.<br>
+          Use the language selector below to see the calendar update its day and month names!
+        </p>
+
+        <!-- Language Selector for Calendar Demo -->
+        <div class="localization-demo">
+          <h4>Language Selector:</h4>
+          <div class="controls">
+            <button class="btn" onclick="setCalendarLanguage('en')">🇺🇸 English</button>
+            <button class="btn" onclick="setCalendarLanguage('es')">🇪🇸 Español</button>
+            <button class="btn" onclick="setCalendarLanguage('pt')">🇵🇹 Português</button>
+            <button class="btn" onclick="setCalendarLanguage('fr')">🇫🇷 Français</button>
+            <button class="btn" onclick="setCalendarLanguage('de')">🇩🇪 Deutsch</button>
+          </div>
+          <p><strong>Current Language:</strong> <span id="currentCalendarLanguage">English</span></p>
+        </div>
+
+        <localized-mixin locale="en" id="calendar-mixin">
+          <ars-calendar data-localize-map='{"localized_abbreviated_days":["days.sun","days.mon","days.tue","days.wed","days.thu","days.fri","days.sat"],"localized_months":["months.jan","months.feb","months.mar","months.apr","months.may","months.jun","months.jul","months.aug","months.sep","months.oct","months.nov","months.dec"],"localized_today":"today"}'></ars-calendar>
+        </localized-mixin>
+        <div class="instructions">
+          <h4>How it works:</h4>
+          <ul>
+            <li>The <code>&lt;ars-calendar&gt;</code> component declares which attributes it wants localized and which translation keys to use via <code>data-localize-map</code>.</li>
+            <li>The <code>&lt;localized-mixin&gt;</code> detects this and sets the appropriate attributes based on the current language.</li>
+            <li>This pattern is generic and works for any component that follows the convention.</li>
+          </ul>
+        </div>
+        <div class="code-example">
+          &lt;localized-mixin locale="en"&gt;<br>
+          &nbsp;&nbsp;&lt;ars-calendar <br>
+          &nbsp;&nbsp;&nbsp;&nbsp;data-localize-map='{"localized_abbreviated_days":["days.sun","days.mon","days.tue","days.wed","days.thu","days.fri","days.sat"],<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;"localized_months":["months.jan","months.feb","months.mar","months.apr","months.may","months.jun","months.jul","months.aug","months.sep","months.oct","months.nov","months.dec"],<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;"localized_today":"today"}'&gt;&lt;/ars-calendar&gt;<br>
+          &lt;/localized-mixin&gt;
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load the components -->
+  <script type="module" src="/dist/components/ars-calendar/ars-calendar.js"></script>
+  <script type="module" src="/dist/components/ars-color-select/ars-color-select.js"></script>
+  <script type="module" src="/dist/mixins/localized-mixin/localized-mixin.js"></script>
+
+  <!-- Test scripts -->
+  <script>
+    const eventLog = document.getElementById('eventLog');
+    const selectedDateSpan = document.getElementById('selectedDate');
+    const previewTextSpan = document.getElementById('previewText');
+    const eventTextInput = document.getElementById('eventText');
+    const eventColorSelect = document.getElementById('eventColorSelect');
+
+    let lastSelectedDate = null;
+    let currentEventColor = 'blue'; // Default color
+
+    // Listen for color selection events
+    window.addEventListener('ars-color-select:change', (e) => {
+      if (e.detail.id === 'eventColorSelect') {
+        currentEventColor = e.detail.color;
+        updatePreview();
+
+        const timestamp = new Date().toLocaleTimeString();
+        eventLog.textContent += `[${timestamp}] Event color changed to: ${currentEventColor}\n`;
+        eventLog.scrollTop = eventLog.scrollHeight;
+      }
+    });
+
+    // Listen for day selection events
+    window.addEventListener('ars-calendar:daySelected', (e) => {
+      const { day, month, year } = e.detail;
+      lastSelectedDate = { day, month, year };
+
+      const timestamp = new Date().toLocaleTimeString();
+      const dateStr = `${day}/${month + 1}/${year}`;
+      selectedDateSpan.textContent = dateStr;
+
+      const logEntry = `[${timestamp}] Date selected: ${dateStr}\n`;
+      eventLog.textContent += logEntry;
+      eventLog.scrollTop = eventLog.scrollHeight;
+
+      // Add event if form is filled
+      const eventText = eventTextInput.value.trim();
+
+      if (eventText) {
+        document.getElementById('basicCalendar').addEvent({
+          'text': eventText,
+          'color': currentEventColor,
+          'day': day,
+          'month': month,
+          'year': year
+        });
+
+        const eventLogEntry = `[${timestamp}] Event added: "${eventText}" (${currentEventColor}) on ${dateStr}\n`;
+        eventLog.textContent += eventLogEntry;
+        eventLog.scrollTop = eventLog.scrollHeight;
+
+        // Clear form
+        eventTextInput.value = '';
+      }
+
+      updatePreview();
+    });
+
+    // Update preview when typing
+    eventTextInput.addEventListener('input', updatePreview);
+
+    function updatePreview() {
+      const eventText = eventTextInput.value.trim();
+
+      if (eventText) {
+        previewTextSpan.innerHTML = `"${eventText}" <span style="color: ${currentEventColor}">●</span>`;
+      } else {
+        previewTextSpan.textContent = 'Enter event details above';
+      }
+    }
+
+    // Utility functions
+    function addSampleEvent() {
+      if (!lastSelectedDate) {
+        alert('Please select a date first!');
+        return;
+      }
+
+      const sampleEvents = [
+        { text: 'Meeting', color: 'red' },
+        { text: 'Birthday', color: 'green' },
+        { text: 'Vacation', color: 'blue' },
+        { text: 'Appointment', color: 'orange' }
+      ];
+
+      const randomEvent = sampleEvents[Math.floor(Math.random() * sampleEvents.length)];
+
+      document.getElementById('basicCalendar').addEvent({
+        ...randomEvent,
+        ...lastSelectedDate
+      });
+
+      const timestamp = new Date().toLocaleTimeString();
+      const dateStr = `${lastSelectedDate.day}/${lastSelectedDate.month + 1}/${lastSelectedDate.year}`;
+      eventLog.textContent += `[${timestamp}] Sample event added: "${randomEvent.text}" on ${dateStr}\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function clearEvents() {
+      // Note: This would need to be implemented in the calendar component
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] Clear events requested (method not implemented)\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function goToToday() {
+      const today = new Date();
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] Navigate to today: ${today.toDateString()}\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function previousMonth() {
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] Previous month navigation requested\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function nextMonth() {
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] Next month navigation requested\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function goToMonth(monthIndex) {
+      const months = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] Navigate to ${months[monthIndex]} requested\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function exportEvents() {
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] Export events requested\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+
+      // Placeholder for export functionality
+      alert('Export functionality would be implemented here');
+    }
+
+    function clearLog() {
+      eventLog.textContent = 'Event log cleared...\n';
+    }
+
+    function exportLog() {
+      const logContent = eventLog.textContent;
+      const blob = new Blob([logContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'ars-calendar-event-log.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] Event log exported to file\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    // CSS Customization functions
+    function applyEmeraldTheme() {
+      const customizedCalendar = document.getElementById('customizedCalendar');
+      const cssVars = {
+        'ars-calendar-bg': '#ecfdf5',
+        'ars-calendar-header-bg': 'linear-gradient(135deg, #10b981, #059669)',
+        'ars-calendar-header-color': '#ffffff',
+        'ars-calendar-cell-bg': '#ffffff',
+        'ars-calendar-cell-color': '#065f46',
+        'ars-calendar-days-header-color': '#6b7280',
+        'ars-calendar-selected-bg': '#10b981',
+        'ars-calendar-selected-color': '#ffffff',
+        'ars-calendar-selected-shadow': '0 0 12px rgba(16, 185, 129, 0.4)',
+        'ars-calendar-button-hover-bg': 'rgba(16, 185, 129, 0.3)',
+        'ars-calendar-border-radius': '8px',
+        'ars-calendar-shadow': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        'ars-calendar-event-indicator-color': '#059669'
+      };
+
+      customizedCalendar.setCSSVars(cssVars);
+      updateCSSVarsDisplay(cssVars);
+
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] Emerald theme applied\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function applySapphireTheme() {
+      const customizedCalendar = document.getElementById('customizedCalendar');
+      const cssVars = {
+        'ars-calendar-bg': '#eff6ff',
+        'ars-calendar-header-bg': 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+        'ars-calendar-header-color': '#ffffff',
+        'ars-calendar-cell-bg': '#ffffff',
+        'ars-calendar-cell-color': '#1e3a8a',
+        'ars-calendar-days-header-color': '#6b7280',
+        'ars-calendar-selected-bg': '#2563eb',
+        'ars-calendar-selected-color': '#ffffff',
+        'ars-calendar-selected-shadow': '0 0 12px rgba(37, 99, 235, 0.4)',
+        'ars-calendar-button-hover-bg': 'rgba(37, 99, 235, 0.3)',
+        'ars-calendar-border-radius': '12px',
+        'ars-calendar-shadow': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        'ars-calendar-event-indicator-color': '#1d4ed8'
+      };
+
+      customizedCalendar.setCSSVars(cssVars);
+      updateCSSVarsDisplay(cssVars);
+
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] Sapphire theme applied\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function applyOnyxTheme() {
+      const customizedCalendar = document.getElementById('customizedCalendar');
+      const cssVars = {
+        'ars-calendar-bg': '#18181b',
+        'ars-calendar-header-bg': 'linear-gradient(135deg, #09090b, #18181b)',
+        'ars-calendar-header-color': '#fafafa',
+        'ars-calendar-header-text-shadow': '0 1px 2px rgba(0, 0, 0, 0.8)',
+        'ars-calendar-cell-bg': '#27272a',
+        'ars-calendar-cell-color': '#e4e4e7',
+        'ars-calendar-days-header-color': '#a1a1aa',
+        'ars-calendar-selected-bg': '#facc15',
+        'ars-calendar-selected-color': '#18181b',
+        'ars-calendar-selected-shadow': '0 0 16px rgba(250, 204, 21, 0.5)',
+        'ars-calendar-button-hover-bg': 'rgba(250, 204, 21, 0.2)',
+        'ars-calendar-border-radius': '8px',
+        'ars-calendar-shadow': '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
+        'ars-calendar-cell-hover-shadow': '0 0 8px rgba(250, 204, 21, 0.3)',
+        'ars-calendar-cell-border': '1px solid #3f3f46',
+        'ars-calendar-event-indicator-color': '#facc15'
+      };
+
+      customizedCalendar.setCSSVars(cssVars);
+      updateCSSVarsDisplay(cssVars);
+
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] Onyx theme applied\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function resetTheme() {
+      const customizedCalendar = document.getElementById('customizedCalendar');
+      customizedCalendar.setCSSVars({});
+      updateCSSVarsDisplay({});
+
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] Theme reset to default\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function updateCSSVarsDisplay(cssVars) {
+      const display = document.getElementById('cssVarsDisplay');
+      if (Object.keys(cssVars).length === 0) {
+        display.textContent = 'Default theme active';
+      } else {
+        display.innerHTML = Object.entries(cssVars)
+          .map(([key, value]) => `<strong>--${key}:</strong> ${value}`)
+          .join('<br>');
+      }
+    }
+
+    // Initialize
+    window.addEventListener('load', function () {
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] ARS Calendar test page loaded\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+
+      // Initialize calendar localization
+      initializeCalendarLocalization();
+    });
+
+    // Calendar Localization Functions
+    function initializeCalendarLocalization() {
+      // Set up global translations for the calendar demo
+      window.globalTranslations = {
+        en: {
+          days: {
+            sun: "Sun", mon: "Mon", tue: "Tue", wed: "Wed",
+            thu: "Thu", fri: "Fri", sat: "Sat"
+          },
+          months: {
+            jan: "January", feb: "February", mar: "March", apr: "April",
+            may: "May", jun: "June", jul: "July", aug: "August",
+            sep: "September", oct: "October", nov: "November", dec: "December"
+          },
+          today: "Today"
+        },
+        es: {
+          days: {
+            sun: "Dom", mon: "Lun", tue: "Mar", wed: "Mié",
+            thu: "Jue", fri: "Vie", sat: "Sáb"
+          },
+          months: {
+            jan: "Enero", feb: "Febrero", mar: "Marzo", apr: "Abril",
+            may: "Mayo", jun: "Junio", jul: "Julio", aug: "Agosto",
+            sep: "Septiembre", oct: "Octubre", nov: "Noviembre", dec: "Diciembre"
+          },
+          today: "Hoy"
+        },
+        pt: {
+          days: {
+            sun: "Dom", mon: "Seg", tue: "Ter", wed: "Qua",
+            thu: "Qui", fri: "Sex", sat: "Sáb"
+          },
+          months: {
+            jan: "Janeiro", feb: "Fevereiro", mar: "Março", apr: "Abril",
+            may: "Maio", jun: "Junho", jul: "Julho", aug: "Agosto",
+            sep: "Setembro", oct: "Outubro", nov: "Novembro", dec: "Dezembro"
+          },
+          today: "Hoje"
+        },
+        fr: {
+          days: {
+            sun: "Dim", mon: "Lun", tue: "Mar", wed: "Mer",
+            thu: "Jeu", fri: "Ven", sat: "Sam"
+          },
+          months: {
+            jan: "Janvier", feb: "Février", mar: "Mars", apr: "Avril",
+            may: "Mai", jun: "Juin", jul: "Juillet", aug: "Août",
+            sep: "Septembre", oct: "Octobre", nov: "Novembre", dec: "Décembre"
+          },
+          today: "Aujourd'hui"
+        },
+        de: {
+          days: {
+            sun: "So", mon: "Mo", tue: "Di", wed: "Mi",
+            thu: "Do", fri: "Fr", sat: "Sa"
+          },
+          months: {
+            jan: "Januar", feb: "Februar", mar: "März", apr: "April",
+            may: "Mai", jun: "Juni", jul: "Juli", aug: "August",
+            sep: "September", oct: "Oktober", nov: "November", dec: "Dezember"
+          },
+          today: "Heute"
+        }
+      };
+
+      // Set initial language
+      setCalendarLanguage('en');
+    }
+
+    function setCalendarLanguage(lang) {
+      const calendarMixin = document.getElementById('calendar-mixin');
+      const languageDisplay = document.getElementById('currentCalendarLanguage');
+
+      if (calendarMixin && window.globalTranslations[lang]) {
+        calendarMixin.setAttribute('locale', lang);
+
+        // Update language display
+        const languageNames = {
+          en: 'English',
+          es: 'Español',
+          pt: 'Português',
+          fr: 'Français',
+          de: 'Deutsch'
+        };
+        languageDisplay.textContent = languageNames[lang] || lang;
+
+        // Log the language change
+        const timestamp = new Date().toLocaleTimeString();
+        eventLog.textContent += `[${timestamp}] Calendar language changed to: ${languageNames[lang]}\n`;
+        eventLog.scrollTop = eventLog.scrollHeight;
+      }
+    }
+  </script>
+</body>
+
+</html>
