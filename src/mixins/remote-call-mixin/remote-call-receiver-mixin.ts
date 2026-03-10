@@ -45,14 +45,10 @@ class RemoteCallReceiverMixin extends MixinBase() {
   /** override handler to forward to inner component */
   _handleRemoteCall(event) {
     const { targetId, method, args = [] } = event.detail || {};
-    console.log(`📦 Receiver mixin ${this.id} received remote call: ${targetId}.${method}(${args.join(', ')})`);
 
     if (!targetId || targetId !== this.id) {
-      console.log(`❌ Remote call not for this mixin (targetId: ${targetId}, this.id: ${this.id})`);
       return;
     }
-
-    console.log(`✅ Remote call matches this mixin: ${this.id}`);
 
     const allowList = this._parseList(AttributeKeys.ALLOW);
     const denyList  = this._parseList(AttributeKeys.DENY);
@@ -76,8 +72,6 @@ class RemoteCallReceiverMixin extends MixinBase() {
       return;
     }
 
-    console.log(`🎯 Forwarding call to inner component: ${method}(${args.join(', ')})`);
-
     if (typeof target[method] !== 'function') {
       console.error(`Method ${method} does not exist on wrapped component of ${this.id}`);
       return;
@@ -85,7 +79,6 @@ class RemoteCallReceiverMixin extends MixinBase() {
 
     try {
       target[method](...args);
-      console.log(`✅ Method ${method} executed successfully on wrapped component of ${this.id}`);
     } catch(err) {
       console.error(`Error executing ${method} on wrapped component of ${this.id}:`, err);
     }

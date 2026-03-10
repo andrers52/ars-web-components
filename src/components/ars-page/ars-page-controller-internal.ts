@@ -48,11 +48,6 @@ class ArsPageControllerInternal extends WebComponentBase {
 
   connectedCallback() {
     this._targetPage = this.getAttribute("target-page") || this._targetPage;
-    console.log(
-      "ArsPageControllerInternal connectedCallback - target-page:",
-      this._targetPage,
-    );
-    console.log("Internal component children:", this.children);
 
     // Wait a bit for the router to be fully initialized
     setTimeout(() => {
@@ -78,21 +73,9 @@ class ArsPageControllerInternal extends WebComponentBase {
     this._navLinks = Array.from(
       this.querySelectorAll("[data-page], [data-route]"),
     );
-    console.log(
-      "ArsPageControllerInternal _setupNavListeners - found nav links:",
-      this._navLinks.length,
-    );
     this._navLinks.forEach((link) => {
       const pageId = link.getAttribute("data-page");
       const route = link.getAttribute("data-route");
-      console.log(
-        "Adding click listener to:",
-        link,
-        "with data-page:",
-        pageId,
-        "data-route:",
-        route,
-      );
       link.addEventListener("click", this._navClickHandler);
     });
 
@@ -110,13 +93,10 @@ class ArsPageControllerInternal extends WebComponentBase {
   }
 
   _onNavClick(e) {
-    console.log("ArsPageControllerInternal _onNavClick triggered:", e);
     e.preventDefault();
     const link = e.currentTarget;
     const pageId = link.getAttribute("data-page");
     const route = link.getAttribute("data-route");
-
-    console.log("Clicked link with pageId:", pageId, "route:", route);
 
     if (pageId) {
       this.navigateToPage(pageId);
@@ -125,14 +105,12 @@ class ArsPageControllerInternal extends WebComponentBase {
       link.classList.add("active");
 
       // Dispatch nav-click event for the remote-call-caller-mixin
-      console.log("Dispatching nav-click event with pageId:", pageId);
       const navEvent = new CustomEvent("nav-click", {
         detail: { pageId },
         bubbles: true,
         composed: true,
       });
       this.dispatchEvent(navEvent);
-      console.log("nav-click event dispatched");
     } else if (route) {
       const success = this.navigateToRoute(route);
       if (success) {
@@ -183,37 +161,19 @@ class ArsPageControllerInternal extends WebComponentBase {
   }
 
   _setInitialActiveState() {
-    console.log("Setting initial active state");
     // Get the current page from the router
     const currentPage = this.getCurrentPage();
     const currentRoute = this.getCurrentRoute();
-    console.log("Current page from router:", currentPage);
-    console.log("Current route from router:", currentRoute);
 
     // Set active class on the corresponding nav link
     this._navLinks.forEach((link) => {
       const pageId = link.getAttribute("data-page");
       const route = link.getAttribute("data-route");
 
-      console.log(
-        "Checking nav link:",
-        link,
-        "with pageId:",
-        pageId,
-        "route:",
-        route,
-        "against currentPage:",
-        currentPage,
-        "currentRoute:",
-        currentRoute,
-      );
-
       if (pageId && pageId === currentPage) {
         link.classList.add("active");
-        console.log("Set active class on:", link, "for page:", pageId);
       } else if (route && route === currentRoute) {
         link.classList.add("active");
-        console.log("Set active class on:", link, "for route:", route);
       } else {
         link.classList.remove("active");
       }
@@ -222,18 +182,12 @@ class ArsPageControllerInternal extends WebComponentBase {
 
   // Public methods
   navigateToPage(pageId) {
-    console.log(
-      "ArsPageControllerInternal navigateToPage called with:",
-      pageId,
-    );
     if (!this._targetPage) {
-      console.log("No target page set, returning false");
       return false;
     }
 
     const targetElement = document.getElementById(this._targetPage);
     if (!targetElement) {
-      console.log("Target element not found:", this._targetPage);
       return false;
     }
 
@@ -242,14 +196,11 @@ class ArsPageControllerInternal extends WebComponentBase {
     if (targetElement.tagName !== "ARS-PAGE") {
       router = targetElement.querySelector("ars-page");
       if (!router) {
-        console.log("Router component not found in target element");
         return false;
       }
     }
 
-    console.log("Calling (router as any).showPage with:", pageId);
     const result = (router as any).showPage(pageId);
-    console.log("Router.showPage result:", result);
 
     if (result && result.success) {
       // Update active class
@@ -261,31 +212,22 @@ class ArsPageControllerInternal extends WebComponentBase {
           (linkRoute && result.route === linkRoute)
         ) {
           link.classList.add("active");
-          console.log("Set active class on:", link);
         } else {
           link.classList.remove("active");
         }
       });
       return true;
     }
-
-    console.log("Navigation failed");
     return false;
   }
 
   navigateToRoute(route) {
-    console.log(
-      "ArsPageControllerInternal navigateToRoute called with:",
-      route,
-    );
     if (!this._targetPage) {
-      console.log("No target page set, returning false");
       return false;
     }
 
     const targetElement = document.getElementById(this._targetPage);
     if (!targetElement) {
-      console.log("Target element not found:", this._targetPage);
       return false;
     }
 
@@ -294,14 +236,11 @@ class ArsPageControllerInternal extends WebComponentBase {
     if (targetElement.tagName !== "ARS-PAGE") {
       router = targetElement.querySelector("ars-page");
       if (!router) {
-        console.log("Router component not found in target element");
         return false;
       }
     }
 
-    console.log("Calling (router as any).navigateToRoute with:", route);
     const result = (router as any).navigateToRoute(route);
-    console.log("Router.navigateToRoute result:", result);
 
     if (result && result.success) {
       // Update active class
@@ -313,20 +252,16 @@ class ArsPageControllerInternal extends WebComponentBase {
           linkRoute === route
         ) {
           link.classList.add("active");
-          console.log("Set active class on:", link);
         } else {
           link.classList.remove("active");
         }
       });
       return true;
     }
-
-    console.log("Route navigation failed");
     return false;
   }
 
   getCurrentPage() {
-    console.log("ArsPageControllerInternal getCurrentPage called");
     if (this._targetPage) {
       const targetElement = document.getElementById(this._targetPage);
       if (targetElement) {
@@ -337,17 +272,14 @@ class ArsPageControllerInternal extends WebComponentBase {
         }
         if (router) {
           const pageInfo = (router as any).getCurrentPage();
-          console.log("Got page info from router:", pageInfo);
           return pageInfo.currentPage; // Extract the current page ID
         }
       }
     }
-    console.log("Could not get current page, returning null");
     return null;
   }
 
   getCurrentRoute() {
-    console.log("ArsPageControllerInternal getCurrentRoute called");
     if (this._targetPage) {
       const targetElement = document.getElementById(this._targetPage);
       if (targetElement) {
@@ -358,18 +290,15 @@ class ArsPageControllerInternal extends WebComponentBase {
         }
         if (router) {
           const routeInfo = (router as any).getCurrentRoute();
-          console.log("Got route info from router:", routeInfo);
           return routeInfo.currentRoute; // Extract the current route
         }
       }
     }
-    console.log("Could not get current route, returning null");
     return null;
   }
 
   // Public method to allow external re-initialization
   reinitialize() {
-    console.log("ArsPageControllerInternal reinitialize called");
     this._setupNavListeners();
     this._setInitialActiveState();
   }

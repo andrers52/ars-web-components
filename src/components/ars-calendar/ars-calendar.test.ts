@@ -3,7 +3,7 @@
  * @vi-environment jsdom
  */
 
-import { describe, it, expect, beforeEach, vi, vi } from 'vitest';
+import { afterEach, describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Import the module
 import { ArsCalendar } from './ars-calendar.js';
@@ -268,14 +268,14 @@ describe('ArsCalendar', () => {
     });
 
     it('should apply localized months from attribute', () => {
-      const months = ['Enero', 'Febrero', 'Marzo'];
+      const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
       element.setAttribute('localized_months', JSON.stringify(months));
       
       expect(element.months).toEqual(months);
     });
 
     it('should apply localized abbreviated days from attribute', () => {
-      const days = ['Dom', 'Lun', 'Mar'];
+      const days = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
       element.setAttribute('localized_abbreviated_days', JSON.stringify(days));
       
       expect(element.localizedAbbreviatedDays).toEqual(days);
@@ -285,6 +285,30 @@ describe('ArsCalendar', () => {
       element.setAttribute('localized_today', 'Hoy');
       
       expect(element.localizedToday).toBe('Hoy');
+    });
+
+    it('should ignore invalid localized abbreviated days JSON', () => {
+      const previousDays = [...element.localizedAbbreviatedDays];
+
+      element.attributeChangedCallback('localized_abbreviated_days', null, 'invalid-json');
+
+      expect(element.localizedAbbreviatedDays).toEqual(previousDays);
+    });
+
+    it('should ignore invalid localized months JSON', () => {
+      const previousMonths = [...element.months];
+
+      element.attributeChangedCallback('localized_months', null, 'invalid-json');
+
+      expect(element.months).toEqual(previousMonths);
+    });
+
+    it('should fall back to an empty object on invalid css-vars JSON', () => {
+      element.cssVars = { existing: 'value' };
+
+      element.attributeChangedCallback('css-vars', null, 'invalid-json');
+
+      expect(element.cssVars).toEqual({});
     });
   });
 
@@ -323,6 +347,16 @@ describe('ArsCalendar', () => {
     it('should create shadow DOM on connect', () => {
       document.body.appendChild(element);
       expect(element.shadowRoot).toBeDefined();
+    });
+
+    it('should unregister global listeners on disconnect', () => {
+      const removeSpy = vi.spyOn(window, 'removeEventListener');
+
+      element.disconnectedCallback();
+
+      expect(removeSpy).toHaveBeenCalledWith('resize', element._resizeHandler);
+      expect(removeSpy).toHaveBeenCalledWith('ars-calendar:clearAllData', element._clearDataHandler);
+      expect(removeSpy).toHaveBeenCalledWith('ars-calendar:refresh', element._refreshHandler);
     });
   });
 });

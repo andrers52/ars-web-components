@@ -1,63 +1,48 @@
-// HTML template for ARS Calendar component
-// Contains the complete calendar structure
-
-export function renderCalendarHTML(self) {
-  const customCSS = self.customCSS || "";
+export function renderCalendarHTML(calendar) {
+  const css = calendar.customCSS || calendar.defaultCSS;
+  const monthName = calendar.months[calendar.monthToShow];
+  const year = calendar.yearToShow;
 
   return `
-    <style>
-      ${self.defaultCSS}
-      ${customCSS}
-    </style>
+    <style>${css}</style>
+    <div class="calendar-header">
+      <button id="prev" class="calendar-nav prev">‹</button>
+      <h2 class="calendar-title">${monthName} ${year}</h2>
+      <button id="next" class="calendar-nav next">›</button>
+      <button id="today" class="calendar-nav today">${calendar.localizedToday}</button>
+    </div>
+    <div class="calendar-weekdays">
+      ${calendar.localizedAbbreviatedDays
+        .map((day) => `<div class="calendar-weekday">${day}</div>`)
+        .join("")}
+    </div>
+    <div class="calendar-body">
+      ${Array.from(
+        { length: calendar.WEEKS_IN_MONTH * calendar.DAYS_IN_WEEK },
+        (_, i) => {
+          const day = calendar.daySlots[i];
+          const hasEvents =
+            day &&
+            calendar.events.some(
+              (event) =>
+                event.day === day &&
+                event.month === calendar.monthToShow &&
+                event.year === calendar.yearToShow,
+            );
+          const isOtherMonth = !day || day < 1 || day > 31;
+          const isSelected =
+            calendar.selectedDay === day &&
+            calendar.selectedMonth === calendar.monthToShow &&
+            calendar.selectedYear === calendar.yearToShow;
 
-    <div class="calendar-container">
-      <div class="calendar-header">
-        <div class="calendar-button" id="prev">&lang;</div>
-        <div class="calendar-month-year" id="label">${self.monthToShowString(
-          self.monthToShow,
-        )} ${self.yearToShow}</div>
-        <div class="calendar-nav-buttons">
-          <div class="calendar-button right" id="today">${
-            self.localizedToday
-          }</div>
-          <div class="calendar-button right" id="next">&rang;</div>
-        </div>
-      </div>
-      <table class="calendar-table calendar-days-header">
-        <tr>
-          <td class="calendar-cell">${self.localizedAbbreviatedDays[0]}</td>
-          <td class="calendar-cell">${self.localizedAbbreviatedDays[1]}</td>
-          <td class="calendar-cell">${self.localizedAbbreviatedDays[2]}</td>
-          <td class="calendar-cell">${self.localizedAbbreviatedDays[3]}</td>
-          <td class="calendar-cell">${self.localizedAbbreviatedDays[4]}</td>
-          <td class="calendar-cell">${self.localizedAbbreviatedDays[5]}</td>
-          <td class="calendar-cell">${self.localizedAbbreviatedDays[6]}</td>
-        </tr>
-      </table>
-      <div class="calendar-frame">
-        <table class="calendar-table calendar-body">
-          <tbody>
-            <tr>
-              <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td>
-            </tr>
-            <tr>
-              <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td>
-            </tr>
-            <tr>
-              <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td>
-            </tr>
-            <tr>
-              <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td>
-            </tr>
-            <tr>
-              <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td>
-            </tr>
-            <tr>
-              <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td> <td class="calendar-cell"></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+          let classes = "calendar-day";
+          if (isOtherMonth) classes += " other-month";
+          if (isSelected) classes += " selected";
+          if (hasEvents) classes += " has-events";
+
+          return `<div class="${classes}">${day || ""}</div>`;
+        },
+      ).join("")}
     </div>
   `;
 }

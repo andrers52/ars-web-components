@@ -45,9 +45,6 @@ class ArsPageController extends WebComponentBase {
     this.innerHTML = '';
     this.appendChild(internalComponent);
 
-    console.log('ArsPageController connectedCallback - Internal component created');
-    console.log('Navigation content moved to internal component');
-
     // Forward all attributes to the internal component
     this._forwardAttributes();
 
@@ -55,7 +52,6 @@ class ArsPageController extends WebComponentBase {
     setTimeout(() => {
       const internalComponent = this.querySelector('ars-page-controller-internal');
       if (internalComponent) {
-        console.log('ArsPageController: Router should be ready, triggering internal component setup');
         // Trigger a re-initialization of the internal component
         (internalComponent as any).reinitialize();
       }

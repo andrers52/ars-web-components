@@ -59,8 +59,6 @@ class ArsPage extends WebComponentBase {
   }
 
   allAttributesChangedCallback(attributes) {
-    console.log("[ars-page] allAttributesChangedCallback:", attributes);
-
     if (attributes.routes) {
       this._routes = attributes.routes;
       this._buildRouteMaps();
@@ -74,7 +72,6 @@ class ArsPage extends WebComponentBase {
 
   connectedCallback() {
     super.connectedCallback();
-    console.log("[ars-page] connectedCallback");
 
     // Add popstate listener for browser back/forward
     window.addEventListener("popstate", this._popstateHandler);
@@ -87,19 +84,11 @@ class ArsPage extends WebComponentBase {
     const pageId = this._getPageIdFromRoute(currentPath);
 
     if (pageId && this._pages.has(pageId)) {
-      console.log(
-        "[ars-page] Found route in URL:",
-        currentPath,
-        "-> pageId:",
-        pageId,
-      );
       this.showPage(pageId);
     } else if (this._defaultPage) {
-      console.log("[ars-page] Using default page:", this._defaultPage);
       this.showPage(this._defaultPage);
     } else if (this._pages.size > 0) {
       const firstPageId = this._pages.keys().next().value;
-      console.log("[ars-page] Using first page:", firstPageId);
       this.showPage(firstPageId);
     }
   }
@@ -118,10 +107,6 @@ class ArsPage extends WebComponentBase {
       this._pages.set(element.id, element);
       (element as HTMLElement).style.display = "none";
     });
-    console.log(
-      "[ars-page] _initializePages: found pages",
-      Array.from(this._pages.keys()),
-    );
   }
 
   _buildRouteMaps() {
@@ -129,26 +114,14 @@ class ArsPage extends WebComponentBase {
     this._pageToRouteMap.clear();
 
     const processRoutes = (routes, parentKey = null) => {
-      console.log(
-        "[ars-page] processRoutes called with:",
-        routes,
-        "parentKey:",
-        parentKey,
-      );
       Object.entries(routes).forEach(([key, value]) => {
-        console.log("[ars-page] Processing key:", key, "value:", value);
         if (typeof value === "string") {
           // The key is the pageId (e.g., "demo-ars-calendar")
           // The value is the route (e.g., "/demos/ars-calendar")
-          console.log("[ars-page] Direct mapping:", key, "->", value);
           this._routeToPageMap.set(value, key); // Maps route -> pageId
           this._pageToRouteMap.set(key, value); // Maps pageId -> route
         } else if (typeof value === "object" && value !== null) {
           const parentPageId = parentKey || key;
-          console.log(
-            "[ars-page] Processing nested routes for parent:",
-            parentPageId,
-          );
 
           if (!this._routeToPageMap.has(`/${parentPageId}`)) {
             this._routeToPageMap.set(`/${parentPageId}`, parentPageId);
@@ -157,12 +130,6 @@ class ArsPage extends WebComponentBase {
 
           Object.entries(value).forEach(([nestedKey, nestedValue]) => {
             if (typeof nestedValue === "string") {
-              console.log(
-                "[ars-page] Mapping nested route:",
-                nestedValue,
-                "->",
-                parentPageId,
-              );
               this._routeToPageMap.set(nestedValue, parentPageId);
             } else if (typeof nestedValue === "object") {
               processRoutes({ [nestedKey]: nestedValue }, parentPageId);
@@ -173,39 +140,25 @@ class ArsPage extends WebComponentBase {
     };
 
     processRoutes(this._routes);
-    console.log("[ars-page] Route maps built:", {
-      routeToPage: Object.fromEntries(this._routeToPageMap),
-      pageToRoute: Object.fromEntries(this._pageToRouteMap),
-    });
-    console.log("[ars-page] Raw routes object:", this._routes);
   }
 
   _getPageIdFromRoute(route) {
     const rel = route.startsWith(this._basePath)
       ? route.slice(this._basePath.length)
       : route;
-    console.log("[ars-page] _getPageIdFromRoute called with:", route, "→", rel);
-    console.log(
-      "[ars-page] Available routes:",
-      Array.from(this._routeToPageMap.keys()),
-    );
 
     // Try exact match first
     if (this._routeToPageMap.has(rel)) {
       const pageId = this._routeToPageMap.get(rel);
-      console.log("[ars-page] Exact match found:", route, "->", pageId);
       return pageId;
     }
 
     // Try partial matches for nested routes
     for (const [routePath, pageId] of this._routeToPageMap) {
       if (rel.startsWith(routePath)) {
-        console.log("[ars-page] Partial match found:", routePath, "->", pageId);
         return pageId;
       }
     }
-
-    console.log("[ars-page] No match found for route:", route);
     return null;
   }
 
@@ -242,31 +195,18 @@ class ArsPage extends WebComponentBase {
   }
 
   _handlePopState(event) {
-    console.log("[ars-page] Popstate event:", event);
     const currentPath = window.location.pathname;
-    console.log("[ars-page] Current path from popstate:", currentPath);
 
     const pageId = this._getPageIdFromRoute(currentPath);
-    console.log("[ars-page] Resolved pageId from popstate:", pageId);
 
     if (pageId && this._pages.has(pageId)) {
-      console.log("[ars-page] Navigating to page from URL:", pageId);
       // Update the current route first so the event has the correct route
       this._currentRoute = currentPath;
       this._showPage(pageId, false); // Don't update URL since we're responding to URL change
-      console.log("[ars-page] Updated current route to:", this._currentRoute);
-    } else {
-      console.log("[ars-page] No valid page found for path:", currentPath);
     }
   }
 
   _showPage(pageId, updateUrl = true) {
-    console.log(
-      "[ars-page] _showPage called with",
-      pageId,
-      "available:",
-      Array.from(this._pages.keys()),
-    );
     if (!this._pages.has(pageId)) {
       console.error(`ARS Page: Page with ID '${pageId}' not found`);
       return false;
@@ -308,12 +248,10 @@ class ArsPage extends WebComponentBase {
         composed: true,
       }),
     );
-    console.log(`[ars-page] Switched to page '${pageId}'`);
     return true;
   }
 
   _hidePage(pageId) {
-    console.log("[ars-page] _hidePage called with", pageId);
     if (!this._pages.has(pageId)) {
       console.error(`ARS Page: Page with ID '${pageId}' not found`);
       return false;
@@ -323,7 +261,6 @@ class ArsPage extends WebComponentBase {
     if (this._currentPage === pageId) {
       this._currentPage = null;
     }
-    console.log(`[ars-page] Hidden page '${pageId}'`);
     return true;
   }
 
@@ -347,7 +284,6 @@ class ArsPage extends WebComponentBase {
     this._pages.forEach((element, pageId) => {
       (element as HTMLElement).style.display = "block";
     });
-    console.log(`ARS Page: Showed all ${this._pages.size} pages`);
     return { success: true, pagesShown: this._pages.size };
   }
 
@@ -356,7 +292,6 @@ class ArsPage extends WebComponentBase {
       (element as HTMLElement).style.display = "none";
     });
     this._currentPage = null;
-    console.log(`ARS Page: Hidden all ${this._pages.size} pages`);
     return { success: true, pagesHidden: this._pages.size };
   }
 
@@ -381,14 +316,7 @@ class ArsPage extends WebComponentBase {
 
   // New methods for route-based navigation
   navigateToRoute(route) {
-    console.log("[ars-page] navigateToRoute called with:", route);
-    console.log(
-      "[ars-page] Current route maps:",
-      Object.fromEntries(this._routeToPageMap),
-    );
-
     const pageId = this._getPageIdFromRoute(route);
-    console.log("[ars-page] Resolved pageId:", pageId);
 
     if (pageId) {
       // Update the current route first so the event has the correct route

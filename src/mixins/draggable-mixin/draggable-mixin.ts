@@ -74,7 +74,6 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
       bubbles: true,
       composed: true,
     }));
-    console.log('[draggable-mixin] CustomEvent "dragstart" dispatched', details);
   }
 
   onDragMove(details) {
@@ -83,7 +82,6 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
       bubbles: true,
       composed: true,
     }));
-    console.log('[draggable-mixin] CustomEvent "dragmove" dispatched', details);
   }
 
   onDragEnd(details) {
@@ -92,7 +90,6 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
       bubbles: true,
       composed: true,
     }));
-    console.log('[draggable-mixin] CustomEvent "dragend" dispatched', details);
   }
 
   connectedCallback() {
@@ -129,19 +126,11 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
   }
 
   _handlePointerDown = (event) => {
-    console.log('[draggable-mixin] _handlePointerDown called', {
-      pointerId: event.pointerId,
-      pointerDown: this._pointerDown,
-      isRedispatched: PointerCoordinator.isRedispatchedEvent(event),
-      event
-    });
-    
     if (this._pointerDown) return; // Only track one pointer
     
     // Try to capture the pointer (only for non-redispatched events)
     if (!PointerCoordinator.isRedispatchedEvent(event)) {
       if (!PointerCoordinator.capturePointer(this, event.pointerId)) {
-        console.log('[draggable-mixin] Failed to capture pointer, will listen for redispatched events');
         return; // Another mixin captured it, we'll listen for redispatched events
       }
       
@@ -162,20 +151,10 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
       this._dragStartY = event.clientY;
       this._isDragging = false;
       this._dragDistance = 0;
-      
-      console.log('[draggable-mixin] Drag started at:', { x: this._dragStartX, y: this._dragStartY });
     }
   };
 
   _handlePointerMove = (event) => {
-    console.log('[draggable-mixin] _handlePointerMove called', {
-      pointerId: event.pointerId,
-      trackingPointerId: this._pointerId,
-      pointerDown: this._pointerDown,
-      isRedispatched: PointerCoordinator.isRedispatchedEvent(event),
-      event
-    });
-    
     if (!this._pointerDown || event.pointerId !== this._pointerId) return;
     
     // Only process if we captured the pointer or it's a redispatched event from another element
@@ -235,14 +214,6 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
   };
 
   _handlePointerUp = (event) => {
-    console.log('[draggable-mixin] _handlePointerUp called', {
-      pointerId: event.pointerId,
-      trackingPointerId: this._pointerId,
-      pointerDown: this._pointerDown,
-      isRedispatched: PointerCoordinator.isRedispatchedEvent(event),
-      event
-    });
-    
     if (!this._pointerDown || event.pointerId !== this._pointerId) return;
     
     // Only process if we captured the pointer or it's a redispatched event from another element
@@ -285,12 +256,6 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
     // Reset state
     this._isDragging = false;
     this._dragDistance = 0;
-    
-    console.log('[draggable-mixin] Drag ended:', {
-      wasDragging: this._isDragging,
-      finalDistance,
-      direction: this._determineDragDirection(deltaX, deltaY)
-    });
   };
 }
 

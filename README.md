@@ -15,7 +15,7 @@ Check out the [live demo](https://andrers52.github.io/src/projects/ars-web-compo
 - **⚡ ES Modules**: Modern module system with proper imports/exports
 - **🔧 Interactive Effects**: Built-in pressed effects and animations
 - **📱 Touch Support**: Full mobile and desktop interaction support
-- **🧪 Vitest Testing**: 323 tests with jsdom environment
+- **🧪 Vitest Testing**: 325 tests with jsdom environment
 - **🔒 Proper Encapsulation**: Private methods and static utilities for clean API design
 - **🤝 Mixin Coordination**: Smart pointer coordination system for multiple gesture mixins
 - **📜 Mobile Scroll Management**: Intelligent scroll prevention during gesture interactions
@@ -43,6 +43,7 @@ ars-web-components/
 │   │   ├── roll-mixin/
 │   │   ├── show-if-property-true-mixin/
 │   │   └── swipeable-mixin/
+├── demos/                  # Demo entry points and demo-only assets
 │   └── css/                # Shared CSS for demos
 ├── dist/                   # Compiled JavaScript output (generated)
 ├── test/                   # Shared Vitest setup and mocks
@@ -402,7 +403,11 @@ Component-based router and navigation controls for web applications, using the n
 #### ArsPage
 
 ```html
-<ars-page id="my-router" default-page="home">
+<ars-page
+  id="my-router"
+  default-page="home"
+  routes='{"home":"/","about":"/about","contact":"/contact"}'
+>
   <div id="home">Home page content</div>
   <div id="about">About page content</div>
   <div id="contact">Contact page content</div>
@@ -412,28 +417,27 @@ Component-based router and navigation controls for web applications, using the n
 **Attributes:**
 
 - `default-page`: The page to show initially
-- `remote-call-id`: (optional) For remote-call targeting
 
 #### ArsPageController
 
 ```html
-<ars-page-controller
-  target-page="my-router"
-  navigation-type="buttons"
-></ars-page-controller>
+<ars-page-controller target-page="my-router">
+  <nav>
+    <button data-page="home">Home</button>
+    <button data-page="about">About</button>
+    <button data-page="contact">Contact</button>
+  </nav>
+</ars-page-controller>
 ```
 
 **Attributes:**
 
 - `target-page`: The ID of the `ars-page` component to control
-- `navigation-type`: `buttons`, `tabs`, or `dropdown` (default: `buttons`)
-- `show-current`: Whether to highlight the current page (default: `true`)
 
 **Features:**
 
 - Component-based routing
-- Multiple navigation types (buttons, tabs, dropdown)
-- Remote method calling (uses the new remote-call API)
+- Custom navigation markup via child elements with `data-page`
 - Event-driven architecture
 - Easy to integrate
 
@@ -463,7 +467,7 @@ class MyButton extends PressedEffectMixin(HTMLElement) {
 - Works with solid background colors
 - Touch and mouse support
 
-**Demo:** http://localhost:8080/src/mixins/pressed-effect-mixin/demo/
+**Demo:** http://localhost:8080/demos/mixins/pressed-effect-mixin/
 
 ### Localized Mixin
 
@@ -475,11 +479,10 @@ import { LocalizedMixin } from "ars-web-components";
 class LocalizedComponent extends LocalizedMixin(HTMLElement) {
   constructor() {
     super();
-    this.setLocalizedText({
-      en: "Hello World",
-      es: "Hola Mundo",
-      fr: "Bonjour le Monde",
-    });
+    this.addTranslations("en", { greeting: "Hello World" });
+    this.addTranslations("es", { greeting: "Hola Mundo" });
+    this.addTranslations("fr", { greeting: "Bonjour le Monde" });
+    this.setLocale("en");
   }
 }
 ```
@@ -491,11 +494,11 @@ class LocalizedComponent extends LocalizedMixin(HTMLElement) {
 - Event-driven updates
 - Mock localization system for testing
 
-**Demo:** http://localhost:8080/src/mixins/localized-mixin/demo/
+**Demo:** http://localhost:8080/demos/mixins/localized-mixin/
 
-### RemoteCall Mixin
+### RemoteCall Mixins
 
-Enables inter-component communication through method calls and event dispatching **using only component IDs**. The `remote-call-id` attribute is no longer required or supported.
+Enables inter-component communication through DOM events and component IDs.
 
 ```javascript
 import {
@@ -503,34 +506,40 @@ import {
   RemoteCallReceiverMixin,
 } from "ars-web-components";
 
-// Receiver component (must have an id!)
-class MyReceiver extends RemoteCallReceiverMixin(HTMLElement) {
-  constructor() {
-    super();
-    this.id = "my-receiver"; // REQUIRED
-    this.exposeMethod("greet", (name) => `Hello ${name}!");
+class GreeterElement extends HTMLElement {
+  greet(name) {
+    console.log(`Hello ${name}`);
+  }
+}
+customElements.define("greeter-element", GreeterElement);
+
+class MyCaller extends RemoteCallCallerMixin(HTMLElement) {
+  sendGreeting() {
+    this.callRemote("my-receiver", "greet", "World");
   }
 }
 
-// Caller component
-class MyCaller extends RemoteCallCallerMixin(HTMLElement) {
-  callRemoteGreet() {
-    this._callRemote("my-receiver", "greet", "World");
-  }
-}
+class MyReceiver extends RemoteCallReceiverMixin(HTMLElement) {}
 ```
 
-**Important:** Components using these mixins must have a unique `id` attribute.
+**Receiver markup:**
+
+```html
+<remote-call-receiver-mixin id="my-receiver" allow="greet">
+  <greeter-element></greeter-element>
+</remote-call-receiver-mixin>
+```
+
+**Important:** Receiver elements must have a unique `id` attribute, and the wrapped target must expose public methods.
 
 **Features:**
 
-- Component ID-based targeting (no more remote-call-id)
+- Component ID-based targeting
 - Method call with parameters
 - Error handling and validation
-- Real-time logging
 - Support for multiple receiver instances
 
-**Demo:** http://localhost:8080/src/mixins/remote-call-mixin/demo/
+**Demo:** http://localhost:8080/demos/mixins/remote-call-mixin/
 
 ### ShowIfPropertyTrue Mixin
 
@@ -547,7 +556,7 @@ class ConditionalComponent extends ShowIfPropertyTrueMixin(HTMLElement) {
 }
 ```
 
-**Demo:** http://localhost:8080/src/mixins/show-if-property-true-mixin/demo/
+**Demo:** http://localhost:8080/demos/mixins/show-if-property-true-mixin/
 
 ### Swipeable Mixin
 
@@ -572,7 +581,7 @@ class SwipeableComponent extends SwipeableMixin(HTMLElement) {
 - Works seamlessly with other mixins using PointerCoordinator
 - **Order-independent**: Can be nested in any order with other gesture mixins
 
-**Demo:** http://localhost:8080/src/mixins/swipeable-mixin/demo/
+**Demo:** http://localhost:8080/demos/mixins/swipeable-mixin/
 
 ### Draggable Mixin
 
@@ -599,7 +608,7 @@ class DraggableComponent extends DraggableMixin(HTMLElement) {
 - Works seamlessly with other mixins using PointerCoordinator
 - **Order-independent**: Can be nested in any order with other gesture mixins
 
-**Demo:** http://localhost:8080/src/mixins/draggable-mixin/demo/
+**Demo:** http://localhost:8080/demos/mixins/draggable-mixin/
 
 ### Roll Mixin
 
@@ -617,40 +626,22 @@ class RollableComponent extends RollMixin(HTMLElement) {
 }
 ```
 
-**Demo:** http://localhost:8080/src/mixins/roll-mixin/demo/
+**Demo:** http://localhost:8080/demos/mixins/roll-mixin/
 
 ## Mixin Coordination
 
 ARS Web Components includes a sophisticated coordination system that allows multiple gesture mixins to work together seamlessly on the same element.
 
-### PointerCoordinator
+### Pointer Coordination
 
-The `PointerCoordinator` manages pointer captures and event redispatching to prevent conflicts between multiple mixins:
-
-```javascript
-import { PointerCoordinator } from "ars-web-components";
-
-// Check if scrolling is currently prevented
-if (PointerCoordinator.isScrollPrevented()) {
-  console.log('Scroll prevention is active');
-}
-
-// Check if an element has captured a specific pointer
-if (PointerCoordinator.hasPointerCapture(element, pointerId)) {
-  console.log('Element has captured this pointer');
-}
-
-// Get debug information
-const debugInfo = PointerCoordinator.getDebugInfo();
-console.log('Active captures:', debugInfo.totalCaptures);
-```
+Gesture mixins in this package share an internal `PointerCoordinator` utility to manage pointer capture and redispatching.
+That coordination is what allows drag and swipe behaviors to coexist on the same interaction surface without fighting over the same pointer stream.
 
 **Features:**
 - Prevents conflicts when multiple mixins try to capture the same pointer
 - Smart scroll prevention that only activates during active gestures
 - Event redispatching system to prevent infinite loops
 - Early gesture detection for responsive touch interactions
-- Debug tools and status monitoring for development
 - **Order-independent coordination**: Works regardless of mixin nesting order
 
 ### Using Multiple Mixins Together
@@ -727,7 +718,7 @@ Add the `keep-space-when-hidden` attribute to keep the element's space in the la
 cd ars-web-components
 npm install
 npm run build   # Compile TypeScript → dist/
-npm run test    # Run all 323 tests
+npm test        # Run all 325 tests
 npm start       # Start dev server on port 8080
 ```
 
@@ -736,9 +727,10 @@ npm start       # Start dev server on port 8080
 | Script | Description |
 |---|---|
 | `npm run build` | Compile TypeScript to `dist/` via `tsc` |
-| `npm run test` | Run all tests (Vitest, single run) |
+| `npm test` | Run all tests (Vitest, single run) |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run test:coverage` | Run tests with coverage report |
+| `npm run dev` | Start the Vite dev server for live demo development |
 | `npm start` | Start Express dev server on port 8080 |
 | `npm stop` | Stop the dev server |
 
@@ -748,19 +740,19 @@ Once the server is running, you can access:
 
 - **Main Demo Gallery**: http://localhost:8080/
 - **Individual Components**:
-  - **ars-calendar**: http://localhost:8080/src/components/ars-calendar/demo/
-  - **ars-color-select**: http://localhost:8080/src/components/ars-color-select/demo/
-  - **ars-dialog**: http://localhost:8080/src/components/ars-dialog/demo/
-  - **ars-page**: http://localhost:8080/src/components/ars-page/demo/
-  - **ars-data-roller**: http://localhost:8080/src/components/ars-data-roller/demo/
+  - **ars-calendar**: http://localhost:8080/demos/components/ars-calendar/
+  - **ars-color-select**: http://localhost:8080/demos/components/ars-color-select/
+  - **ars-dialog**: http://localhost:8080/demos/components/ars-dialog/
+  - **ars-page**: http://localhost:8080/demos/components/ars-page/
+  - **ars-data-roller**: http://localhost:8080/demos/components/ars-data-roller/
 - **Individual Mixins**:
-  - **pressed-effect**: http://localhost:8080/src/mixins/pressed-effect-mixin/demo/
-  - **localized**: http://localhost:8080/src/mixins/localized-mixin/demo/
-  - **remote-call**: http://localhost:8080/src/mixins/remote-call-mixin/demo/
-  - **swipeable**: http://localhost:8080/src/mixins/swipeable-mixin/demo/
-  - **draggable**: http://localhost:8080/src/mixins/draggable-mixin/demo/
-  - **show-if-property-true**: http://localhost:8080/src/mixins/show-if-property-true-mixin/demo/
-  - **roll**: http://localhost:8080/src/mixins/roll-mixin/demo/
+  - **pressed-effect**: http://localhost:8080/demos/mixins/pressed-effect-mixin/
+  - **localized**: http://localhost:8080/demos/mixins/localized-mixin/
+  - **remote-call**: http://localhost:8080/demos/mixins/remote-call-mixin/
+  - **swipeable**: http://localhost:8080/demos/mixins/swipeable-mixin/
+  - **draggable**: http://localhost:8080/demos/mixins/draggable-mixin/
+  - **show-if-property-true**: http://localhost:8080/demos/mixins/show-if-property-true-mixin/
+  - **roll**: http://localhost:8080/demos/mixins/roll-mixin/
 
 ### Co-development Setup
 
@@ -786,12 +778,12 @@ export { WebComponentBase } from "./components/web-component-base/web-component-
 // Mixins
 export { LocalizedMixin } from "./mixins/localized-mixin/localized-mixin.js";
 export { PressedEffectMixin } from "./mixins/pressed-effect-mixin/pressed-effect-mixin.js";
+export { DraggableMixin } from "./mixins/draggable-mixin/draggable-mixin.js";
 export { RemoteCallCallerMixin } from "./mixins/remote-call-mixin/remote-call-caller-mixin.js";
 export { RemoteCallReceiverMixin } from "./mixins/remote-call-mixin/remote-call-receiver-mixin.js";
 export { RollMixin } from "./mixins/roll-mixin/roll-mixin.js";
 export { ShowIfPropertyTrueMixin } from "./mixins/show-if-property-true-mixin/show-if-property-true-mixin.js";
 export { SwipeableMixin } from "./mixins/swipeable-mixin/swipeable-mixin.js";
-export { DraggableMixin } from "./mixins/draggable-mixin/draggable-mixin.js";
 ```
 
 ## Requirements

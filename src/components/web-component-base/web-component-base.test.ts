@@ -134,12 +134,6 @@ describe('WebComponentBase', () => {
       it('should have disconnectedCallback', () => {
         expect(typeof instance.disconnectedCallback).toBe('function');
       });
-
-      it('should log when connected', () => {
-        const logSpy = vi.spyOn(console, 'log');
-        instance.connectedCallback();
-        expect(logSpy).toHaveBeenCalled();
-      });
     });
   });
 

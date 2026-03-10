@@ -101,7 +101,6 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
     this._touchStartX = coords.x;
     this._touchStartY = coords.y;
     this._touchStartTime = Date.now();
-    console.log('Touch start:', this._touchStartX, this._touchStartY);
   };
 
   _handleTouchMove = (event) => {
@@ -111,17 +110,11 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
 
   _handleTouchEnd = (event) => {
     event.preventDefault();
-    console.log('_handleTouchEnd');
     const coords = this._getTouchCoordinates(event);
     this._touchEndX = coords.x;
     this._touchEndY = coords.y;
     const { deltaX, deltaY, distance } = this._calculateSwipeDistance();
     const time = this._calculateSwipeTime();
-    console.log('Touch start:', this._touchStartX, this._touchStartY);
-    console.log('Touch end:', this._touchEndX, this._touchEndY);
-    console.log('Delta X:', deltaX, 'Delta Y:', deltaY, 'Distance:', distance);
-    console.log('Time:', time, 'Min distance:', this._minSwipeDistance, 'Max time:', this._maxSwipeTime);
-    console.log('this._isValidSwipe(distance, time)', this._isValidSwipe(distance, time));
     if (this._isValidSwipe(distance, time)) {
       const direction = this._determineSwipeDirection(deltaX, deltaY);
       this.onSwipe(direction, { deltaX, deltaY, distance, time });
@@ -136,7 +129,6 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
   };
 
   _handleMouseEnd = (event) => {
-    console.log('_handleMouseEnd');
     const coords = this._getTouchCoordinates(event);
     this._touchEndX = coords.x;
     this._touchEndY = coords.y;
@@ -168,8 +160,6 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
       bubbles: true,
       composed: true,
     }));
-    // Optionally, also log for debugging
-    console.log('[swipeable-mixin] CustomEvent "swipe" dispatched from host', direction, details);
   }
 
   connectedCallback() {
@@ -210,19 +200,11 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
   }
 
   _handlePointerDown = (event) => {
-    console.log('[swipeable-mixin] _handlePointerDown called', {
-      pointerId: event.pointerId,
-      pointerDown: this._pointerDown,
-      isRedispatched: PointerCoordinator.isRedispatchedEvent(event),
-      event
-    });
-    
     if (this._pointerDown) return; // Only track one pointer
     
     // Try to capture the pointer (only for non-redispatched events)
     if (!PointerCoordinator.isRedispatchedEvent(event)) {
       if (!PointerCoordinator.capturePointer(this, event.pointerId)) {
-        console.log('[swipeable-mixin] Failed to capture pointer, will listen for redispatched events');
         return; // Another mixin captured it, we'll listen for redispatched events
       }
       
@@ -242,23 +224,10 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
       this._touchStartX = event.clientX;
       this._touchStartY = event.clientY;
       this._touchStartTime = Date.now();
-      
-      // Debug: Log bounding rect and start coordinates
-      const rect = this.getBoundingClientRect();
-      console.log('[swipeable-mixin] Bounding rect:', rect);
-      console.log('[swipeable-mixin] Start coordinates:', { x: this._touchStartX, y: this._touchStartY });
     }
   };
 
   _handlePointerMove = (event) => {
-    console.log('[swipeable-mixin] _handlePointerMove called', {
-      pointerId: event.pointerId,
-      trackingPointerId: this._pointerId,
-      pointerDown: this._pointerDown,
-      isRedispatched: PointerCoordinator.isRedispatchedEvent(event),
-      event
-    });
-    
     if (!this._pointerDown || event.pointerId !== this._pointerId) return;
     
     // Only process if we captured the pointer or it's a redispatched event from another element
@@ -270,8 +239,6 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
     if (PointerCoordinator.hasPointerCapture(this, event.pointerId) && PointerCoordinator.isRedispatchedEvent(event)) {
       return;
     }
-    
-    console.log('[swipeable-mixin] pointermove', event.type, event.pointerId, event.clientX, event.clientY);
     
     // Redispatch the event (only for non-redispatched events)
     if (!PointerCoordinator.isRedispatchedEvent(event)) {
@@ -304,14 +271,6 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
   };
 
   _handlePointerUp = (event) => {
-    console.log('[swipeable-mixin] _handlePointerUp called', {
-      pointerId: event.pointerId,
-      trackingPointerId: this._pointerId,
-      pointerDown: this._pointerDown,
-      isRedispatched: PointerCoordinator.isRedispatchedEvent(event),
-      event
-    });
-    
     if (!this._pointerDown || event.pointerId !== this._pointerId) return;
     
     // Only process if we captured the pointer or it's a redispatched event from another element
@@ -323,8 +282,6 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
     if (PointerCoordinator.hasPointerCapture(this, event.pointerId) && PointerCoordinator.isRedispatchedEvent(event)) {
       return;
     }
-    
-    console.log('[swipeable-mixin] pointerup', event.type, event.pointerId, event.clientX, event.clientY);
     
     // Redispatch the event (only for non-redispatched events)
     if (!PointerCoordinator.isRedispatchedEvent(event)) {
@@ -340,25 +297,11 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
     const deltaY = this._touchEndY - this._touchStartY;
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     const time = Date.now() - this._touchStartTime;
-    
-    // Debug: Log detailed pointer coordinates and distance calculation
-    console.log('[swipeable-mixin] pointerup detailed:', {
-      start: { x: this._touchStartX, y: this._touchStartY },
-      end: { x: event.clientX, y: event.clientY },
-      deltaX,
-      deltaY,
-      distance,
-      minSwipeDistance: this._minSwipeDistance,
-      time,
-      maxSwipeTime: this._maxSwipeTime,
-      isValidSwipe: distance >= this._minSwipeDistance && time <= this._maxSwipeTime
-    });
-    
+
     if (distance >= this._minSwipeDistance && time <= this._maxSwipeTime) {
       const direction = Math.abs(deltaX) > Math.abs(deltaY)
         ? (deltaX > 0 ? "right" : "left")
         : (deltaY > 0 ? "down" : "up");
-      console.log('[swipeable-mixin] Detected swipe', { direction, deltaX, deltaY, distance, time });
       this.onSwipe(direction, { deltaX, deltaY, distance, time });
     }
   };

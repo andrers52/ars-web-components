@@ -67,14 +67,10 @@ class LocalizedMixin extends MixinBase() {
    *  Public API
    * -------------------------------------------------- */
   setLocale(loc) {
-    console.log(`[LocalizedMixin] setLocale called with: ${loc}`);
     if(this._isValidLocale(loc)){
       this._locale = loc;
       this._loadTranslations();
-      console.log(`[LocalizedMixin] Locale set to: ${this._locale}`);
       this._render();
-    } else {
-      console.log(`[LocalizedMixin] Invalid locale: ${loc}`);
     }
   }
   getLocale(){ return this._locale; }
@@ -91,7 +87,6 @@ class LocalizedMixin extends MixinBase() {
   // @ts-ignore
   translate(key: any, params?: any): any {
     const t=this._findTranslation(key);
-    console.log(`[LocalizedMixin] translate(${key}) -> ${t || key}`);
     return t?this._interpolate(t,params):key;
   }
 
@@ -109,7 +104,6 @@ class LocalizedMixin extends MixinBase() {
       try {
         translations = JSON.parse(translations);
         Object.entries(translations).forEach(([l, t]) => this.addTranslations(l, t));
-        console.log('[LocalizedMixin] Loaded translations from attribute.');
         return;
       } catch (e) {
         console.error('Invalid translations JSON in attribute', e);
@@ -117,7 +111,6 @@ class LocalizedMixin extends MixinBase() {
     }
     if((window as any).globalTranslations && this._isValidTranslations((window as any).globalTranslations)){
       Object.entries((window as any).globalTranslations).forEach(([l,t]) => this.addTranslations(l,t));
-      console.log('[LocalizedMixin] Loaded translations from global.');
     }
   }
 
@@ -125,25 +118,15 @@ class LocalizedMixin extends MixinBase() {
    *  Internal render – replace [[localization.key]] in light DOM content
    * -------------------------------------------------- */
   _render(){
-    console.log(`[LocalizedMixin] _render called`);
     const target = this.firstElementChild;
-    console.log(`[LocalizedMixin] Target element:`, target);
-    if(!target) {
-      console.log(`[LocalizedMixin] No target element found`);
-      return;
-    }
+    if(!target) return;
     if(!this._originalTemplate) {
       this._originalTemplate = target.innerHTML;
-      console.log(`[LocalizedMixin] Original template saved:`, this._originalTemplate);
     }
     let html = this._originalTemplate;
-    console.log(`[LocalizedMixin] Processing template:`, html);
     html = html.replace(/\[\[localization\.([^\]]+)\]\]/g,(m,k)=> {
-      const translation = this.translate(k);
-      console.log(`[LocalizedMixin] Replacing ${k} with: ${translation}`);
-      return translation;
+      return this.translate(k);
     });
-    console.log(`[LocalizedMixin] Final HTML:`, html);
     target.innerHTML = html;
 
     // --- Attribute-based localization using data-localize-map ---
@@ -164,7 +147,6 @@ class LocalizedMixin extends MixinBase() {
           value = this.translate(keys);
           target.setAttribute(attr, value);
         }
-        console.log(`[LocalizedMixin] Set attribute ${attr} =`, value);
       });
     }
   }
@@ -173,12 +155,10 @@ class LocalizedMixin extends MixinBase() {
    *  Lifecycle
    * -------------------------------------------------- */
   connectedCallback(){
-    console.log(`[LocalizedMixin] connectedCallback called`);
     super.connectedCallback?.();
 
     // Read attributes
     const locAttr = this.getAttribute('locale');
-    console.log(`[LocalizedMixin] Initial locale attribute: ${locAttr}`);
     if(this._isValidLocale(locAttr)) this._locale = locAttr;
 
     // Load translations from attribute or global
@@ -186,20 +166,16 @@ class LocalizedMixin extends MixinBase() {
 
     // Initialize target once a child exists
     const initTarget = () => {
-      console.log(`[LocalizedMixin] Initializing target`);
       // async render after children ready
       setTimeout(() => this._render());
     };
 
     if (this.firstElementChild) {
-      console.log(`[LocalizedMixin] First child exists, initializing immediately`);
       initTarget();
     } else {
-      console.log(`[LocalizedMixin] No first child, setting up mutation observer`);
       // Wait until a child is slotted/added
       const mo = new MutationObserver(() => {
         if (this.firstElementChild) {
-          console.log(`[LocalizedMixin] Child added, initializing`);
           mo.disconnect();
           initTarget();
         }

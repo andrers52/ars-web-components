@@ -37,18 +37,6 @@ const createPropertyDescriptor = (propKey) => ({
   },
 });
 
-// Pure function to map properties to attributes
-const mapPropertiesToAttributes = (obj, propKeys) => {
-  propKeys.forEach((propKey) => {
-    try {
-      Object.defineProperty(obj, propKey, createPropertyDescriptor(propKey));
-    } catch (err) {
-      console.error(`Error mapping property '${propKey}':`, err);
-    }
-  });
-  return obj;
-};
-
 // Pure function to create event
 const createCustomEvent = (name, detail) =>
   new CustomEvent(name, { detail, bubbles: true, composed: true });
@@ -77,11 +65,35 @@ const removeFromArray = (array, item) => {
   return array;
 };
 
+const resolveMethodReference = (component, methodRef) => {
+  if (typeof methodRef === "function") {
+    return methodRef.bind(component);
+  }
+  if (typeof methodRef !== "string") {
+    return null;
+  }
+
+  const normalizedRef = methodRef
+    .trim()
+    .replace(/^this\./, "")
+    .replace(/\(\s*\)\s*;?$/, "");
+
+  if (!normalizedRef || normalizedRef.includes("(") || normalizedRef.includes(".")) {
+    return null;
+  }
+
+  const candidate = component[normalizedRef];
+  return typeof candidate === "function" ? candidate.bind(component) : null;
+};
+
 // Factory function for event connection
-const createEventConnector = (elementId, eventStr, methodCallStr) => (self) => {
-  self.shadowRoot.getElementById(elementId)[eventStr] = function () {
-    eval(`${methodCallStr.replace(/this/g, "self")}`);
-  };
+const createEventConnector = (elementId, eventStr, methodRef) => (self) => {
+  const element = self.shadowRoot?.getElementById(elementId);
+  const handler = resolveMethodReference(self, methodRef);
+  if (!element || !handler) {
+    return;
+  }
+  element[eventStr] = handler;
 };
 
 class WebComponentBase extends HTMLElement {
@@ -128,11 +140,11 @@ class WebComponentBase extends HTMLElement {
   }
 
   connectedCallback() {
-    console.log("Component connected to the DOM.");
+    // Subclasses may override.
   }
 
   disconnectedCallback() {
-    console.log("Component disconnected from the DOM.");
+    // Subclasses may override.
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
@@ -147,7 +159,6 @@ class WebComponentBase extends HTMLElement {
     }
 
     if (this._waitingOnAttr.length === 0 && !this.alreadyMappedAttributes) {
-      // mapPropertiesToAttributes(this, Object.keys(this._attributesMap)); // Removed to prevent recursion
       this.allAttributesChangedCallback(this._attributesMap);
       this.alreadyMappedAttributes = true;
     }
@@ -158,8 +169,8 @@ class WebComponentBase extends HTMLElement {
   }
 
   allAttributesChangedCallback(attributes) {
-    // Override in the subclass to handle changes to all attributes
-    console.log("All attributes have changed:", attributes);
+    void attributes;
+    // Subclasses may override.
   }
 
   connectElementWithEvent(elementId, eventStr, methodCallStr) {
