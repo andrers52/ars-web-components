@@ -33,6 +33,8 @@ class ArsPageControllerInternal extends WebComponentBase {
     this._currentPage = null;
     this._availablePages = [];
     this._navClickHandler = this._onNavClick.bind(this);
+    this._routerChangeHandler = this._handleRouterChange.bind(this);
+    this._targetRouter = null;
   }
 
   static get observedAttributes() {
@@ -42,6 +44,7 @@ class ArsPageControllerInternal extends WebComponentBase {
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === "target-page" && newValue) {
       this._targetPage = newValue;
+      this._bindTargetRouterEvents();
       this._refreshPageInfo();
     }
   }
@@ -57,19 +60,72 @@ class ArsPageControllerInternal extends WebComponentBase {
     // Wait a bit for the router to be fully initialized
     setTimeout(() => {
       this._setupNavListeners();
+      this._bindTargetRouterEvents();
       this._refreshPageInfo();
     }, 200);
-
-    this._popStateHandler = () => {
-      /* URL was restored by browser back/forward */
-      this._updateActiveState();
-    };
-    window.addEventListener("popstate", this._popStateHandler);
   }
 
   disconnectedCallback() {
     this._removeNavListeners();
-    window.removeEventListener("popstate", this._popStateHandler);
+    this._unbindTargetRouterEvents();
+  }
+
+  // Router updates are observed directly so the controller works in both browser and internal routing modes.
+  _handleRouterChange() {
+    this._updateActiveState();
+  }
+
+  // Resolves the target element from the closest root first, then falls back to the owner document.
+  _resolveTargetElement() {
+    if (!this._targetPage) {
+      return null;
+    }
+
+    const rootNode = this.getRootNode();
+    if (
+      rootNode &&
+      "getElementById" in rootNode &&
+      typeof rootNode.getElementById === "function"
+    ) {
+      const rootMatch = rootNode.getElementById(this._targetPage);
+      if (rootMatch) {
+        return rootMatch;
+      }
+    }
+
+    return this.ownerDocument.getElementById(this._targetPage);
+  }
+
+  // Normalizes access to the ars-page router whether the target id points at the router or a wrapper node.
+  _resolveRouter() {
+    const targetElement = this._resolveTargetElement();
+    if (!targetElement) {
+      return null;
+    }
+    if (targetElement.tagName === "ARS-PAGE") {
+      return targetElement;
+    }
+    return targetElement.querySelector("ars-page");
+  }
+
+  // Subscribes to page change events instead of the global window history channel.
+  _bindTargetRouterEvents() {
+    this._unbindTargetRouterEvents();
+    const router = this._resolveRouter();
+    if (!router) {
+      return;
+    }
+    this._targetRouter = router;
+    this._targetRouter.addEventListener("ars-page:page-changed", this._routerChangeHandler);
+  }
+
+  // Removes the current router subscription so retargeting stays deterministic.
+  _unbindTargetRouterEvents() {
+    if (!this._targetRouter) {
+      return;
+    }
+    this._targetRouter.removeEventListener("ars-page:page-changed", this._routerChangeHandler);
+    this._targetRouter = null;
   }
 
   _setupNavListeners() {
@@ -160,23 +216,17 @@ class ArsPageControllerInternal extends WebComponentBase {
       const route = link.getAttribute("data-route");
 
       // Get the current page from the target component
-      const targetElement = document.getElementById(this._targetPage);
-      if (targetElement) {
-        let router = targetElement;
-        if (targetElement.tagName !== "ARS-PAGE") {
-          router = targetElement.querySelector("ars-page");
-        }
-        if (router) {
-          const currentPage = (router as any)._currentPage;
-          const currentRoute = (router as any)._currentRoute;
+      const router = this._resolveRouter();
+      if (router) {
+        const currentPage = (router as any)._currentPage;
+        const currentRoute = (router as any)._currentRoute;
 
-          if (pageId && currentPage === pageId) {
-            link.classList.add("active");
-          } else if (route && currentRoute === route) {
-            link.classList.add("active");
-          } else {
-            link.classList.remove("active");
-          }
+        if (pageId && currentPage === pageId) {
+          link.classList.add("active");
+        } else if (route && currentRoute === route) {
+          link.classList.add("active");
+        } else {
+          link.classList.remove("active");
         }
       }
     });
@@ -231,20 +281,10 @@ class ArsPageControllerInternal extends WebComponentBase {
       return false;
     }
 
-    const targetElement = document.getElementById(this._targetPage);
-    if (!targetElement) {
-      console.log("Target element not found:", this._targetPage);
+    const router = this._resolveRouter();
+    if (!router) {
+      console.log("Router component not found in target element");
       return false;
-    }
-
-    // Check if target element is the router itself or contains the router
-    let router = targetElement;
-    if (targetElement.tagName !== "ARS-PAGE") {
-      router = targetElement.querySelector("ars-page");
-      if (!router) {
-        console.log("Router component not found in target element");
-        return false;
-      }
     }
 
     console.log("Calling (router as any).showPage with:", pageId);
@@ -283,20 +323,10 @@ class ArsPageControllerInternal extends WebComponentBase {
       return false;
     }
 
-    const targetElement = document.getElementById(this._targetPage);
-    if (!targetElement) {
-      console.log("Target element not found:", this._targetPage);
+    const router = this._resolveRouter();
+    if (!router) {
+      console.log("Router component not found in target element");
       return false;
-    }
-
-    // Check if target element is the router itself or contains the router
-    let router = targetElement;
-    if (targetElement.tagName !== "ARS-PAGE") {
-      router = targetElement.querySelector("ars-page");
-      if (!router) {
-        console.log("Router component not found in target element");
-        return false;
-      }
     }
 
     console.log("Calling (router as any).navigateToRoute with:", route);
@@ -328,18 +358,11 @@ class ArsPageControllerInternal extends WebComponentBase {
   getCurrentPage() {
     console.log("ArsPageControllerInternal getCurrentPage called");
     if (this._targetPage) {
-      const targetElement = document.getElementById(this._targetPage);
-      if (targetElement) {
-        // Check if target element is the router itself or contains the router
-        let router = targetElement;
-        if (targetElement.tagName !== "ARS-PAGE") {
-          router = targetElement.querySelector("ars-page");
-        }
-        if (router) {
-          const pageInfo = (router as any).getCurrentPage();
-          console.log("Got page info from router:", pageInfo);
-          return pageInfo.currentPage; // Extract the current page ID
-        }
+      const router = this._resolveRouter();
+      if (router) {
+        const pageInfo = (router as any).getCurrentPage();
+        console.log("Got page info from router:", pageInfo);
+        return pageInfo.currentPage; // Extract the current page ID
       }
     }
     console.log("Could not get current page, returning null");
@@ -349,18 +372,11 @@ class ArsPageControllerInternal extends WebComponentBase {
   getCurrentRoute() {
     console.log("ArsPageControllerInternal getCurrentRoute called");
     if (this._targetPage) {
-      const targetElement = document.getElementById(this._targetPage);
-      if (targetElement) {
-        // Check if target element is the router itself or contains the router
-        let router = targetElement;
-        if (targetElement.tagName !== "ARS-PAGE") {
-          router = targetElement.querySelector("ars-page");
-        }
-        if (router) {
-          const routeInfo = (router as any).getCurrentRoute();
-          console.log("Got route info from router:", routeInfo);
-          return routeInfo.currentRoute; // Extract the current route
-        }
+      const router = this._resolveRouter();
+      if (router) {
+        const routeInfo = (router as any).getCurrentRoute();
+        console.log("Got route info from router:", routeInfo);
+        return routeInfo.currentRoute; // Extract the current route
       }
     }
     console.log("Could not get current route, returning null");
@@ -387,7 +403,7 @@ class ArsPageControllerInternal extends WebComponentBase {
       bubbles: true,
       composed: true,
     });
-    document.dispatchEvent(event);
+    this.ownerDocument.dispatchEvent(event);
   }
 }
 

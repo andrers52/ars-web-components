@@ -3,7 +3,7 @@
  * @vi-environment jsdom
  */
 
-import { describe, it, expect, beforeEach, vi, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 
 // Import the module
 import { ArsPage } from './ars-page.js';
@@ -40,10 +40,12 @@ describe('ArsPage', () => {
       expect(ArsPage.observedAttributes).toContain('default-page');
       expect(ArsPage.observedAttributes).toContain('routes');
       expect(ArsPage.observedAttributes).toContain('base-path');
+      expect(ArsPage.observedAttributes).toContain('routing-mode');
     });
 
     it('should have defaultAttributeValue', () => {
       expect(ArsPage.defaultAttributeValue('routes')).toBe('{}');
+      expect(ArsPage.defaultAttributeValue('routing-mode')).toBe('browser');
       expect(ArsPage.defaultAttributeValue('unknown')).toBeNull();
     });
   });
@@ -162,6 +164,17 @@ describe('ArsPage', () => {
     it('should build route maps', () => {
       expect(element._routeToPageMap.size).toBeGreaterThan(0);
       expect(element._pageToRouteMap.size).toBeGreaterThan(0);
+    });
+
+    it('should keep routing local when routing-mode is internal', () => {
+      const pushStateSpy = vi.spyOn(window.history, 'pushState');
+      element.setAttribute('routing-mode', 'internal');
+
+      const result = element.navigateToRoute('/page1');
+
+      expect(result.success).toBe(true);
+      expect(result.route).toBe('/page1');
+      expect(pushStateSpy).not.toHaveBeenCalled();
     });
   });
 

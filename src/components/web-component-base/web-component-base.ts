@@ -6,47 +6,9 @@
 const parseJsonSafely = (value) => {
   try {
     return JSON.parse(value);
-  } catch (e) {
+  } catch {
     return value;
   }
-};
-
-const stringifySafely = (value) => {
-  return typeof value === "string" ? value : JSON.stringify(value);
-};
-
-const getAttributeValue = (element, propKey) => {
-  const attr = element.getAttribute(propKey);
-  return parseJsonSafely(attr);
-};
-
-const setAttributeValue = (element, propKey, value) => {
-  element.setAttribute(propKey, stringifySafely(value));
-};
-
-// Pure function to create property descriptor
-const createPropertyDescriptor = (propKey) => ({
-  get() {
-    return getAttributeValue(this, propKey);
-  },
-  set(value) {
-    const current = getAttributeValue(this, propKey);
-    if (JSON.stringify(current) !== JSON.stringify(value)) {
-      setAttributeValue(this, propKey, value);
-    }
-  },
-});
-
-// Pure function to map properties to attributes
-const mapPropertiesToAttributes = (obj, propKeys) => {
-  propKeys.forEach((propKey) => {
-    try {
-      Object.defineProperty(obj, propKey, createPropertyDescriptor(propKey));
-    } catch (err) {
-      console.error(`Error mapping property '${propKey}':`, err);
-    }
-  });
-  return obj;
 };
 
 // Pure function to create event
@@ -77,10 +39,85 @@ const removeFromArray = (array, item) => {
   return array;
 };
 
-// Factory function for event connection
+// Resolves a dotted property path against the component so event connectors can stay declarative.
+const resolveComponentPath = (root, path) => {
+  return path.split(".").reduce((currentValue, key) => {
+    if (currentValue == null) {
+      throw new Error(`Cannot resolve '${path}' from component.`);
+    }
+    return currentValue[key];
+  }, root);
+};
+
+// Parses the supported declarative event syntax into a method name and optional primitive/property arguments.
+const parseMethodCallExpression = (methodCallStr) => {
+  const normalizedMethodCall = methodCallStr.trim().replace(/;$/, "");
+  const match = normalizedMethodCall.match(
+    /^(?:this\.)?([A-Za-z_$][\w$]*)(?:\((.*)\))?$/,
+  );
+
+  if (!match) {
+    throw new Error(
+      `Unsupported event handler expression '${methodCallStr}'. Use methodName(...) syntax.`,
+    );
+  }
+
+  const [, methodName, rawArguments = ""] = match;
+  const args = rawArguments.trim()
+    ? rawArguments.split(",").map((argument) => argument.trim())
+    : [];
+
+  return { methodName, args };
+};
+
+// Resolves declarative string arguments without executing arbitrary code.
+const resolveMethodArgument = (component, argument) => {
+  if (!argument.length) {
+    return undefined;
+  }
+  if (argument === "this") {
+    return component;
+  }
+  if (argument.startsWith("this.")) {
+    return resolveComponentPath(component, argument.slice(5));
+  }
+  if (argument === "true") {
+    return true;
+  }
+  if (argument === "false") {
+    return false;
+  }
+  if (argument === "null") {
+    return null;
+  }
+  if (/^-?\d+(\.\d+)?$/.test(argument)) {
+    return Number(argument);
+  }
+  if (
+    (argument.startsWith('"') && argument.endsWith('"')) ||
+    (argument.startsWith("'") && argument.endsWith("'"))
+  ) {
+    return argument.slice(1, -1);
+  }
+
+  throw new Error(
+    `Unsupported event handler argument '${argument}'. Use primitives or component property paths.`,
+  );
+};
+
+// Factory function for event connection without arbitrary code execution.
 const createEventConnector = (elementId, eventStr, methodCallStr) => (self) => {
-  self.shadowRoot.getElementById(elementId)[eventStr] = function () {
-    eval(`${methodCallStr.replace(/this/g, "self")}`);
+  const element = self.shadowRoot.getElementById(elementId);
+  const { methodName, args } = parseMethodCallExpression(methodCallStr);
+
+  element[eventStr] = function () {
+    const method = self[methodName];
+    if (typeof method !== "function") {
+      throw new Error(`Event connector method '${methodName}' does not exist.`);
+    }
+
+    const resolvedArgs = args.map((argument) => resolveMethodArgument(self, argument));
+    method.apply(self, resolvedArgs);
   };
 };
 
@@ -91,11 +128,11 @@ class WebComponentBase extends HTMLElement {
     return []; // Override in the subclass to specify observed attributes
   }
 
-  static defaultAttributeValue(name) {
+  static defaultAttributeValue(_name) {
     return null; // Override in the subclass if needed
   }
 
-  static parseAttributeValue(name, value) {
+  static parseAttributeValue(_name, value) {
     return parseJsonSafely(value);
   }
 

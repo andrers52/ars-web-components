@@ -3,7 +3,7 @@
  * @vi-environment jsdom
  */
 
-import { describe, it, expect, beforeEach, vi, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Import the module
 import { ArsDialog } from './ars-dialog.js';
@@ -44,6 +44,15 @@ describe('ArsDialog', () => {
     it('should have defaultCSS', () => {
       expect(element.defaultCSS).toBeDefined();
     });
+
+    it('should render without using eval when opened', () => {
+      const evalSpy = vi.spyOn(globalThis, 'eval');
+
+      document.body.appendChild(element);
+      element.setAttribute('open', 'true');
+
+      expect(evalSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('Static methods', () => {
@@ -62,6 +71,17 @@ describe('ArsDialog', () => {
         
         const dialog = document.querySelector('ars-dialog');
         expect(dialog).toBeDefined();
+      });
+
+      it('should mount dialogs into an explicit host container', async () => {
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+
+        ArsDialog.notify('Test message', 'Test Title', {}, '', { mountTarget: host });
+
+        await Promise.resolve();
+
+        expect(host.querySelector('ars-dialog')).toBeDefined();
       });
 
       it('should resolve when dialog is closed', async () => {

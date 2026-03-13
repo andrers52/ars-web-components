@@ -283,9 +283,8 @@ class ArsColorSelect extends WebComponentBase {
     if (!component.shadowRoot) {
       component.attachShadow({ mode: "open" });
     }
-    component.shadowRoot.innerHTML = eval(
-      "`" + ArsColorSelect.#createTemplate() + "`",
-    );
+    // The template factory already returns the final HTML string for the component.
+    component.shadowRoot.innerHTML = ArsColorSelect.#createTemplate();
     ArsColorSelect.#initializeColorSelectors(component.shadowRoot, component);
     const initialColor = ArsColorSelect.#initializeColor(component);
     ArsColorSelect.#setBackgroundColor(

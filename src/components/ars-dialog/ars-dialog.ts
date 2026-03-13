@@ -22,6 +22,11 @@ import WebComponentBase from "../web-component-base/web-component-base.js";
 import { DEFAULT_CSS } from "./ars-dialog-css.js";
 import "../../mixins/pressed-effect-mixin/pressed-effect-mixin.js";
 
+type ArsDialogMountOptions = {
+  mountTarget?: ParentNode & { appendChild(node: Node): Node };
+  targetDocument?: Document;
+};
+
 class ArsDialog extends WebComponentBase {
   [key: string]: any;
 
@@ -54,7 +59,8 @@ class ArsDialog extends WebComponentBase {
   }
 
   #render() {
-    this.shadowRoot.innerHTML = eval("`" + this.#getTemplate() + "`");
+    // The template is already materialized by #getTemplate, so assign it directly.
+    this.shadowRoot.innerHTML = this.#getTemplate();
     ArsDialog.#applyCSSVars(this.shadowRoot, this.cssVars);
   }
 
@@ -88,12 +94,13 @@ class ArsDialog extends WebComponentBase {
     return ArsDialog.#isOverlayVisible(this);
   }
 
-  static notify(content = "", title = "!", cssVars = {}, customCSS = "") {
+  static notify(content = "", title = "!", cssVars = {}, customCSS = "", options: ArsDialogMountOptions = {}) {
     return ArsDialog.#createNotificationPromise(
       content,
       title,
       customCSS,
       cssVars,
+      options,
     );
   }
 
@@ -104,6 +111,7 @@ class ArsDialog extends WebComponentBase {
     customCSS = "",
     localizedOk = "Ok",
     localizedCancel = "Cancel",
+    options: ArsDialogMountOptions = {},
   ) {
     return ArsDialog.#createDialogPromise(
       content,
@@ -112,6 +120,7 @@ class ArsDialog extends WebComponentBase {
       customCSS,
       localizedOk,
       localizedCancel,
+      options,
     );
   }
 
@@ -266,8 +275,10 @@ class ArsDialog extends WebComponentBase {
     localizedCancel,
     customCSS,
     cssVars,
+    options: ArsDialogMountOptions,
   ) {
-    const dialog = document.createElement("ars-dialog");
+    const targetDocument = options.targetDocument || document;
+    const dialog = targetDocument.createElement("ars-dialog");
     dialog.id = id;
     if (customCSS) dialog.setAttribute("custom-css", customCSS);
     if (Object.keys(cssVars).length > 0)
@@ -282,6 +293,11 @@ class ArsDialog extends WebComponentBase {
     return dialog;
   }
 
+  static #resolveMountTarget(options: ArsDialogMountOptions) {
+    const targetDocument = options.targetDocument || document;
+    return options.mountTarget || targetDocument.body;
+  }
+
   static #setupDialogPromise(dialog, resolve) {
     dialog.onbuttonclick = function (result) {
       dialog.parentNode.removeChild(dialog);
@@ -290,7 +306,7 @@ class ArsDialog extends WebComponentBase {
     dialog.setAttribute("open", true);
   }
 
-  static #createNotificationPromise(content, title, customCSS, cssVars) {
+  static #createNotificationPromise(content, title, customCSS, cssVars, options: ArsDialogMountOptions) {
     return new Promise(function (resolve) {
       const dialog = ArsDialog.#createDialogElement(
         "notification_dialog",
@@ -301,8 +317,9 @@ class ArsDialog extends WebComponentBase {
         null,
         customCSS,
         cssVars,
+        options,
       );
-      document.body.appendChild(dialog);
+      ArsDialog.#resolveMountTarget(options).appendChild(dialog);
       ArsDialog.#setupDialogPromise(dialog, resolve);
     });
   }
@@ -314,6 +331,7 @@ class ArsDialog extends WebComponentBase {
     customCSS,
     localizedOk,
     localizedCancel,
+    options: ArsDialogMountOptions,
   ) {
     return new Promise(function (resolve) {
       const dialog = ArsDialog.#createDialogElement(
@@ -325,8 +343,9 @@ class ArsDialog extends WebComponentBase {
         localizedCancel,
         customCSS,
         cssVars,
+        options,
       );
-      document.body.appendChild(dialog);
+      ArsDialog.#resolveMountTarget(options).appendChild(dialog);
       ArsDialog.#setupDialogPromise(dialog, resolve);
     });
   }

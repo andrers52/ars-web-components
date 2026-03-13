@@ -14,7 +14,7 @@ class ArsDataRoller extends WebComponentBase {
   static #DEFAULT_INTERVAL = 3000;
   static #DEFAULT_ANIMATION_DURATION = 500;
 
-  static #createRollerItem(item, className = '') {
+  static #createRollerItem(item) {
     if (typeof item === 'string') {
       return `<span class="param-value">${item}</span>`;
     } else if (typeof item === 'object' && item.title && item.hasOwnProperty('value')) {

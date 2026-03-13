@@ -66,6 +66,14 @@ describe('WebComponentBase', () => {
         allAttributesChangedCallback(attributes) {
           this.receivedAttributes = attributes;
         }
+
+        triggerWithArgs(text, count, enabled, nestedValue, selfRef) {
+          this.triggerPayload = { text, count, enabled, nestedValue, selfRef };
+        }
+
+        triggerWithoutArgs() {
+          this.triggerCount = (this.triggerCount || 0) + 1;
+        }
       }
 
       TestComponent = TestComponentClass;
@@ -123,6 +131,53 @@ describe('WebComponentBase', () => {
         await new Promise(r => setTimeout(r, 10));
         expect(instance.alreadyMappedAttributes).toBe(true);
         expect(instance.receivedAttributes).toBeDefined();
+      });
+    });
+
+    describe('connectElementWithEvent', () => {
+      beforeEach(() => {
+        instance.attachShadow({ mode: 'open' });
+        instance.shadowRoot.innerHTML = '<button id="trigger"></button>';
+        instance.nested = { value: 'nested-value' };
+      });
+
+      it('should call the component method without evaluating code strings', () => {
+        instance.connectElementWithEvent('trigger', 'onclick', 'triggerWithoutArgs()');
+
+        instance.shadowRoot.getElementById('trigger').click();
+
+        expect(instance.triggerCount).toBe(1);
+      });
+
+      it('should resolve primitive and component-path arguments', () => {
+        instance.connectElementWithEvent(
+          'trigger',
+          'onclick',
+          `triggerWithArgs("label", 3, true, this.nested.value, this)`,
+        );
+
+        instance.shadowRoot.getElementById('trigger').click();
+
+        expect(instance.triggerPayload).toEqual({
+          text: 'label',
+          count: 3,
+          enabled: true,
+          nestedValue: 'nested-value',
+          selfRef: instance,
+        });
+      });
+
+      it('should fail fast on unsupported handler arguments', () => {
+        instance.connectElementWithEvent(
+          'trigger',
+          'onclick',
+          'triggerWithArgs(window.location)',
+        );
+        const handler = instance.shadowRoot.getElementById('trigger').onclick;
+
+        expect(() => {
+          handler.call(instance.shadowRoot.getElementById('trigger'));
+        }).toThrow(/Unsupported event handler argument/);
       });
     });
 

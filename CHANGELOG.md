@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `ars-relational-node`, a reusable graph-card component for DOM-based spatial overlays such as Nexus and Brainiac Engine widget projections
+
+### Changed
+
+- documentation now includes the `ars-relational-node` export and positions it as the canonical reusable node surface for graph-like UIs
+
+## [0.9.1] - 2026-03-11
+
+### Added
+
+- `ars-dialog` mount target options for embedded hosts
+- `ars-page` internal routing mode for non-history-controlled environments
+- `ars-calendar` opt-out flag for global window events
+- `eslint`-based lint workflow with flat config and TypeScript-aware project scoping
+
+### Changed
+
+- `ars-page-controller` now tracks router state from the router itself instead of relying on global `popstate`
+- README documentation now includes Brainiac Engine embedding guidance
+- `web-component-base`, `ars-dialog`, and `ars-color-select` no longer rely on `eval` for event wiring or template rendering
+- release verification now includes `npm run lint`
+
 ## [0.9.0] - 2026-02-26
 
 ### Added

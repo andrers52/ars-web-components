@@ -561,7 +561,6 @@ class ArsCalendar extends ArsCalendarBase {
           if (!dayElement) continue;
 
           const backgroundCanvas = this.daySlotsColors[daySlotIndex];
-          const { width, height } = ArsCalendar.#getCellDimensions(dayElement);
 
           if (backgroundCanvas) {
             (dayElement as HTMLElement).style.backgroundImage = `url(${backgroundCanvas.toDataURL()})`;
@@ -625,21 +624,16 @@ class ArsCalendar extends ArsCalendarBase {
     // Create event handlers
     const handlers = ArsCalendar.#createEventHandlers(this);
     Object.assign(this, handlers);
-
-    // Add event listeners
-    window.addEventListener("resize", ArsCalendar.#createResizeHandler(this));
-    window.addEventListener(
-      "ars-calendar:clearAllData",
-      ArsCalendar.#createClearDataHandler(this),
-    );
-    window.addEventListener(
-      "ars-calendar:refresh",
-      ArsCalendar.#createRefreshHandler(this),
-    );
+    this.globalEventsEnabled = true;
+    this._resizeHandler = ArsCalendar.#createResizeHandler(this);
+    this._clearDataHandler = ArsCalendar.#createClearDataHandler(this);
+    this._refreshHandler = ArsCalendar.#createRefreshHandler(this);
+    this._globalEventsBound = false;
   }
 
   connectedCallback() {
     super.connectedCallback();
+    this._bindGlobalEvents();
     setTimeout(() => {
       if (!this.shadowRoot) {
         this.attachShadow({ mode: "open" });
@@ -653,6 +647,47 @@ class ArsCalendar extends ArsCalendarBase {
     setTimeout(() => {
       this.render();
     }, 0);
+  }
+
+  // Removes global listeners when the component leaves the DOM so overlays do not leak handlers.
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._unbindGlobalEvents();
+  }
+
+  // Uses the ownerDocument window so the component can run inside alternate browser hosts.
+  _getHostWindow() {
+    return this.ownerDocument?.defaultView || null;
+  }
+
+  // Binds optional global events only when the component is configured to participate in them.
+  _bindGlobalEvents() {
+    if (this._globalEventsBound || this.globalEventsEnabled === false) {
+      return;
+    }
+    const hostWindow = this._getHostWindow();
+    if (!hostWindow) {
+      return;
+    }
+    hostWindow.addEventListener("resize", this._resizeHandler);
+    hostWindow.addEventListener("ars-calendar:clearAllData", this._clearDataHandler);
+    hostWindow.addEventListener("ars-calendar:refresh", this._refreshHandler);
+    this._globalEventsBound = true;
+  }
+
+  // Removes the optional global events so embedded hosts can opt out cleanly.
+  _unbindGlobalEvents() {
+    if (!this._globalEventsBound) {
+      return;
+    }
+    const hostWindow = this._getHostWindow();
+    if (!hostWindow) {
+      return;
+    }
+    hostWindow.removeEventListener("resize", this._resizeHandler);
+    hostWindow.removeEventListener("ars-calendar:clearAllData", this._clearDataHandler);
+    hostWindow.removeEventListener("ars-calendar:refresh", this._refreshHandler);
+    this._globalEventsBound = false;
   }
 
   clearAllData() {
@@ -680,6 +715,7 @@ class ArsCalendar extends ArsCalendarBase {
       "localized_today",
       "custom-css",
       "css-vars",
+      "global-events-enabled",
     ];
   }
 
@@ -706,6 +742,11 @@ class ArsCalendar extends ArsCalendarBase {
       this.cssVars = JSON.parse(newVal || "{}");
       ArsCalendar.#applyCSSVars(this.shadowRoot, this.cssVars);
       this.render();
+    }
+    if (attrName === "global-events-enabled") {
+      this.globalEventsEnabled = newVal !== "false";
+      this._unbindGlobalEvents();
+      this._bindGlobalEvents();
     }
   }
 

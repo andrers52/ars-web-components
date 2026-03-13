@@ -4,6 +4,7 @@ export { ArsDataRoller } from "./components/ars-data-roller/ars-data-roller.js";
 export { ArsDialog } from "./components/ars-dialog/ars-dialog.js";
 export { ArsPageController } from "./components/ars-page/ars-page-controller.js";
 export { ArsPage } from "./components/ars-page/ars-page.js";
+export { ArsRelationalNode } from "./components/ars-relational-node/ars-relational-node.js";
 export { WebComponentBase } from "./components/web-component-base/web-component-base.js";
 // mixins
 export { LocalizedMixin } from "./mixins/localized-mixin/localized-mixin.js";

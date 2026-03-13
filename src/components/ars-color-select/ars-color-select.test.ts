@@ -3,7 +3,7 @@
  * @vi-environment jsdom
  */
 
-import { describe, it, expect, beforeEach, vi, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Import the module
 import { ArsColorSelect } from './ars-color-select.js';
@@ -15,6 +15,10 @@ describe('ArsColorSelect', () => {
     document.body.innerHTML = '';
     element = document.createElement('ars-color-select');
     element.id = 'test-color-select';
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('Static properties', () => {
@@ -43,6 +47,14 @@ describe('ArsColorSelect', () => {
       const options = element.shadowRoot.getElementById('optionsContainer');
       expect(options).toBeDefined();
     });
+
+    it('should render without using eval', () => {
+      const evalSpy = vi.spyOn(globalThis, 'eval');
+
+      document.body.appendChild(element);
+
+      expect(evalSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('Color selection', () => {
@@ -64,7 +76,6 @@ describe('ArsColorSelect', () => {
     });
 
     it('should toggle color selection visibility', () => {
-      const selector = element.shadowRoot.getElementById('colorSelector');
       const options = element.shadowRoot.getElementById('optionsContainer');
 
       const initialVisibility = options.style.visibility;

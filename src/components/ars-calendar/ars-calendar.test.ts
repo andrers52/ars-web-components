@@ -3,7 +3,7 @@
  * @vi-environment jsdom
  */
 
-import { describe, it, expect, beforeEach, vi, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Import the module
 import { ArsCalendar } from './ars-calendar.js';
@@ -29,6 +29,7 @@ describe('ArsCalendar', () => {
       expect(ArsCalendar.observedAttributes).toContain('localized_today');
       expect(ArsCalendar.observedAttributes).toContain('custom-css');
       expect(ArsCalendar.observedAttributes).toContain('css-vars');
+      expect(ArsCalendar.observedAttributes).toContain('global-events-enabled');
     });
   });
 
@@ -197,6 +198,15 @@ describe('ArsCalendar', () => {
       
       expect(element.events).toHaveLength(0);
     });
+
+    it('should allow embedded hosts to disable global window events', () => {
+      element.setAttribute('global-events-enabled', 'false');
+      element.addEvent({ day: 15, month: 0, year: 2024, text: 'Event', color: 'red' });
+
+      window.dispatchEvent(new Event('ars-calendar:clearAllData'));
+
+      expect(element.events).toHaveLength(1);
+    });
   });
 
   describe('Date selection', () => {
@@ -244,7 +254,7 @@ describe('ArsCalendar', () => {
     });
 
     it('should set custom template', () => {
-      const templateFn = (cal) => '<div>Custom</div>';
+      const templateFn = (_calendar) => '<div>Custom</div>';
       
       element.setCustomTemplate(templateFn);
       

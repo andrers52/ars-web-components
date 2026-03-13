@@ -32,16 +32,20 @@ class ArsPage extends WebComponentBase {
     this._routeToPageMap = new Map();
     this._pageToRouteMap = new Map();
     this._currentRoute = null;
+    this._routingMode = "browser";
     this._popstateHandler = this._handlePopState.bind(this);
   }
 
   static get observedAttributes() {
-    return ["default-page", "routes", "base-path"];
+    return ["default-page", "routes", "base-path", "routing-mode"];
   }
 
   static defaultAttributeValue(name) {
     if (name === "routes") {
       return "{}";
+    }
+    if (name === "routing-mode") {
+      return "browser";
     }
     return null;
   }
@@ -70,21 +74,25 @@ class ArsPage extends WebComponentBase {
       this._defaultPage = attributes["default-page"];
     }
     this._basePath = attributes["base-path"] || "";
+    this._routingMode = attributes["routing-mode"] || "browser";
   }
 
   connectedCallback() {
     super.connectedCallback();
     console.log("[ars-page] connectedCallback");
 
-    // Add popstate listener for browser back/forward
-    window.addEventListener("popstate", this._popstateHandler);
+    if (this._usesBrowserRouting()) {
+      this._getBrowserWindow()?.addEventListener("popstate", this._popstateHandler);
+    }
 
     this._initializePages();
     this._buildRouteMaps();
 
-    // Check if there's a route in the URL
-    const currentPath = window.location.pathname;
-    const pageId = this._getPageIdFromRoute(currentPath);
+    // Browser routing uses the current URL; internal routing stays local to the component.
+    const currentPath = this._usesBrowserRouting()
+      ? this._getBrowserWindow()?.location.pathname || null
+      : this._currentRoute;
+    const pageId = currentPath ? this._getPageIdFromRoute(currentPath) : null;
 
     if (pageId && this._pages.has(pageId)) {
       console.log(
@@ -106,8 +114,20 @@ class ArsPage extends WebComponentBase {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    window.removeEventListener("popstate", this._popstateHandler);
+    if (this._usesBrowserRouting()) {
+      this._getBrowserWindow()?.removeEventListener("popstate", this._popstateHandler);
+    }
     this._pages.clear();
+  }
+
+  // Resolves the window object from the current ownerDocument.
+  _getBrowserWindow() {
+    return this.ownerDocument?.defaultView || null;
+  }
+
+  // Internal mode skips global history/location integration so the component can be embedded safely.
+  _usesBrowserRouting() {
+    return this._routingMode !== "internal";
   }
 
   // Private methods
@@ -232,18 +252,29 @@ class ArsPage extends WebComponentBase {
   }
 
   _updateBrowserUrl(route) {
-    if (route) {
-      const abs = this._basePath + route;
-      if (abs && abs !== window.location.pathname) {
-        window.history.pushState({ pageId: this._currentPage }, "", abs);
-        this._currentRoute = abs;
-      }
+    if (!route) {
+      return;
+    }
+
+    if (!this._usesBrowserRouting()) {
+      this._currentRoute = route;
+      return;
+    }
+
+    const hostWindow = this._getBrowserWindow();
+    const abs = this._basePath + route;
+    if (hostWindow && abs && abs !== hostWindow.location.pathname) {
+      hostWindow.history.pushState({ pageId: this._currentPage }, "", abs);
+      this._currentRoute = abs;
     }
   }
 
   _handlePopState(event) {
+    if (!this._usesBrowserRouting()) {
+      return;
+    }
     console.log("[ars-page] Popstate event:", event);
-    const currentPath = window.location.pathname;
+    const currentPath = this._getBrowserWindow()?.location.pathname || "";
     console.log("[ars-page] Current path from popstate:", currentPath);
 
     const pageId = this._getPageIdFromRoute(currentPath);
@@ -271,8 +302,9 @@ class ArsPage extends WebComponentBase {
       console.error(`ARS Page: Page with ID '${pageId}' not found`);
       return false;
     }
-    if (this._currentPage && this._pages.has(this._currentPage)) {
-      this._pages.get(this._currentPage).style.display = "none";
+    const previousPage = this._currentPage;
+    if (previousPage && this._pages.has(previousPage)) {
+      this._pages.get(previousPage).style.display = "none";
     }
     const pageElement = this._pages.get(pageId);
     pageElement.style.display = "block";
@@ -281,7 +313,9 @@ class ArsPage extends WebComponentBase {
     // Update browser URL if requested
     if (updateUrl) {
       // For nested routes, preserve the original route if it's more specific
-      const currentPath = window.location.pathname;
+      const currentPath = this._usesBrowserRouting()
+        ? this._getBrowserWindow()?.location.pathname || ""
+        : (this._currentRoute || "");
       const directRoute = this._getRouteFromPageId(pageId);
       
       // Check if current path is a nested route for this page
@@ -299,7 +333,7 @@ class ArsPage extends WebComponentBase {
     this.dispatchEvent(
       new CustomEvent("ars-page:page-changed", {
         detail: {
-          previousPage: this._currentPage,
+          previousPage,
           currentPage: pageId,
           pageElement: pageElement,
           route: this._currentRoute,
@@ -344,7 +378,7 @@ class ArsPage extends WebComponentBase {
   }
 
   showAllPages() {
-    this._pages.forEach((element, pageId) => {
+    this._pages.forEach((element) => {
       (element as HTMLElement).style.display = "block";
     });
     console.log(`ARS Page: Showed all ${this._pages.size} pages`);
@@ -352,7 +386,7 @@ class ArsPage extends WebComponentBase {
   }
 
   hideAllPages() {
-    this._pages.forEach((element, pageId) => {
+    this._pages.forEach((element) => {
       (element as HTMLElement).style.display = "none";
     });
     this._currentPage = null;
@@ -397,7 +431,7 @@ class ArsPage extends WebComponentBase {
       // Show the page without updating URL (we'll do it manually)
       const success = this._showPage(pageId, false);
       if (success) {
-        // Update the URL to the specific route, not the page's default route
+        // Internal mode keeps route state local; browser mode updates history.
         this._updateBrowserUrl(route);
         return {
           success: true,

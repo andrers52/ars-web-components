@@ -15,7 +15,8 @@ Check out the [live demo](https://andrers52.github.io/src/projects/ars-web-compo
 - **⚡ ES Modules**: Modern module system with proper imports/exports
 - **🔧 Interactive Effects**: Built-in pressed effects and animations
 - **📱 Touch Support**: Full mobile and desktop interaction support
-- **🧪 Vitest Testing**: 323 tests with jsdom environment
+- **🧪 Vitest Testing**: 330 tests with jsdom environment
+- **🧹 ESLint**: Flat-config linting for source, tests, and tool configs
 - **🔒 Proper Encapsulation**: Private methods and static utilities for clean API design
 - **🤝 Mixin Coordination**: Smart pointer coordination system for multiple gesture mixins
 - **📜 Mobile Scroll Management**: Intelligent scroll prevention during gesture interactions
@@ -112,6 +113,16 @@ npm test
 
 Test files live alongside the source they cover (for easier navigation while editing components/mixins). Shared Vitest setup and mocks remain in `test/`.
 
+### Lint
+
+Run the lint suite:
+
+```bash
+npm run lint
+```
+
+The lint configuration covers source files, colocated tests, and TypeScript tool config files through `tsconfig.eslint.json`.
+
 ## Design System Compatibility (Design-Agnostic by Default)
 
 `ars-web-components` is intended to be **design-system agnostic**.
@@ -159,6 +170,32 @@ initializeArsWebComponents({
 ```
 
 This keeps initialization explicit while still providing a simple starter theme.
+
+## Brainiac Engine Embedding
+
+`ars-web-components` can be mounted inside `brainiac-engine` DOM overlays as agent presentations.
+
+Embedding guidelines:
+
+- Prefer components that can operate inside a provided host container instead of assuming `document.body`.
+- Prefer local/internal routing when embedding page containers inside an engine overlay.
+- Prefer owner-document scoped listeners over hard-coded global `window` references.
+- Prefer declarative event wiring and direct template rendering over dynamic string evaluation.
+
+Current component support for engine embedding:
+
+- `ars-calendar`
+  - supports `global-events-enabled="false"` so embedded hosts can opt out of global window events
+- `ars-dialog`
+  - static `notify(...)` and `dialog(...)` accept an optional mount-target options object
+- `ars-page`
+  - supports `routing-mode="internal"` for local navigation without browser history ownership
+
+Hardening notes for embedded hosts:
+
+- `web-component-base` no longer uses `eval` to wire DOM events
+- `ars-dialog` and `ars-color-select` now render templates directly instead of evaluating template strings
+- embedded integrations should prefer explicit host references and typed data over raw HTML/script injection patterns
 
 ### Custom Design System Contract (`--arswc-*`)
 
@@ -436,6 +473,28 @@ Component-based router and navigation controls for web applications, using the n
 - Remote method calling (uses the new remote-call API)
 - Event-driven architecture
 - Easy to integrate
+
+### ArsRelationalNode
+
+Reusable DOM node card for graph-based UIs that need browser-native interaction instead of canvas-drawn text.
+
+```typescript
+import { ArsRelationalNode } from "ars-web-components";
+
+const node = new ArsRelationalNode();
+node.data = {
+  id: "event_alpha",
+  title: "Event Alpha",
+  subtitle: "is a: event",
+  properties: {
+    start_date: "2026-03-11",
+    owner: "andre",
+  },
+};
+node.setSelected(true);
+```
+
+This component is intended for projected overlays in tools like Nexus or Brainiac Engine where the spatial runtime owns positioning and zoom while the browser owns the card UI.
 
 ## Mixins
 
@@ -781,6 +840,7 @@ export { ArsColorSelect } from "./components/ars-color-select/ars-color-select.j
 export { ArsDialog } from "./components/ars-dialog/ars-dialog.js";
 export { ArsPageController } from "./components/ars-page/ars-page-controller.js";
 export { ArsPage } from "./components/ars-page/ars-page.js";
+export { ArsRelationalNode } from "./components/ars-relational-node/ars-relational-node.js";
 export { WebComponentBase } from "./components/web-component-base/web-component-base.js";
 
 // Mixins

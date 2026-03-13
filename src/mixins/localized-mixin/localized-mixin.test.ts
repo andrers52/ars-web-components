@@ -3,7 +3,7 @@
  * @vi-environment jsdom
  */
 
-import { describe, it, expect, beforeEach, vi, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 // Import the module
 import { LocalizedMixin } from './localized-mixin.js';

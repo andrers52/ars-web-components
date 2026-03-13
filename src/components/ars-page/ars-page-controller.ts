@@ -33,7 +33,7 @@ class ArsPageController extends WebComponentBase {
 
   connectedCallback() {
     // Create the internal component
-    const internalComponent = document.createElement('ars-page-controller-internal');
+    const internalComponent = this.ownerDocument.createElement('ars-page-controller-internal');
     internalComponent.setAttribute('target-page', this.getAttribute('target-page') || '');
 
     // Move all child nodes to the internal component
