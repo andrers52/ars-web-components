@@ -495,12 +495,6 @@ class ArsCalendar extends ArsCalendarBase {
     }, 0);
   }
 
-  // Removes global listeners when the component leaves the DOM so overlays do not leak handlers.
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this._unbindGlobalEvents();
-  }
-
   // Uses the ownerDocument window so the component can run inside alternate browser hosts.
   _getHostWindow() {
     return this.ownerDocument?.defaultView || null;
