@@ -18,6 +18,16 @@ function distToSrcRewritePlugin() {
           req.url = "/src/index.ts";
         } else if (url === "/dist/design-system.js") {
           req.url = "/src/design-system.ts";
+        } else if (url.startsWith("/dist/components/") && url.includes("/demo/") && url.endsWith(".js")) {
+          req.url = url
+            .replace(/^\/dist\/components\//, "/demos/components/")
+            .replace("/demo/", "/")
+            .replace(/\.js$/, ".ts");
+        } else if (url.startsWith("/dist/mixins/") && url.includes("/demo/") && url.endsWith(".js")) {
+          req.url = url
+            .replace(/^\/dist\/mixins\//, "/demos/mixins/")
+            .replace("/demo/", "/")
+            .replace(/\.js$/, ".ts");
         } else if (url.startsWith("/dist/components/") && url.endsWith(".js")) {
           req.url = url.replace(/^\/dist\//, "/src/").replace(/\.js$/, ".ts");
         } else if (url.startsWith("/dist/mixins/") && url.endsWith(".js")) {

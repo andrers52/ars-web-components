@@ -53,13 +53,12 @@ class ArsDialog extends WebComponentBase {
       if (this.shadowRoot) this.#render();
     }
     if (attrName === "css-vars") {
-      this.cssVars = JSON.parse(newVal || "{}");
+      this.cssVars = ArsDialog.#parseCSSVars(newVal);
       ArsDialog.#applyCSSVars(this.shadowRoot, this.cssVars);
     }
   }
 
   #render() {
-    // The template is already materialized by #getTemplate, so assign it directly.
     this.shadowRoot.innerHTML = this.#getTemplate();
     ArsDialog.#applyCSSVars(this.shadowRoot, this.cssVars);
   }
@@ -153,6 +152,18 @@ class ArsDialog extends WebComponentBase {
     }
     cssVarString += "}\n";
     return cssVarString;
+  }
+
+  static #parseCSSVars(value) {
+    if (!value) return {};
+    try {
+      const parsed = JSON.parse(value);
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+        ? parsed
+        : {};
+    } catch {
+      return {};
+    }
   }
 
   static #applyCSSVars(shadowRoot, cssVars) {

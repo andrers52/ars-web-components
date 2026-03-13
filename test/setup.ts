@@ -1,5 +1,3 @@
-// Jest setup file for web components testing
-
 // Mock console methods to reduce noise in tests but keep errors visible
 const originalConsole = { ...console };
 global.console = {
@@ -10,6 +8,22 @@ global.console = {
   info: vi.fn(),
   debug: vi.fn()
 };
+
+if (typeof PointerEvent === 'undefined') {
+  global.PointerEvent = class PointerEvent extends MouseEvent {
+    constructor(type, options = {}) {
+      super(type, options);
+      this.pointerId = options.pointerId || 0;
+      this.pointerType = options.pointerType || 'mouse';
+      this.pressure = options.pressure || 0;
+      this.tiltX = options.tiltX || 0;
+      this.tiltY = options.tiltY || 0;
+      this.width = options.width || 1;
+      this.height = options.height || 1;
+      this.isPrimary = options.isPrimary || false;
+    }
+  };
+}
 
 // Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
@@ -81,4 +95,26 @@ afterEach(() => {
 afterAll(() => {
   vi.restoreAllMocks();
 });
-HTMLCanvasElement.prototype.getContext = () => ({ fillRect: vi.fn(), clearRect: vi.fn(), getImageData: (x, y, w, h) => ({ data: new Array(w*h*4) }), putImageData: vi.fn(), createImageData: () => ([]), setTransform: vi.fn(), drawImage: vi.fn(), save: vi.fn(), fillText: vi.fn(), restore: vi.fn(), beginPath: vi.fn(), moveTo: vi.fn(), lineTo: vi.fn(), closePath: vi.fn(), stroke: vi.fn(), translate: vi.fn(), scale: vi.fn(), rotate: vi.fn(), arc: vi.fn(), fill: vi.fn() });
+
+HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
+  fillRect: vi.fn(),
+  clearRect: vi.fn(),
+  getImageData: (x, y, w, h) => ({ data: new Array(w * h * 4) }),
+  putImageData: vi.fn(),
+  createImageData: () => ([]),
+  setTransform: vi.fn(),
+  drawImage: vi.fn(),
+  save: vi.fn(),
+  fillText: vi.fn(),
+  restore: vi.fn(),
+  beginPath: vi.fn(),
+  moveTo: vi.fn(),
+  lineTo: vi.fn(),
+  closePath: vi.fn(),
+  stroke: vi.fn(),
+  translate: vi.fn(),
+  scale: vi.fn(),
+  rotate: vi.fn(),
+  arc: vi.fn(),
+  fill: vi.fn()
+}));

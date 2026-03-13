@@ -50,20 +50,15 @@ class RemoteCallCallerMixin extends MixinBase() {
 
   _buildArgs(e) {
     const mapAttr = this.getAttribute(AttributeKeys.ARGSMAP);
-    console.log('RemoteCallCallerMixin: _buildArgs called with event:', e, 'mapAttr:', mapAttr);
     if (!mapAttr) {
-      console.log('RemoteCallCallerMixin: no args-map, returning empty array');
       return [];
     }
     let mapObj;
     try { mapObj = JSON.parse(mapAttr); } catch(err) { console.error('Invalid args-map JSON:', err); return []; }
-    console.log('RemoteCallCallerMixin: parsed mapObj:', mapObj, 'event.detail:', e.detail);
     const argsArr = [];
     Object.entries(mapObj).forEach(([key, pos])=>{
       argsArr[pos as any] = e.detail ? e.detail[key] : undefined;
-      console.log('RemoteCallCallerMixin: mapped key:', key, 'to position:', pos, 'value:', argsArr[pos as any]);
     });
-    console.log('RemoteCallCallerMixin: final args array:', argsArr);
     return argsArr;
   }
 
@@ -74,7 +69,6 @@ class RemoteCallCallerMixin extends MixinBase() {
     const target = this.findActualTargetComponent();
     if (!target) { console.warn('RemoteCallCallerMixin: no inner target found'); return; }
     const handlerFactory = (evtName) => (e) => {
-      console.log('RemoteCallCallerMixin: received event:', evtName, e);
       const targetId = this.getAttribute(AttributeKeys.TARGET);
       const method = this.getAttribute(AttributeKeys.METHOD);
       if (!targetId || !method) {
@@ -82,11 +76,9 @@ class RemoteCallCallerMixin extends MixinBase() {
         return;
       }
       const args = this._buildArgs(e);
-      console.log('RemoteCallCallerMixin: calling remote with targetId:', targetId, 'method:', method, 'args:', args);
       this._callRemote(targetId, method, ...args);
     };
     listenAttr.forEach(evtName => {
-      console.log('RemoteCallCallerMixin: setting up listener for event:', evtName, 'on target:', target);
       const h = handlerFactory(evtName);
       target.addEventListener(evtName, h);
       this._boundHandlers.push({evt: evtName, handler: h, target});

@@ -1,118 +1,16 @@
 import { EObject } from "arslib";
 import WebComponentBase from "../web-component-base/web-component-base.js";
-
-// CSS for the calendar component
-const DEFAULT_CSS = `
-  :host {
-    display: block;
-    font-family: var(--arswc-font-family-sans, Arial, sans-serif);
-    background: var(--ars-calendar-bg, var(--arswc-color-surface, white));
-    border-radius: var(--ars-calendar-border-radius, var(--arswc-radius-md, 8px));
-    box-shadow: var(--ars-calendar-shadow, var(--arswc-shadow-sm, 0 2px 10px rgba(0, 0, 0, 0.1)));
-    overflow: hidden;
-  }
-  .calendar-header {
-    background: var(--ars-calendar-header-bg, var(--arswc-color-accent, linear-gradient(135deg, #667eea 0%, #764ba2 100%)));
-    color: var(--ars-calendar-header-color, var(--arswc-color-accent-contrast, white));
-    padding: 15px;
-    text-align: center;
-    position: relative;
-  }
-  .calendar-title {
-    font-size: 1.2em;
-    font-weight: bold;
-    margin: 0;
-    text-shadow: var(--ars-calendar-header-text-shadow, none);
-  }
-  .calendar-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: var(--ars-calendar-header-color, var(--arswc-color-accent-contrast, white));
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  .calendar-nav:hover {
-    background: var(--ars-calendar-button-hover-bg, color-mix(in srgb, var(--arswc-color-accent-contrast, #ffffff) 30%, transparent));
-  }
-  .calendar-nav.prev {
-    left: 15px;
-  }
-  .calendar-nav.next {
-    right: 15px;
-  }
-  .calendar-nav.today {
-    position: static;
-    transform: none;
-    margin: 10px 5px 0 5px;
-    font-size: 0.9em;
-  }
-  .calendar-weekdays {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    background: var(--ars-calendar-weekdays-bg, var(--arswc-color-surface, #f8f9fa));
-    border-bottom: 1px solid #e9ecef;
-  }
-  .calendar-weekday {
-    padding: 10px;
-    text-align: center;
-    font-weight: bold;
-    color: var(--ars-calendar-days-header-color, var(--arswc-color-muted, #6c757d));
-    font-size: 0.9em;
-  }
-  .calendar-body {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
-    background: var(--ars-calendar-body-bg, var(--arswc-color-border, #e9ecef));
-  }
-  .calendar-day {
-    background: var(--ars-calendar-cell-bg, var(--arswc-color-bg, white));
-    color: var(--ars-calendar-cell-color, var(--arswc-color-text, inherit));
-    padding: 10px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: var(--ars-calendar-cell-border, none);
-  }
-  .calendar-day:hover {
-    background: var(--ars-calendar-cell-hover-bg, var(--arswc-color-surface, #f8f9fa));
-    transform: scale(1.05);
-    box-shadow: var(--ars-calendar-cell-hover-shadow, none);
-  }
-  .calendar-day.selected {
-    background: var(--ars-calendar-selected-bg, var(--arswc-color-accent, #667eea));
-    color: var(--ars-calendar-selected-color, var(--arswc-color-accent-contrast, white));
-    font-weight: bold;
-    box-shadow: var(--ars-calendar-selected-shadow, none);
-  }
-  .calendar-day.other-month {
-    color: var(--ars-calendar-other-month-color, var(--arswc-color-muted, #adb5bd));
-  }
-  .calendar-day.has-events::after {
-    content: '';
-    position: absolute;
-    bottom: 2px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    background: var(--ars-calendar-event-indicator-color, var(--arswc-color-accent, #28a745));
-    border-radius: 50%;
-  }
-  .calendar-day.selected.has-events::after {
-    background: var(--ars-calendar-selected-event-indicator-color, white);
-  }
-`;
+import { DEFAULT_CSS } from "./ars-calendar-css.js";
+import { renderCalendarHTML } from "./ars-calendar-html.js";
+import {
+  createEmptySlots,
+  getColorsForDate,
+  getDaysInMonth,
+  getEventsByDate,
+  getFirstDayOfMonth,
+  parseObjectAttribute,
+  parseStringArrayAttribute,
+} from "./calendar-utils.js";
 
 // Utility function for creating pie chart (simplified version)
 const createPieChart = (width, height, colors) => {
@@ -143,10 +41,6 @@ const createPieChart = (width, height, colors) => {
 
   return canvas;
 };
-
-// Global variables for cell dimensions
-let cellWidth = 30;
-let cellHeight = 30;
 
 // Use only WebComponentBase
 const ArsCalendarBase = WebComponentBase;
@@ -202,10 +96,7 @@ class ArsCalendar extends ArsCalendarBase {
   }
 
   static #getEventsByDate(events, day, month, year) {
-    return events.filter(
-      (event) =>
-        event.day === day && event.month === month && event.year === year,
-    );
+    return getEventsByDate(events, day, month, year);
   }
 
   static #removeEventFromArray(events, eventToRemove) {
@@ -227,11 +118,11 @@ class ArsCalendar extends ArsCalendarBase {
   }
 
   static #getDaysInMonth(month, year) {
-    return new Date(year, month + 1, 0).getDate();
+    return getDaysInMonth(month, year);
   }
 
   static #getFirstDayOfMonth(month, year) {
-    return new Date(year, month).getDay();
+    return getFirstDayOfMonth(month, year);
   }
 
   static #getDaySlotIndex(weekIndex, dayOfWeekIndex) {
@@ -239,24 +130,19 @@ class ArsCalendar extends ArsCalendarBase {
   }
 
   static #createEmptyDaySlots() {
-    return new Array(
+    return createEmptySlots(
       ArsCalendar.#WEEKS_IN_MONTH * ArsCalendar.#DAYS_IN_WEEK,
-    ).fill(null);
+    );
   }
 
   static #createEmptyColorSlots() {
-    return new Array(
+    return createEmptySlots(
       ArsCalendar.#WEEKS_IN_MONTH * ArsCalendar.#DAYS_IN_WEEK,
-    ).fill(null);
+    );
   }
 
   static #getColorsForDate(events, day, month, year) {
-    return events
-      .filter(
-        (event) =>
-          event.day === day && event.month === month && event.year === year,
-      )
-      .map((event) => event.color);
+    return getColorsForDate(events, day, month, year);
   }
 
   static #createColorCanvas(colors, width, height) {
@@ -264,16 +150,16 @@ class ArsCalendar extends ArsCalendarBase {
     return createPieChart(width, height, colors);
   }
 
-  static #getCellDimensions(element) {
-    const defaultWidth = cellWidth || 30;
-    const defaultHeight = cellHeight || 30;
+  static #getCellDimensions(calendar, element) {
+    const defaultWidth = calendar._cellWidth || 30;
+    const defaultHeight = calendar._cellHeight || 30;
     if (element && element.offsetWidth > 0) {
-      cellWidth = element.offsetWidth;
-      cellHeight = element.offsetHeight;
+      calendar._cellWidth = element.offsetWidth;
+      calendar._cellHeight = element.offsetHeight;
     }
     return {
-      width: cellWidth || defaultWidth,
-      height: cellHeight || defaultHeight,
+      width: calendar._cellWidth || defaultWidth,
+      height: calendar._cellHeight || defaultHeight,
     };
   }
 
@@ -314,7 +200,7 @@ class ArsCalendar extends ArsCalendarBase {
     };
   }
 
-  static #fillDaySlots(daySlots, daySlotsColors, month, year, events) {
+  static #fillDaySlots(calendar, daySlots, daySlotsColors, month, year, events) {
     // First, clear all slots
     for (let i = 0; i < daySlots.length; i++) {
       daySlots[i] = null;
@@ -336,7 +222,7 @@ class ArsCalendar extends ArsCalendarBase {
         month,
         year,
       );
-      const { width, height } = ArsCalendar.#getCellDimensions(this as any);
+      const { width, height } = ArsCalendar.#getCellDimensions(calendar, null);
       daySlotsColors[daySlotIndex] = ArsCalendar.#createColorCanvas(
         colors,
         width,
@@ -396,7 +282,13 @@ class ArsCalendar extends ArsCalendarBase {
     calendar.customCSS = null;
     calendar.cssVars = {};
     calendar.defaultCSS = DEFAULT_CSS;
+    calendar._cellWidth = 30;
+    calendar._cellHeight = 30;
+    calendar._resizeHandler = ArsCalendar.#createResizeHandler(calendar);
+    calendar._clearDataHandler = ArsCalendar.#createClearDataHandler(calendar);
+    calendar._refreshHandler = ArsCalendar.#createRefreshHandler(calendar);
     ArsCalendar.#fillDaySlots(
+      calendar,
       calendar.daySlots,
       calendar.daySlotsColors,
       calendar.monthToShow,
@@ -418,10 +310,7 @@ class ArsCalendar extends ArsCalendarBase {
         calendar.selectDate(event.day, event.month, event.year);
       },
       removeEvent: (eventDate) => {
-        if (!eventDate) {
-          console.log("no event found");
-          return;
-        }
+        if (!eventDate) return;
         calendar.events = ArsCalendar.#removeEventFromArray(
           calendar.events,
           eventDate,
@@ -453,57 +342,6 @@ class ArsCalendar extends ArsCalendarBase {
     };
   }
 
-  static #createCalendarHTML(calendar) {
-    const css = calendar.customCSS || calendar.defaultCSS;
-    const monthName = calendar.months[calendar.monthToShow];
-    const year = calendar.yearToShow;
-
-    return `
-      <style>${css}</style>
-      <div class="calendar-header">
-        <button id="prev" class="calendar-nav prev">‹</button>
-        <h2 class="calendar-title">${monthName} ${year}</h2>
-        <button id="next" class="calendar-nav next">›</button>
-        <button id="today" class="calendar-nav today">${
-          calendar.localizedToday
-        }</button>
-      </div>
-      <div class="calendar-weekdays">
-        ${calendar.localizedAbbreviatedDays
-          .map((day) => `<div class="calendar-weekday">${day}</div>`)
-          .join("")}
-      </div>
-      <div class="calendar-body">
-        ${Array.from(
-          { length: calendar.WEEKS_IN_MONTH * calendar.DAYS_IN_WEEK },
-          (_, i) => {
-            const day = calendar.daySlots[i];
-            const hasEvents =
-              day &&
-              calendar.events.some(
-                (event) =>
-                  event.day === day &&
-                  event.month === calendar.monthToShow &&
-                  event.year === calendar.yearToShow,
-              );
-            const isOtherMonth = !day || day < 1 || day > 31;
-            const isSelected =
-              calendar.selectedDay === day &&
-              calendar.selectedMonth === calendar.monthToShow &&
-              calendar.selectedYear === calendar.yearToShow;
-
-            let classes = "calendar-day";
-            if (isOtherMonth) classes += " other-month";
-            if (isSelected) classes += " selected";
-            if (hasEvents) classes += " has-events";
-
-            return `<div class="${classes}">${day || ""}</div>`;
-          },
-        ).join("")}
-      </div>
-    `;
-  }
-
   // ---- PUBLIC INSTANCE METHODS ----
   getEventsByDate(day, month, year) {
     return ArsCalendar.#getEventsByDate(this.events, day, month, year);
@@ -531,6 +369,7 @@ class ArsCalendar extends ArsCalendarBase {
 
     try {
       ArsCalendar.#fillDaySlots(
+        this,
         this.daySlots,
         this.daySlotsColors,
         this.monthToShow,
@@ -540,7 +379,7 @@ class ArsCalendar extends ArsCalendarBase {
 
       const template = this.customTemplate
         ? this.customTemplate(this)
-        : ArsCalendar.#createCalendarHTML(this);
+        : renderCalendarHTML(this);
       this.shadowRoot.innerHTML = template;
 
       const dayElements = this.shadowRoot.querySelectorAll(
@@ -642,6 +481,13 @@ class ArsCalendar extends ArsCalendarBase {
     }, 0);
   }
 
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    window.removeEventListener("resize", this._resizeHandler);
+    window.removeEventListener("ars-calendar:clearAllData", this._clearDataHandler);
+    window.removeEventListener("ars-calendar:refresh", this._refreshHandler);
+  }
+
   allAttributesChangedCallback() {
     if (!this.shadowRoot) this.attachShadow({ mode: "open" });
     setTimeout(() => {
@@ -723,11 +569,17 @@ class ArsCalendar extends ArsCalendarBase {
     super.attributeChangedCallback(attrName, oldVal, newVal);
 
     if (attrName === "localized_abbreviated_days") {
-      this.localizedAbbreviatedDays = JSON.parse(newVal);
+      const parsedDays = parseStringArrayAttribute(newVal, 7);
+      if (parsedDays) {
+        this.localizedAbbreviatedDays = parsedDays;
+      }
       this.render();
     }
     if (attrName === "localized_months") {
-      this.months = JSON.parse(newVal);
+      const parsedMonths = parseStringArrayAttribute(newVal, 12);
+      if (parsedMonths) {
+        this.months = parsedMonths;
+      }
       this.render();
     }
     if (attrName === "localized_today") {
@@ -739,7 +591,7 @@ class ArsCalendar extends ArsCalendarBase {
       this.render();
     }
     if (attrName === "css-vars") {
-      this.cssVars = JSON.parse(newVal || "{}");
+      this.cssVars = parseObjectAttribute(newVal);
       ArsCalendar.#applyCSSVars(this.shadowRoot, this.cssVars);
       this.render();
     }
@@ -802,7 +654,7 @@ class ArsCalendar extends ArsCalendarBase {
 
   getColorCanvasFromDate(day, month, year) {
     const colors = ArsCalendar.#getColorsForDate(this.events, day, month, year);
-    const { width, height } = ArsCalendar.#getCellDimensions(this as any);
+    const { width, height } = ArsCalendar.#getCellDimensions(this, null);
     return ArsCalendar.#createColorCanvas(colors, width, height);
   }
 

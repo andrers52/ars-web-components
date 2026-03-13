@@ -1,5 +1,5 @@
-/* Package-level CSS entrypoint for consumers.
-   Keep source paths internal to this package so consuming apps can import from `ars-web-components/...`. */
-@import "./src/css/base.css";
-@import "./src/css/buttons.css";
-@import "./src/css/components.css";
+/* Package-level CSS entrypoint for the bundled shared styles.
+   These imports point at the demo/shared stylesheet sources kept under `demos/`. */
+@import "./demos/css/base.css";
+@import "./demos/css/buttons.css";
+@import "./demos/css/components.css";

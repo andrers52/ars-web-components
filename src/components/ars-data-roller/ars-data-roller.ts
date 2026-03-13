@@ -220,7 +220,6 @@ class ArsDataRoller extends WebComponentBase {
   // ---- CONSTRUCTOR AND LIFECYCLE ----
   constructor() {
     super();
-    console.log('[ars-data-roller] constructor', this);
     this.currentIndex = 0;
     this.interval = null;
     this.data = [];
@@ -232,7 +231,6 @@ class ArsDataRoller extends WebComponentBase {
 
   connectedCallback() {
     super.connectedCallback();
-    console.log('[ars-data-roller] connectedCallback', this);
     this.#initializeRoller();
   }
 
@@ -273,7 +271,6 @@ class ArsDataRoller extends WebComponentBase {
 
   attributeChangedCallback(attrName, oldVal, newVal) {
     super.attributeChangedCallback(attrName, oldVal, newVal);
-    console.log(`[ars-data-roller] attributeChangedCallback: ${attrName}`, { oldVal, newVal });
     if (oldVal === newVal) return;
     // Only update UI if shadowRoot is ready
     const shadowReady = this.shadowRoot && this.shadowRoot.querySelector('.roller-item.current');
@@ -281,7 +278,6 @@ class ArsDataRoller extends WebComponentBase {
       case "data":
         this.currentIndex = 0;
         this.data = ArsDataRoller.#parseDataAttribute(newVal);
-        console.log('[ars-data-roller] parsed data:', this.data);
         if (shadowReady) {
           this.#render();
           this.#startRolling();

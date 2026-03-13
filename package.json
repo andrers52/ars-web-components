@@ -4,6 +4,12 @@
     "description": "A collection of reusable web components built with TypeScript and ES modules",
     "repository": "https://github.com/andrers52/ars-web-components.git",
     "main": "dist/index.js",
+    "module": "src/index.ts",
+    "exports": {
+        ".": "./src/index.ts",
+        "./styles.css": "./styles.css",
+        "./*": "./src/*.ts"
+    },
     "scripts": {
         "dev": "vite",
         "start": "node server.js",

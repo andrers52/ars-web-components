@@ -1,4 +1,4 @@
-import WebComponentBase from '../../../components/web-component-base/web-component-base.js';
+import WebComponentBase from '../../../src/components/web-component-base/web-component-base.js';
 
 class DemoReceiver extends WebComponentBase {
   [key: string]: any;

@@ -9,6 +9,7 @@ export { WebComponentBase } from "./components/web-component-base/web-component-
 // mixins
 export { LocalizedMixin } from "./mixins/localized-mixin/localized-mixin.js";
 export { PressedEffectMixin } from "./mixins/pressed-effect-mixin/pressed-effect-mixin.js";
+export { DraggableMixin } from "./mixins/draggable-mixin/draggable-mixin.js";
 export { RemoteCallCallerMixin } from "./mixins/remote-call-mixin/remote-call-caller-mixin.js";
 export { RemoteCallReceiverMixin } from "./mixins/remote-call-mixin/remote-call-receiver-mixin.js";
 export { RollMixin } from "./mixins/roll-mixin/roll-mixin.js";

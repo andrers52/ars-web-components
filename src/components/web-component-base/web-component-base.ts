@@ -165,11 +165,11 @@ class WebComponentBase extends HTMLElement {
   }
 
   connectedCallback() {
-    console.log("Component connected to the DOM.");
+    // Subclasses may override.
   }
 
   disconnectedCallback() {
-    console.log("Component disconnected from the DOM.");
+    // Subclasses may override.
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
@@ -184,7 +184,6 @@ class WebComponentBase extends HTMLElement {
     }
 
     if (this._waitingOnAttr.length === 0 && !this.alreadyMappedAttributes) {
-      // mapPropertiesToAttributes(this, Object.keys(this._attributesMap)); // Removed to prevent recursion
       this.allAttributesChangedCallback(this._attributesMap);
       this.alreadyMappedAttributes = true;
     }
@@ -195,8 +194,8 @@ class WebComponentBase extends HTMLElement {
   }
 
   allAttributesChangedCallback(attributes) {
-    // Override in the subclass to handle changes to all attributes
-    console.log("All attributes have changed:", attributes);
+    void attributes;
+    // Subclasses may override.
   }
 
   connectElementWithEvent(elementId, eventStr, methodCallStr) {

@@ -31,29 +31,21 @@ class RollMixin extends WebComponentBase {
    *  Public API
    * -------------------------------------------------- */
   roll() {
-    console.log('🎲 roll() method called on:', this.tagName || this.constructor.name);
-    console.log('🎲 _isRolling state:', this._isRolling);
-    console.log('🎲 _isInCooldown state:', this._isInCooldown);
-
     if (this._isRolling || this._isInCooldown) {
-      console.log('🎲 Skipping roll - already rolling or in cooldown');
       return;
     }
 
     // Set rolling state BEFORE doing anything else
     this._isRolling = true;
-    console.log('🎲 Set _isRolling to true');
 
     this.emitEvent('roll-started', { duration: this._rollDuration });
 
     // Get the target component (first child element)
     const targetComponent = this.firstElementChild;
-    console.log('🎲 Target component found:', targetComponent?.tagName || targetComponent?.constructor.name);
 
     if (targetComponent) {
       this.triggerRollAnimation(targetComponent);
     } else {
-      console.log('🎲 No target component found!');
       this._isRolling = false;
     }
   }
@@ -70,11 +62,8 @@ class RollMixin extends WebComponentBase {
 
     // Skip if value hasn't changed
     if (parsed === this._rollDuration) {
-      console.log(`🎲 setRollDuration called but value unchanged (${parsed}ms)`);
       return;
     }
-
-    console.log(`🎲 setRollDuration: ${this._rollDuration}ms → ${parsed}ms`);
 
     this._rollDuration = parsed;
 
@@ -93,9 +82,6 @@ class RollMixin extends WebComponentBase {
   triggerRollAnimation(targetComponent) {
     // Always fetch the latest duration right before animating
     const currentDuration = this.getRollDuration();
-
-    console.log('🎲 triggerRollAnimation called for:', targetComponent.tagName || targetComponent.constructor.name);
-    console.log('🎲 Duration:', currentDuration, 'ms');
 
     // If Web Animations API is available, prefer it for smoother control
     if (typeof targetComponent.animate === 'function') {
@@ -117,7 +103,6 @@ class RollMixin extends WebComponentBase {
         // Ensure final state is reset
         targetComponent.style.transform = '';
         this._animationTimeout = null;
-        console.log('🎲 Animation (WAAPI) completed');
 
         // Start cooldown before resetting rolling state
         this.startCooldown();
@@ -135,15 +120,9 @@ class RollMixin extends WebComponentBase {
     const originalTransform = targetComponent.style.transform || '';
     const originalTransition = targetComponent.style.transition || '';
 
-    console.log('🎲 Original transform:', originalTransform);
-    console.log('🎲 Original transition:', originalTransition);
-
     // Apply rotation
     const newTransform = `${originalTransform} rotate(359deg)`; // 359 to ensure delta
     const newTransition = `transform ${currentDuration}ms ease-in-out`;
-
-    console.log('🎲 Applying new transform:', newTransform);
-    console.log('🎲 Applying new transition:', newTransition);
 
     targetComponent.style.transition = newTransition;
     targetComponent.style.transform = newTransform;
@@ -155,10 +134,6 @@ class RollMixin extends WebComponentBase {
 
     // Reset after animation
     this._animationTimeout = setTimeout(() => {
-      console.log('🎲 Animation completed, resetting styles');
-      console.log('🎲 Restoring transform to:', originalTransform);
-      console.log('🎲 Restoring transition to:', originalTransition);
-
       targetComponent.style.transform = originalTransform;
       targetComponent.style.transition = originalTransition;
 
@@ -167,7 +142,6 @@ class RollMixin extends WebComponentBase {
 
       // Now reset rolling state
       this._isRolling = false;
-      console.log('🎲 Set _isRolling to false');
       this._animationTimeout = null;
 
       this.emitEvent('roll-completed', { duration: currentDuration });
@@ -178,7 +152,6 @@ class RollMixin extends WebComponentBase {
    *  Cooldown management
    * -------------------------------------------------- */
   startCooldown() {
-    console.log('🎲 Starting cooldown period');
     this._isInCooldown = true;
 
     // Clear any existing cooldown timeout
@@ -188,7 +161,6 @@ class RollMixin extends WebComponentBase {
 
     // Cooldown period: 500ms after animation completes
     this._cooldownTimeout = setTimeout(() => {
-      console.log('🎲 Cooldown period ended');
       this._isInCooldown = false;
       this._cooldownTimeout = null;
     }, 500);
@@ -199,11 +171,9 @@ class RollMixin extends WebComponentBase {
    * -------------------------------------------------- */
   connectedCallback() {
     super.connectedCallback?.();
-    console.log('🎲 connectedCallback called on:', this.tagName || this.constructor.name);
 
     // Set initial duration from attribute
     const duration = this.getAttribute("roll-duration");
-    console.log('🎲 Initial roll-duration attribute:', duration);
     if (duration !== null) {
       this.setRollDuration(duration);
     }
@@ -243,11 +213,8 @@ class RollMixin extends WebComponentBase {
   setupHoverListeners() {
     const targetComponent = this.firstElementChild;
     if (!targetComponent) {
-      console.log('🎲 No target component found for hover listeners');
       return;
     }
-
-    console.log('🎲 Setting up hover listeners for:', targetComponent.tagName || targetComponent.constructor.name);
 
     // Remove any existing listeners first
     this.cleanupHoverListeners();
@@ -256,14 +223,12 @@ class RollMixin extends WebComponentBase {
     this._hoverHandler = (event) => {
       // Only trigger if not already rolling, not in cooldown, and correct target
       if (!this._isRolling && !this._isInCooldown && event.target === targetComponent) {
-        console.log('🎲 Hover detected, triggering roll');
         this.roll();
       }
     };
 
     // Add mouse enter listener
     targetComponent.addEventListener('mouseenter', this._hoverHandler);
-    console.log('🎲 Hover listener added');
   }
 
   cleanupHoverListeners() {
@@ -271,7 +236,6 @@ class RollMixin extends WebComponentBase {
     if (targetComponent && this._hoverHandler) {
       targetComponent.removeEventListener('mouseenter', this._hoverHandler);
       this._hoverHandler = null;
-      console.log('🎲 Hover listeners cleaned up');
     }
   }
 }

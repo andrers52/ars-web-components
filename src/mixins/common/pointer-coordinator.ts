@@ -25,7 +25,6 @@ class PointerCoordinator {
     try {
       element.setPointerCapture(pointerId);
       this._capturedPointers.set(pointerId, element);
-      console.log(`[PointerCoordinator] Pointer ${pointerId} captured by ${element.tagName}`);
       
       // Prevent scrolling when we capture a pointer
       this._preventScrolling();
@@ -47,7 +46,6 @@ class PointerCoordinator {
       try {
         element.releasePointerCapture(pointerId);
         this._capturedPointers.delete(pointerId);
-        console.log(`[PointerCoordinator] Pointer ${pointerId} released by ${element.tagName}`);
         
         // Re-enable scrolling if no more pointers are captured
         if (this._capturedPointers.size === 0) {
@@ -138,8 +136,6 @@ class PointerCoordinator {
     
     // Dispatch from the capturing element
     capturingElement.dispatchEvent(redispatchedEvent);
-    
-    console.log(`[PointerCoordinator] Redispatched ${eventType || originalEvent.type} from ${capturingElement.tagName}`);
   }
   
   /**
@@ -164,8 +160,6 @@ class PointerCoordinator {
     // Add listeners to prevent scrolling
     document.addEventListener('touchmove', preventScroll, { passive: false });
     document.addEventListener('wheel', preventScroll, { passive: false });
-    
-    console.log('[PointerCoordinator] Scroll prevention enabled');
   }
   
   /**
@@ -183,7 +177,6 @@ class PointerCoordinator {
       (this as any)._scrollPreventionHandler = null;
     }
     
-    console.log('[PointerCoordinator] Scrolling re-enabled');
   }
   
   /**
@@ -193,7 +186,6 @@ class PointerCoordinator {
     this._capturedPointers.clear();
     this._redispatchedEvents = new WeakSet();
     this._allowScrolling(); // Re-enable scrolling
-    console.log('[PointerCoordinator] All captures cleared');
   }
   
   /**

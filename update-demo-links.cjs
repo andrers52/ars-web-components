@@ -11,7 +11,7 @@ function walk(dir) {
                     let html = fs.readFileSync(indexHtmlPath, 'utf8');
 
                     html = html.replace(/\"(\.\.\/)+node_modules\//g, '"/node_modules/');
-                    html = html.replace(/\"(\.\.\/)+css\//g, '"/src/css/');
+                    html = html.replace(/\"(\.\.\/)+css\//g, '"/demos/css/');
                     html = html.replace(/href=\"\.\.\/\.\.\/\.\.\/index\.html\"/g, 'href=\"/index.html\"');
                     html = html.replace(/href=\"\.\.\/\.\.\/\.\.\/\"/g, 'href=\"/\"');
 
@@ -31,4 +31,4 @@ function walk(dir) {
         }
     }
 }
-walk('src');
+walk('demos');

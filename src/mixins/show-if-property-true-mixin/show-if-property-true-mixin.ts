@@ -117,7 +117,6 @@ class ShowIfPropertyTrueMixin extends WebComponentBase {
    * -------------------------------------------------- */
   connectedCallback() {
     super.connectedCallback?.();
-    console.log('👁️ ShowIfPropertyTrueMixin connected');
 
     const property = this.getAttribute("show-if-property");
     if (this.#validateProperty(property)) {
