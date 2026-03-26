@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Input - Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+
+  <style>
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin: 12px 0;
+    }
+    .demo-section {
+      background: var(--arswc-color-surface, #f6f8fb);
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: var(--arswc-radius-md, 10px);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-section h3 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      color: var(--arswc-color-text, #1b2430);
+    }
+    ars-input {
+      margin-bottom: 12px;
+    }
+    .event-log {
+      background: #0d1117;
+      color: #c9d1d9;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem;
+      padding: 12px;
+      border-radius: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 12px;
+    }
+    .event-log .entry { margin-bottom: 4px; }
+    .event-log .timestamp { color: #8b949e; }
+    .event-log .event-name { color: #79c0ff; }
+    .code-block {
+      background: #161b22;
+      color: #e6edf3;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem;
+      padding: 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+  <h1>ars-input</h1>
+  <p>Text input with label, validation feedback, and clearable state.</p>
+
+  <div class="info-box">
+    <h3>About</h3>
+    <p>Uses a native &lt;input&gt; inside Shadow DOM for full keyboard, IME, autocomplete, and accessibility support.
+       Error messages render below the input with <code>aria-invalid</code> and <code>aria-describedby</code>.</p>
+  </div>
+
+  <!-- Text types -->
+  <div class="demo-section">
+    <h3>Input Types</h3>
+    <div class="demo-grid">
+      <ars-input label="Text" type="text" placeholder="Enter text..."></ars-input>
+      <ars-input label="Email" type="email" placeholder="user@example.com"></ars-input>
+      <ars-input label="Password" type="password" placeholder="Enter password"></ars-input>
+      <ars-input label="Number" type="number" min="0" max="100" step="1" placeholder="0-100"></ars-input>
+      <ars-input label="Search" type="search" placeholder="Search..." clearable></ars-input>
+      <ars-input label="URL" type="url" placeholder="https://..."></ars-input>
+      <ars-input label="Telephone" type="tel" placeholder="+1 (555) 000-0000"></ars-input>
+    </div>
+  </div>
+
+  <!-- Validation states -->
+  <div class="demo-section">
+    <h3>Validation States</h3>
+    <div class="demo-grid">
+      <ars-input label="Required Field" required placeholder="This field is required"></ars-input>
+      <ars-input label="With Error" error="Please enter a valid email address" value="not-an-email"></ars-input>
+      <ars-input label="Pattern (A-Z only)" pattern="[A-Z]+" placeholder="UPPERCASE"></ars-input>
+    </div>
+  </div>
+
+  <!-- Clearable -->
+  <div class="demo-section">
+    <h3>Clearable</h3>
+    <ars-input label="Clearable Input" clearable value="Click the X to clear" placeholder="Type something..."></ars-input>
+    <div class="code-block">&lt;ars-input label="Clearable" clearable value="initial"&gt;&lt;/ars-input&gt;</div>
+  </div>
+
+  <!-- Prefix / Suffix slots -->
+  <div class="demo-section">
+    <h3>Prefix &amp; Suffix Slots</h3>
+    <ars-input label="Price">
+      <span slot="prefix">$</span>
+    </ars-input>
+    <ars-input label="Search" type="search" clearable>
+      <span slot="prefix">&#128269;</span>
+    </ars-input>
+    <div class="code-block">&lt;ars-input label="Price"&gt;
+  &lt;span slot="prefix"&gt;$&lt;/span&gt;
+&lt;/ars-input&gt;</div>
+  </div>
+
+  <!-- Readonly and disabled -->
+  <div class="demo-section">
+    <h3>Readonly &amp; Disabled</h3>
+    <div class="demo-grid">
+      <ars-input label="Readonly" readonly value="Cannot edit this"></ars-input>
+      <ars-input label="Disabled" disabled value="Disabled input"></ars-input>
+    </div>
+  </div>
+
+  <!-- Event monitor -->
+  <div class="demo-section">
+    <h3>Event Monitor</h3>
+    <p>Interact with any input above to see events.</p>
+    <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px;">Clear Log</button>
+    <div class="event-log" id="event-log">
+      <div class="entry"><span class="timestamp">[ready]</span> Listening for ars-input events...</div>
+    </div>
+  </div>
+
+  <!-- Theme toggle -->
+  <div class="demo-section">
+    <h3>Theme Toggle</h3>
+    <div style="display:flex;gap:8px;">
+      <button class="btn" id="theme-light">Light</button>
+      <button class="btn" id="theme-dark">Dark</button>
+    </div>
+  </div>
+
+  <!-- Usage -->
+  <div class="demo-section">
+    <h3>Usage</h3>
+    <div class="code-block">&lt;ars-input
+  label="Email"
+  type="email"
+  placeholder="user@example.com"
+  required
+  error="Please enter a valid email"
+&gt;&lt;/ars-input&gt;
+
+&lt;script&gt;
+  const input = document.querySelector('ars-input');
+  input.addEventListener('ars-input:change', (e) =&gt; {
+    console.log('Value committed:', e.detail.value);
+  });
+&lt;/script&gt;</div>
+  </div>
+
+  <script type="module">
+    import { ArsInput } from '/src/components/ars-input/ars-input.ts';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/src/design-system.ts';
+
+    initializeArsWebComponents({
+      designAdapter: getArsWebComponentsDefaultAdapter('light')
+    });
+
+    const log = document.getElementById('event-log');
+    for (const eventName of ['ars-input:input', 'ars-input:change', 'ars-input:clear']) {
+      document.addEventListener(eventName, (e) => {
+        const time = new Date().toLocaleTimeString();
+        const entry = document.createElement('div');
+        entry.className = 'entry';
+        const detail = JSON.stringify(e.detail);
+        entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">${eventName}</span> ${detail}`;
+        log.appendChild(entry);
+        log.scrollTop = log.scrollHeight;
+      });
+    }
+
+    document.getElementById('clear-log').addEventListener('click', () => {
+      log.innerHTML = '<div class="entry"><span class="timestamp">[cleared]</span> Listening...</div>';
+    });
+
+    document.getElementById('theme-light').addEventListener('click', () => {
+      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
+    });
+    document.getElementById('theme-dark').addEventListener('click', () => {
+      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('dark') });
+    });
+  </script>
+</body>
+</html>

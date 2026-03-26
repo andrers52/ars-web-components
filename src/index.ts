@@ -1,6 +1,8 @@
 export { ArsButton } from "./components/ars-button/ars-button.js";
 export type { ArsButtonVariant, ArsButtonSize, ArsButtonType } from "./components/ars-button/ars-button.js";
 export { ArsCalendar } from "./components/ars-calendar/ars-calendar.js";
+export { ArsInput } from "./components/ars-input/ars-input.js";
+export type { ArsInputType } from "./components/ars-input/ars-input.js";
 export { ArsColorSelect } from "./components/ars-color-select/ars-color-select.js";
 export { ArsDataRoller } from "./components/ars-data-roller/ars-data-roller.js";
 export { ArsDialog } from "./components/ars-dialog/ars-dialog.js";
