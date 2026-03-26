@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Tabs - Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+
+  <style>
+    .demo-section {
+      background: var(--arswc-color-surface, #f6f8fb);
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: var(--arswc-radius-md, 10px);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-section h3 { margin: 0 0 12px; font-size: 1rem; }
+    .demo-row {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      align-items: center; margin: 8px 0;
+    }
+    .event-log {
+      background: #0d1117; color: #c9d1d9;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      max-height: 200px; overflow-y: auto; margin-top: 12px;
+    }
+    .event-log .entry { margin-bottom: 4px; }
+    .event-log .timestamp { color: #8b949e; }
+    .event-log .event-name { color: #79c0ff; }
+    .code-block {
+      background: #161b22; color: #e6edf3;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      overflow-x: auto; margin-top: 8px;
+    }
+    ars-tabs {
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: var(--arswc-radius-md, 10px);
+      overflow: hidden;
+      margin: 8px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+  <h1>ars-tabs</h1>
+  <p>Tabbed navigation container with keyboard support and placement options.</p>
+
+  <div class="info-box">
+    <h3>About</h3>
+    <p>Accepts <code>&lt;ars-tab-panel&gt;</code> children. Provides ARIA <code>tablist</code>/<code>tab</code>/<code>tabpanel</code>
+       roles, keyboard navigation (Arrow keys, Home, End), and 4 placement directions.</p>
+  </div>
+
+  <!-- Basic horizontal tabs -->
+  <div class="demo-section">
+    <h3>Basic Horizontal Tabs</h3>
+    <ars-tabs>
+      <ars-tab-panel tab-id="overview" label="Overview">
+        <h4>Overview</h4>
+        <p>This is the overview panel content. Tabs preserve DOM state when switching.</p>
+      </ars-tab-panel>
+      <ars-tab-panel tab-id="details" label="Details">
+        <h4>Details</h4>
+        <p>Detailed information goes here. Content is hidden via <code>display: none</code>, not removed.</p>
+      </ars-tab-panel>
+      <ars-tab-panel tab-id="settings" label="Settings">
+        <h4>Settings</h4>
+        <p>Configuration options panel.</p>
+      </ars-tab-panel>
+    </ars-tabs>
+    <div class="code-block">&lt;ars-tabs&gt;
+  &lt;ars-tab-panel tab-id="overview" label="Overview"&gt;...&lt;/ars-tab-panel&gt;
+  &lt;ars-tab-panel tab-id="details" label="Details"&gt;...&lt;/ars-tab-panel&gt;
+&lt;/ars-tabs&gt;</div>
+  </div>
+
+  <!-- Placement options -->
+  <div class="demo-section">
+    <h3>Placement: Bottom</h3>
+    <ars-tabs placement="bottom">
+      <ars-tab-panel tab-id="b1" label="First">Bottom-aligned tab 1</ars-tab-panel>
+      <ars-tab-panel tab-id="b2" label="Second">Bottom-aligned tab 2</ars-tab-panel>
+    </ars-tabs>
+  </div>
+
+  <div class="demo-section">
+    <h3>Placement: Start (Vertical)</h3>
+    <ars-tabs placement="start">
+      <ars-tab-panel tab-id="v1" label="Dashboard">Dashboard content</ars-tab-panel>
+      <ars-tab-panel tab-id="v2" label="Analytics">Analytics content</ars-tab-panel>
+      <ars-tab-panel tab-id="v3" label="Reports">Reports content</ars-tab-panel>
+    </ars-tabs>
+  </div>
+
+  <div class="demo-section">
+    <h3>Placement: End (Vertical, reversed)</h3>
+    <ars-tabs placement="end">
+      <ars-tab-panel tab-id="e1" label="Tab A">End-placed tab A</ars-tab-panel>
+      <ars-tab-panel tab-id="e2" label="Tab B">End-placed tab B</ars-tab-panel>
+    </ars-tabs>
+  </div>
+
+  <!-- Disabled tab -->
+  <div class="demo-section">
+    <h3>Disabled Tab</h3>
+    <ars-tabs>
+      <ars-tab-panel tab-id="active" label="Active">This tab works.</ars-tab-panel>
+      <ars-tab-panel tab-id="disabled" label="Disabled" disabled>Cannot access this.</ars-tab-panel>
+      <ars-tab-panel tab-id="also-active" label="Also Active">This tab also works.</ars-tab-panel>
+    </ars-tabs>
+  </div>
+
+  <!-- Keyboard instructions -->
+  <div class="demo-section">
+    <h3>Keyboard Navigation</h3>
+    <p>Focus a tab, then use:</p>
+    <ul>
+      <li><strong>Arrow Right/Down</strong> — next tab</li>
+      <li><strong>Arrow Left/Up</strong> — previous tab</li>
+      <li><strong>Home</strong> — first tab</li>
+      <li><strong>End</strong> — last tab</li>
+    </ul>
+    <ars-tabs id="keyboard-tabs">
+      <ars-tab-panel tab-id="k1" label="First">Use arrow keys to navigate.</ars-tab-panel>
+      <ars-tab-panel tab-id="k2" label="Second">Second panel.</ars-tab-panel>
+      <ars-tab-panel tab-id="k3" label="Third">Third panel.</ars-tab-panel>
+    </ars-tabs>
+  </div>
+
+  <!-- Dynamic tabs -->
+  <div class="demo-section">
+    <h3>Dynamic Tabs</h3>
+    <div class="demo-row">
+      <button class="btn" id="add-tab">Add Tab</button>
+      <button class="btn" id="remove-tab">Remove Last Tab</button>
+    </div>
+    <ars-tabs id="dynamic-tabs">
+      <ars-tab-panel tab-id="dyn-1" label="Tab 1">Dynamic content 1</ars-tab-panel>
+    </ars-tabs>
+  </div>
+
+  <!-- Event monitor -->
+  <div class="demo-section">
+    <h3>Event Monitor</h3>
+    <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px;">Clear</button>
+    <div class="event-log" id="event-log">
+      <div class="entry"><span class="timestamp">[ready]</span> Listening for ars-tabs:change events...</div>
+    </div>
+  </div>
+
+  <!-- Theme toggle -->
+  <div class="demo-section">
+    <h3>Theme Toggle</h3>
+    <div style="display:flex;gap:8px;">
+      <button class="btn" id="theme-light">Light</button>
+      <button class="btn" id="theme-dark">Dark</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsTabs, ArsTabPanel } from '/src/components/ars-tabs/ars-tabs.ts';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/src/design-system.ts';
+
+    initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
+
+    // Dynamic tabs
+    let dynCount = 1;
+    const dynTabs = document.getElementById('dynamic-tabs');
+    document.getElementById('add-tab').addEventListener('click', () => {
+      dynCount++;
+      const panel = document.createElement('ars-tab-panel');
+      panel.setAttribute('tab-id', `dyn-${dynCount}`);
+      panel.setAttribute('label', `Tab ${dynCount}`);
+      panel.textContent = `Dynamic content ${dynCount}`;
+      dynTabs.appendChild(panel);
+    });
+    document.getElementById('remove-tab').addEventListener('click', () => {
+      const panels = dynTabs.querySelectorAll('ars-tab-panel');
+      if (panels.length > 1) panels[panels.length - 1].remove();
+    });
+
+    // Event log
+    const log = document.getElementById('event-log');
+    document.addEventListener('ars-tabs:change', (e) => {
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+      entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">ars-tabs:change</span> active=${e.detail.activeTab} prev=${e.detail.previousTab}`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    });
+    document.getElementById('clear-log').onclick = () => {
+      log.innerHTML = '<div class="entry"><span class="timestamp">[cleared]</span> Listening...</div>';
+    };
+
+    // Theme
+    document.getElementById('theme-light').onclick = () => initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
+    document.getElementById('theme-dark').onclick = () => initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('dark') });
+  </script>
+</body>
+</html>
