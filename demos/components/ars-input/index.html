@@ -68,12 +68,15 @@
 </head>
 
 <body>
-  <a href="/" class="back-link">&larr; Back to Demo Page</a>
+  <div class="container">
+    <div class="header">
+      <h1>ars-input</h1>
+      <p>Text input with label, validation feedback, and clearable state.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
 
-  <h1>ars-input</h1>
-  <p>Text input with label, validation feedback, and clearable state.</p>
-
-  <div class="info-box">
+      <div class="info-box">
     <h3>About</h3>
     <p>Uses a native &lt;input&gt; inside Shadow DOM for full keyboard, IME, autocomplete, and accessibility support.
        Error messages render below the input with <code>aria-invalid</code> and <code>aria-describedby</code>.</p>
@@ -171,9 +174,12 @@
 &lt;/script&gt;</div>
   </div>
 
+    </div>
+  </div>
+
   <script type="module">
-    import { ArsInput } from '/src/components/ars-input/ars-input.ts';
-    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/src/design-system.ts';
+    import { ArsInput } from '/dist/components/ars-input/ars-input.js';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
 
     initializeArsWebComponents({
       designAdapter: getArsWebComponentsDefaultAdapter('light')

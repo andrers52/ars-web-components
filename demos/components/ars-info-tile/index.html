@@ -52,12 +52,15 @@
 </head>
 
 <body>
-  <a href="/" class="back-link">&larr; Back to Demo Page</a>
+  <div class="container">
+    <div class="header">
+      <h1>ars-info-tile</h1>
+      <p>Structured information display tile for dashboards and graph visualizations.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
 
-  <h1>ars-info-tile</h1>
-  <p>Structured information display tile for dashboards and graph visualizations.</p>
-
-  <div class="info-box">
+      <div class="info-box">
     <h3>About</h3>
     <p>Renders a card with title, subtitle, accent color header, and key-value property list.
        Supports selection and dragging states for graph visualization integration.</p>
@@ -151,9 +154,12 @@ tile.data = {
     </div>
   </div>
 
+    </div>
+  </div>
+
   <script type="module">
-    import { ArsInfoTile } from '/src/components/ars-info-tile/ars-info-tile.ts';
-    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/src/design-system.ts';
+    import { ArsInfoTile } from '/dist/components/ars-info-tile/ars-info-tile.js';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
 
     initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
 

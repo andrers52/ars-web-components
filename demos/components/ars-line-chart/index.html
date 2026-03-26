@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ARS Line Chart - Test Page</title>
+  <title>ARS Line Chart - Demo</title>
 
   <!-- Import Map for module resolution -->
   <script type="importmap">
@@ -21,99 +21,178 @@
   <link rel="stylesheet" href="/demos/css/buttons.css">
 
   <style>
-    .chart-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 24px;
-      justify-content: center;
-    }
     .chart-card {
       background: #1a1a2e;
       border-radius: 8px;
       padding: 16px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      display: inline-block;
     }
-    .chart-card h3 {
+    .chart-card h4 {
       color: #e8eef9;
       margin: 0 0 12px 0;
       font-size: 14px;
     }
-    .controls {
+    .chart-row {
       display: flex;
-      gap: 12px;
-      margin: 24px 0;
       flex-wrap: wrap;
+      gap: 20px;
       justify-content: center;
-    }
-    .controls button {
-      padding: 8px 16px;
-      border: 1px solid #3aa8ff;
-      background: #162238;
-      color: #dbeafe;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .controls button:hover {
-      background: #1d2d47;
-    }
-    body {
-      background: #0b1220;
-      color: #e8eef9;
+      margin: 12px 0;
     }
   </style>
 </head>
 
 <body>
-  <div class="page-content">
-    <h1>ARS Line Chart</h1>
-    <p>A canvas-rendered line chart web component with grid, axis labels, and data-point dots.</p>
-
-    <div class="controls">
-      <button id="btn-random">Randomize Data</button>
-      <button id="btn-grow">Add Point</button>
-      <button id="btn-shrink">Remove Point</button>
-      <button id="btn-toggle-dots">Toggle Dots</button>
-      <button id="btn-color">Cycle Color</button>
+  <div class="container">
+    <div class="header">
+      <h1>ARS Line Chart</h1>
+      <p>Canvas-rendered line chart web component</p>
     </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
 
-    <div class="chart-container">
-      <div class="chart-card">
-        <h3>Default (320x180)</h3>
-        <ars-line-chart id="chart-default"
-          data="[18, 22, 19, 26, 24, 30, 27, 33, 31, 36, 34, 40, 37, 42, 45, 41, 48, 46]">
-        </ars-line-chart>
+      <div class="info-box">
+        <h4>About ARS Line Chart</h4>
+        <p>A canvas-rendered line chart with configurable grid, axis labels, and data-point dots.
+          Supports dynamic data updates, color theming, and responsive sizing via <code>width</code>/<code>height</code> attributes.
+          Extends <code>ChartBase</code> for shared canvas/repaint infrastructure.</p>
       </div>
 
-      <div class="chart-card">
-        <h3>Wide (500x200)</h3>
-        <ars-line-chart id="chart-wide" width="500" height="200"
-          line-color="#3aa8ff"
-          data="[5, 12, 8, 15, 22, 18, 25, 20, 28, 35, 30, 38, 42, 36, 45]">
-        </ars-line-chart>
+      <!-- Basic Usage -->
+      <div class="demo-section">
+        <h3>Basic Line Chart</h3>
+        <p style="color: #666; margin-bottom: 12px;">Default chart with 18 data points. All styling uses built-in defaults.</p>
+        <div class="chart-row">
+          <div class="chart-card">
+            <h4>Default (320&times;180)</h4>
+            <ars-line-chart id="chart-default"
+              data="[18, 22, 19, 26, 24, 30, 27, 33, 31, 36, 34, 40, 37, 42, 45, 41, 48, 46]">
+            </ars-line-chart>
+          </div>
+        </div>
       </div>
 
-      <div class="chart-card">
-        <h3>Custom Colors (400x160)</h3>
-        <ars-line-chart id="chart-custom" width="400" height="160"
-          line-color="#5ad68a"
-          grid-color="rgba(90, 214, 138, 0.12)"
-          axis-color="rgba(90, 214, 138, 0.4)"
-          data="[100, 95, 102, 98, 105, 110, 107, 112, 108, 115]">
-        </ars-line-chart>
+      <!-- Sizing -->
+      <div class="demo-section">
+        <h3>Custom Sizing</h3>
+        <p style="color: #666; margin-bottom: 12px;">Charts can be sized with the <code>width</code> and <code>height</code> attributes.</p>
+        <div class="chart-row">
+          <div class="chart-card">
+            <h4>Wide (500&times;200)</h4>
+            <ars-line-chart id="chart-wide" width="500" height="200"
+              line-color="#3aa8ff"
+              data="[5, 12, 8, 15, 22, 18, 25, 20, 28, 35, 30, 38, 42, 36, 45]">
+            </ars-line-chart>
+          </div>
+          <div class="chart-card">
+            <h4>Compact (400&times;160)</h4>
+            <ars-line-chart width="400" height="160"
+              line-color="#c084fc"
+              data="[60, 55, 62, 58, 65, 70, 67, 72, 68, 75]">
+            </ars-line-chart>
+          </div>
+        </div>
       </div>
 
-      <div class="chart-card">
-        <h3>No Dots</h3>
-        <ars-line-chart id="chart-no-dots" show-dots="false"
-          line-color="#f06b63"
-          data="[50, 45, 55, 42, 60, 48, 65, 52, 70, 55, 75, 60]">
-        </ars-line-chart>
+      <!-- Color Customization -->
+      <div class="demo-section">
+        <h3>Color Customization</h3>
+        <p style="color: #666; margin-bottom: 12px;">Use <code>line-color</code>, <code>grid-color</code>, and <code>axis-color</code> to theme the chart.</p>
+        <div class="chart-row">
+          <div class="chart-card">
+            <h4>Green Theme</h4>
+            <ars-line-chart id="chart-custom" width="400" height="160"
+              line-color="#5ad68a"
+              grid-color="rgba(90, 214, 138, 0.12)"
+              axis-color="rgba(90, 214, 138, 0.4)"
+              data="[100, 95, 102, 98, 105, 110, 107, 112, 108, 115]">
+            </ars-line-chart>
+          </div>
+          <div class="chart-card">
+            <h4>Red Theme</h4>
+            <ars-line-chart width="400" height="160"
+              line-color="#f06b63"
+              grid-color="rgba(240, 107, 99, 0.12)"
+              axis-color="rgba(240, 107, 99, 0.4)"
+              data="[50, 45, 55, 42, 60, 48, 65, 52, 70, 55, 75, 60]">
+            </ars-line-chart>
+          </div>
+        </div>
       </div>
+
+      <!-- Dot Visibility -->
+      <div class="demo-section">
+        <h3>Dot Visibility</h3>
+        <p style="color: #666; margin-bottom: 12px;">Data-point dots can be hidden with <code>show-dots="false"</code>.</p>
+        <div class="chart-row">
+          <div class="chart-card">
+            <h4>With Dots (default)</h4>
+            <ars-line-chart width="300" height="140"
+              line-color="#3aa8ff"
+              data="[10, 18, 14, 22, 20, 28, 25, 32]">
+            </ars-line-chart>
+          </div>
+          <div class="chart-card">
+            <h4>Without Dots</h4>
+            <ars-line-chart id="chart-no-dots" width="300" height="140"
+              show-dots="false"
+              line-color="#f06b63"
+              data="[10, 18, 14, 22, 20, 28, 25, 32]">
+            </ars-line-chart>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Controls -->
+      <div class="demo-section">
+        <h3>Interactive Controls</h3>
+        <p style="color: #666; margin-bottom: 12px;">Programmatic data and attribute changes on the default chart above.</p>
+        <div class="controls">
+          <button class="btn" id="btn-random">Randomize Data</button>
+          <button class="btn" id="btn-grow">Add Point</button>
+          <button class="btn" id="btn-shrink">Remove Point</button>
+          <button class="btn" id="btn-toggle-dots">Toggle Dots</button>
+          <button class="btn" id="btn-color">Cycle Color</button>
+        </div>
+      </div>
+
+      <!-- Usage Instructions -->
+      <div class="demo-section">
+        <h3>Usage Instructions</h3>
+        <div class="info-box">
+          <h4>HTML Usage:</h4>
+          <p><strong>&lt;ars-line-chart data="[10, 20, 30, 25, 35]"&gt;&lt;/ars-line-chart&gt;</strong></p>
+        </div>
+
+        <div class="info-box">
+          <h4>Attributes:</h4>
+          <p>
+            <strong>data:</strong> JSON array of numbers<br>
+            <strong>width / height:</strong> Canvas dimensions (default 320&times;180)<br>
+            <strong>line-color:</strong> Line stroke color (default #f6c453)<br>
+            <strong>grid-color:</strong> Grid line color<br>
+            <strong>axis-color:</strong> Axis label color<br>
+            <strong>background-color:</strong> Canvas background<br>
+            <strong>grid-lines:</strong> Number of grid lines<br>
+            <strong>show-dots:</strong> Show data-point dots (default true)
+          </p>
+        </div>
+
+        <div class="info-box">
+          <h4>Programmatic API:</h4>
+          <p>
+            <strong>chart.data = [10, 20, 30];</strong> &mdash; set data via property<br>
+            <strong>chart.setAttribute('line-color', '#ff0');</strong> &mdash; change colors at runtime
+          </p>
+        </div>
+      </div>
+
     </div>
   </div>
 
   <script type="module">
-    import '/src/components/ars-line-chart/ars-line-chart.js';
+    import '/dist/components/ars-line-chart/ars-line-chart.js';
 
     const chartDefault = document.getElementById('chart-default');
 

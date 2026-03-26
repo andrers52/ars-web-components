@@ -193,6 +193,30 @@ class ArsColorSelect extends HTMLElement {
     }
   }
 
+  // Updates only scroll-related styles on existing DOM so the CSS
+  // transition on .strip animates the movement instead of snapping.
+  #updateScroll() {
+    if (!this.shadowRoot) return;
+    const swatchPx = this.#getSwatchPx();
+    const gap = 8;
+    const visCount = this.visibleCount;
+    const translateX = -(this._scrollOffset * (swatchPx + gap));
+    const trackProgress = this._palette.length > visCount
+      ? this._scrollOffset / (this._palette.length - visCount)
+      : 0;
+
+    const strip = this.shadowRoot.querySelector(".strip") as HTMLElement | null;
+    if (strip) strip.style.transform = `translateX(${translateX}px)`;
+
+    const marker = this.shadowRoot.querySelector(".track-marker") as HTMLElement | null;
+    if (marker) marker.style.left = `${trackProgress * 100}%`;
+
+    const prevBtn = this.shadowRoot.querySelector(".nav-btn--prev") as HTMLButtonElement | null;
+    const nextBtn = this.shadowRoot.querySelector(".nav-btn--next") as HTMLButtonElement | null;
+    if (prevBtn) prevBtn.disabled = this._scrollOffset <= 0;
+    if (nextBtn) nextBtn.disabled = this._scrollOffset >= this._palette.length - visCount;
+  }
+
   // --- Rendering ---
 
   #getSwatchPx(): number {
@@ -209,6 +233,8 @@ class ArsColorSelect extends HTMLElement {
     const gap = 8;
     const visCount = this.visibleCount;
     const totalWidth = visCount * (swatchPx + gap) - gap;
+    // Horizontal padding for scale overflow, capped so next off-screen swatch stays hidden
+    const hPad = Math.min(Math.ceil(swatchPx * 0.15 + 1), gap - 1);
     const trackProgress = this._palette.length > visCount
       ? this._scrollOffset / (this._palette.length - visCount)
       : 0;
@@ -231,7 +257,7 @@ class ArsColorSelect extends HTMLElement {
     const translateX = -(this._scrollOffset * (swatchPx + gap));
 
     this.shadowRoot.innerHTML = `
-      <style>${ArsColorSelect.#styles(swatchPx, gap, totalWidth)}</style>
+      <style>${ArsColorSelect.#styles(swatchPx, gap, totalWidth, hPad)}</style>
       <div class="carousel" role="listbox" aria-orientation="horizontal" aria-label="Color palette">
         <button class="nav-btn nav-btn--prev" aria-label="Previous colors"
                 ${this._scrollOffset <= 0 ? "disabled" : ""}>&lsaquo;</button>
@@ -253,7 +279,7 @@ class ArsColorSelect extends HTMLElement {
     if (!this.shadowRoot || this._eventsBound) return;
     this._eventsBound = true;
 
-    // Swatch click
+    // Swatch click/tap
     this.shadowRoot.addEventListener("click", (e) => {
       const target = e.target as HTMLElement;
       if (target.classList.contains("swatch")) {
@@ -262,14 +288,14 @@ class ArsColorSelect extends HTMLElement {
       }
       if (target.classList.contains("nav-btn--prev")) {
         this._scrollOffset = Math.max(0, this._scrollOffset - this.visibleCount);
-        this.#render();
+        this.#updateScroll();
       }
       if (target.classList.contains("nav-btn--next")) {
         this._scrollOffset = Math.min(
           this._palette.length - this.visibleCount,
           this._scrollOffset + this.visibleCount,
         );
-        this.#render();
+        this.#updateScroll();
       }
     });
 
@@ -283,26 +309,26 @@ class ArsColorSelect extends HTMLElement {
           e.preventDefault();
           this.#selectIndex(Math.min(this._selectedIdx + 1, this._palette.length - 1));
           this.#scrollToSelected();
-          this.#render();
+          this.#updateScroll();
           break;
         case "ArrowLeft":
         case "ArrowUp":
           e.preventDefault();
           this.#selectIndex(Math.max(this._selectedIdx - 1, 0));
           this.#scrollToSelected();
-          this.#render();
+          this.#updateScroll();
           break;
         case "Home":
           e.preventDefault();
           this.#selectIndex(0);
           this._scrollOffset = 0;
-          this.#render();
+          this.#updateScroll();
           break;
         case "End":
           e.preventDefault();
           this.#selectIndex(this._palette.length - 1);
           this.#scrollToSelected();
-          this.#render();
+          this.#updateScroll();
           break;
       }
     });
@@ -312,7 +338,7 @@ class ArsColorSelect extends HTMLElement {
     return value.replaceAll('"', "&quot;").replaceAll("'", "&#39;");
   }
 
-  static #styles(swatchPx: number, gap: number, totalWidth: number): string {
+  static #styles(swatchPx: number, gap: number, totalWidth: number, hPad: number): string {
     return `
       :host {
         display: inline-block;
@@ -334,12 +360,15 @@ class ArsColorSelect extends HTMLElement {
         width: ${totalWidth}px;
         overflow: hidden;
         flex-shrink: 0;
+        /* Padding prevents clipping of the scaled/lifted selected swatch.
+           Horizontal pad is capped to gap-1 so the next off-screen swatch stays hidden. */
+        padding: ${Math.ceil(swatchPx * 0.2 + 4)}px ${hPad}px ${Math.ceil(swatchPx * 0.1)}px ${hPad}px;
       }
 
       .strip {
         display: flex;
         gap: ${gap}px;
-        transition: transform var(--ars-color-select-transition-duration, var(--arswc-transition-duration, 200ms)) ease;
+        transition: transform var(--ars-color-select-transition-duration, var(--arswc-transition-duration, 200ms)) ease-in-out;
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -347,6 +376,7 @@ class ArsColorSelect extends HTMLElement {
       }
 
       .swatch {
+        box-sizing: border-box;
         width: ${swatchPx}px;
         height: ${swatchPx}px;
         border-radius: var(--ars-color-select-swatch-radius, 50%);
@@ -360,17 +390,17 @@ class ArsColorSelect extends HTMLElement {
       }
 
       .swatch:hover {
-        transform: scale(1.1);
+        transform: scale(1.1) translateY(-2px);
       }
 
       .swatch--selected {
-        transform: scale(var(--ars-color-select-selected-scale, 1.2));
-        border-color: var(--arswc-color-text, #1b2430);
-        box-shadow: var(--ars-color-select-selected-shadow, 0 2px 8px rgba(0,0,0,0.25));
+        transform: scale(var(--ars-color-select-selected-scale, 1.3)) translateY(-3px);
+        border-color: #fff;
+        box-shadow: var(--ars-color-select-selected-shadow, 0 4px 12px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.06));
       }
 
       .swatch--selected:hover {
-        transform: scale(var(--ars-color-select-selected-scale, 1.2));
+        transform: scale(var(--ars-color-select-selected-scale, 1.3)) translateY(-3px);
       }
 
       .swatch:focus-visible {

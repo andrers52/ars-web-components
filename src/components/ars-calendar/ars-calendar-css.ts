@@ -67,7 +67,10 @@ export const DEFAULT_CSS = `
     background: var(--ars-calendar-body-bg, var(--arswc-color-border, #e9ecef));
   }
   .calendar-day {
-    background: var(--ars-calendar-cell-bg, var(--arswc-color-bg, white));
+    background-color: var(--ars-calendar-cell-bg, var(--arswc-color-bg, white));
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
     color: var(--ars-calendar-cell-color, var(--arswc-color-text, inherit));
     padding: 10px;
     text-align: center;
@@ -81,12 +84,12 @@ export const DEFAULT_CSS = `
     border: var(--ars-calendar-cell-border, none);
   }
   .calendar-day:hover {
-    background: var(--ars-calendar-cell-hover-bg, var(--arswc-color-surface, #f8f9fa));
+    background-color: var(--ars-calendar-cell-hover-bg, var(--arswc-color-surface, #f8f9fa));
     transform: scale(1.05);
     box-shadow: var(--ars-calendar-cell-hover-shadow, none);
   }
   .calendar-day.selected {
-    background: var(--ars-calendar-selected-bg, var(--arswc-color-accent, #667eea));
+    background-color: var(--ars-calendar-selected-bg, var(--arswc-color-accent, #667eea));
     color: var(--ars-calendar-selected-color, var(--arswc-color-accent-contrast, white));
     font-weight: bold;
     box-shadow: var(--ars-calendar-selected-shadow, none);
@@ -94,18 +97,5 @@ export const DEFAULT_CSS = `
   .calendar-day.other-month {
     color: var(--ars-calendar-other-month-color, var(--arswc-color-muted, #adb5bd));
   }
-  .calendar-day.has-events::after {
-    content: '';
-    position: absolute;
-    bottom: 2px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    background: var(--ars-calendar-event-indicator-color, var(--arswc-color-accent, #28a745));
-    border-radius: 50%;
-  }
-  .calendar-day.selected.has-events::after {
-    background: var(--ars-calendar-selected-event-indicator-color, white);
-  }
+  /* Event indicator dot removed — events now use the full cell background image */
 `;

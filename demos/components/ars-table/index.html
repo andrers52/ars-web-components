@@ -47,12 +47,15 @@
 </head>
 
 <body>
-  <a href="/" class="back-link">&larr; Back to Demo Page</a>
+  <div class="container">
+    <div class="header">
+      <h1>ars-table</h1>
+      <p>Data table with sorting, selection, and virtual scrolling.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
 
-  <h1>ars-table</h1>
-  <p>Data table with sorting, selection, and virtual scrolling.</p>
-
-  <div class="info-box">
+      <div class="info-box">
     <h3>About</h3>
     <p>Renders tabular data with sortable columns, single/multiple row selection,
        striped/compact variants, virtual scrolling for large datasets, and custom
@@ -127,9 +130,12 @@
     </div>
   </div>
 
+    </div>
+  </div>
+
   <script type="module">
-    import { ArsTable } from '/src/components/ars-table/ars-table.ts';
-    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/src/design-system.ts';
+    import { ArsTable } from '/dist/components/ars-table/ars-table.js';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
 
     initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
 

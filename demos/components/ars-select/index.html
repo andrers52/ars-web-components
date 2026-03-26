@@ -52,12 +52,15 @@
 </head>
 
 <body>
-  <a href="/" class="back-link">&larr; Back to Demo Page</a>
+  <div class="container">
+    <div class="header">
+      <h1>ars-select</h1>
+      <p>Dropdown select with search, groups, and multi-select.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
 
-  <h1>ars-select</h1>
-  <p>Dropdown select with search, groups, and multi-select.</p>
-
-  <div class="info-box">
+      <div class="info-box">
     <h3>About</h3>
     <p>Dropdown select with keyboard navigation (Arrow/Enter/Escape),
        searchable filtering, multiple selection, option groups, and ARIA combobox semantics.</p>
@@ -137,9 +140,12 @@ select.value = 'opt1';</div>
     </div>
   </div>
 
+    </div>
+  </div>
+
   <script type="module">
-    import { ArsSelect } from '/src/components/ars-select/ars-select.ts';
-    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/src/design-system.ts';
+    import { ArsSelect } from '/dist/components/ars-select/ars-select.js';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
 
     initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
 

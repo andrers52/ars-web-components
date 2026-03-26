@@ -56,12 +56,15 @@
 </head>
 
 <body>
-  <a href="/" class="back-link">&larr; Back to Demo Page</a>
+  <div class="container">
+    <div class="header">
+      <h1>ars-tabs</h1>
+      <p>Tabbed navigation container with keyboard support and placement options.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
 
-  <h1>ars-tabs</h1>
-  <p>Tabbed navigation container with keyboard support and placement options.</p>
-
-  <div class="info-box">
+      <div class="info-box">
     <h3>About</h3>
     <p>Accepts <code>&lt;ars-tab-panel&gt;</code> children. Provides ARIA <code>tablist</code>/<code>tab</code>/<code>tabpanel</code>
        roles, keyboard navigation (Arrow keys, Home, End), and 4 placement directions.</p>
@@ -173,9 +176,12 @@
     </div>
   </div>
 
+    </div>
+  </div>
+
   <script type="module">
-    import { ArsTabs, ArsTabPanel } from '/src/components/ars-tabs/ars-tabs.ts';
-    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/src/design-system.ts';
+    import { ArsTabs, ArsTabPanel } from '/dist/components/ars-tabs/ars-tabs.js';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
 
     initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
 

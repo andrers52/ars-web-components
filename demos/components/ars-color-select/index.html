@@ -73,12 +73,16 @@
 </head>
 
 <body>
-  <a href="/" class="back-link">&larr; Back to Demo Page</a>
+  <div class="container">
+    <div class="header">
+      <h1>ars-color-select</h1>
+      <p>Carousel-based color picker with swatchable palette navigation.</p>
+    </div>
 
-  <h1>ars-color-select</h1>
-  <p>Carousel-based color picker with swatchable palette navigation.</p>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
 
-  <div class="info-box">
+      <div class="info-box">
     <h3>About</h3>
     <p>Redesigned as a horizontal carousel strip of circular color swatches.
        Navigate with arrow buttons, keyboard arrows, Home/End keys.
@@ -181,18 +185,20 @@
     </div>
   </div>
 
-  <!-- Theme toggle -->
-  <div class="demo-section">
-    <h3>Theme Toggle</h3>
-    <div style="display:flex;gap:8px;">
-      <button class="btn" id="theme-light">Light</button>
-      <button class="btn" id="theme-dark">Dark</button>
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
     </div>
   </div>
 
   <script type="module">
-    import { ArsColorSelect } from '/src/components/ars-color-select/ars-color-select.ts';
-    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/src/design-system.ts';
+    import { ArsColorSelect } from '/dist/components/ars-color-select/ars-color-select.js';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
 
     initializeArsWebComponents({
       designAdapter: getArsWebComponentsDefaultAdapter('light')

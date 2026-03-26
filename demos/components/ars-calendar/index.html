@@ -31,11 +31,36 @@
 
     .event-form {
       display: flex;
-      gap: 10px;
+      gap: 16px;
       flex-wrap: wrap;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .form-input {
+      padding: 8px 12px;
+      border: 1px solid #d5dde8;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      color: #333;
+      background: #fff;
+    }
+
+    .form-input::placeholder {
+      color: #999;
     }
 
     .event-preview {

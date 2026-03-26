@@ -62,12 +62,15 @@
 </head>
 
 <body>
-  <a href="/" class="back-link">&larr; Back to Demo Page</a>
+  <div class="container">
+    <div class="header">
+      <h1>ars-toast</h1>
+      <p>Notification toast with severity levels, auto-dismiss, and stacking.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
 
-  <h1>ars-toast</h1>
-  <p>Notification toast with severity levels, auto-dismiss, and stacking.</p>
-
-  <div class="info-box">
+      <div class="info-box">
     <h3>About</h3>
     <p>Provides both a <strong>static API</strong> (<code>ArsToast.show(message, options)</code>)
        and a <strong>declarative API</strong> (<code>&lt;ars-toast&gt;</code>).
@@ -160,9 +163,12 @@ ArsToast.show('Operation complete!', {
     </div>
   </div>
 
+    </div>
+  </div>
+
   <script type="module">
-    import { ArsToast } from '/src/components/ars-toast/ars-toast.ts';
-    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/src/design-system.ts';
+    import { ArsToast } from '/dist/components/ars-toast/ars-toast.js';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
 
     initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
 

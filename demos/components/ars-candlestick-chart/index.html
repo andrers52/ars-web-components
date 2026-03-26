@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ARS Candlestick Chart - Test Page</title>
+  <title>ARS Candlestick Chart - Demo</title>
 
   <!-- Import Map for module resolution -->
   <script type="importmap">
@@ -21,44 +21,24 @@
   <link rel="stylesheet" href="/demos/css/buttons.css">
 
   <style>
-    .chart-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 24px;
-      justify-content: center;
-    }
     .chart-card {
       background: #1a1a2e;
       border-radius: 8px;
       padding: 16px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      display: inline-block;
     }
-    .chart-card h3 {
+    .chart-card h4 {
       color: #e8eef9;
       margin: 0 0 12px 0;
       font-size: 14px;
     }
-    .controls {
+    .chart-row {
       display: flex;
-      gap: 12px;
-      margin: 24px 0;
       flex-wrap: wrap;
+      gap: 20px;
       justify-content: center;
-    }
-    .controls button {
-      padding: 8px 16px;
-      border: 1px solid #3aa8ff;
-      background: #162238;
-      color: #dbeafe;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .controls button:hover {
-      background: #1d2d47;
-    }
-    body {
-      background: #0b1220;
-      color: #e8eef9;
+      margin: 12px 0;
     }
     .info {
       font-size: 13px;
@@ -66,56 +46,165 @@
       text-align: center;
       margin-top: 8px;
     }
+    .event-log {
+      background: #0d1117;
+      color: #c9d1d9;
+      font-family: monospace;
+      font-size: 0.8rem;
+      padding: 12px;
+      border-radius: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 12px;
+    }
   </style>
 </head>
 
 <body>
-  <div class="page-content">
-    <h1>ARS Candlestick Chart</h1>
-    <p>OHLCV candlestick chart with volume bars, grid, axis labels, and optional order overlays.</p>
-
-    <div class="controls">
-      <button id="btn-random">Randomize Data</button>
-      <button id="btn-toggle-orders">Toggle Orders</button>
-      <button id="btn-label-pos">Toggle Label Position</button>
-      <button id="btn-vol-ratio">Cycle Volume Ratio</button>
+  <div class="container">
+    <div class="header">
+      <h1>ARS Candlestick Chart</h1>
+      <p>OHLCV Candlestick Chart Component</p>
     </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
 
-    <div class="chart-container">
-      <div class="chart-card">
-        <h3>Default (460x220) with Orders</h3>
-        <ars-candlestick-chart id="chart-main"></ars-candlestick-chart>
-        <div class="info" id="info-main"></div>
+      <div class="info-box">
+        <h4>About ARS Candlestick Chart</h4>
+        <p>Canvas-rendered OHLCV candlestick chart with volume bars, configurable grid, axis labels,
+          and optional order overlays with label positioning. Extends <code>ChartBase</code> for shared
+          canvas/repaint infrastructure. Data is provided as an array of <code>{ open, high, low, close, volume, time }</code> objects.</p>
       </div>
 
-      <div class="chart-card">
-        <h3>Wide (600x280)</h3>
-        <ars-candlestick-chart id="chart-wide" width="600" height="280"></ars-candlestick-chart>
+      <!-- Basic Candlestick -->
+      <div class="demo-section">
+        <h3>Basic Candlestick Chart</h3>
+        <p style="color: #666; margin-bottom: 12px;">Default chart with 20 synthetic OHLCV candles and volume bars.</p>
+        <div class="chart-row">
+          <div class="chart-card">
+            <h4>Default (460&times;220)</h4>
+            <ars-candlestick-chart id="chart-main"></ars-candlestick-chart>
+            <div class="info" id="info-main"></div>
+          </div>
+        </div>
       </div>
 
-      <div class="chart-card">
-        <h3>Custom Colors</h3>
-        <ars-candlestick-chart id="chart-custom"
-          up-color="#3aa8ff"
-          down-color="#c084fc"
-          grid-color="rgba(58, 168, 255, 0.08)"
-          axis-color="rgba(58, 168, 255, 0.3)">
-        </ars-candlestick-chart>
+      <!-- Sizing -->
+      <div class="demo-section">
+        <h3>Custom Sizing</h3>
+        <p style="color: #666; margin-bottom: 12px;">Charts can be sized with the <code>width</code> and <code>height</code> attributes.</p>
+        <div class="chart-row">
+          <div class="chart-card">
+            <h4>Wide (600&times;280)</h4>
+            <ars-candlestick-chart id="chart-wide" width="600" height="280"></ars-candlestick-chart>
+          </div>
+        </div>
       </div>
 
-      <div class="chart-card">
-        <h3>Right-Aligned Labels</h3>
-        <ars-candlestick-chart id="chart-right"
-          order-label-position="right">
-        </ars-candlestick-chart>
+      <!-- Color Customization -->
+      <div class="demo-section">
+        <h3>Color Customization</h3>
+        <p style="color: #666; margin-bottom: 12px;">Use <code>up-color</code>, <code>down-color</code>, <code>grid-color</code>, and <code>axis-color</code> to theme the chart.</p>
+        <div class="chart-row">
+          <div class="chart-card">
+            <h4>Blue/Purple Theme</h4>
+            <ars-candlestick-chart id="chart-custom"
+              up-color="#3aa8ff"
+              down-color="#c084fc"
+              grid-color="rgba(58, 168, 255, 0.08)"
+              axis-color="rgba(58, 168, 255, 0.3)">
+            </ars-candlestick-chart>
+          </div>
+        </div>
       </div>
+
+      <!-- Order Overlays -->
+      <div class="demo-section">
+        <h3>Order Overlays</h3>
+        <p style="color: #666; margin-bottom: 12px;">Buy/sell orders can be overlaid on the chart with configurable label position (<code>order-label-position</code>).</p>
+        <div class="chart-row">
+          <div class="chart-card">
+            <h4>Left-Aligned Labels (default)</h4>
+            <ars-candlestick-chart id="chart-orders-left"></ars-candlestick-chart>
+          </div>
+          <div class="chart-card">
+            <h4>Right-Aligned Labels</h4>
+            <ars-candlestick-chart id="chart-right" order-label-position="right"></ars-candlestick-chart>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Controls -->
+      <div class="demo-section">
+        <h3>Interactive Controls</h3>
+        <p style="color: #666; margin-bottom: 12px;">Manipulate the charts above programmatically.</p>
+        <div class="controls">
+          <button class="btn" id="btn-random">Randomize Data</button>
+          <button class="btn" id="btn-toggle-orders">Toggle Orders</button>
+          <button class="btn" id="btn-label-pos">Toggle Label Position</button>
+          <button class="btn" id="btn-vol-ratio">Cycle Volume Ratio</button>
+        </div>
+        <div class="event-log" id="event-log">Ready to capture interactions...\n</div>
+      </div>
+
+      <!-- Usage Instructions -->
+      <div class="demo-section">
+        <h3>Usage Instructions</h3>
+        <div class="info-box">
+          <h4>HTML Usage:</h4>
+          <p><strong>&lt;ars-candlestick-chart id="chart"&gt;&lt;/ars-candlestick-chart&gt;</strong></p>
+        </div>
+
+        <div class="info-box">
+          <h4>Data Format:</h4>
+          <p>
+            <strong>chart.data = [{ open, high, low, close, volume, time }, ...];</strong><br>
+            Each object represents one candle. <code>time</code> is a Unix timestamp in milliseconds.
+          </p>
+        </div>
+
+        <div class="info-box">
+          <h4>Order Overlays:</h4>
+          <p>
+            <strong>chart.orders = [{ side, amount, price }, ...];</strong><br>
+            <strong>side:</strong> "buy" or "sell"<br>
+            <strong>amount:</strong> order size<br>
+            <strong>price:</strong> price level for the dashed overlay line
+          </p>
+        </div>
+
+        <div class="info-box">
+          <h4>Attributes:</h4>
+          <p>
+            <strong>width / height:</strong> Canvas dimensions (default 460&times;220)<br>
+            <strong>up-color:</strong> Bullish candle color (default green)<br>
+            <strong>down-color:</strong> Bearish candle color (default red)<br>
+            <strong>background-color:</strong> Canvas background<br>
+            <strong>grid-color / axis-color:</strong> Grid and axis styling<br>
+            <strong>volume-opacity:</strong> Volume bar opacity<br>
+            <strong>volume-height-ratio:</strong> Fraction of chart height for volume (default 0.25)<br>
+            <strong>candle-gap:</strong> Gap between candles in pixels<br>
+            <strong>price-tick-count / date-tick-count:</strong> Number of axis ticks<br>
+            <strong>order-label-position:</strong> "left" or "right" for order labels
+          </p>
+        </div>
+      </div>
+
     </div>
   </div>
 
   <script type="module">
-    import '/src/components/ars-candlestick-chart/ars-candlestick-chart.js';
+    import '/dist/components/ars-candlestick-chart/ars-candlestick-chart.js';
 
-    // --- Synthetic data generator (mirrors brainiac-engine demo/js/demos/chart_agent/common.ts) ---
+    const eventLog = document.getElementById('event-log');
+
+    function log(msg) {
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] ${msg}\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    // --- Synthetic data generator ---
     function buildCandleData(count = 20, referenceTime = Date.now()) {
       const dayInMillis = 24 * 60 * 60 * 1000;
       const startTime = referenceTime - (count - 1) * dayInMillis;
@@ -147,6 +236,7 @@
     const chartMain = document.getElementById('chart-main');
     const chartWide = document.getElementById('chart-wide');
     const chartCustom = document.getElementById('chart-custom');
+    const chartOrdersLeft = document.getElementById('chart-orders-left');
     const chartRight = document.getElementById('chart-right');
     const infoMain = document.getElementById('info-main');
 
@@ -158,13 +248,14 @@
       chartMain.data = currentData;
       chartWide.data = currentData;
       chartCustom.data = currentData;
+      chartOrdersLeft.data = currentData;
       chartRight.data = currentData;
 
       if (ordersVisible) {
-        chartMain.orders = currentOrders;
+        chartOrdersLeft.orders = currentOrders;
         chartRight.orders = currentOrders;
       } else {
-        chartMain.orders = [];
+        chartOrdersLeft.orders = [];
         chartRight.orders = [];
       }
 
@@ -172,6 +263,7 @@
     }
 
     updateAllCharts();
+    log('Charts initialized with ' + currentData.length + ' candles');
 
     // --- Controls ---
     document.getElementById('btn-random').addEventListener('click', () => {
@@ -179,17 +271,20 @@
       currentData = buildCandleData(count);
       currentOrders = buildOrders(currentData);
       updateAllCharts();
+      log('Randomized: ' + count + ' candles');
     });
 
     document.getElementById('btn-toggle-orders').addEventListener('click', () => {
       ordersVisible = !ordersVisible;
       updateAllCharts();
+      log('Orders ' + (ordersVisible ? 'shown' : 'hidden'));
     });
 
     let labelPos = 'left';
     document.getElementById('btn-label-pos').addEventListener('click', () => {
       labelPos = labelPos === 'left' ? 'right' : 'left';
-      chartMain.setAttribute('order-label-position', labelPos);
+      chartOrdersLeft.setAttribute('order-label-position', labelPos);
+      log('Label position: ' + labelPos);
     });
 
     const volRatios = [0.25, 0.15, 0.35, 0.5];
@@ -199,6 +294,7 @@
       const ratio = volRatios[volIndex];
       chartMain.setAttribute('volume-height-ratio', String(ratio));
       chartWide.setAttribute('volume-height-ratio', String(ratio));
+      log('Volume ratio: ' + ratio);
     });
   </script>
 </body>

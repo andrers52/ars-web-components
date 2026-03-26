@@ -76,12 +76,15 @@
 </head>
 
 <body>
-  <a href="/" class="back-link">&larr; Back to Demo Page</a>
+  <div class="container">
+    <div class="header">
+      <h1>Form Primitives</h1>
+      <p>Interactive form controls: buttons and toggles.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
 
-  <h1>Form Primitives</h1>
-  <p>Interactive form controls: buttons and toggles.</p>
-
-  <div class="info-box">
+      <div class="info-box">
     <h3>About</h3>
     <p><strong>ars-button</strong> provides a styled, accessible button with variant, size, and state support.
        Uses a native &lt;button&gt; inside Shadow DOM for full keyboard/focus accessibility.</p>
@@ -272,11 +275,14 @@
 &lt;/script&gt;</div>
   </div>
 
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script type="module">
-    import { ArsButton } from '/src/components/ars-button/ars-button.ts';
-    import { ArsToggle } from '/src/components/ars-toggle/ars-toggle.ts';
-    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/src/design-system.ts';
+    import { ArsButton } from '/dist/components/ars-button/ars-button.js';
+    import { ArsToggle } from '/dist/components/ars-toggle/ars-toggle.js';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
 
     // Initialize with light theme by default
     initializeArsWebComponents({
