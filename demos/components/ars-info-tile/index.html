@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Info Tile - Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+
+  <style>
+    .demo-section {
+      background: var(--arswc-color-surface, #f6f8fb);
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: var(--arswc-radius-md, 10px);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-section h3 { margin: 0 0 12px; font-size: 1rem; }
+    .tile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin: 12px 0;
+    }
+    .event-log {
+      background: #0d1117; color: #c9d1d9;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      max-height: 200px; overflow-y: auto; margin-top: 12px;
+    }
+    .event-log .entry { margin-bottom: 4px; }
+    .event-log .timestamp { color: #8b949e; }
+    .event-log .event-name { color: #79c0ff; }
+    .code-block {
+      background: #161b22; color: #e6edf3;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      overflow-x: auto; margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+  <h1>ars-info-tile</h1>
+  <p>Structured information display tile for dashboards and graph visualizations.</p>
+
+  <div class="info-box">
+    <h3>About</h3>
+    <p>Renders a card with title, subtitle, accent color header, and key-value property list.
+       Supports selection and dragging states for graph visualization integration.</p>
+  </div>
+
+  <!-- Basic card -->
+  <div class="demo-section">
+    <h3>Basic Card</h3>
+    <div class="tile-grid">
+      <ars-info-tile id="tile-basic"></ars-info-tile>
+    </div>
+  </div>
+
+  <!-- With/without subtitle -->
+  <div class="demo-section">
+    <h3>With and Without Subtitle</h3>
+    <div class="tile-grid">
+      <ars-info-tile id="tile-with-subtitle"></ars-info-tile>
+      <ars-info-tile id="tile-no-subtitle"></ars-info-tile>
+    </div>
+  </div>
+
+  <!-- Custom accent colors -->
+  <div class="demo-section">
+    <h3>Custom Accent Colors</h3>
+    <div class="tile-grid">
+      <ars-info-tile id="tile-accent-1"></ars-info-tile>
+      <ars-info-tile id="tile-accent-2"></ars-info-tile>
+      <ars-info-tile id="tile-accent-3"></ars-info-tile>
+    </div>
+  </div>
+
+  <!-- Selection state -->
+  <div class="demo-section">
+    <h3>Selection State</h3>
+    <p>Click tiles to toggle selection:</p>
+    <div class="tile-grid" id="selectable-grid">
+      <ars-info-tile id="tile-sel-1"></ars-info-tile>
+      <ars-info-tile id="tile-sel-2"></ars-info-tile>
+    </div>
+  </div>
+
+  <!-- Event handling -->
+  <div class="demo-section">
+    <h3>Event Handling</h3>
+    <p>Double-click a tile to see the activation event:</p>
+    <div class="tile-grid">
+      <ars-info-tile id="tile-events"></ars-info-tile>
+    </div>
+    <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px; margin-top:8px;">Clear</button>
+    <div class="event-log" id="event-log">
+      <div class="entry"><span class="timestamp">[ready]</span> Double-click a tile...</div>
+    </div>
+  </div>
+
+  <!-- Attribute-driven -->
+  <div class="demo-section">
+    <h3>Attribute-Driven</h3>
+    <ars-info-tile title="Attribute Title" subtitle="attribute subtitle" tile-id="ATTR-01" accent-color="#FF6B6B"></ars-info-tile>
+    <div class="code-block">&lt;ars-info-tile
+  title="Attribute Title"
+  subtitle="attribute subtitle"
+  tile-id="ATTR-01"
+  accent-color="#FF6B6B"
+&gt;&lt;/ars-info-tile&gt;</div>
+  </div>
+
+  <!-- Usage -->
+  <div class="demo-section">
+    <h3>Usage</h3>
+    <div class="code-block">const tile = document.querySelector('ars-info-tile');
+tile.data = {
+  id: 'bot_001',
+  title: 'Scalper Bot',
+  subtitle: 'Trading Bot',
+  accentColor: '#3aa8ff',
+  properties: {
+    status: 'active',
+    pnl: '+$1,234',
+    trades: '48'
+  }
+};</div>
+  </div>
+
+  <!-- Theme toggle -->
+  <div class="demo-section">
+    <h3>Theme Toggle</h3>
+    <div style="display:flex;gap:8px;">
+      <button class="btn" id="theme-light">Light</button>
+      <button class="btn" id="theme-dark">Dark</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsInfoTile } from '/src/components/ars-info-tile/ars-info-tile.ts';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/src/design-system.ts';
+
+    initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
+
+    // Basic
+    document.getElementById('tile-basic').data = {
+      id: 'bot_001',
+      title: 'Scalper Bot',
+      subtitle: 'Trading Bot',
+      properties: { status: 'active', pnl: '+$1,234.56', trades: '48' }
+    };
+
+    // With/without subtitle
+    document.getElementById('tile-with-subtitle').data = {
+      id: 'proj_alpha',
+      title: 'Project Alpha',
+      subtitle: 'Research Initiative',
+      properties: { lead: 'Alice', deadline: '2026-04-01' }
+    };
+    document.getElementById('tile-no-subtitle').data = {
+      id: 'sensor_42',
+      title: 'Temperature Sensor',
+      properties: { value: '23.4°C', location: 'Lab B' }
+    };
+
+    // Accent colors
+    document.getElementById('tile-accent-1').data = {
+      id: 'a1', title: 'Success', accentColor: '#22C55E',
+      properties: { metric: 'All green' }
+    };
+    document.getElementById('tile-accent-2').data = {
+      id: 'a2', title: 'Warning', accentColor: '#F59E0B',
+      properties: { metric: 'High load' }
+    };
+    document.getElementById('tile-accent-3').data = {
+      id: 'a3', title: 'Error', accentColor: '#EF4444',
+      properties: { metric: 'Down' }
+    };
+
+    // Selectable
+    document.getElementById('tile-sel-1').data = {
+      id: 's1', title: 'Node A', subtitle: 'Clickable',
+      properties: { role: 'primary' }
+    };
+    document.getElementById('tile-sel-2').data = {
+      id: 's2', title: 'Node B', subtitle: 'Clickable',
+      properties: { role: 'secondary' }
+    };
+
+    document.getElementById('selectable-grid').addEventListener('click', (e) => {
+      const tile = e.target.closest('ars-info-tile');
+      if (!tile) return;
+      tile.setSelected(!tile.hasAttribute('selected'));
+    });
+
+    // Events
+    document.getElementById('tile-events').data = {
+      id: 'evt1', title: 'Interactive Tile', subtitle: 'Double-click me',
+      properties: { action: 'double-click to activate' }
+    };
+
+    const log = document.getElementById('event-log');
+    document.addEventListener('ars-info-tile:activate', (e) => {
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+      entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">ars-info-tile:activate</span> type=${e.detail.originalEventType}`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    });
+    document.getElementById('clear-log').onclick = () => {
+      log.innerHTML = '<div class="entry"><span class="timestamp">[cleared]</span> Double-click a tile...</div>';
+    };
+
+    // Theme
+    document.getElementById('theme-light').onclick = () => initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
+    document.getElementById('theme-dark').onclick = () => initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('dark') });
+  </script>
+</body>
+</html>
