@@ -68,7 +68,7 @@ class RemoteCallCallerMixin extends MixinBase() {
     if (listenAttr.length === 0) return;
     const target = this.findActualTargetComponent();
     if (!target) { console.warn('RemoteCallCallerMixin: no inner target found'); return; }
-    const handlerFactory = (evtName) => (e) => {
+    const handlerFactory = (_evtName) => (e) => {
       const targetId = this.getAttribute(AttributeKeys.TARGET);
       const method = this.getAttribute(AttributeKeys.METHOD);
       if (!targetId || !method) {

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Line Chart - Test Page</title>
+
+  <!-- Import Map for module resolution -->
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <!-- Common CSS -->
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+
+  <style>
+    .chart-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      justify-content: center;
+    }
+    .chart-card {
+      background: #1a1a2e;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .chart-card h3 {
+      color: #e8eef9;
+      margin: 0 0 12px 0;
+      font-size: 14px;
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin: 24px 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .controls button {
+      padding: 8px 16px;
+      border: 1px solid #3aa8ff;
+      background: #162238;
+      color: #dbeafe;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .controls button:hover {
+      background: #1d2d47;
+    }
+    body {
+      background: #0b1220;
+      color: #e8eef9;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-content">
+    <h1>ARS Line Chart</h1>
+    <p>A canvas-rendered line chart web component with grid, axis labels, and data-point dots.</p>
+
+    <div class="controls">
+      <button id="btn-random">Randomize Data</button>
+      <button id="btn-grow">Add Point</button>
+      <button id="btn-shrink">Remove Point</button>
+      <button id="btn-toggle-dots">Toggle Dots</button>
+      <button id="btn-color">Cycle Color</button>
+    </div>
+
+    <div class="chart-container">
+      <div class="chart-card">
+        <h3>Default (320x180)</h3>
+        <ars-line-chart id="chart-default"
+          data="[18, 22, 19, 26, 24, 30, 27, 33, 31, 36, 34, 40, 37, 42, 45, 41, 48, 46]">
+        </ars-line-chart>
+      </div>
+
+      <div class="chart-card">
+        <h3>Wide (500x200)</h3>
+        <ars-line-chart id="chart-wide" width="500" height="200"
+          line-color="#3aa8ff"
+          data="[5, 12, 8, 15, 22, 18, 25, 20, 28, 35, 30, 38, 42, 36, 45]">
+        </ars-line-chart>
+      </div>
+
+      <div class="chart-card">
+        <h3>Custom Colors (400x160)</h3>
+        <ars-line-chart id="chart-custom" width="400" height="160"
+          line-color="#5ad68a"
+          grid-color="rgba(90, 214, 138, 0.12)"
+          axis-color="rgba(90, 214, 138, 0.4)"
+          data="[100, 95, 102, 98, 105, 110, 107, 112, 108, 115]">
+        </ars-line-chart>
+      </div>
+
+      <div class="chart-card">
+        <h3>No Dots</h3>
+        <ars-line-chart id="chart-no-dots" show-dots="false"
+          line-color="#f06b63"
+          data="[50, 45, 55, 42, 60, 48, 65, 52, 70, 55, 75, 60]">
+        </ars-line-chart>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import '/src/components/ars-line-chart/ars-line-chart.js';
+
+    const chartDefault = document.getElementById('chart-default');
+
+    // Randomize data
+    document.getElementById('btn-random').addEventListener('click', () => {
+      const count = 12 + Math.floor(Math.random() * 10);
+      const data = Array.from({ length: count }, () => Math.floor(Math.random() * 80) + 10);
+      chartDefault.data = data;
+    });
+
+    // Add a data point
+    document.getElementById('btn-grow').addEventListener('click', () => {
+      const current = chartDefault.data;
+      const last = current.length > 0 ? current[current.length - 1] : 20;
+      current.push(last + Math.floor(Math.random() * 10) - 4);
+      chartDefault.data = current;
+    });
+
+    // Remove last data point
+    document.getElementById('btn-shrink').addEventListener('click', () => {
+      const current = chartDefault.data;
+      if (current.length > 1) {
+        current.pop();
+        chartDefault.data = current;
+      }
+    });
+
+    // Toggle dots
+    let dotsVisible = true;
+    document.getElementById('btn-toggle-dots').addEventListener('click', () => {
+      dotsVisible = !dotsVisible;
+      chartDefault.setAttribute('show-dots', String(dotsVisible));
+    });
+
+    // Cycle line color
+    const colors = ['#f6c453', '#3aa8ff', '#5ad68a', '#f06b63', '#c084fc'];
+    let colorIndex = 0;
+    document.getElementById('btn-color').addEventListener('click', () => {
+      colorIndex = (colorIndex + 1) % colors.length;
+      chartDefault.setAttribute('line-color', colors[colorIndex]);
+    });
+  </script>
+</body>
+
+</html>

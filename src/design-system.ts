@@ -41,6 +41,25 @@ export function getArsWebComponentsDefaultAdapter(mode: "light" | "dark" = "ligh
         "--arswc-shadow-sm": "0 1px 2px rgb(0 0 0 / 0.28)",
         "--arswc-font-family-sans": 'system-ui, -apple-system, "Segoe UI", sans-serif',
         "--arswc-font-family-mono": "ui-monospace, SFMono-Regular, Menlo, monospace",
+        // Semantic color tokens
+        "--arswc-color-danger": "#ef4444",
+        "--arswc-color-success": "#22c55e",
+        "--arswc-color-warning": "#f59e0b",
+        "--arswc-color-disabled": "#6b7280",
+        "--arswc-color-disabled-bg": "#1f2937",
+        // Typography scale tokens
+        "--arswc-font-size-sm": "0.75rem",
+        "--arswc-font-size-md": "0.875rem",
+        "--arswc-font-size-lg": "1.25rem",
+        // Spacing scale tokens
+        "--arswc-spacing-xs": "4px",
+        "--arswc-spacing-sm": "8px",
+        "--arswc-spacing-md": "16px",
+        "--arswc-spacing-lg": "24px",
+        "--arswc-spacing-xl": "32px",
+        // Animation and focus tokens
+        "--arswc-transition-duration": "200ms",
+        "--arswc-focus-ring": "0 0 0 3px rgba(58, 168, 255, 0.4)",
       },
     };
   }
@@ -71,6 +90,25 @@ export function getArsWebComponentsDefaultAdapter(mode: "light" | "dark" = "ligh
       "--arswc-shadow-sm": "0 1px 2px rgb(0 0 0 / 0.12)",
       "--arswc-font-family-sans": 'system-ui, -apple-system, "Segoe UI", sans-serif',
       "--arswc-font-family-mono": "ui-monospace, SFMono-Regular, Menlo, monospace",
+      // Semantic color tokens
+      "--arswc-color-danger": "#dc2626",
+      "--arswc-color-success": "#16a34a",
+      "--arswc-color-warning": "#d97706",
+      "--arswc-color-disabled": "#9ca3af",
+      "--arswc-color-disabled-bg": "#f3f4f6",
+      // Typography scale tokens
+      "--arswc-font-size-sm": "0.75rem",
+      "--arswc-font-size-md": "0.875rem",
+      "--arswc-font-size-lg": "1.25rem",
+      // Spacing scale tokens
+      "--arswc-spacing-xs": "4px",
+      "--arswc-spacing-sm": "8px",
+      "--arswc-spacing-md": "16px",
+      "--arswc-spacing-lg": "24px",
+      "--arswc-spacing-xl": "32px",
+      // Animation and focus tokens
+      "--arswc-transition-duration": "200ms",
+      "--arswc-focus-ring": "0 0 0 3px rgba(37, 99, 235, 0.3)",
     },
   };
 }

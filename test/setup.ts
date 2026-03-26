@@ -60,19 +60,19 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-// Mock getComputedStyle
+// Mock getComputedStyle — preserve prototype methods (e.g. getPropertyValue) that the spread
+// operator would silently drop from CSSStyleDeclaration.
 const originalGetComputedStyle = window.getComputedStyle;
 window.getComputedStyle = (element) => {
   const style = originalGetComputedStyle(element);
-  // Provide default values for common properties
-  return {
-    ...style,
+  const overrides = {
     display: style.display || 'block',
     visibility: style.visibility || 'visible',
     backgroundColor: style.backgroundColor || 'rgb(255, 255, 255)',
     width: style.width || '100px',
     height: style.height || '100px',
   };
+  return Object.assign(Object.create(Object.getPrototypeOf(style)), style, overrides);
 };
 
 // Ensure customElements is available
@@ -96,25 +96,40 @@ afterAll(() => {
   vi.restoreAllMocks();
 });
 
-HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
-  fillRect: vi.fn(),
-  clearRect: vi.fn(),
-  getImageData: (x, y, w, h) => ({ data: new Array(w * h * 4) }),
-  putImageData: vi.fn(),
-  createImageData: () => ([]),
-  setTransform: vi.fn(),
-  drawImage: vi.fn(),
-  save: vi.fn(),
-  fillText: vi.fn(),
-  restore: vi.fn(),
-  beginPath: vi.fn(),
-  moveTo: vi.fn(),
-  lineTo: vi.fn(),
-  closePath: vi.fn(),
-  stroke: vi.fn(),
-  translate: vi.fn(),
-  scale: vi.fn(),
-  rotate: vi.fn(),
-  arc: vi.fn(),
-  fill: vi.fn()
-}));
+// Cache mock context per canvas so repeated getContext calls return the same spy objects.
+HTMLCanvasElement.prototype.getContext = vi.fn(function () {
+  if (this._mockCtx) return this._mockCtx;
+  this._mockCtx = {
+    canvas: this,
+    fillRect: vi.fn(),
+    clearRect: vi.fn(),
+    getImageData: (x, y, w, h) => ({ data: new Array(w * h * 4) }),
+    putImageData: vi.fn(),
+    createImageData: () => ([]),
+    setTransform: vi.fn(),
+    drawImage: vi.fn(),
+    save: vi.fn(),
+    fillText: vi.fn(),
+    restore: vi.fn(),
+    beginPath: vi.fn(),
+    moveTo: vi.fn(),
+    lineTo: vi.fn(),
+    closePath: vi.fn(),
+    stroke: vi.fn(),
+    translate: vi.fn(),
+    scale: vi.fn(),
+    rotate: vi.fn(),
+    arc: vi.fn(),
+    fill: vi.fn(),
+    setLineDash: vi.fn(),
+    // Writable style properties used by chart components
+    fillStyle: "",
+    strokeStyle: "",
+    lineWidth: 1,
+    lineJoin: "miter",
+    textAlign: "start",
+    textBaseline: "alphabetic",
+    font: "10px sans-serif",
+  };
+  return this._mockCtx;
+});

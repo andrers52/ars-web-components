@@ -130,8 +130,6 @@ class ArsPageControllerInternal extends WebComponentBase {
       this.querySelectorAll("[data-page], [data-route]"),
     );
     this._navLinks.forEach((link) => {
-      const pageId = link.getAttribute("data-page");
-      const route = link.getAttribute("data-route");
       link.addEventListener("click", this._navClickHandler);
     });
 

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Candlestick Chart - Test Page</title>
+
+  <!-- Import Map for module resolution -->
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <!-- Common CSS -->
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+
+  <style>
+    .chart-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      justify-content: center;
+    }
+    .chart-card {
+      background: #1a1a2e;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .chart-card h3 {
+      color: #e8eef9;
+      margin: 0 0 12px 0;
+      font-size: 14px;
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin: 24px 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .controls button {
+      padding: 8px 16px;
+      border: 1px solid #3aa8ff;
+      background: #162238;
+      color: #dbeafe;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .controls button:hover {
+      background: #1d2d47;
+    }
+    body {
+      background: #0b1220;
+      color: #e8eef9;
+    }
+    .info {
+      font-size: 13px;
+      color: #9fb0cb;
+      text-align: center;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-content">
+    <h1>ARS Candlestick Chart</h1>
+    <p>OHLCV candlestick chart with volume bars, grid, axis labels, and optional order overlays.</p>
+
+    <div class="controls">
+      <button id="btn-random">Randomize Data</button>
+      <button id="btn-toggle-orders">Toggle Orders</button>
+      <button id="btn-label-pos">Toggle Label Position</button>
+      <button id="btn-vol-ratio">Cycle Volume Ratio</button>
+    </div>
+
+    <div class="chart-container">
+      <div class="chart-card">
+        <h3>Default (460x220) with Orders</h3>
+        <ars-candlestick-chart id="chart-main"></ars-candlestick-chart>
+        <div class="info" id="info-main"></div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Wide (600x280)</h3>
+        <ars-candlestick-chart id="chart-wide" width="600" height="280"></ars-candlestick-chart>
+      </div>
+
+      <div class="chart-card">
+        <h3>Custom Colors</h3>
+        <ars-candlestick-chart id="chart-custom"
+          up-color="#3aa8ff"
+          down-color="#c084fc"
+          grid-color="rgba(58, 168, 255, 0.08)"
+          axis-color="rgba(58, 168, 255, 0.3)">
+        </ars-candlestick-chart>
+      </div>
+
+      <div class="chart-card">
+        <h3>Right-Aligned Labels</h3>
+        <ars-candlestick-chart id="chart-right"
+          order-label-position="right">
+        </ars-candlestick-chart>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import '/src/components/ars-candlestick-chart/ars-candlestick-chart.js';
+
+    // --- Synthetic data generator (mirrors brainiac-engine demo/js/demos/chart_agent/common.ts) ---
+    function buildCandleData(count = 20, referenceTime = Date.now()) {
+      const dayInMillis = 24 * 60 * 60 * 1000;
+      const startTime = referenceTime - (count - 1) * dayInMillis;
+      let price = 100 + Math.floor(Math.random() * 40);
+      const data = [];
+      for (let i = 0; i < count; i++) {
+        const step = Math.floor(Math.random() * 12) - 5;
+        const open = price;
+        const close = price + step;
+        const high = Math.max(open, close) + 1 + Math.floor(Math.random() * 4);
+        const low = Math.min(open, close) - 1 - Math.floor(Math.random() * 3);
+        const volume = 80 + Math.floor(Math.random() * 100) + (step > 0 ? 30 : 0);
+        const time = startTime + i * dayInMillis;
+        data.push({ open, high, low, close, volume, time });
+        price = close;
+      }
+      return data;
+    }
+
+    function buildOrders(data) {
+      if (data.length < 8) return [];
+      return [
+        { side: 'buy', amount: +(Math.random() * 15 + 1).toFixed(3), price: data[3].low + 1 },
+        { side: 'sell', amount: +(Math.random() * 10 + 1).toFixed(3), price: data[7].high + 1 },
+      ];
+    }
+
+    // --- Initialize all charts ---
+    const chartMain = document.getElementById('chart-main');
+    const chartWide = document.getElementById('chart-wide');
+    const chartCustom = document.getElementById('chart-custom');
+    const chartRight = document.getElementById('chart-right');
+    const infoMain = document.getElementById('info-main');
+
+    let currentData = buildCandleData();
+    let currentOrders = buildOrders(currentData);
+    let ordersVisible = true;
+
+    function updateAllCharts() {
+      chartMain.data = currentData;
+      chartWide.data = currentData;
+      chartCustom.data = currentData;
+      chartRight.data = currentData;
+
+      if (ordersVisible) {
+        chartMain.orders = currentOrders;
+        chartRight.orders = currentOrders;
+      } else {
+        chartMain.orders = [];
+        chartRight.orders = [];
+      }
+
+      infoMain.textContent = `${currentData.length} candles | ${ordersVisible ? currentOrders.length + ' orders' : 'no orders'}`;
+    }
+
+    updateAllCharts();
+
+    // --- Controls ---
+    document.getElementById('btn-random').addEventListener('click', () => {
+      const count = 10 + Math.floor(Math.random() * 20);
+      currentData = buildCandleData(count);
+      currentOrders = buildOrders(currentData);
+      updateAllCharts();
+    });
+
+    document.getElementById('btn-toggle-orders').addEventListener('click', () => {
+      ordersVisible = !ordersVisible;
+      updateAllCharts();
+    });
+
+    let labelPos = 'left';
+    document.getElementById('btn-label-pos').addEventListener('click', () => {
+      labelPos = labelPos === 'left' ? 'right' : 'left';
+      chartMain.setAttribute('order-label-position', labelPos);
+    });
+
+    const volRatios = [0.25, 0.15, 0.35, 0.5];
+    let volIndex = 0;
+    document.getElementById('btn-vol-ratio').addEventListener('click', () => {
+      volIndex = (volIndex + 1) % volRatios.length;
+      const ratio = volRatios[volIndex];
+      chartMain.setAttribute('volume-height-ratio', String(ratio));
+      chartWide.setAttribute('volume-height-ratio', String(ratio));
+    });
+  </script>
+</body>
+
+</html>

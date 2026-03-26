@@ -4,7 +4,7 @@
  * @vi-environment jsdom
  */
 
-import { describe, it, expect, beforeEach, vi, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Import the module
 import { ShowIfPropertyTrueMixin } from './show-if-property-true-mixin.js';

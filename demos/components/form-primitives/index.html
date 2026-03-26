@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Primitives - ars-button &amp; ars-toggle</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+
+  <style>
+    .demo-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin: 12px 0;
+    }
+    .demo-section {
+      background: var(--arswc-color-surface, #f6f8fb);
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: var(--arswc-radius-md, 10px);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-section h3 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      color: var(--arswc-color-text, #1b2430);
+    }
+    .event-log {
+      background: #0d1117;
+      color: #c9d1d9;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem;
+      padding: 12px;
+      border-radius: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 12px;
+    }
+    .event-log .entry {
+      margin-bottom: 4px;
+    }
+    .event-log .timestamp {
+      color: #8b949e;
+    }
+    .event-log .event-name {
+      color: #79c0ff;
+    }
+    .code-block {
+      background: #161b22;
+      color: #e6edf3;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem;
+      padding: 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin-top: 8px;
+    }
+    .separator {
+      border-top: 2px solid var(--arswc-color-border, #d5dde8);
+      margin: 40px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+  <h1>Form Primitives</h1>
+  <p>Interactive form controls: buttons and toggles.</p>
+
+  <div class="info-box">
+    <h3>About</h3>
+    <p><strong>ars-button</strong> provides a styled, accessible button with variant, size, and state support.
+       Uses a native &lt;button&gt; inside Shadow DOM for full keyboard/focus accessibility.</p>
+  </div>
+
+  <!-- ============= ARS-BUTTON ============= -->
+  <h2>ars-button</h2>
+
+  <!-- Variants -->
+  <div class="demo-section">
+    <h3>Variants</h3>
+    <div class="demo-row">
+      <ars-button variant="primary">Primary</ars-button>
+      <ars-button variant="secondary">Secondary</ars-button>
+      <ars-button variant="danger">Danger</ars-button>
+      <ars-button variant="ghost">Ghost</ars-button>
+    </div>
+    <div class="code-block">&lt;ars-button variant="primary"&gt;Primary&lt;/ars-button&gt;
+&lt;ars-button variant="secondary"&gt;Secondary&lt;/ars-button&gt;
+&lt;ars-button variant="danger"&gt;Danger&lt;/ars-button&gt;
+&lt;ars-button variant="ghost"&gt;Ghost&lt;/ars-button&gt;</div>
+  </div>
+
+  <!-- Sizes -->
+  <div class="demo-section">
+    <h3>Sizes</h3>
+    <div class="demo-row">
+      <ars-button size="sm">Small</ars-button>
+      <ars-button size="md">Medium</ars-button>
+      <ars-button size="lg">Large</ars-button>
+    </div>
+    <div class="demo-row">
+      <ars-button variant="secondary" size="sm">Small</ars-button>
+      <ars-button variant="secondary" size="md">Medium</ars-button>
+      <ars-button variant="secondary" size="lg">Large</ars-button>
+    </div>
+    <div class="code-block">&lt;ars-button size="sm"&gt;Small&lt;/ars-button&gt;
+&lt;ars-button size="md"&gt;Medium&lt;/ars-button&gt;
+&lt;ars-button size="lg"&gt;Large&lt;/ars-button&gt;</div>
+  </div>
+
+  <!-- States -->
+  <div class="demo-section">
+    <h3>States</h3>
+    <div class="demo-row">
+      <ars-button disabled>Disabled Primary</ars-button>
+      <ars-button variant="secondary" disabled>Disabled Secondary</ars-button>
+      <ars-button variant="danger" disabled>Disabled Danger</ars-button>
+    </div>
+    <div class="demo-row">
+      <ars-button loading>Loading Primary</ars-button>
+      <ars-button variant="secondary" loading>Loading Secondary</ars-button>
+      <ars-button variant="danger" loading>Loading Danger</ars-button>
+    </div>
+    <div class="code-block">&lt;ars-button disabled&gt;Disabled&lt;/ars-button&gt;
+&lt;ars-button loading&gt;Loading&lt;/ars-button&gt;</div>
+  </div>
+
+  <!-- Slots -->
+  <div class="demo-section">
+    <h3>Slots (Prefix / Suffix)</h3>
+    <div class="demo-row">
+      <ars-button>
+        <span slot="prefix">&#9733;</span>
+        With Prefix
+      </ars-button>
+      <ars-button variant="secondary">
+        With Suffix
+        <span slot="suffix">&rarr;</span>
+      </ars-button>
+      <ars-button variant="danger">
+        <span slot="prefix">&#9888;</span>
+        Delete
+        <span slot="suffix">&#10005;</span>
+      </ars-button>
+    </div>
+    <div class="code-block">&lt;ars-button&gt;
+  &lt;span slot="prefix"&gt;&amp;#9733;&lt;/span&gt;
+  With Prefix
+&lt;/ars-button&gt;</div>
+  </div>
+
+  <!-- Event Log -->
+  <div class="demo-section">
+    <h3>Event Log</h3>
+    <p>Click any button above and watch events appear below.</p>
+    <button class="btn" id="clear-btn-log" style="font-size:0.8rem; padding:4px 10px;">Clear Log</button>
+    <div class="event-log" id="btn-event-log">
+      <div class="entry"><span class="timestamp">[ready]</span> Listening for ars-button:click events...</div>
+    </div>
+  </div>
+
+  <!-- ============= SEPARATOR ============= -->
+  <div class="separator"></div>
+
+  <!-- ars-toggle placeholder - will be added in step 2 -->
+  <div class="info-box">
+    <h3>ars-toggle</h3>
+    <p><em>Toggle component will be added here in the next iteration.</em></p>
+  </div>
+
+  <!-- ============= THEME TOGGLE ============= -->
+  <div class="demo-section">
+    <h3>Theme Toggle</h3>
+    <div class="demo-row">
+      <button class="btn" id="theme-light">Light Theme</button>
+      <button class="btn" id="theme-dark">Dark Theme</button>
+    </div>
+  </div>
+
+  <!-- ============= USAGE ============= -->
+  <div class="demo-section">
+    <h3>Usage</h3>
+    <div class="code-block">&lt;script type="module"&gt;
+  import { ArsButton, initializeArsWebComponents, getArsWebComponentsDefaultAdapter }
+    from 'ars-web-components';
+
+  initializeArsWebComponents({
+    designAdapter: getArsWebComponentsDefaultAdapter('light')
+  });
+&lt;/script&gt;
+
+&lt;ars-button variant="primary" size="md"&gt;Click Me&lt;/ars-button&gt;
+&lt;ars-button variant="danger" disabled&gt;Can't Touch This&lt;/ars-button&gt;
+
+&lt;script&gt;
+  document.querySelector('ars-button')
+    .addEventListener('ars-button:click', (e) =&gt; {
+      console.log('Clicked:', e.detail.variant);
+    });
+&lt;/script&gt;</div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { ArsButton } from '/src/components/ars-button/ars-button.ts';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/src/design-system.ts';
+
+    // Initialize with light theme by default
+    initializeArsWebComponents({
+      designAdapter: getArsWebComponentsDefaultAdapter('light')
+    });
+
+    // Event log
+    const log = document.getElementById('btn-event-log');
+    document.addEventListener('ars-button:click', (e) => {
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+      entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">ars-button:click</span> variant=${e.detail.variant}`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    });
+
+    document.getElementById('clear-btn-log').addEventListener('click', () => {
+      log.innerHTML = '<div class="entry"><span class="timestamp">[cleared]</span> Listening...</div>';
+    });
+
+    // Theme toggles
+    document.getElementById('theme-light').addEventListener('click', () => {
+      initializeArsWebComponents({
+        designAdapter: getArsWebComponentsDefaultAdapter('light')
+      });
+    });
+    document.getElementById('theme-dark').addEventListener('click', () => {
+      initializeArsWebComponents({
+        designAdapter: getArsWebComponentsDefaultAdapter('dark')
+      });
+    });
+  </script>
+</body>
+</html>

@@ -3,6 +3,7 @@
   "include": [
     "src/**/*.ts",
     "test/**/*.ts",
+    "demos/**/*.ts",
     "vite.config.ts",
     "vitest.config.ts"
   ],
