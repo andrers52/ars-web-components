@@ -5,6 +5,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-03-25
+
+### Added
+
+- **7 new foundational components:**
+  - **ars-button** — Styled, accessible button with variant (primary/secondary/danger/ghost), size (sm/md/lg), disabled, and loading states. Shadow DOM with delegated focus, composed `ars-button:click` event, prefix/suffix slots.
+  - **ars-toggle** — Boolean switch control with `role="switch"`, `aria-checked`, keyboard navigation (Space/Enter), label positioning, composed `ars-toggle:change` event.
+  - **ars-input** — Text input with label, validation feedback (`aria-invalid`, `aria-describedby`), clearable mode, prefix/suffix slots, and composed input/change/clear events. Supports text, number, email, password, search, url, tel types.
+  - **ars-toast** — Notification toast with severity levels (info/success/warning/error), auto-dismiss timers, stacking containers per position, enter/exit CSS animations, `ArsToast.show()` static API, custom mount targets, `role="alert"`, reduced-motion support.
+  - **ars-tabs** / **ars-tab-panel** — Tabbed navigation with 4 placement directions (top/bottom/start/end), ARIA tablist/tab/tabpanel roles, keyboard navigation (Arrow/Home/End with wrapping), disabled tabs, dynamic panel add/remove via MutationObserver.
+  - **ars-select** — Dropdown select with single/multiple selection, searchable filtering, option groups, disabled options, keyboard navigation (Arrow/Enter/Escape/Home/End), ARIA combobox semantics, error state.
+  - **ars-table** — Data table with sortable columns, single/multiple row selection, striped/compact modes, virtual scrolling (windowed rendering for large datasets), auto-sort, custom cell render functions, ARIA grid roles, empty state slot.
+
+- **Design token extensions (Section 3 of Development Plan):**
+  - Semantic colors: `--arswc-color-danger`, `--arswc-color-success`, `--arswc-color-warning`, `--arswc-color-disabled`, `--arswc-color-disabled-bg`
+  - Typography scale: `--arswc-font-size-sm`, `--arswc-font-size-md`, `--arswc-font-size-lg`
+  - Spacing scale: `--arswc-spacing-xs` through `--arswc-spacing-xl`
+  - Animation/focus: `--arswc-transition-duration`, `--arswc-focus-ring`
+  - All tokens added to both light and dark default adapters with appropriate values.
+
+- **8 new demo pages:**
+  - Combined "Form Primitives" demo for ars-button and ars-toggle with live dark mode binding
+  - Dedicated demos for ars-input, ars-toast, ars-tabs, ars-select, ars-table
+  - ars-info-tile demo (backfill for existing component)
+  - All demos follow the template (header, info box, demo sections, theme toggle, event monitor, usage)
+
+- **Gallery index updated** with cards for all new components in both Quick Access and Components Demo grids.
+
+- **docs/EMBEDDING.md** — Covers programmatic mount/unmount, attribute vs property data flow, event forwarding with detail reference, shell-only component caveats, and design adapter usage in iframe/shadow root contexts.
+
+- **docs/PUBLISH_CHECKLIST.md** — Release process covering code quality, documentation, demos, and publish steps.
+
+### Changed
+
+- **ars-color-select redesigned** as a horizontal carousel picker:
+  - Replaced fullscreen overlay grid with inline carousel strip of circular swatches in spectrum order
+  - Added navigation buttons, position track indicator, keyboard navigation (Arrow/Home/End), ARIA listbox semantics
+  - Custom palette support via `palette` property/attribute, swatch sizes (sm/md/lg), `visible-count`, disabled state
+  - `prefers-reduced-motion` support
+  - Removed arslib dependency (no longer uses `EArray.choice`)
+  - Backwards compatible: `color` attribute and `ars-color-select:change` event unchanged; `previousColor` added to event detail
+  - Deprecated: `toggleColorSelection()` (no-op), `setBackgroundColor()` (delegates to color setter)
+
+### Fixed
+
+- Fixed duplicate `vi` import in 6 mixin test files causing parse errors
+- Fixed unused variable warnings in `ars-page-controller-internal.ts` and `remote-call-caller-mixin.ts`
+- Fixed `tsconfig.eslint.json` to include `demos/**/*.ts` files, resolving ESLint parsing errors
+- All 26 test files (681 tests) passing, 0 lint errors, clean TypeScript build
+
 ## [0.9.1] - 2026-03-10
 
 ### Changed

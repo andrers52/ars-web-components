@@ -15,7 +15,7 @@ Check out the [live demo](https://andrers52.github.io/src/projects/ars-web-compo
 - **⚡ ES Modules**: Modern module system with proper imports/exports
 - **🔧 Interactive Effects**: Built-in pressed effects and animations
 - **📱 Touch Support**: Full mobile and desktop interaction support
-- **🧪 Vitest Testing**: 330 tests with jsdom environment
+- **🧪 Vitest Testing**: 681 tests with jsdom environment
 - **🧹 ESLint**: Flat-config linting for source, tests, and tool configs
 - **🔒 Proper Encapsulation**: Private methods and static utilities for clean API design
 - **🤝 Mixin Coordination**: Smart pointer coordination system for multiple gesture mixins
@@ -29,11 +29,22 @@ Check out the [live demo](https://andrers52.github.io/src/projects/ars-web-compo
 ars-web-components/
 ├── src/                    # TypeScript source files
 │   ├── components/         # Web components
+│   │   ├── ars-button/
 │   │   ├── ars-calendar/
+│   │   ├── ars-candlestick-chart/
 │   │   ├── ars-color-select/
-│   │   ├── ars-dialog/
-│   │   ├── ars-page/
 │   │   ├── ars-data-roller/
+│   │   ├── ars-dialog/
+│   │   ├── ars-info-tile/
+│   │   ├── ars-input/
+│   │   ├── ars-line-chart/
+│   │   ├── ars-page/
+│   │   ├── ars-select/
+│   │   ├── ars-table/
+│   │   ├── ars-tabs/
+│   │   ├── ars-toast/
+│   │   ├── ars-toggle/
+│   │   ├── chart-base/
 │   │   └── web-component-base/
 │   ├── mixins/             # Reusable mixins
 │   │   ├── common/
@@ -198,6 +209,10 @@ Hardening notes for embedded hosts:
 - `ars-dialog` and `ars-color-select` now render templates directly instead of evaluating template strings
 - embedded integrations should prefer explicit host references and typed data over raw HTML/script injection patterns
 
+For comprehensive embedding guidance including mount/unmount lifecycle, event forwarding, and design adapter usage in iframes/shadow roots, see [docs/EMBEDDING.md](docs/EMBEDDING.md).
+
+For the release process checklist, see [docs/PUBLISH_CHECKLIST.md](docs/PUBLISH_CHECKLIST.md).
+
 ### Custom Design System Contract (`--arswc-*`)
 
 `ars-web-components` components read library-level design variables (`--arswc-*`) set by the active design adapter.
@@ -227,28 +242,29 @@ Resolution priority in components:
 
 This makes the library design-system agnostic while keeping integration predictable.
 
-### Design Contract Coverage (Current Components)
+### Design Contract Coverage
 
-The following components already resolve their default styling through the library design contract (`--arswc-*`) before falling back to hardcoded values:
+All components resolve their default styling through the library design contract (`--arswc-*`) before falling back to hardcoded values.
 
-- `ars-calendar`
-- `ars-dialog`
-- `ars-color-select`
-- `ars-data-roller`
+**Core tokens** (used by most components):
 
-Common `--arswc-*` variables currently used across these components:
+- `--arswc-color-bg`, `--arswc-color-surface`, `--arswc-color-border`
+- `--arswc-color-text`, `--arswc-color-muted`, `--arswc-color-accent`, `--arswc-color-accent-contrast`
+- `--arswc-radius-sm`, `--arswc-radius-md`, `--arswc-shadow-sm`
+- `--arswc-font-family-sans`, `--arswc-font-family-mono`
 
-- `--arswc-color-bg`
-- `--arswc-color-surface`
-- `--arswc-color-border`
-- `--arswc-color-text`
-- `--arswc-color-muted`
-- `--arswc-color-accent`
-- `--arswc-color-accent-contrast`
-- `--arswc-radius-sm`
-- `--arswc-radius-md`
-- `--arswc-shadow-sm`
-- `--arswc-font-family-sans`
+**Semantic color tokens** (added in 1.0.0):
+
+- `--arswc-color-danger` — destructive actions, error states (button, toast, input validation)
+- `--arswc-color-success` — success confirmation (toast, toggle on state)
+- `--arswc-color-warning` — warning states (toast)
+- `--arswc-color-disabled`, `--arswc-color-disabled-bg` — disabled element foreground/background
+
+**Typography and spacing tokens** (added in 1.0.0):
+
+- `--arswc-font-size-sm`, `--arswc-font-size-md`, `--arswc-font-size-lg`
+- `--arswc-spacing-xs` through `--arswc-spacing-xl`
+- `--arswc-transition-duration`, `--arswc-focus-ring`
 
 Components remain independently overridable through their own component-specific CSS variables (for example `--ars-calendar-*`).
 
@@ -287,6 +303,141 @@ For projects that need to load components directly without bundling:
 ```
 
 ## Components
+
+### Component Inventory
+
+| Component | Tag | Status | Description |
+|---|---|---|---|
+| Button | `<ars-button>` | Stable | Interactive button with variant, size, disabled, loading |
+| Toggle | `<ars-toggle>` | Stable | Boolean switch control with keyboard support |
+| Input | `<ars-input>` | Stable | Text input with label, validation, clearable |
+| Color Select | `<ars-color-select>` | Stable | Carousel color picker with keyboard navigation |
+| Toast | `<ars-toast>` | Stable | Notification toast with stacking and auto-dismiss |
+| Tabs | `<ars-tabs>` | Stable | Tabbed navigation with 4 placement options |
+| Select | `<ars-select>` | Stable | Dropdown select with search and multi-select |
+| Table | `<ars-table>` | Stable | Data table with sorting, selection, virtual scroll |
+| Calendar | `<ars-calendar>` | Stable | Date selection and event management |
+| Dialog | `<ars-dialog>` | Stable | Modal dialog with confirmation and notification modes |
+| Data Roller | `<ars-data-roller>` | Stable | Animated cycling data display |
+| Info Tile | `<ars-info-tile>` | Stable | Structured information card for dashboards |
+| Line Chart | `<ars-line-chart>` | Stable | Canvas-based line chart |
+| Candlestick Chart | `<ars-candlestick-chart>` | Stable | Financial OHLC candlestick chart |
+| Page Router | `<ars-page>` | Stable | Component-based routing |
+| Relational Node | `<ars-relational-node>` | Deprecated | Use `<ars-info-tile>` instead |
+
+### ArsButton
+
+Styled, accessible button with variant, size, and state support.
+
+```html
+<ars-button variant="primary" size="md">Click Me</ars-button>
+<ars-button variant="danger" disabled>Disabled</ars-button>
+<ars-button loading>Loading...</ars-button>
+```
+
+**Attributes:** `variant` (primary/secondary/danger/ghost), `size` (sm/md/lg), `disabled`, `loading`, `type` (button/submit/reset)
+
+**Slots:** default (label), `prefix`, `suffix`
+
+**Events:** `ars-button:click` — detail: `{ variant }`
+
+### ArsToggle
+
+Boolean switch control with keyboard support.
+
+```html
+<ars-toggle label="Dark mode" checked></ars-toggle>
+```
+
+**Attributes:** `checked`, `disabled`, `label`, `label-position` (start/end)
+
+**Events:** `ars-toggle:change` — detail: `{ checked }`
+
+### ArsInput
+
+Text input with label, validation, and clearable state.
+
+```html
+<ars-input label="Email" type="email" placeholder="user@example.com" required></ars-input>
+<ars-input label="Search" type="search" clearable></ars-input>
+```
+
+**Attributes:** `type`, `value`, `placeholder`, `label`, `error`, `disabled`, `readonly`, `clearable`, `min`, `max`, `step`, `pattern`, `required`
+
+**Slots:** `prefix`, `suffix`
+
+**Events:** `ars-input:input`, `ars-input:change`, `ars-input:clear`
+
+### ArsToast
+
+Notification toast with severity levels and stacking.
+
+```javascript
+import { ArsToast } from "ars-web-components";
+
+ArsToast.show("Operation complete!", {
+  severity: "success",
+  duration: 4000,
+  position: "top-right",
+});
+```
+
+**Static API:** `ArsToast.show(message, options)` — options: `severity`, `duration`, `dismissible`, `position`, `mountTarget`, `targetDocument`
+
+**Attributes:** `message`, `severity` (info/success/warning/error), `duration`, `dismissible`, `open`
+
+**Events:** `ars-toast:dismiss` — detail: `{ reason }`
+
+### ArsTabs
+
+Tabbed navigation with companion `<ars-tab-panel>`.
+
+```html
+<ars-tabs>
+  <ars-tab-panel tab-id="overview" label="Overview">Content here</ars-tab-panel>
+  <ars-tab-panel tab-id="settings" label="Settings">Settings here</ars-tab-panel>
+</ars-tabs>
+```
+
+**Attributes:** `active-tab`, `placement` (top/bottom/start/end)
+
+**Events:** `ars-tabs:change` — detail: `{ activeTab, previousTab }`
+
+### ArsSelect
+
+Dropdown select with search, groups, and multi-select.
+
+```javascript
+const select = document.querySelector("ars-select");
+select.options = [
+  { value: "apple", label: "Apple" },
+  { value: "banana", label: "Banana", group: "Tropical" },
+];
+```
+
+**Attributes:** `value`, `placeholder`, `label`, `disabled`, `searchable`, `multiple`, `error`
+
+**Events:** `ars-select:change`, `ars-select:open`, `ars-select:close`
+
+### ArsTable
+
+Data table with sorting, selection, and virtual scrolling.
+
+```javascript
+const table = document.querySelector("ars-table");
+table.columns = [
+  { key: "name", label: "Name" },
+  { key: "age", label: "Age", align: "end" },
+];
+table.data = [
+  { name: "Alice", age: 30 },
+  { name: "Bob", age: 25 },
+];
+```
+
+**Attributes:** `selectable` (none/single/multiple), `sortable`, `striped`, `compact`, `virtual-scroll`, `auto-sort`
+
+**Events:** `ars-table:sort`, `ars-table:select`, `ars-table:row-click`
 
 ### ArsCalendar
 
@@ -397,41 +548,34 @@ if (result) {
 
 ### ArsColorSelect
 
-Color picker component with improved UI and UX.
+Carousel-based color picker with spectrum-ordered swatches and keyboard navigation.
 
 ```html
-<ars-color-select id="myColorPicker" color="Blue"></ars-color-select>
+<ars-color-select color="#3B82F6" visible-count="7"></ars-color-select>
 ```
 
 **Features:**
 
-- Modern, touch-friendly color palette with grid layout
-- Color blocks have a border, shadow, and animated hover effect
-- Palette overlay can be dismissed by clicking outside the color blocks
-- Emits `ars-color-select:change` event with `{ id, color }` detail
-- Easy integration: update any text or UI in response to color changes
+- Horizontal carousel strip of circular swatches in spectrum order (red → orange → yellow → green → blue → purple → neutrals)
+- Navigation buttons and position track indicator
+- Keyboard navigation: Arrow Left/Right, Home, End
+- ARIA listbox semantics with `role="option"` and `aria-selected`
+- Custom palette via `palette` property, swatch sizes (sm/md/lg)
+- `prefers-reduced-motion` support
+
+**Attributes:** `color`, `palette` (JSON array), `swatch-size` (sm/md/lg), `disabled`, `visible-count`
+
+**Events:** `ars-color-select:change` — detail: `{ id, color, previousColor }`
 
 **Usage Example:**
 
-```html
-<span id="selectedColorText">Press the element below to change its color.</span>
-<ars-color-select id="colorSelect1"></ars-color-select>
-<script>
-  const colorSelect = document.getElementById("colorSelect1");
-  const colorText = document.getElementById("selectedColorText");
-  colorSelect.addEventListener("ars-color-select:change", (e) => {
-    colorText.textContent = `Selected Color: ${e.detail.color}`;
-  });
-</script>
+```javascript
+const picker = document.querySelector("ars-color-select");
+picker.palette = ["#FF0000", "#00FF00", "#0000FF"];
+picker.addEventListener("ars-color-select:change", (e) => {
+  console.log(`Selected: ${e.detail.color}`);
+});
 ```
-
-**Attributes:**
-
-- `color`: Initial color (optional). If not provided, a random color is selected.
-
-**Events:**
-
-- `ars-color-select:change`: Fired when a color is selected or changed.
 
 ### ArsPage & ArsPageController
 
@@ -777,7 +921,7 @@ Add the `keep-space-when-hidden` attribute to keep the element's space in the la
 cd ars-web-components
 npm install
 npm run build   # Compile TypeScript → dist/
-npm test        # Run all 325 tests
+npm test        # Run all 681 tests
 npm start       # Start dev server on port 8080
 ```
 
@@ -799,11 +943,20 @@ Once the server is running, you can access:
 
 - **Main Demo Gallery**: http://localhost:8080/
 - **Individual Components**:
-  - **ars-calendar**: http://localhost:8080/demos/components/ars-calendar/
+  - **form-primitives** (button + toggle): http://localhost:8080/demos/components/form-primitives/
+  - **ars-input**: http://localhost:8080/demos/components/ars-input/
   - **ars-color-select**: http://localhost:8080/demos/components/ars-color-select/
+  - **ars-toast**: http://localhost:8080/demos/components/ars-toast/
+  - **ars-tabs**: http://localhost:8080/demos/components/ars-tabs/
+  - **ars-select**: http://localhost:8080/demos/components/ars-select/
+  - **ars-table**: http://localhost:8080/demos/components/ars-table/
+  - **ars-info-tile**: http://localhost:8080/demos/components/ars-info-tile/
+  - **ars-calendar**: http://localhost:8080/demos/components/ars-calendar/
   - **ars-dialog**: http://localhost:8080/demos/components/ars-dialog/
   - **ars-page**: http://localhost:8080/demos/components/ars-page/
   - **ars-data-roller**: http://localhost:8080/demos/components/ars-data-roller/
+  - **ars-line-chart**: http://localhost:8080/demos/components/ars-line-chart/
+  - **ars-candlestick-chart**: http://localhost:8080/demos/components/ars-candlestick-chart/
 - **Individual Mixins**:
   - **pressed-effect**: http://localhost:8080/demos/mixins/pressed-effect-mixin/
   - **localized**: http://localhost:8080/demos/mixins/localized-mixin/
@@ -827,18 +980,33 @@ ln -s ../../../../ars-web-components ars-web-components-dev
 Check `src/index.ts` for all available imports:
 
 ```typescript
+// Components
+export { ArsButton } from "./components/ars-button/ars-button.js";
 export { ArsCalendar } from "./components/ars-calendar/ars-calendar.js";
+export { ArsCandlestickChart } from "./components/ars-candlestick-chart/ars-candlestick-chart.js";
 export { ArsColorSelect } from "./components/ars-color-select/ars-color-select.js";
+export { ArsDataRoller } from "./components/ars-data-roller/ars-data-roller.js";
 export { ArsDialog } from "./components/ars-dialog/ars-dialog.js";
-export { ArsPageController } from "./components/ars-page/ars-page-controller.js";
+export { ArsInfoTile } from "./components/ars-info-tile/ars-info-tile.js";
+export { ArsInput } from "./components/ars-input/ars-input.js";
+export { ArsLineChart } from "./components/ars-line-chart/ars-line-chart.js";
 export { ArsPage } from "./components/ars-page/ars-page.js";
-export { ArsRelationalNode } from "./components/ars-relational-node/ars-relational-node.js";
+export { ArsPageController } from "./components/ars-page/ars-page-controller.js";
+export { ArsSelect } from "./components/ars-select/ars-select.js";
+export { ArsTable } from "./components/ars-table/ars-table.js";
+export { ArsTabs, ArsTabPanel } from "./components/ars-tabs/ars-tabs.js";
+export { ArsToast } from "./components/ars-toast/ars-toast.js";
+export { ArsToggle } from "./components/ars-toggle/ars-toggle.js";
+export { ChartBase } from "./components/chart-base/chart-base.js";
 export { WebComponentBase } from "./components/web-component-base/web-component-base.js";
 
+// Design System
+export { getArsWebComponentsDefaultAdapter, initializeArsWebComponents } from "./design-system.js";
+
 // Mixins
+export { DraggableMixin } from "./mixins/draggable-mixin/draggable-mixin.js";
 export { LocalizedMixin } from "./mixins/localized-mixin/localized-mixin.js";
 export { PressedEffectMixin } from "./mixins/pressed-effect-mixin/pressed-effect-mixin.js";
-export { DraggableMixin } from "./mixins/draggable-mixin/draggable-mixin.js";
 export { RemoteCallCallerMixin } from "./mixins/remote-call-mixin/remote-call-caller-mixin.js";
 export { RemoteCallReceiverMixin } from "./mixins/remote-call-mixin/remote-call-receiver-mixin.js";
 export { RollMixin } from "./mixins/roll-mixin/roll-mixin.js";
