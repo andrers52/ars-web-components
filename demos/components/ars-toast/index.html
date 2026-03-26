@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Toast - Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+
+  <style>
+    .demo-section {
+      background: var(--arswc-color-surface, #f6f8fb);
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: var(--arswc-radius-md, 10px);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-section h3 { margin: 0 0 12px; font-size: 1rem; }
+    .demo-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 8px 0;
+    }
+    .event-log {
+      background: #0d1117; color: #c9d1d9;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      max-height: 200px; overflow-y: auto; margin-top: 12px;
+    }
+    .event-log .entry { margin-bottom: 4px; }
+    .event-log .timestamp { color: #8b949e; }
+    .event-log .event-name { color: #79c0ff; }
+    .code-block {
+      background: #161b22; color: #e6edf3;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      overflow-x: auto; margin-top: 8px;
+    }
+    .bounded-container {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      border: 2px dashed var(--arswc-color-border, #d5dde8);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+  <h1>ars-toast</h1>
+  <p>Notification toast with severity levels, auto-dismiss, and stacking.</p>
+
+  <div class="info-box">
+    <h3>About</h3>
+    <p>Provides both a <strong>static API</strong> (<code>ArsToast.show(message, options)</code>)
+       and a <strong>declarative API</strong> (<code>&lt;ars-toast&gt;</code>).
+       Toasts stack in a fixed container, animate in/out, and auto-dismiss.</p>
+  </div>
+
+  <!-- Severity levels -->
+  <div class="demo-section">
+    <h3>Severity Levels</h3>
+    <div class="demo-row">
+      <button class="btn" id="show-info">Info</button>
+      <button class="btn" id="show-success">Success</button>
+      <button class="btn" id="show-warning">Warning</button>
+      <button class="btn" id="show-error">Error</button>
+    </div>
+  </div>
+
+  <!-- Position -->
+  <div class="demo-section">
+    <h3>Positions</h3>
+    <div class="demo-row">
+      <button class="btn" data-pos="top-left">Top Left</button>
+      <button class="btn" data-pos="top-center">Top Center</button>
+      <button class="btn" data-pos="top-right">Top Right</button>
+      <button class="btn" data-pos="bottom-left">Bottom Left</button>
+      <button class="btn" data-pos="bottom-center">Bottom Center</button>
+      <button class="btn" data-pos="bottom-right">Bottom Right</button>
+    </div>
+  </div>
+
+  <!-- Stacking -->
+  <div class="demo-section">
+    <h3>Stacking</h3>
+    <p>Click rapidly to see toasts stack.</p>
+    <button class="btn" id="show-stack">Fire 5 Toasts</button>
+  </div>
+
+  <!-- Duration -->
+  <div class="demo-section">
+    <h3>Auto-Dismiss Duration</h3>
+    <div class="demo-row">
+      <label>Duration (ms): <input type="range" id="duration-slider" min="0" max="10000" step="500" value="5000"></label>
+      <span id="duration-display">5000ms</span>
+      <button class="btn" id="show-timed">Show Toast</button>
+    </div>
+  </div>
+
+  <!-- Non-dismissible -->
+  <div class="demo-section">
+    <h3>Non-Dismissible</h3>
+    <button class="btn" id="show-nondismiss">Show (no close button, auto-dismiss 3s)</button>
+  </div>
+
+  <!-- Programmatic API -->
+  <div class="demo-section">
+    <h3>Programmatic API</h3>
+    <div class="code-block">import { ArsToast } from 'ars-web-components';
+
+ArsToast.show('Operation complete!', {
+  severity: 'success',
+  duration: 4000,
+  dismissible: true,
+  position: 'top-right'
+});</div>
+  </div>
+
+  <!-- Custom mount target -->
+  <div class="demo-section">
+    <h3>Custom Mount Target</h3>
+    <p>Toast mounted inside a bounded container:</p>
+    <button class="btn" id="show-bounded">Show in Container</button>
+    <div class="bounded-container" id="bounded-target"></div>
+  </div>
+
+  <!-- Event monitor -->
+  <div class="demo-section">
+    <h3>Event Monitor</h3>
+    <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px;">Clear</button>
+    <div class="event-log" id="event-log">
+      <div class="entry"><span class="timestamp">[ready]</span> Listening...</div>
+    </div>
+  </div>
+
+  <!-- Theme toggle -->
+  <div class="demo-section">
+    <h3>Theme Toggle</h3>
+    <div style="display:flex;gap:8px;">
+      <button class="btn" id="theme-light">Light</button>
+      <button class="btn" id="theme-dark">Dark</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsToast } from '/src/components/ars-toast/ars-toast.ts';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/src/design-system.ts';
+
+    initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
+
+    // Severity buttons
+    document.getElementById('show-info').onclick = () => ArsToast.show('This is an informational message.', { severity: 'info' });
+    document.getElementById('show-success').onclick = () => ArsToast.show('Operation completed successfully!', { severity: 'success' });
+    document.getElementById('show-warning').onclick = () => ArsToast.show('Please review your settings.', { severity: 'warning' });
+    document.getElementById('show-error').onclick = () => ArsToast.show('An error occurred. Please try again.', { severity: 'error' });
+
+    // Position buttons
+    document.querySelectorAll('[data-pos]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        ArsToast.show(`Toast at ${btn.dataset.pos}`, { position: btn.dataset.pos, duration: 3000 });
+      });
+    });
+
+    // Stacking
+    document.getElementById('show-stack').onclick = () => {
+      for (let i = 1; i <= 5; i++) {
+        setTimeout(() => ArsToast.show(`Toast #${i}`, { severity: ['info','success','warning','error'][i%4], duration: 4000 }), i * 200);
+      }
+    };
+
+    // Duration
+    const slider = document.getElementById('duration-slider');
+    const display = document.getElementById('duration-display');
+    slider.oninput = () => { display.textContent = slider.value + 'ms'; };
+    document.getElementById('show-timed').onclick = () => {
+      ArsToast.show(`Auto-dismiss in ${slider.value}ms`, { duration: parseInt(slider.value) });
+    };
+
+    // Non-dismissible
+    document.getElementById('show-nondismiss').onclick = () => {
+      ArsToast.show('This toast has no close button.', { dismissible: false, duration: 3000 });
+    };
+
+    // Bounded
+    document.getElementById('show-bounded').onclick = () => {
+      const target = document.getElementById('bounded-target');
+      ArsToast.show('Inside container', { mountTarget: target, position: 'top-right', duration: 3000 });
+    };
+
+    // Event log
+    const log = document.getElementById('event-log');
+    document.addEventListener('ars-toast:dismiss', (e) => {
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+      entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">ars-toast:dismiss</span> reason=${e.detail.reason}`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    });
+    document.getElementById('clear-log').onclick = () => {
+      log.innerHTML = '<div class="entry"><span class="timestamp">[cleared]</span> Listening...</div>';
+    };
+
+    // Theme
+    document.getElementById('theme-light').onclick = () => initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
+    document.getElementById('theme-dark').onclick = () => initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('dark') });
+  </script>
+</body>
+</html>
