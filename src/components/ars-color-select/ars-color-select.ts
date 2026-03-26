@@ -1,350 +1,433 @@
-// usage:
-//  <ars-color-select
-//    color: base initial color. If not defined, a random color will be chosen.
-//  </ars-color-select>
-import { EArray } from "arslib";
-import WebComponentBase from "../web-component-base/web-component-base.js";
+// <ars-color-select> — Carousel-based color picker.
+//
+// Renders a horizontal carousel strip of circular color swatches. The user
+// clicks/taps to select, uses arrow keys to navigate, and the selected swatch
+// is visually emphasized.
+//
+// Attributes:
+//   color         — current selected color (read/write, backwards compatible)
+//   palette       — JSON array of color strings (overrides default)
+//   swatch-size   — "sm" | "md" | "lg" (default "md")
+//   disabled      — boolean
+//   visible-count — number of swatches visible at once (default 7)
+//
+// Properties:
+//   color         — string (read/write)
+//   palette       — string[] (read/write)
+//   selectedIndex — number (read-only)
+//
+// Events:
+//   ars-color-select:change — composed CustomEvent with detail
+//     { id, color, previousColor }
 
-class ArsColorSelect extends WebComponentBase {
-  [key: string]: any;
+export type ArsColorSelectSwatchSize = "sm" | "md" | "lg";
 
-  // ---- PRIVATE STATIC UTILITY METHODS ----
-  static #COLORS = [
-    "Aqua",
-    "Aquamarine",
-    "BlueViolet",
-    "Brown",
-    "BurlyWood",
-    "CadetBlue",
-    "Chartreuse",
-    "Chocolate",
-    "Crimson",
-    "Cyan",
-    "DarkCyan",
-    "DarkGoldenRod",
-    "DarkGray",
-    "DarkGreen",
-    "DarkKhaki",
-    "DarkMagenta",
-    "DarkOliveGreen",
-    "DarkOrange",
-    "DarkOrchid",
-    "DarkRed",
-    "DarkSalmon",
-    "DarkSeaGreen",
-    "DarkSlateBlue",
-    "DarkSlateGray",
-    "DarkTurquoise",
-    "DarkViolet",
-    "DeepPink",
-    "DeepSkyBlue",
-    "DimGray",
-    "DodgerBlue",
-    "FireBrick",
-    "ForestGreen",
-    "Fuchsia",
-    "Gold",
-    "GoldenRod",
-    "Gray",
-    "Green",
-    "GreenYellow",
-    "HotPink",
-    "IndianRed",
-    "LawnGreen",
-    "LightBlue",
-    "LightCoral",
-    "LightGreen",
-    "LightSalmon",
-    "LightSeaGreen",
-    "LightSkyBlue",
-    "LightSlateGray",
-    "LightSteelBlue",
-    "Lime",
-    "LimeGreen",
-    "Magenta",
-    "MediumAquaMarine",
-    "MediumOrchid",
-    "MediumPurple",
-    "MediumSeaGreen",
-    "MediumSlateBlue",
-    "MediumSpringGreen",
-    "MediumTurquoise",
-    "MediumVioletRed",
-    "Olive",
-    "Orange",
-    "OrangeRed",
-    "Orchid",
-    "Peru",
-    "Pink",
-    "Plum",
-    "Purple",
-    "RebeccaPurple",
-    "Red",
-    "RosyBrown",
-    "RoyalBlue",
-    "SaddleBrown",
-    "Salmon",
-    "SandyBrown",
-    "SeaGreen",
-    "Sienna",
-    "Silver",
-    "SkyBlue",
-    "SlateBlue",
-    "SlateGray",
-    "SpringGreen",
-    "SteelBlue",
-    "Tan",
-    "Teal",
-    "Thistle",
-    "Tomato",
-    "Turquoise",
-    "Violet",
-    "Yellow",
-    "YellowGreen",
-  ];
+// Curated default palette ordered by hue (spectrum order)
+const DEFAULT_PALETTE: string[] = [
+  // Reds
+  "#DC2626", "#EF4444", "#F87171",
+  // Oranges
+  "#EA580C", "#F97316", "#FB923C",
+  // Yellows
+  "#CA8A04", "#EAB308", "#FACC15",
+  // Greens
+  "#16A34A", "#22C55E", "#4ADE80",
+  // Teals
+  "#0D9488", "#14B8A6", "#2DD4BF",
+  // Cyans
+  "#0891B2", "#06B6D4", "#22D3EE",
+  // Blues
+  "#2563EB", "#3B82F6", "#60A5FA",
+  // Indigos
+  "#4F46E5", "#6366F1", "#818CF8",
+  // Purples
+  "#7C3AED", "#8B5CF6", "#A78BFA",
+  // Pinks
+  "#DB2777", "#EC4899", "#F472B6",
+  // Neutrals
+  "#1F2937", "#6B7280", "#D1D5DB", "#F9FAFB",
+];
 
-  static #getRandomColor() {
-    return EArray.choice(ArsColorSelect.#COLORS);
+class ArsColorSelect extends HTMLElement {
+  private _palette: string[] = [...DEFAULT_PALETTE];
+  private _scrollOffset = 0;
+  private _selectedIdx = 0;
+  private _eventsBound = false;
+
+  static get observedAttributes() {
+    return ["color", "palette", "swatch-size", "disabled", "visible-count"];
   }
 
-  static #getColorAttribute(element) {
-    return element.getAttribute("color");
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
   }
 
-  static #setColorAttribute(element, color) {
-    element.setAttribute("color", color);
+  connectedCallback() {
+    // Initialize selection from color attribute if present
+    const initialColor = this.getAttribute("color");
+    if (initialColor) {
+      const idx = this._palette.findIndex(
+        (c) => c.toLowerCase() === initialColor.toLowerCase(),
+      );
+      if (idx >= 0) this._selectedIdx = idx;
+    }
+    this.#render();
+    this.#bindEvents();
+    // Make focusable for keyboard navigation
+    if (!this.hasAttribute("tabindex")) {
+      this.setAttribute("tabindex", "0");
+    }
   }
 
-  static #setBackgroundColor(element, color) {
-    if (!element) return;
-    element.style.backgroundColor = color;
+  attributeChangedCallback(name: string, oldVal: string | null, newVal: string | null) {
+    if (name === "palette" && newVal) {
+      try {
+        this._palette = JSON.parse(newVal);
+        this._selectedIdx = 0;
+        this._scrollOffset = 0;
+      } catch { /* keep existing palette */ }
+    }
+    if (name === "color" && newVal && oldVal !== newVal) {
+      const previousColor = oldVal ?? "";
+      const idx = this._palette.findIndex(
+        (c) => c.toLowerCase() === newVal.toLowerCase(),
+      );
+      if (idx >= 0) {
+        this._selectedIdx = idx;
+        this.#scrollToSelected();
+      }
+      this.dispatchEvent(
+        new CustomEvent("ars-color-select:change", {
+          bubbles: true,
+          composed: true,
+          detail: { id: this.id, color: newVal, previousColor },
+        }),
+      );
+    }
+    if (this.shadowRoot) this.#render();
   }
 
-  static #toggleElementVisibility(element) {
-    if (!element) return;
-    element.style.visibility =
-      element.style.visibility === "visible" ? "hidden" : "visible";
+  // --- Property accessors ---
+
+  get color(): string {
+    return this.getAttribute("color") ?? this._palette[this._selectedIdx] ?? "";
   }
 
-  static #createColorChangeEvent(id, color) {
-    return new CustomEvent("ars-color-select:change", {
-      detail: { id, color },
-      bubbles: true,
-      composed: true,
-    });
+  set color(value: string) {
+    this.setAttribute("color", value);
   }
 
-  static #createColorDiv(color) {
-    return `<div style="background-color: ${color};"></div>`;
+  get palette(): string[] {
+    return [...this._palette];
   }
 
-  static #createColorOptionsHTML() {
-    return ArsColorSelect.#COLORS
-      .map(ArsColorSelect.#createColorDiv)
-      .join(" &nbsp ");
+  set palette(value: string[]) {
+    this._palette = [...value];
+    this._selectedIdx = 0;
+    this._scrollOffset = 0;
+    this.setAttribute("palette", JSON.stringify(value));
   }
 
-  static #createTemplate() {
-    return `
-      <style>
-        :host {
-          display: inline-block;
-          width: 44px;
-          height: 44px;
-        }
-        .overlay {
-          position: fixed;
-          visibility: hidden;
-          width: 100%;
-          height: 100%;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: var(--ars-color-select-overlay-bg, color-mix(in srgb, var(--arswc-color-text, #000) 35%, transparent));
-          z-index: 2;
-          cursor: pointer;
-        }
-        .center {
-          margin: auto;
-          width: 80%;
-          padding: 5px;
-        }
-        .flex-container {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
-          column-gap: 4px;
-          row-gap: 8px;
-          justify-content: center;
-          align-content: flex-start;
-          width: 80%;
-          padding: 5px;
-          position: absolute;
-          top: 40%; left: 50%;
-          transform: translate(-50%,-40%);
-          user-select: none;
-          z-index: 99;
-          visibility: inherit;
-        }
-        .flex-container > div {
-          width: 44px;
-          height: 44px;
-          border-radius: var(--ars-color-select-swatch-radius, var(--arswc-radius-sm, 6px));
-          border: var(--ars-color-select-swatch-border, 2px solid var(--arswc-color-bg, #fff));
-          box-shadow: var(--ars-color-select-swatch-shadow, var(--arswc-shadow-sm, 0 1px 4px rgba(0,0,0,0.10)));
-          cursor: pointer;
-          transition: transform 0.18s cubic-bezier(.4,2,.6,1), box-shadow 0.18s;
-          background-clip: padding-box;
-        }
-        .flex-container > div:hover {
-          transform: translateY(-6px) scale(1.08);
-          box-shadow: var(--ars-color-select-swatch-hover-shadow, var(--arswc-shadow-sm, 0 6px 16px rgba(0,0,0,0.18)));
-          z-index: 1;
-        }
-        .colorSelector {
-          width: 40px;
-          height: 40px;
-          margin: auto;
-          background-color: blue;
-          border-radius: var(--ars-color-select-selector-radius, var(--arswc-radius-sm, 5px));
-          cursor: pointer;
-          border: var(--ars-color-select-selector-border, 2px solid var(--arswc-color-border, #ccc));
-          box-shadow: var(--ars-color-select-selector-shadow, var(--arswc-shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.1)));
-          transition: all 0.2s ease;
-        }
-        .colorSelector:hover {
-          transform: scale(1.05);
-          box-shadow: var(--ars-color-select-selector-hover-shadow, var(--arswc-shadow-sm, 0 4px 8px rgba(0, 0, 0, 0.2)));
-        }
-      </style>
-      <div id="colorSelector" class="colorSelector" style="visibility: visible;"> &nbsp; </div>
-      <div id="optionsContainer" class="overlay" style="visibility: hidden;">
-        <div id="colorsDiv" class="flex-container center" >
-        ${ArsColorSelect.#createColorOptionsHTML()}
+  get selectedIndex(): number {
+    return this._selectedIdx;
+  }
+
+  get swatchSize(): ArsColorSelectSwatchSize {
+    return (this.getAttribute("swatch-size") as ArsColorSelectSwatchSize) || "md";
+  }
+
+  set swatchSize(value: ArsColorSelectSwatchSize) {
+    this.setAttribute("swatch-size", value);
+  }
+
+  get visibleCount(): number {
+    return parseInt(this.getAttribute("visible-count") ?? "7", 10);
+  }
+
+  set visibleCount(value: number) {
+    this.setAttribute("visible-count", String(value));
+  }
+
+  get disabled(): boolean {
+    return this.hasAttribute("disabled");
+  }
+
+  set disabled(value: boolean) {
+    this.toggleAttribute("disabled", value);
+  }
+
+  // --- Deprecated API (backwards compatibility) ---
+
+  /** @deprecated Use the `color` property setter instead. */
+  setBackgroundColor(color: string) {
+    this.color = color;
+  }
+
+  /** @deprecated No longer applicable (overlay removed). Use the component directly. */
+  toggleColorSelection() {
+    // No-op: the overlay model was removed in the carousel redesign.
+  }
+
+  // --- Selection ---
+
+  #selectIndex(idx: number) {
+    if (this.disabled || idx < 0 || idx >= this._palette.length) return;
+    const previousColor = this.color;
+    this._selectedIdx = idx;
+    this.setAttribute("color", this._palette[idx]);
+    // Note: the attributeChangedCallback fires the event
+    // If color didn't change (same value), manually re-render
+    if (this._palette[idx].toLowerCase() === previousColor.toLowerCase()) {
+      this.#render();
+    }
+  }
+
+  #scrollToSelected() {
+    const visCount = this.visibleCount;
+    // Ensure selected is visible
+    if (this._selectedIdx < this._scrollOffset) {
+      this._scrollOffset = this._selectedIdx;
+    } else if (this._selectedIdx >= this._scrollOffset + visCount) {
+      this._scrollOffset = this._selectedIdx - visCount + 1;
+    }
+  }
+
+  // --- Rendering ---
+
+  #getSwatchPx(): number {
+    const size = this.swatchSize;
+    if (size === "sm") return 28;
+    if (size === "lg") return 48;
+    return 36; // md
+  }
+
+  #render() {
+    if (!this.shadowRoot) return;
+
+    const swatchPx = this.#getSwatchPx();
+    const gap = 8;
+    const visCount = this.visibleCount;
+    const totalWidth = visCount * (swatchPx + gap) - gap;
+    const trackProgress = this._palette.length > visCount
+      ? this._scrollOffset / (this._palette.length - visCount)
+      : 0;
+
+    const swatchesHtml = this._palette
+      .map((c, i) => {
+        const isSelected = i === this._selectedIdx;
+        return `<div
+          class="swatch ${isSelected ? "swatch--selected" : ""}"
+          role="option"
+          aria-selected="${String(isSelected)}"
+          aria-label="${ArsColorSelect.#escapeAttr(c)}"
+          data-index="${i}"
+          style="background-color: ${c};"
+          ${isSelected ? 'tabindex="0"' : 'tabindex="-1"'}
+        ></div>`;
+      })
+      .join("");
+
+    const translateX = -(this._scrollOffset * (swatchPx + gap));
+
+    this.shadowRoot.innerHTML = `
+      <style>${ArsColorSelect.#styles(swatchPx, gap, totalWidth)}</style>
+      <div class="carousel" role="listbox" aria-orientation="horizontal" aria-label="Color palette">
+        <button class="nav-btn nav-btn--prev" aria-label="Previous colors"
+                ${this._scrollOffset <= 0 ? "disabled" : ""}>&lsaquo;</button>
+        <div class="viewport">
+          <div class="strip" style="transform: translateX(${translateX}px);">
+            ${swatchesHtml}
+          </div>
         </div>
+        <button class="nav-btn nav-btn--next" aria-label="Next colors"
+                ${this._scrollOffset >= this._palette.length - visCount ? "disabled" : ""}>&rsaquo;</button>
+      </div>
+      <div class="track">
+        <div class="track-marker" style="left: ${trackProgress * 100}%;"></div>
       </div>
     `;
   }
 
-  static #createColorClickHandler(colorSelector, component) {
-    return (element) => {
-      const backgroundColor = element.currentTarget.style.backgroundColor;
-      ArsColorSelect.#setBackgroundColor(colorSelector, backgroundColor);
-      ArsColorSelect.#setColorAttribute(component, backgroundColor);
-      component.toggleColorSelection();
-    };
-  }
+  #bindEvents() {
+    if (!this.shadowRoot || this._eventsBound) return;
+    this._eventsBound = true;
 
-  static #createSelectorClickHandler(component) {
-    return () => {
-      component.toggleColorSelection();
-    };
-  }
-
-  static #initializeColorSelectors(shadowRoot, component) {
-    const colorSelector = shadowRoot.getElementById("colorSelector");
-    const colorsDiv = shadowRoot.getElementById("colorsDiv");
-    const innerDivs = colorsDiv.getElementsByTagName("div");
-    for (let i = 0; i < innerDivs.length; i++) {
-      innerDivs[i].onclick = ArsColorSelect.#createColorClickHandler(
-        colorSelector,
-        component,
-      );
-    }
-    colorSelector.onclick =
-      ArsColorSelect.#createSelectorClickHandler(component);
-  }
-
-  static #initializeColor(component) {
-    if (!ArsColorSelect.#getColorAttribute(component)) {
-      ArsColorSelect.#setColorAttribute(
-        component,
-        ArsColorSelect.#getRandomColor(),
-      );
-    }
-    return ArsColorSelect.#getColorAttribute(component);
-  }
-
-  static #sendColorChangeEvent(component, color) {
-    component.dispatchEvent(
-      ArsColorSelect.#createColorChangeEvent(component.id, color),
-    );
-  }
-
-  static #toggleColorSelection(component) {
-    const colorSelector = component.shadowRoot.getElementById("colorSelector");
-    const optionsContainer =
-      component.shadowRoot.getElementById("optionsContainer");
-    ArsColorSelect.#toggleElementVisibility(colorSelector);
-    ArsColorSelect.#toggleElementVisibility(optionsContainer);
-  }
-
-  static #initializeColorSelect(component) {
-    if (!component.shadowRoot) {
-      component.attachShadow({ mode: "open" });
-    }
-    // The template factory already returns the final HTML string for the component.
-    component.shadowRoot.innerHTML = ArsColorSelect.#createTemplate();
-    ArsColorSelect.#initializeColorSelectors(component.shadowRoot, component);
-    const initialColor = ArsColorSelect.#initializeColor(component);
-    ArsColorSelect.#setBackgroundColor(
-      component.shadowRoot.getElementById("colorSelector"),
-      initialColor,
-    );
-    // Add overlay click handler to dismiss on outside click
-    const optionsContainer =
-      component.shadowRoot.getElementById("optionsContainer");
-    optionsContainer.onclick = (e) => {
-      if (e.target === optionsContainer) {
-        component.toggleColorSelection();
+    // Swatch click
+    this.shadowRoot.addEventListener("click", (e) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains("swatch")) {
+        const idx = parseInt(target.dataset.index ?? "0", 10);
+        this.#selectIndex(idx);
       }
-    };
-    return component;
+      if (target.classList.contains("nav-btn--prev")) {
+        this._scrollOffset = Math.max(0, this._scrollOffset - this.visibleCount);
+        this.#render();
+      }
+      if (target.classList.contains("nav-btn--next")) {
+        this._scrollOffset = Math.min(
+          this._palette.length - this.visibleCount,
+          this._scrollOffset + this.visibleCount,
+        );
+        this.#render();
+      }
+    });
+
+    // Keyboard navigation
+    this.addEventListener("keydown", (evt) => {
+      if (this.disabled) return;
+      const e = evt as KeyboardEvent;
+      switch (e.key) {
+        case "ArrowRight":
+        case "ArrowDown":
+          e.preventDefault();
+          this.#selectIndex(Math.min(this._selectedIdx + 1, this._palette.length - 1));
+          this.#scrollToSelected();
+          this.#render();
+          break;
+        case "ArrowLeft":
+        case "ArrowUp":
+          e.preventDefault();
+          this.#selectIndex(Math.max(this._selectedIdx - 1, 0));
+          this.#scrollToSelected();
+          this.#render();
+          break;
+        case "Home":
+          e.preventDefault();
+          this.#selectIndex(0);
+          this._scrollOffset = 0;
+          this.#render();
+          break;
+        case "End":
+          e.preventDefault();
+          this.#selectIndex(this._palette.length - 1);
+          this.#scrollToSelected();
+          this.#render();
+          break;
+      }
+    });
   }
 
-  // ---- PRIVATE INSTANCE METHODS ----
-
-  constructor() {
-    super();
-    this.template = ArsColorSelect.#createTemplate();
-    this.colorSelector = "";
+  static #escapeAttr(value: string): string {
+    return value.replaceAll('"', "&quot;").replaceAll("'", "&#39;");
   }
 
-  connectedCallback() {
-    ArsColorSelect.#initializeColorSelect(this);
-  }
+  static #styles(swatchPx: number, gap: number, totalWidth: number): string {
+    return `
+      :host {
+        display: inline-block;
+        font-family: var(--arswc-font-family-sans, system-ui, sans-serif);
+      }
 
-  static get observedAttributes() {
-    return ["color"];
-  }
+      :host([disabled]) {
+        pointer-events: none;
+        opacity: 0.5;
+      }
 
-  attributeChangedCallback(attrName, oldVal, newVal) {
-    super.attributeChangedCallback(attrName, oldVal, newVal);
-    if (attrName === "color" && oldVal !== newVal && newVal) {
-      ArsColorSelect.#sendColorChangeEvent(this, newVal);
-      this.setBackgroundColor(newVal);
-    }
-  }
+      .carousel {
+        display: flex;
+        align-items: center;
+        gap: var(--arswc-spacing-xs, 4px);
+      }
 
-  // ---- PUBLIC INSTANCE METHODS ----
-  setBackgroundColor(color) {
-    if (!this.shadowRoot) return;
-    ArsColorSelect.#setBackgroundColor(
-      this.shadowRoot.getElementById("colorSelector"),
-      color,
-    );
-  }
+      .viewport {
+        width: ${totalWidth}px;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
 
-  toggleColorSelection() {
-    const colorSelector = this.shadowRoot.getElementById("colorSelector");
-    const optionsContainer = this.shadowRoot.getElementById("optionsContainer");
-    ArsColorSelect.#toggleElementVisibility(colorSelector);
-    ArsColorSelect.#toggleElementVisibility(optionsContainer);
+      .strip {
+        display: flex;
+        gap: ${gap}px;
+        transition: transform var(--ars-color-select-transition-duration, var(--arswc-transition-duration, 200ms)) ease;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .strip { transition: none; }
+      }
+
+      .swatch {
+        width: ${swatchPx}px;
+        height: ${swatchPx}px;
+        border-radius: var(--ars-color-select-swatch-radius, 50%);
+        border: 2px solid transparent;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition:
+          transform var(--arswc-transition-duration, 200ms) ease,
+          box-shadow var(--arswc-transition-duration, 200ms) ease,
+          border-color var(--arswc-transition-duration, 200ms) ease;
+      }
+
+      .swatch:hover {
+        transform: scale(1.1);
+      }
+
+      .swatch--selected {
+        transform: scale(var(--ars-color-select-selected-scale, 1.2));
+        border-color: var(--arswc-color-text, #1b2430);
+        box-shadow: var(--ars-color-select-selected-shadow, 0 2px 8px rgba(0,0,0,0.25));
+      }
+
+      .swatch--selected:hover {
+        transform: scale(var(--ars-color-select-selected-scale, 1.2));
+      }
+
+      .swatch:focus-visible {
+        outline: none;
+        box-shadow: var(--arswc-focus-ring, 0 0 0 3px rgba(37, 99, 235, 0.3));
+      }
+
+      .nav-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border: 1px solid var(--arswc-color-border, #d5dde8);
+        border-radius: 50%;
+        background: var(--arswc-color-surface, #f6f8fb);
+        color: var(--arswc-color-text, #1b2430);
+        font-size: 1.2rem;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background var(--arswc-transition-duration, 200ms) ease;
+        line-height: 1;
+      }
+
+      .nav-btn:hover:not(:disabled) {
+        background: var(--arswc-color-border, #d5dde8);
+      }
+
+      .nav-btn:disabled {
+        opacity: 0.3;
+        cursor: default;
+      }
+
+      .track {
+        position: relative;
+        height: var(--ars-color-select-track-height, 3px);
+        background: var(--ars-color-select-track-color, var(--arswc-color-border, #d5dde8));
+        border-radius: 2px;
+        margin-top: var(--arswc-spacing-sm, 8px);
+      }
+
+      .track-marker {
+        position: absolute;
+        top: -2px;
+        width: 12px;
+        height: 7px;
+        border-radius: 4px;
+        background: var(--ars-color-select-track-active-color, var(--arswc-color-accent, #2563eb));
+        transform: translateX(-50%);
+        transition: left var(--arswc-transition-duration, 200ms) ease;
+      }
+    `;
   }
 }
 
-if (document.createElement("ars-color-select").constructor === HTMLElement) {
-  window.customElements.define("ars-color-select", ArsColorSelect);
+if (typeof customElements !== "undefined" && !customElements.get("ars-color-select")) {
+  customElements.define("ars-color-select", ArsColorSelect);
 }
 
 export { ArsColorSelect, ArsColorSelect as default };
