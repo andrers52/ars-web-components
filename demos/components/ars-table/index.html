@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Table - Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+
+  <style>
+    .demo-section {
+      background: var(--arswc-color-surface, #f6f8fb);
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: var(--arswc-radius-md, 10px);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-section h3 { margin: 0 0 12px; font-size: 1rem; }
+    .demo-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+    .event-log {
+      background: #0d1117; color: #c9d1d9;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      max-height: 200px; overflow-y: auto; margin-top: 12px;
+    }
+    .event-log .entry { margin-bottom: 4px; }
+    .event-log .timestamp { color: #8b949e; }
+    .event-log .event-name { color: #79c0ff; }
+    .code-block {
+      background: #161b22; color: #e6edf3;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      overflow-x: auto; margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+  <h1>ars-table</h1>
+  <p>Data table with sorting, selection, and virtual scrolling.</p>
+
+  <div class="info-box">
+    <h3>About</h3>
+    <p>Renders tabular data with sortable columns, single/multiple row selection,
+       striped/compact variants, virtual scrolling for large datasets, and custom
+       cell rendering. Uses ARIA grid/row/columnheader/gridcell roles.</p>
+  </div>
+
+  <!-- Basic -->
+  <div class="demo-section">
+    <h3>Basic Table</h3>
+    <ars-table id="basic-table"></ars-table>
+  </div>
+
+  <!-- Sortable -->
+  <div class="demo-section">
+    <h3>Sortable Columns</h3>
+    <ars-table id="sort-table" sortable auto-sort></ars-table>
+  </div>
+
+  <!-- Row selection -->
+  <div class="demo-section">
+    <h3>Row Selection (Single)</h3>
+    <ars-table id="select-single" selectable="single"></ars-table>
+  </div>
+
+  <div class="demo-section">
+    <h3>Row Selection (Multiple)</h3>
+    <ars-table id="select-multi" selectable="multiple"></ars-table>
+  </div>
+
+  <!-- Striped / Compact -->
+  <div class="demo-section">
+    <h3>Striped &amp; Compact</h3>
+    <ars-table id="striped-compact" striped compact></ars-table>
+  </div>
+
+  <!-- Virtual scrolling -->
+  <div class="demo-section">
+    <h3>Virtual Scrolling (10,000 rows)</h3>
+    <button class="btn" id="load-large">Load 10,000 Rows</button>
+    <ars-table id="virtual-table" virtual-scroll sortable auto-sort></ars-table>
+  </div>
+
+  <!-- Custom cell rendering -->
+  <div class="demo-section">
+    <h3>Custom Cell Rendering</h3>
+    <ars-table id="custom-render"></ars-table>
+  </div>
+
+  <!-- Empty state -->
+  <div class="demo-section">
+    <h3>Empty State</h3>
+    <ars-table id="empty-table">
+      <span slot="empty">No records found. Try adjusting your filters.</span>
+    </ars-table>
+  </div>
+
+  <!-- Event monitor -->
+  <div class="demo-section">
+    <h3>Event Monitor</h3>
+    <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px;">Clear</button>
+    <div class="event-log" id="event-log">
+      <div class="entry"><span class="timestamp">[ready]</span> Listening...</div>
+    </div>
+  </div>
+
+  <!-- Theme -->
+  <div class="demo-section">
+    <h3>Theme Toggle</h3>
+    <div style="display:flex;gap:8px;">
+      <button class="btn" id="theme-light">Light</button>
+      <button class="btn" id="theme-dark">Dark</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsTable } from '/src/components/ars-table/ars-table.ts';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/src/design-system.ts';
+
+    initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
+
+    const cols = [
+      { key: 'name', label: 'Name' },
+      { key: 'age', label: 'Age', align: 'end' },
+      { key: 'city', label: 'City' },
+      { key: 'status', label: 'Status' },
+    ];
+
+    const data = [
+      { name: 'Alice', age: 30, city: 'New York', status: 'Active' },
+      { name: 'Bob', age: 25, city: 'Los Angeles', status: 'Inactive' },
+      { name: 'Charlie', age: 35, city: 'Chicago', status: 'Active' },
+      { name: 'Diana', age: 28, city: 'Houston', status: 'Active' },
+      { name: 'Eve', age: 32, city: 'Phoenix', status: 'Inactive' },
+      { name: 'Frank', age: 45, city: 'Seattle', status: 'Active' },
+      { name: 'Grace', age: 29, city: 'Denver', status: 'Active' },
+    ];
+
+    // Basic tables
+    for (const id of ['basic-table', 'sort-table', 'select-single', 'select-multi', 'striped-compact']) {
+      const t = document.getElementById(id);
+      t.columns = cols;
+      t.data = data;
+    }
+
+    // Empty table
+    document.getElementById('empty-table').columns = cols;
+    document.getElementById('empty-table').data = [];
+
+    // Virtual scroll
+    const vTable = document.getElementById('virtual-table');
+    vTable.columns = cols;
+    vTable.data = data;
+    document.getElementById('load-large').onclick = () => {
+      const cities = ['NYC', 'LA', 'Chicago', 'Houston', 'Phoenix', 'Seattle', 'Denver', 'Austin'];
+      const statuses = ['Active', 'Inactive', 'Pending'];
+      const bigData = Array.from({ length: 10000 }, (_, i) => ({
+        name: `User ${i + 1}`,
+        age: 18 + (i % 60),
+        city: cities[i % cities.length],
+        status: statuses[i % statuses.length],
+      }));
+      vTable.data = bigData;
+    };
+
+    // Custom render
+    const customTable = document.getElementById('custom-render');
+    customTable.columns = [
+      { key: 'name', label: 'Name' },
+      { key: 'score', label: 'Score', align: 'end', render: (v) => `<strong>${v}</strong>` },
+      { key: 'status', label: 'Status', render: (v) => {
+        const color = v === 'Active' ? 'var(--arswc-color-success, green)' : 'var(--arswc-color-muted, gray)';
+        return `<span style="color:${color};font-weight:600;">${v}</span>`;
+      }},
+    ];
+    customTable.data = [
+      { name: 'Alice', score: 95, status: 'Active' },
+      { name: 'Bob', score: 72, status: 'Inactive' },
+      { name: 'Charlie', score: 88, status: 'Active' },
+    ];
+
+    // Event log
+    const log = document.getElementById('event-log');
+    for (const evtName of ['ars-table:sort', 'ars-table:select', 'ars-table:row-click']) {
+      document.addEventListener(evtName, (e) => {
+        const time = new Date().toLocaleTimeString();
+        const entry = document.createElement('div');
+        entry.className = 'entry';
+        const detail = JSON.stringify(e.detail, null, 0).slice(0, 120);
+        entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">${evtName}</span> ${detail}`;
+        log.appendChild(entry);
+        log.scrollTop = log.scrollHeight;
+      });
+    }
+    document.getElementById('clear-log').onclick = () => {
+      log.innerHTML = '<div class="entry"><span class="timestamp">[cleared]</span> Listening...</div>';
+    };
+
+    // Theme
+    document.getElementById('theme-light').onclick = () => initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
+    document.getElementById('theme-dark').onclick = () => initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('dark') });
+  </script>
+</body>
+</html>
