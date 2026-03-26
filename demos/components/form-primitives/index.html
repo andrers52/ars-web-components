@@ -177,10 +177,67 @@
   <!-- ============= SEPARATOR ============= -->
   <div class="separator"></div>
 
-  <!-- ars-toggle placeholder - will be added in step 2 -->
   <div class="info-box">
-    <h3>ars-toggle</h3>
-    <p><em>Toggle component will be added here in the next iteration.</em></p>
+    <h3>About</h3>
+    <p><strong>ars-toggle</strong> is a switch/toggle control for boolean state.
+       Uses <code>role="switch"</code> with <code>aria-checked</code> for accessibility.
+       Keyboard navigable with Space and Enter.</p>
+  </div>
+
+  <h2>ars-toggle</h2>
+
+  <!-- Basic -->
+  <div class="demo-section">
+    <h3>Basic</h3>
+    <div class="demo-row">
+      <ars-toggle></ars-toggle>
+      <ars-toggle label="Enable notifications"></ars-toggle>
+      <ars-toggle label="Dark mode" checked></ars-toggle>
+    </div>
+    <div class="code-block">&lt;ars-toggle&gt;&lt;/ars-toggle&gt;
+&lt;ars-toggle label="Enable notifications"&gt;&lt;/ars-toggle&gt;
+&lt;ars-toggle label="Dark mode" checked&gt;&lt;/ars-toggle&gt;</div>
+  </div>
+
+  <!-- Label positions -->
+  <div class="demo-section">
+    <h3>Label Positions</h3>
+    <div class="demo-row">
+      <ars-toggle label="Label at start" label-position="start"></ars-toggle>
+      <ars-toggle label="Label at end" label-position="end"></ars-toggle>
+    </div>
+    <div class="code-block">&lt;ars-toggle label="Label at start" label-position="start"&gt;&lt;/ars-toggle&gt;
+&lt;ars-toggle label="Label at end" label-position="end"&gt;&lt;/ars-toggle&gt;</div>
+  </div>
+
+  <!-- States -->
+  <div class="demo-section">
+    <h3>States</h3>
+    <div class="demo-row">
+      <ars-toggle label="Disabled (off)" disabled></ars-toggle>
+      <ars-toggle label="Disabled (on)" disabled checked></ars-toggle>
+    </div>
+    <div class="code-block">&lt;ars-toggle label="Disabled (off)" disabled&gt;&lt;/ars-toggle&gt;
+&lt;ars-toggle label="Disabled (on)" disabled checked&gt;&lt;/ars-toggle&gt;</div>
+  </div>
+
+  <!-- Toggle event log -->
+  <div class="demo-section">
+    <h3>Event Log</h3>
+    <p>Toggle any switch above and watch events appear below.</p>
+    <button class="btn" id="clear-toggle-log" style="font-size:0.8rem; padding:4px 10px;">Clear Log</button>
+    <div class="event-log" id="toggle-event-log">
+      <div class="entry"><span class="timestamp">[ready]</span> Listening for ars-toggle:change events...</div>
+    </div>
+  </div>
+
+  <!-- Live binding: toggle controls theme -->
+  <div class="demo-section">
+    <h3>Live Binding</h3>
+    <p>This toggle switches between light and dark theme:</p>
+    <div class="demo-row">
+      <ars-toggle id="theme-toggle" label="Dark Mode"></ars-toggle>
+    </div>
   </div>
 
   <!-- ============= THEME TOGGLE ============= -->
@@ -218,6 +275,7 @@
   <!-- Scripts -->
   <script type="module">
     import { ArsButton } from '/src/components/ars-button/ars-button.ts';
+    import { ArsToggle } from '/src/components/ars-toggle/ars-toggle.ts';
     import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/src/design-system.ts';
 
     // Initialize with light theme by default
@@ -225,22 +283,37 @@
       designAdapter: getArsWebComponentsDefaultAdapter('light')
     });
 
-    // Event log
-    const log = document.getElementById('btn-event-log');
+    // Button event log
+    const btnLog = document.getElementById('btn-event-log');
     document.addEventListener('ars-button:click', (e) => {
       const time = new Date().toLocaleTimeString();
       const entry = document.createElement('div');
       entry.className = 'entry';
       entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">ars-button:click</span> variant=${e.detail.variant}`;
-      log.appendChild(entry);
-      log.scrollTop = log.scrollHeight;
+      btnLog.appendChild(entry);
+      btnLog.scrollTop = btnLog.scrollHeight;
     });
 
     document.getElementById('clear-btn-log').addEventListener('click', () => {
-      log.innerHTML = '<div class="entry"><span class="timestamp">[cleared]</span> Listening...</div>';
+      btnLog.innerHTML = '<div class="entry"><span class="timestamp">[cleared]</span> Listening...</div>';
     });
 
-    // Theme toggles
+    // Toggle event log
+    const toggleLog = document.getElementById('toggle-event-log');
+    document.addEventListener('ars-toggle:change', (e) => {
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+      entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">ars-toggle:change</span> checked=${e.detail.checked}`;
+      toggleLog.appendChild(entry);
+      toggleLog.scrollTop = toggleLog.scrollHeight;
+    });
+
+    document.getElementById('clear-toggle-log').addEventListener('click', () => {
+      toggleLog.innerHTML = '<div class="entry"><span class="timestamp">[cleared]</span> Listening...</div>';
+    });
+
+    // Theme toggles (buttons)
     document.getElementById('theme-light').addEventListener('click', () => {
       initializeArsWebComponents({
         designAdapter: getArsWebComponentsDefaultAdapter('light')
@@ -249,6 +322,14 @@
     document.getElementById('theme-dark').addEventListener('click', () => {
       initializeArsWebComponents({
         designAdapter: getArsWebComponentsDefaultAdapter('dark')
+      });
+    });
+
+    // Live binding: dark mode toggle
+    document.getElementById('theme-toggle').addEventListener('ars-toggle:change', (e) => {
+      const mode = e.detail.checked ? 'dark' : 'light';
+      initializeArsWebComponents({
+        designAdapter: getArsWebComponentsDefaultAdapter(mode)
       });
     });
   </script>
