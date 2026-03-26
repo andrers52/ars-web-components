@@ -12,6 +12,8 @@ export { ArsInfoTile } from "./components/ars-info-tile/ars-info-tile.js";
 export type { ArsInfoTileData, ArsInfoTileProperty } from "./components/ars-info-tile/ars-info-tile.js";
 /** @deprecated Use ArsInfoTile instead. */
 export { ArsRelationalNode } from "./components/ars-relational-node/ars-relational-node.js";
+export { ArsSelect } from "./components/ars-select/ars-select.js";
+export type { ArsSelectOption } from "./components/ars-select/ars-select.js";
 export { ArsTabs, ArsTabPanel } from "./components/ars-tabs/ars-tabs.js";
 export type { ArsTabsPlacement } from "./components/ars-tabs/ars-tabs.js";
 export { ArsToast } from "./components/ars-toast/ars-toast.js";
