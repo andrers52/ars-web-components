@@ -2,6 +2,7 @@
 //
 // Attributes:
 //   data           — JSON number[] of data points
+//   markers        — JSON ChartVerticalMarker[] vertical marker lines (optional)
 //   width / height — canvas dimensions (default 320 x 180)
 //   line-color     — line & dot color (default from CSS var or #f6c453)
 //   background-color — canvas bg  (default from CSS var or rgba(8,12,16,0.9))
@@ -11,6 +12,7 @@
 //   show-dots      — whether to draw data-point circles (default true)
 
 import { ChartBase, mapToRange, generateTicks } from "../chart-base/chart-base.js";
+import type { ChartVerticalMarker } from "../chart-base/chart-types.js";
 
 // --- Pure rendering helpers ---
 
@@ -29,11 +31,13 @@ const dataExtent = (data: number[]): [number, number] => {
 class ArsLineChart extends ChartBase {
   // Cached parsed data to avoid re-parsing on every paint.
   #parsedData: number[] = [];
+  #parsedMarkers: ChartVerticalMarker[] = [];
 
   static get observedAttributes(): string[] {
     return [
       ...ChartBase.observedAttributes,
       "data",
+      "markers",
       "line-color",
       "background-color",
       "grid-color",
@@ -46,6 +50,8 @@ class ArsLineChart extends ChartBase {
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (name === "data") {
       this.#parsedData = this.parseJsonAttribute<number[]>("data", []);
+    } else if (name === "markers") {
+      this.#parsedMarkers = this.parseJsonAttribute<ChartVerticalMarker[]>("markers", []);
     }
     super.attributeChangedCallback(name, oldValue, newValue);
   }
@@ -58,6 +64,15 @@ class ArsLineChart extends ChartBase {
 
   set data(value: number[]) {
     this.#parsedData = [...value];
+    this.scheduleRepaint();
+  }
+
+  get markers(): ChartVerticalMarker[] {
+    return [...this.#parsedMarkers];
+  }
+
+  set markers(value: ChartVerticalMarker[]) {
+    this.#parsedMarkers = [...value];
     this.scheduleRepaint();
   }
 
@@ -117,6 +132,11 @@ class ArsLineChart extends ChartBase {
     // Data point dots
     if (showDots) {
       ArsLineChart.#drawDots(ctx, data, padding, plotWidth, plotHeight, dataMin, dataMax, lineColor);
+    }
+
+    // Vertical marker lines (generation boundaries, etc.)
+    if (this.#parsedMarkers.length > 0) {
+      ArsLineChart.#drawMarkers(ctx, this.#parsedMarkers, data.length, padding, plotWidth, plotHeight);
     }
   }
 
@@ -187,6 +207,49 @@ class ArsLineChart extends ChartBase {
       ctx.beginPath();
       ctx.arc(x, y, radius, 0, 2 * Math.PI);
       ctx.fill();
+    }
+  }
+
+  /** Draws vertical marker lines spanning the full plot area.
+   *
+   * Markers use data-point indices (0-based). Each marker is drawn as a
+   * dashed vertical line with an optional label, matching the style used
+   * by `<ars-candlestick-chart>` for generation boundaries.
+   */
+  static #drawMarkers(
+    ctx: CanvasRenderingContext2D,
+    markers: ChartVerticalMarker[],
+    dataLen: number,
+    padding: { left: number; right: number; top: number; bottom: number },
+    plotWidth: number,
+    plotHeight: number,
+  ): void {
+    if (dataLen < 2) return;
+    const chartTop = padding.top;
+    const chartBottom = padding.top + plotHeight;
+
+    for (const marker of markers) {
+      const x = Math.round(padding.left + (marker.index / (dataLen - 1)) * plotWidth) + 0.5;
+      if (x < padding.left || x > ctx.canvas.width - padding.right) continue;
+
+      const color = marker.color ?? "rgba(92, 128, 196, 0.6)";
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(x, chartTop);
+      ctx.lineTo(x, chartBottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      if (marker.label) {
+        ctx.fillStyle = color;
+        ctx.font = "9px monospace";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "bottom";
+        ctx.fillText(marker.label, x, chartTop - 2);
+      }
     }
   }
 }

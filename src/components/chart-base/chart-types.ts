@@ -27,6 +27,28 @@ export interface CandleOrder {
   price: number;
 }
 
+/** A vertical marker line on a candlestick chart (e.g. generation boundary). */
+export interface ChartVerticalMarker {
+  /** Candle index (0-based) where the vertical line should be drawn. */
+  index: number;
+  /** CSS color string (default: rgba(92, 128, 196, 0.6)). */
+  color?: string;
+  /** Optional label text rendered at the top of the line. */
+  label?: string;
+}
+
+/** A highlighted index range on a candlestick chart (e.g. visible trading window). */
+export interface ChartHighlightRange {
+  /** Start candle index (0-based, inclusive). */
+  startIndex: number;
+  /** End candle index (0-based, inclusive). */
+  endIndex: number;
+  /** Fill color (default: rgba(80, 140, 220, 0.15)). */
+  fillColor?: string;
+  /** Border color for top/bottom edges (default: rgb(80, 140, 220)). */
+  borderColor?: string;
+}
+
 /** Renderer-specific options for candlestick charts. */
 export interface CandleRendererOptions {
   upColor?: string;

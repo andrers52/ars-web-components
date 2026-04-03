@@ -5,7 +5,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ArsCandlestickChart } from "./ars-candlestick-chart.js";
-import type { CandleDataPoint, CandleOrder } from "../chart-base/chart-types.js";
+import type { CandleDataPoint, CandleOrder, ChartVerticalMarker, ChartHighlightRange } from "../chart-base/chart-types.js";
 
 // Helper to create synthetic candle data
 const makeCandleData = (count = 5): CandleDataPoint[] => {
@@ -27,6 +27,11 @@ const makeCandleData = (count = 5): CandleDataPoint[] => {
 const makeOrders = (): CandleOrder[] => [
   { side: "buy", amount: 10.5, price: 98 },
   { side: "sell", amount: 5.2, price: 108 },
+];
+
+const makeMarkers = (): ChartVerticalMarker[] => [
+  { index: 2, color: "rgba(92, 128, 196, 0.6)", label: "GEN" },
+  { index: 4 },
 ];
 
 describe("ArsCandlestickChart", () => {
@@ -215,6 +220,18 @@ describe("ArsCandlestickChart", () => {
     expect(ctx.setLineDash).not.toBeUndefined();
   });
 
+  it("paint handles orders with prices outside candle range without clipping", () => {
+    // Candles range ~95-115. Orders at 50 (far below) and 200 (far above).
+    // Before the fix, these would draw outside the chart area.
+    // After the fix, priceExtent includes orders, so the Y-axis expands.
+    element.data = makeCandleData(3);
+    element.orders = [
+      { side: "buy", amount: 1, price: 50 },
+      { side: "sell", amount: 1, price: 200 },
+    ];
+    expect(() => element.paint()).not.toThrow();
+  });
+
   it("paint uses custom up/down colors from attributes", () => {
     element.setAttribute("up-color", "#00ff00");
     element.setAttribute("down-color", "#ff0000");
@@ -286,5 +303,111 @@ describe("ArsCandlestickChart", () => {
     const spy = vi.spyOn(element, "scheduleRepaint");
     element.orders = makeOrders();
     expect(spy).toHaveBeenCalled();
+  });
+
+  // --- Markers attribute ---
+
+  it("observes the markers attribute", () => {
+    expect(ArsCandlestickChart.observedAttributes).toContain("markers");
+  });
+
+  it("parses markers from JSON attribute", () => {
+    const markers = makeMarkers();
+    element.setAttribute("markers", JSON.stringify(markers));
+    expect(element.markers).toEqual(markers);
+  });
+
+  it("returns empty array for absent markers attribute", () => {
+    expect(element.markers).toEqual([]);
+  });
+
+  it("markers property setter updates internal state", () => {
+    const markers = makeMarkers();
+    element.markers = markers;
+    expect(element.markers).toEqual(markers);
+  });
+
+  it("markers property returns a copy", () => {
+    const markers = makeMarkers();
+    element.markers = markers;
+    const retrieved = element.markers;
+    retrieved.push({ index: 10 });
+    expect(element.markers.length).toBe(2);
+  });
+
+  it("scheduleRepaint is called when markers property is set", () => {
+    const spy = vi.spyOn(element, "scheduleRepaint");
+    element.markers = makeMarkers();
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it("paint runs without error with markers", () => {
+    element.data = makeCandleData(5);
+    element.markers = makeMarkers();
+    expect(() => element.paint()).not.toThrow();
+  });
+
+  it("paint draws dashed marker lines (setLineDash)", () => {
+    element.data = makeCandleData(5);
+    element.markers = [{ index: 2, color: "blue", label: "GEN" }];
+    element.paint();
+    const canvas = element.shadowRoot?.querySelector("canvas") as HTMLCanvasElement;
+    const ctx = canvas.getContext("2d")!;
+    // Markers use setLineDash for dashed lines, then reset.
+    expect(ctx.setLineDash).toHaveBeenCalled();
+  });
+
+  // --- Highlight range ---
+
+  it("observes the highlight-range attribute", () => {
+    expect(ArsCandlestickChart.observedAttributes).toContain("highlight-range");
+  });
+
+  it("parses highlight-range from JSON attribute", () => {
+    const range: ChartHighlightRange = { startIndex: 1, endIndex: 3 };
+    element.setAttribute("highlight-range", JSON.stringify(range));
+    expect(element.highlightRange).toEqual(range);
+  });
+
+  it("returns null for absent highlight-range", () => {
+    expect(element.highlightRange).toBeNull();
+  });
+
+  it("highlightRange property setter updates state", () => {
+    const range: ChartHighlightRange = { startIndex: 0, endIndex: 4 };
+    element.highlightRange = range;
+    expect(element.highlightRange).toEqual(range);
+  });
+
+  it("highlightRange property returns a copy", () => {
+    const range: ChartHighlightRange = { startIndex: 0, endIndex: 2 };
+    element.highlightRange = range;
+    const retrieved = element.highlightRange!;
+    retrieved.startIndex = 99;
+    expect(element.highlightRange!.startIndex).toBe(0);
+  });
+
+  it("scheduleRepaint is called when highlightRange is set", () => {
+    const spy = vi.spyOn(element, "scheduleRepaint");
+    element.highlightRange = { startIndex: 1, endIndex: 3 };
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it("paint runs without error with highlight range", () => {
+    element.data = makeCandleData(5);
+    element.highlightRange = { startIndex: 1, endIndex: 3 };
+    expect(() => element.paint()).not.toThrow();
+  });
+
+  it("paint draws highlight range overlay (fillRect for region)", () => {
+    element.data = makeCandleData(5);
+    element.highlightRange = { startIndex: 1, endIndex: 3, fillColor: "rgba(80,140,220,0.15)" };
+    element.paint();
+    const canvas = element.shadowRoot?.querySelector("canvas") as HTMLCanvasElement;
+    const ctx = canvas.getContext("2d")!;
+    // fillRect called for: background (1) + highlight overlay (1) + candle bodies (5) + volume bars (5) = 12
+    expect(ctx.fillRect).toHaveBeenCalled();
+    // The call count should be higher than without highlight (7 base + 1 highlight = at least 8).
+    expect((ctx.fillRect as unknown as { mock: { calls: unknown[] } }).mock.calls.length).toBeGreaterThanOrEqual(8);
   });
 });

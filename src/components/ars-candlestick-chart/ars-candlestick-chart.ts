@@ -3,6 +3,8 @@
 // Attributes:
 //   data           — JSON CandleDataPoint[] (OHLCV array)
 //   orders         — JSON CandleOrder[] (optional buy/sell overlay lines)
+//   markers        — JSON ChartVerticalMarker[] (optional vertical marker lines)
+//   highlight-range — JSON ChartHighlightRange (optional highlighted candle region)
 //   width / height — canvas dimensions (default 460 x 220)
 //   up-color       — bullish candle color (default #5ad68a)
 //   down-color     — bearish candle color (default #f06b63)
@@ -17,18 +19,28 @@
 //   order-label-position — "left" | "right" (default "left")
 
 import { ChartBase, mapToRange, generateTicks, formatAxisValue, formatDateShort } from "../chart-base/chart-base.js";
-import type { CandleDataPoint, CandleOrder, ChartPadding } from "../chart-base/chart-types.js";
+import type { CandleDataPoint, CandleOrder, ChartPadding, ChartVerticalMarker, ChartHighlightRange } from "../chart-base/chart-types.js";
 
 // --- Pure helpers ---
 
-/** Computes the price extent (min low, max high) across all candles. */
-const priceExtent = (data: CandleDataPoint[]): [number, number] => {
+/** Computes the price extent (min low, max high) across all candles and orders.
+ *
+ * Including order prices ensures overlay lines are always within the visible
+ * chart area. Without this, sell orders above the highest candle high or buy
+ * orders below the lowest candle low would be drawn outside the chart bounds.
+ */
+const priceExtent = (data: CandleDataPoint[], orders: CandleOrder[] = []): [number, number] => {
   if (data.length === 0) return [0, 0];
   let min = data[0].low;
   let max = data[0].high;
   for (let i = 1; i < data.length; i++) {
     if (data[i].low < min) min = data[i].low;
     if (data[i].high > max) max = data[i].high;
+  }
+  // Expand extent to include order price levels.
+  for (const order of orders) {
+    if (order.price < min) min = order.price;
+    if (order.price > max) max = order.price;
   }
   return [min, max];
 };
@@ -53,12 +65,16 @@ const withOpacity = (hex: string, opacity: number): string => {
 class ArsCandlestickChart extends ChartBase {
   #parsedData: CandleDataPoint[] = [];
   #parsedOrders: CandleOrder[] = [];
+  #parsedMarkers: ChartVerticalMarker[] = [];
+  #parsedHighlightRange: ChartHighlightRange | null = null;
 
   static get observedAttributes(): string[] {
     return [
       ...ChartBase.observedAttributes,
       "data",
       "orders",
+      "markers",
+      "highlight-range",
       "up-color",
       "down-color",
       "background-color",
@@ -80,6 +96,12 @@ class ArsCandlestickChart extends ChartBase {
     if (name === "orders") {
       this.#parsedOrders = this.parseJsonAttribute<CandleOrder[]>("orders", []);
     }
+    if (name === "markers") {
+      this.#parsedMarkers = this.parseJsonAttribute<ChartVerticalMarker[]>("markers", []);
+    }
+    if (name === "highlight-range") {
+      this.#parsedHighlightRange = this.parseJsonAttribute<ChartHighlightRange | null>("highlight-range", null);
+    }
     super.attributeChangedCallback(name, oldValue, newValue);
   }
 
@@ -100,6 +122,24 @@ class ArsCandlestickChart extends ChartBase {
 
   set orders(value: CandleOrder[]) {
     this.#parsedOrders = [...value];
+    this.scheduleRepaint();
+  }
+
+  get markers(): ChartVerticalMarker[] {
+    return [...this.#parsedMarkers];
+  }
+
+  set markers(value: ChartVerticalMarker[]) {
+    this.#parsedMarkers = [...value];
+    this.scheduleRepaint();
+  }
+
+  get highlightRange(): ChartHighlightRange | null {
+    return this.#parsedHighlightRange ? { ...this.#parsedHighlightRange } : null;
+  }
+
+  set highlightRange(value: ChartHighlightRange | null) {
+    this.#parsedHighlightRange = value ? { ...value } : null;
     this.scheduleRepaint();
   }
 
@@ -152,6 +192,8 @@ class ArsCandlestickChart extends ChartBase {
 
     const data = this.#parsedData;
     const orders = this.#parsedOrders;
+    const markers = this.#parsedMarkers;
+    const highlightRange = this.#parsedHighlightRange;
 
     // Layout: price area + separator + volume area
     const totalPlotWidth = w - padding.left - padding.right;
@@ -165,8 +207,9 @@ class ArsCandlestickChart extends ChartBase {
 
     if (data.length === 0) return;
 
-    // Price extent with small margin
-    const [rawPriceMin, rawPriceMax] = priceExtent(data);
+    // Price extent with small margin — includes order prices so
+    // overlay lines never clip outside the visible chart area.
+    const [rawPriceMin, rawPriceMax] = priceExtent(data, orders);
     const priceMargin = (rawPriceMax - rawPriceMin) * 0.06 || 1;
     const pMin = rawPriceMin - priceMargin;
     const pMax = rawPriceMax + priceMargin;
@@ -182,6 +225,14 @@ class ArsCandlestickChart extends ChartBase {
     // Candlestick slot geometry
     const slotWidth = totalPlotWidth / data.length;
     const bodyWidth = slotWidth * (1 - candleGap);
+
+    // Highlight range overlay (e.g. visible trading window) — rendered
+    // behind candles so the semi-transparent fill doesn't obscure them.
+    if (highlightRange && highlightRange.startIndex < data.length) {
+      ArsCandlestickChart.#drawHighlightRange(
+        ctx, highlightRange, padding, slotWidth, priceHeight, volumeHeight, separatorGap,
+      );
+    }
 
     // Draw candles + wicks
     ArsCandlestickChart.#drawCandles(
@@ -205,6 +256,11 @@ class ArsCandlestickChart extends ChartBase {
 
     // X-axis date labels
     ArsCandlestickChart.#drawDateLabels(ctx, data, padding, slotWidth, h, dateTickCount, axisColor, font);
+
+    // Vertical marker lines (generation boundaries, current timestamp, etc.)
+    if (markers.length > 0) {
+      ArsCandlestickChart.#drawMarkers(ctx, markers, padding, slotWidth, priceHeight, volumeHeight, separatorGap, axisColor, font);
+    }
 
     // Order overlay lines
     if (orders.length > 0) {
@@ -307,7 +363,102 @@ class ArsCandlestickChart extends ChartBase {
     }
   }
 
-  /** Draws horizontal order overlay lines with side/price labels. */
+  /** Draws a semi-transparent highlighted region over a candle index range.
+   *
+   * Used to visualize the "visible trading window" — the subset of candles
+   * whose indicators the bots can observe. Renders as a translucent overlay
+   * with top/bottom border lines, matching the pygame visualizer's style.
+   *
+   * Reference: Tufte, E., "The Visual Display of Quantitative Information"
+   * (1983) — background shading for region-of-interest highlighting.
+   */
+  static #drawHighlightRange(
+    ctx: CanvasRenderingContext2D,
+    range: ChartHighlightRange,
+    padding: ChartPadding,
+    slotWidth: number,
+    priceHeight: number,
+    volumeHeight: number,
+    separatorGap: number,
+  ): void {
+    const fillColor = range.fillColor ?? "rgba(80, 140, 220, 0.25)";
+    const borderColor = range.borderColor ?? "rgb(80, 180, 255)";
+
+    const x0 = padding.left + range.startIndex * slotWidth;
+    const x1 = padding.left + (range.endIndex + 1) * slotWidth;
+    const chartTop = padding.top;
+    const chartBottom = padding.top + priceHeight + separatorGap + volumeHeight;
+    const regionWidth = Math.max(1, x1 - x0);
+    const regionHeight = Math.max(1, chartBottom - chartTop);
+
+    // Semi-transparent fill.
+    ctx.fillStyle = fillColor;
+    ctx.fillRect(x0, chartTop, regionWidth, regionHeight);
+
+    // Top and bottom border lines.
+    ctx.strokeStyle = borderColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x0, chartTop + 0.5);
+    ctx.lineTo(x1, chartTop + 0.5);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x0, chartBottom - 0.5);
+    ctx.lineTo(x1, chartBottom - 0.5);
+    ctx.stroke();
+  }
+
+  /** Draws vertical marker lines spanning the full chart area.
+   *
+   * Used for generation boundaries, current timestamp markers, etc.
+   * Each marker can specify its own color and optional label.
+   */
+  static #drawMarkers(
+    ctx: CanvasRenderingContext2D,
+    markers: ChartVerticalMarker[],
+    padding: ChartPadding,
+    slotWidth: number,
+    priceHeight: number,
+    volumeHeight: number,
+    separatorGap: number,
+    axisColor: string,
+    font: string,
+  ): void {
+    const chartTop = padding.top;
+    const chartBottom = padding.top + priceHeight + separatorGap + volumeHeight;
+
+    for (const marker of markers) {
+      const x = Math.round(padding.left + marker.index * slotWidth + slotWidth / 2) + 0.5;
+      if (x < padding.left || x > ctx.canvas.width - padding.right) continue;
+
+      const color = marker.color ?? "rgba(92, 128, 196, 0.6)";
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(x, chartTop);
+      ctx.lineTo(x, chartBottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Optional label at the top of the marker line.
+      if (marker.label) {
+        ctx.fillStyle = color;
+        ctx.font = font;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "bottom";
+        ctx.fillText(marker.label, x, chartTop - 2);
+      }
+    }
+  }
+
+  /** Draws horizontal order overlay lines.
+   *
+   * Sell orders render as solid orange/red lines, buy orders as blue/green
+   * lines spanning the full price area. Matching the pygame visualizer's
+   * clean horizontal-bar approach rather than cluttered per-order labels.
+   */
   static #drawOrders(
     ctx: CanvasRenderingContext2D,
     orders: CandleOrder[],
@@ -316,39 +467,33 @@ class ArsCandlestickChart extends ChartBase {
     priceHeight: number,
     pMin: number,
     pMax: number,
-    upColor: string,
+    _upColor: string,
     downColor: string,
     _axisColor: string,
-    font: string,
-    labelPosition: "left" | "right",
+    _font: string,
+    _labelPosition: "left" | "right",
   ): void {
-    ctx.font = font;
-    ctx.textBaseline = "bottom";
-    for (const order of orders) {
-      const y = Math.round(padding.top + priceHeight - mapToRange(order.price, pMin, pMax, 0, priceHeight)) + 0.5;
-      const isBuy = order.side === "buy";
-      const color = isBuy ? upColor : downColor;
+    // Sell orders: orange, buy orders: blue (matching pygame convention).
+    const sellColor = "rgba(255, 170, 70, 0.7)";
+    const buyColor = "rgba(90, 160, 255, 0.7)";
 
-      // Dashed line
+    const chartTop = padding.top;
+    const chartBottom = padding.top + priceHeight;
+
+    for (const order of orders) {
+      const rawY = Math.round(padding.top + priceHeight - mapToRange(order.price, pMin, pMax, 0, priceHeight)) + 0.5;
+      // Clamp to visible price area so lines never draw outside chart bounds.
+      const y = Math.max(chartTop, Math.min(chartBottom, rawY));
+      const isBuy = order.side === "buy";
+      const color = isBuy ? buyColor : sellColor;
+
+      // Solid line spanning the full price area.
       ctx.strokeStyle = color;
       ctx.lineWidth = 1;
-      ctx.setLineDash([4, 3]);
       ctx.beginPath();
       ctx.moveTo(padding.left, y);
       ctx.lineTo(canvasWidth - padding.right, y);
       ctx.stroke();
-      ctx.setLineDash([]);
-
-      // Label
-      const label = `${order.side.toUpperCase()} ${order.amount.toFixed(3)} @ ${formatAxisValue(order.price)}`;
-      ctx.fillStyle = color;
-      if (labelPosition === "left") {
-        ctx.textAlign = "left";
-        ctx.fillText(label, padding.left + 4, y - 3);
-      } else {
-        ctx.textAlign = "right";
-        ctx.fillText(label, canvasWidth - padding.right - 4, y - 3);
-      }
     }
   }
 }

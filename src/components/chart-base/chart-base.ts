@@ -139,8 +139,14 @@ abstract class ChartBase extends HTMLElement {
 
   /** Fills the entire canvas with a background color. */
   protected drawBackground(ctx: CanvasRenderingContext2D, w: number, h: number, color: string): void {
-    ctx.fillStyle = color;
-    ctx.fillRect(0, 0, w, h);
+    // Always clear the canvas first to remove previous frame's pixels.
+    // This is critical for transparent overlays (e.g. indicator lines
+    // stacked on top of a candlestick chart).
+    ctx.clearRect(0, 0, w, h);
+    if (color !== "transparent") {
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, w, h);
+    }
   }
 
   /** Draws horizontal grid lines in the plot area. */
