@@ -32,6 +32,9 @@ class ArsLineChart extends ChartBase {
   // Cached parsed data to avoid re-parsing on every paint.
   #parsedData: number[] = [];
   #parsedMarkers: ChartVerticalMarker[] = [];
+  // Optional fixed Y domain [min, max] — overrides auto-scaling.
+  // Use this to align multiple overlaid charts to the same Y axis.
+  #yDomain: [number, number] | null = null;
 
   static get observedAttributes(): string[] {
     return [
@@ -76,6 +79,16 @@ class ArsLineChart extends ChartBase {
     this.scheduleRepaint();
   }
 
+  /** Fixed Y domain [min, max] for aligning overlaid charts to the same scale. */
+  get yDomain(): [number, number] | null {
+    return this.#yDomain;
+  }
+
+  set yDomain(value: [number, number] | null) {
+    this.#yDomain = value;
+    this.scheduleRepaint();
+  }
+
   // --- Rendering ---
 
   paint(): void {
@@ -110,11 +123,17 @@ class ArsLineChart extends ChartBase {
 
     if (data.length === 0) return;
 
-    // Compute data range with a small margin
-    const [rawMin, rawMax] = dataExtent(data);
-    const margin = (rawMax - rawMin) * 0.08 || 1;
-    const dataMin = rawMin - margin;
-    const dataMax = rawMax + margin;
+    // Compute data range: use fixed yDomain if set, otherwise auto-scale.
+    let dataMin: number, dataMax: number;
+    if (this.#yDomain) {
+      dataMin = this.#yDomain[0];
+      dataMax = this.#yDomain[1];
+    } else {
+      const [rawMin, rawMax] = dataExtent(data);
+      const margin = (rawMax - rawMin) * 0.08 || 1;
+      dataMin = rawMin - margin;
+      dataMax = rawMax + margin;
+    }
 
     // Grid
     this.drawHorizontalGrid(ctx, padding, plotHeight, gridLineCount, gridColor);
