@@ -15,7 +15,7 @@ Check out the [live demo](https://andrers52.github.io/src/projects/ars-web-compo
 - **⚡ ES Modules**: Modern module system with proper imports/exports
 - **🔧 Interactive Effects**: Built-in pressed effects and animations
 - **📱 Touch Support**: Full mobile and desktop interaction support
-- **🧪 Vitest Testing**: 681 tests with jsdom environment
+- **🧪 Vitest Testing**: 698 tests with jsdom environment
 - **🧹 ESLint**: Flat-config linting for source, tests, and tool configs
 - **🔒 Proper Encapsulation**: Private methods and static utilities for clean API design
 - **🤝 Mixin Coordination**: Smart pointer coordination system for multiple gesture mixins

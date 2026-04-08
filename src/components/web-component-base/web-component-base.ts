@@ -124,6 +124,48 @@ const createEventConnector = (elementId, eventStr, methodCallStr) => (self) => {
 class WebComponentBase extends HTMLElement {
   [key: string]: any;
 
+  // ── Repaint coalescing ─────────────────────────────────────────────
+  // brainiac's DOMSidebandReconciler re-sets all properties every frame.
+  // These utilities let subclasses skip redundant work.
+
+  #_repaintScheduled = false;
+
+  /**
+   * Schedule a repaint on the next animation frame, coalescing multiple
+   * calls within the same frame into a single `paint()` invocation.
+   * Subclasses that use canvas rendering should override `paint()`.
+   */
+  scheduleRepaint(): void {
+    if (this.#_repaintScheduled) return;
+    this.#_repaintScheduled = true;
+    requestAnimationFrame(() => {
+      this.#_repaintScheduled = false;
+      if (typeof (this as any).paint === 'function') {
+        (this as any).paint();
+      }
+    });
+  }
+
+  /**
+   * Cheap array comparison: same length + same first/last element.
+   * Catches the common case where the reconciler re-sets identical data
+   * every frame, without a full deep-equality scan.
+   *
+   * @param key  Optional property key to compare on object arrays
+   *             (e.g. "time" for CandleDataPoint[], "index" for markers).
+   */
+  arraysMatch<T>(a: T[], b: T[], key?: keyof T): boolean {
+    if (a.length !== b.length) return false;
+    if (a.length === 0) return true;
+    const first = key ? a[0]?.[key] : a[0];
+    const last = key ? a[a.length - 1]?.[key] : a[a.length - 1];
+    const prevFirst = key ? b[0]?.[key] : b[0];
+    const prevLast = key ? b[b.length - 1]?.[key] : b[b.length - 1];
+    return first === prevFirst && last === prevLast;
+  }
+
+  // ── Standard lifecycle ─────────────────────────────────────────────
+
   static get observedAttributes() {
     return []; // Override in the subclass to specify observed attributes
   }

@@ -1,7 +1,9 @@
 // Abstract base class for canvas-rendered chart web components.
+// Extends WebComponentBase for repaint coalescing and array comparison utilities.
 // Provides shared canvas lifecycle, axis/grid drawing utilities, and scaling math.
 
 import type { ChartPadding } from "./chart-types.js";
+import { WebComponentBase } from "../web-component-base/web-component-base.js";
 
 // --- Pure utility functions ---
 
@@ -50,15 +52,12 @@ const DEFAULT_PADDING: ChartPadding = { top: 12, right: 12, bottom: 28, left: 48
 
 // --- ChartBase abstract class ---
 
-abstract class ChartBase extends HTMLElement {
-  [key: string]: unknown;
-
-  // Tracks whether a repaint has already been scheduled for this animation frame.
-  #repaintScheduled = false;
-
+abstract class ChartBase extends WebComponentBase {
   constructor() {
     super();
-    this.attachShadow({ mode: "open" });
+    if (!this.shadowRoot) {
+      this.attachShadow({ mode: "open" });
+    }
   }
 
   // --- Attribute observation ---
@@ -92,16 +91,6 @@ abstract class ChartBase extends HTMLElement {
   /** Returns the padding for the plot area. Subclasses may override. */
   getPadding(): ChartPadding {
     return { ...DEFAULT_PADDING };
-  }
-
-  /** Schedules a repaint on the next animation frame, coalescing multiple calls. */
-  scheduleRepaint(): void {
-    if (this.#repaintScheduled) return;
-    this.#repaintScheduled = true;
-    requestAnimationFrame(() => {
-      this.#repaintScheduled = false;
-      this.paint();
-    });
   }
 
   /** Subclasses must implement the actual chart rendering here. */

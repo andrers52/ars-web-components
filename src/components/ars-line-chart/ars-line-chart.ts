@@ -62,20 +62,22 @@ class ArsLineChart extends ChartBase {
   // --- Property accessors for programmatic use ---
 
   get data(): number[] {
-    return [...this.#parsedData];
+    return this.#parsedData;
   }
 
   set data(value: number[]) {
-    this.#parsedData = [...value];
+    if (this.arraysMatch(value, this.#parsedData)) return;
+    this.#parsedData = value;
     this.scheduleRepaint();
   }
 
   get markers(): ChartVerticalMarker[] {
-    return [...this.#parsedMarkers];
+    return this.#parsedMarkers;
   }
 
   set markers(value: ChartVerticalMarker[]) {
-    this.#parsedMarkers = [...value];
+    if (this.arraysMatch(value, this.#parsedMarkers, "index")) return;
+    this.#parsedMarkers = value;
     this.scheduleRepaint();
   }
 
@@ -85,6 +87,7 @@ class ArsLineChart extends ChartBase {
   }
 
   set yDomain(value: [number, number] | null) {
+    if (value?.[0] === this.#yDomain?.[0] && value?.[1] === this.#yDomain?.[1]) return;
     this.#yDomain = value;
     this.scheduleRepaint();
   }

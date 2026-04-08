@@ -91,12 +91,10 @@ describe("ArsCandlestickChart", () => {
     expect(element.data).toEqual(data);
   });
 
-  it("data property returns a copy, not the internal array", () => {
+  it("data property returns the internal reference (zero-copy)", () => {
     const data = makeCandleData(2);
     element.data = data;
-    const retrieved = element.data;
-    retrieved.push(makeCandleData(1)[0]);
-    expect(element.data.length).toBe(2);
+    expect(element.data).toBe(data);
   });
 
   // --- Orders attribute ---
@@ -117,12 +115,10 @@ describe("ArsCandlestickChart", () => {
     expect(element.orders).toEqual(orders);
   });
 
-  it("orders property returns a copy", () => {
+  it("orders property returns the internal reference (zero-copy)", () => {
     const orders = makeOrders();
     element.orders = orders;
-    const retrieved = element.orders;
-    retrieved.push({ side: "buy", amount: 1, price: 50 });
-    expect(element.orders.length).toBe(2);
+    expect(element.orders).toBe(orders);
   });
 
   // --- Observed attributes ---
@@ -327,12 +323,10 @@ describe("ArsCandlestickChart", () => {
     expect(element.markers).toEqual(markers);
   });
 
-  it("markers property returns a copy", () => {
+  it("markers property returns the internal reference (zero-copy)", () => {
     const markers = makeMarkers();
     element.markers = markers;
-    const retrieved = element.markers;
-    retrieved.push({ index: 10 });
-    expect(element.markers.length).toBe(2);
+    expect(element.markers).toBe(markers);
   });
 
   it("scheduleRepaint is called when markers property is set", () => {
@@ -379,12 +373,10 @@ describe("ArsCandlestickChart", () => {
     expect(element.highlightRange).toEqual(range);
   });
 
-  it("highlightRange property returns a copy", () => {
+  it("highlightRange property returns the internal reference (zero-copy)", () => {
     const range: ChartHighlightRange = { startIndex: 0, endIndex: 2 };
     element.highlightRange = range;
-    const retrieved = element.highlightRange!;
-    retrieved.startIndex = 99;
-    expect(element.highlightRange!.startIndex).toBe(0);
+    expect(element.highlightRange).toBe(range);
   });
 
   it("scheduleRepaint is called when highlightRange is set", () => {

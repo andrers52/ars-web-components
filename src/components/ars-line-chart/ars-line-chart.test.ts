@@ -61,11 +61,11 @@ describe("ArsLineChart", () => {
     expect(element.data).toEqual([5, 10, 15]);
   });
 
-  it("data property returns a copy, not the internal array", () => {
+  it("data property returns the internal reference (zero-copy)", () => {
     element.data = [1, 2, 3];
     const retrieved = element.data;
-    retrieved.push(4);
-    expect(element.data).toEqual([1, 2, 3]);
+    // Callers must not mutate — but the reference is the same array.
+    expect(retrieved).toBe(element.data);
   });
 
   // --- Observed attributes ---

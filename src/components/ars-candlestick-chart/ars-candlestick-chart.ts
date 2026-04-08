@@ -108,38 +108,45 @@ class ArsCandlestickChart extends ChartBase {
   // --- Property accessors ---
 
   get data(): CandleDataPoint[] {
-    return [...this.#parsedData];
+    return this.#parsedData;
   }
 
   set data(value: CandleDataPoint[]) {
-    this.#parsedData = [...value];
+    if (this.arraysMatch(value, this.#parsedData, "time")) return;
+    this.#parsedData = value;
     this.scheduleRepaint();
   }
 
   get orders(): CandleOrder[] {
-    return [...this.#parsedOrders];
+    return this.#parsedOrders;
   }
 
   set orders(value: CandleOrder[]) {
-    this.#parsedOrders = [...value];
+    if (this.arraysMatch(value, this.#parsedOrders, "price")) return;
+    this.#parsedOrders = value;
     this.scheduleRepaint();
   }
 
   get markers(): ChartVerticalMarker[] {
-    return [...this.#parsedMarkers];
+    return this.#parsedMarkers;
   }
 
   set markers(value: ChartVerticalMarker[]) {
-    this.#parsedMarkers = [...value];
+    if (this.arraysMatch(value, this.#parsedMarkers, "index")) return;
+    this.#parsedMarkers = value;
     this.scheduleRepaint();
   }
 
   get highlightRange(): ChartHighlightRange | null {
-    return this.#parsedHighlightRange ? { ...this.#parsedHighlightRange } : null;
+    return this.#parsedHighlightRange;
   }
 
   set highlightRange(value: ChartHighlightRange | null) {
-    this.#parsedHighlightRange = value ? { ...value } : null;
+    if (
+      value?.startIndex === this.#parsedHighlightRange?.startIndex &&
+      value?.endIndex === this.#parsedHighlightRange?.endIndex
+    ) return;
+    this.#parsedHighlightRange = value;
     this.scheduleRepaint();
   }
 

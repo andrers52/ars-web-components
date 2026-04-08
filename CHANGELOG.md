@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-04-08
+
+### Changed
+
+- **WebComponentBase: repaint coalescing and array comparison utilities**
+  - Added `scheduleRepaint()` to `WebComponentBase` — coalesces multiple
+    property updates within a single animation frame into one repaint.
+    Previously only available in `ChartBase`; now all components inherit it.
+  - Added `arraysMatch(a, b, key?)` to `WebComponentBase` — cheap
+    comparison (length + first/last element) that lets property setters
+    skip redundant updates when the DOMSidebandReconciler re-sets
+    identical data every frame.
+
+- **ChartBase now extends WebComponentBase**
+  - `ChartBase` inherits `scheduleRepaint()` and `arraysMatch()` from
+    `WebComponentBase` instead of implementing its own copies.
+  - All chart components now participate in the same base-class hierarchy
+    as non-chart components.
+
+- **Zero-copy property accessors in chart components**
+  - `ars-line-chart` and `ars-candlestick-chart` property getters and
+    setters no longer spread-copy arrays (`[...value]`). They store and
+    return references directly, eliminating O(n) copies per property
+    access.  With 15 chart components × 2-4 properties × 60fps, this
+    removes ~240 array copies per second.
+  - Property setters use `arraysMatch()` to skip `scheduleRepaint()`
+    entirely when data hasn't changed, avoiding redundant canvas repaints.
+
+### Performance impact
+
+Before: every frame triggered 15 canvas repaints with full array copies,
+regardless of whether data changed.
+After: canvas repaints only occur when data actually changes. Property
+updates are O(1) reference assignments instead of O(n) array copies.
+
 ## [1.0.0] - 2026-03-25
 
 ### Added

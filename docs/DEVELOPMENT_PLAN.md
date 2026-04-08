@@ -1,9 +1,9 @@
 # ars-web-components Development Plan
 
-**Version:** 1.0
-**Date:** 2026-03-25
-**Scope:** Foundational primitives, embedding documentation, publish checklist
-**Target release:** 1.0.0
+**Version:** 1.1
+**Date:** 2026-04-08
+**Scope:** Foundational primitives, performance optimisation, embedding documentation, publish checklist
+**Target release:** 1.1.0
 
 ## 1. Current State Summary
 
@@ -612,3 +612,51 @@ The work described in this plan is complete when:
 8. The design token contract in `design-system.ts` includes all tokens from Section 3 in both light and dark adapters.
 9. `CHANGELOG.md` has entries for all additions under the next version.
 10. `npm run test`, `npm run lint`, and `npm run build` all pass with zero warnings.
+
+## Future: WebGPU Chart Rendering
+
+### Problem
+
+Canvas 2D chart rendering is CPU-bound. Each chart component independently
+calls `clearRect` + sequential `beginPath/moveTo/lineTo/stroke` draw calls
+through the browser's Skia pipeline. With 15+ chart components at 60fps,
+this is 900+ full canvas redraws per second — a bottleneck when used with
+brainiac-engine's per-frame DOM sideband updates.
+
+### Proposed solution
+
+Replace Canvas 2D rendering in chart components with WebGPU instanced
+rendering. brainiac-engine already initialises a `GPUDevice` for its
+sprite compositor — chart components can share the same device.
+
+**Architecture:**
+
+```
+ChartBase (WebComponentBase)
+  │
+  ├── Canvas 2D path (current, fallback for unsupported browsers)
+  │     paint() → ctx.beginPath/moveTo/lineTo/stroke
+  │
+  └── WebGPU path (planned)
+        paint() → write vertex buffer → submit render pass
+        - Line charts: all data points → single draw call
+        - Candlestick charts: instanced rendering (bodies + wicks)
+        - Shared GPUDevice across all chart instances
+        - WGSL shaders for lines, rectangles, text labels
+```
+
+**Expected performance:**
+
+| Metric | Canvas 2D | WebGPU |
+|--------|-----------|--------|
+| 120 candles + 4 indicators | ~3ms CPU | <0.1ms GPU |
+| 1440-point metrics charts ×4 | ~8ms CPU | <0.2ms GPU |
+| Total per frame (15 charts) | ~15ms | <1ms |
+
+**Requirements:**
+
+- `GPUDevice` instance passed to chart components (via property or context)
+- WGSL vertex/fragment shaders for: solid lines, dashed lines, filled
+  rectangles, text labels (SDF or texture atlas)
+- Fallback to Canvas 2D when WebGPU is unavailable
+- No change to the component's public property API
