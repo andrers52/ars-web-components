@@ -1,5 +1,5 @@
 /**
- * Tests for ArsCandlestickChart web component.
+ * Tests for ArsCandlestickChart web component (WebGPU rendering).
  * @vi-environment jsdom
  */
 
@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ArsCandlestickChart } from "./ars-candlestick-chart.js";
 import type { CandleDataPoint, CandleOrder, ChartVerticalMarker, ChartHighlightRange } from "../chart-base/chart-types.js";
 
-// Helper to create synthetic candle data
+// Helper to create synthetic candle data.
 const makeCandleData = (count = 5): CandleDataPoint[] => {
   const base = Date.now();
   const day = 24 * 60 * 60 * 1000;
@@ -150,158 +150,127 @@ describe("ArsCandlestickChart", () => {
     expect(p.bottom).toBeGreaterThanOrEqual(28);
   });
 
-  // --- Rendering (paint) ---
+  // --- GPU rendering ---
 
-  it("paint runs without error on empty data", () => {
+  it("paint runs without error on empty data (triggers GPU init)", () => {
     expect(() => element.paint()).not.toThrow();
   });
 
-  it("paint runs without error on valid data", () => {
+  it("paint runs without error on valid data (triggers GPU init)", () => {
     element.data = makeCandleData(10);
     expect(() => element.paint()).not.toThrow();
   });
 
-  it("paint creates a canvas in the shadow root", () => {
+  it("paint with GPU renderer pushes candle geometry", async () => {
+    document.body.appendChild(element);
+    await element.initGPU();
+
     element.data = makeCandleData(3);
+    const renderer = element.gpuRenderer!;
+    const pushRectSpy = vi.spyOn(renderer, 'pushRect');
+    const pushLineSpy = vi.spyOn(renderer, 'pushLine');
+    const pushTextSpy = vi.spyOn(renderer, 'pushText');
+
     element.paint();
-    expect(element.shadowRoot?.querySelector("canvas")).toBeInstanceOf(HTMLCanvasElement);
+
+    // Background (1) + candle bodies (3) + volume bars (3) = 7 rects minimum.
+    expect(pushRectSpy.mock.calls.length).toBeGreaterThanOrEqual(7);
+    // Wicks (3) + grid lines (5) + separator (1) = 9 lines minimum.
+    expect(pushLineSpy.mock.calls.length).toBeGreaterThanOrEqual(9);
+    // Y-axis labels + date labels.
+    expect(pushTextSpy).toHaveBeenCalled();
+
+    document.body.removeChild(element);
   });
 
-  it("paint draws candlestick wicks (vertical lines via moveTo/lineTo)", () => {
-    element.data = makeCandleData(3);
-    element.paint();
-    const canvas = element.shadowRoot?.querySelector("canvas") as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d")!;
-    // Wicks use moveTo + lineTo for each candle
-    expect(ctx.moveTo).toHaveBeenCalled();
-    expect(ctx.lineTo).toHaveBeenCalled();
-    expect(ctx.stroke).toHaveBeenCalled();
-  });
+  it("paint draws order overlay lines", async () => {
+    document.body.appendChild(element);
+    await element.initGPU();
 
-  it("paint draws candlestick bodies (fillRect)", () => {
-    element.data = makeCandleData(3);
-    element.paint();
-    const canvas = element.shadowRoot?.querySelector("canvas") as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d")!;
-    // fillRect: background + candle bodies + volume bars
-    expect(ctx.fillRect).toHaveBeenCalled();
-    // Should be at least: 1 (bg) + 3 (bodies) + 3 (vol bars) = 7
-    expect(ctx.fillRect).toHaveBeenCalledTimes(7);
-  });
-
-  it("paint draws separator line between price and volume areas", () => {
-    element.data = makeCandleData(3);
-    element.paint();
-    const canvas = element.shadowRoot?.querySelector("canvas") as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d")!;
-    // Separator is one additional stroke call beyond candles and grid
-    expect(ctx.stroke).toHaveBeenCalled();
-  });
-
-  it("paint draws date labels on X-axis", () => {
-    element.data = makeCandleData(5);
-    element.paint();
-    const canvas = element.shadowRoot?.querySelector("canvas") as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d")!;
-    expect(ctx.fillText).toHaveBeenCalled();
-  });
-
-  it("paint draws order overlay lines when orders are provided", () => {
     element.data = makeCandleData(5);
     element.orders = makeOrders();
+    const pushLineSpy = vi.spyOn(element.gpuRenderer!, 'pushLine');
+
     element.paint();
-    const canvas = element.shadowRoot?.querySelector("canvas") as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d")!;
-    // Orders use setLineDash for dashed lines
-    expect(ctx.setLineDash).not.toBeUndefined();
+
+    // At least 2 order overlay lines (buy + sell).
+    const lineCount = pushLineSpy.mock.calls.length;
+    expect(lineCount).toBeGreaterThanOrEqual(2);
+
+    document.body.removeChild(element);
   });
 
-  it("paint handles orders with prices outside candle range without clipping", () => {
-    // Candles range ~95-115. Orders at 50 (far below) and 200 (far above).
-    // Before the fix, these would draw outside the chart area.
-    // After the fix, priceExtent includes orders, so the Y-axis expands.
+  it("paint handles orders with prices outside candle range", async () => {
+    document.body.appendChild(element);
+    await element.initGPU();
+
     element.data = makeCandleData(3);
     element.orders = [
       { side: "buy", amount: 1, price: 50 },
       { side: "sell", amount: 1, price: 200 },
     ];
     expect(() => element.paint()).not.toThrow();
+
+    document.body.removeChild(element);
   });
 
-  it("paint uses custom up/down colors from attributes", () => {
+  it("paint uses custom up/down colors from attributes", async () => {
+    document.body.appendChild(element);
+    await element.initGPU();
+
     element.setAttribute("up-color", "#00ff00");
     element.setAttribute("down-color", "#ff0000");
     element.data = makeCandleData(4);
     expect(() => element.paint()).not.toThrow();
+
+    document.body.removeChild(element);
   });
 
-  it("handles data with all bullish candles", () => {
+  it("handles data with all bullish candles", async () => {
+    document.body.appendChild(element);
+    await element.initGPU();
+
     const data: CandleDataPoint[] = [
       { open: 10, close: 12, high: 13, low: 9, volume: 100, time: Date.now() },
       { open: 12, close: 14, high: 15, low: 11, volume: 120, time: Date.now() + 86400000 },
     ];
     element.data = data;
     expect(() => element.paint()).not.toThrow();
+
+    document.body.removeChild(element);
   });
 
-  it("handles data with all bearish candles", () => {
+  it("handles data with all bearish candles", async () => {
+    document.body.appendChild(element);
+    await element.initGPU();
+
     const data: CandleDataPoint[] = [
       { open: 14, close: 12, high: 15, low: 11, volume: 100, time: Date.now() },
       { open: 12, close: 10, high: 13, low: 9, volume: 120, time: Date.now() + 86400000 },
     ];
     element.data = data;
     expect(() => element.paint()).not.toThrow();
+
+    document.body.removeChild(element);
   });
 
-  it("handles single candle data point", () => {
+  it("handles single candle data point", async () => {
+    document.body.appendChild(element);
+    await element.initGPU();
     element.data = makeCandleData(1);
     expect(() => element.paint()).not.toThrow();
+    document.body.removeChild(element);
   });
 
-  it("handles zero volume data", () => {
-    const data: CandleDataPoint[] = [
-      { open: 10, close: 12, high: 13, low: 9, volume: 0, time: Date.now() },
-    ];
-    element.data = data;
+  it("handles zero volume data", async () => {
+    document.body.appendChild(element);
+    await element.initGPU();
+    element.data = [{ open: 10, close: 12, high: 13, low: 9, volume: 0, time: Date.now() }];
     expect(() => element.paint()).not.toThrow();
+    document.body.removeChild(element);
   });
 
-  // --- Order label position ---
-
-  it("paint runs with order-label-position=right", () => {
-    element.setAttribute("order-label-position", "right");
-    element.data = makeCandleData(5);
-    element.orders = makeOrders();
-    expect(() => element.paint()).not.toThrow();
-  });
-
-  // --- Reactivity ---
-
-  it("scheduleRepaint is called when data attribute changes", () => {
-    const spy = vi.spyOn(element, "scheduleRepaint");
-    element.setAttribute("data", JSON.stringify(makeCandleData(2)));
-    expect(spy).toHaveBeenCalled();
-  });
-
-  it("scheduleRepaint is called when orders attribute changes", () => {
-    const spy = vi.spyOn(element, "scheduleRepaint");
-    element.setAttribute("orders", JSON.stringify(makeOrders()));
-    expect(spy).toHaveBeenCalled();
-  });
-
-  it("scheduleRepaint is called when data property is set", () => {
-    const spy = vi.spyOn(element, "scheduleRepaint");
-    element.data = makeCandleData(3);
-    expect(spy).toHaveBeenCalled();
-  });
-
-  it("scheduleRepaint is called when orders property is set", () => {
-    const spy = vi.spyOn(element, "scheduleRepaint");
-    element.orders = makeOrders();
-    expect(spy).toHaveBeenCalled();
-  });
-
-  // --- Markers attribute ---
+  // --- Markers ---
 
   it("observes the markers attribute", () => {
     expect(ArsCandlestickChart.observedAttributes).toContain("markers");
@@ -335,20 +304,22 @@ describe("ArsCandlestickChart", () => {
     expect(spy).toHaveBeenCalled();
   });
 
-  it("paint runs without error with markers", () => {
-    element.data = makeCandleData(5);
-    element.markers = makeMarkers();
-    expect(() => element.paint()).not.toThrow();
-  });
+  it("paint draws dashed marker lines", async () => {
+    document.body.appendChild(element);
+    await element.initGPU();
 
-  it("paint draws dashed marker lines (setLineDash)", () => {
     element.data = makeCandleData(5);
-    element.markers = [{ index: 2, color: "blue", label: "GEN" }];
+    element.markers = [{ index: 2, color: "rgba(92,128,196,0.6)", label: "GEN" }];
+    const pushDashedSpy = vi.spyOn(element.gpuRenderer!, 'pushDashedLine');
+    const pushTextSpy = vi.spyOn(element.gpuRenderer!, 'pushText');
+
     element.paint();
-    const canvas = element.shadowRoot?.querySelector("canvas") as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d")!;
-    // Markers use setLineDash for dashed lines, then reset.
-    expect(ctx.setLineDash).toHaveBeenCalled();
+
+    expect(pushDashedSpy).toHaveBeenCalledTimes(1);
+    const markerTextCall = pushTextSpy.mock.calls.find((c: any) => c[0] === "GEN");
+    expect(markerTextCall).toBeDefined();
+
+    document.body.removeChild(element);
   });
 
   // --- Highlight range ---
@@ -385,21 +356,57 @@ describe("ArsCandlestickChart", () => {
     expect(spy).toHaveBeenCalled();
   });
 
-  it("paint runs without error with highlight range", () => {
+  it("paint draws highlight range overlay", async () => {
+    document.body.appendChild(element);
+    await element.initGPU();
+
     element.data = makeCandleData(5);
     element.highlightRange = { startIndex: 1, endIndex: 3 };
-    expect(() => element.paint()).not.toThrow();
+    const pushRectSpy = vi.spyOn(element.gpuRenderer!, 'pushRect');
+    const pushLineSpy = vi.spyOn(element.gpuRenderer!, 'pushLine');
+
+    element.paint();
+
+    // Should have more rects than without highlight (background + highlight fill + bodies + volumes).
+    const rectCount = pushRectSpy.mock.calls.length;
+    expect(rectCount).toBeGreaterThanOrEqual(12); // 1 bg + 1 highlight + 5 bodies + 5 volumes
+    // Should have border lines for highlight.
+    expect(pushLineSpy.mock.calls.length).toBeGreaterThanOrEqual(2);
+
+    document.body.removeChild(element);
   });
 
-  it("paint draws highlight range overlay (fillRect for region)", () => {
-    element.data = makeCandleData(5);
-    element.highlightRange = { startIndex: 1, endIndex: 3, fillColor: "rgba(80,140,220,0.15)" };
-    element.paint();
-    const canvas = element.shadowRoot?.querySelector("canvas") as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d")!;
-    // fillRect called for: background (1) + highlight overlay (1) + candle bodies (5) + volume bars (5) = 12
-    expect(ctx.fillRect).toHaveBeenCalled();
-    // The call count should be higher than without highlight (7 base + 1 highlight = at least 8).
-    expect((ctx.fillRect as unknown as { mock: { calls: unknown[] } }).mock.calls.length).toBeGreaterThanOrEqual(8);
+  // --- Reactivity ---
+
+  it("scheduleRepaint is called when data attribute changes", () => {
+    const spy = vi.spyOn(element, "scheduleRepaint");
+    element.setAttribute("data", JSON.stringify(makeCandleData(2)));
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it("scheduleRepaint is called when orders attribute changes", () => {
+    const spy = vi.spyOn(element, "scheduleRepaint");
+    element.setAttribute("orders", JSON.stringify(makeOrders()));
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it("scheduleRepaint is called when data property is set", () => {
+    const spy = vi.spyOn(element, "scheduleRepaint");
+    element.data = makeCandleData(3);
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it("scheduleRepaint is called when orders property is set", () => {
+    const spy = vi.spyOn(element, "scheduleRepaint");
+    element.orders = makeOrders();
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it("data setter skips repaint when data is identical", () => {
+    const data = makeCandleData(3);
+    element.data = data;
+    const spy = vi.spyOn(element, "scheduleRepaint");
+    element.data = data;
+    expect(spy).not.toHaveBeenCalled();
   });
 });

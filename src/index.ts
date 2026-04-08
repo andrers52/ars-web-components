@@ -28,6 +28,8 @@ export { ChartBase } from "./components/chart-base/chart-base.js";
 export { ArsLineChart } from "./components/ars-line-chart/ars-line-chart.js";
 export { ArsCandlestickChart } from "./components/ars-candlestick-chart/ars-candlestick-chart.js";
 export type { ChartColorPalette, CandleDataPoint, CandleOrder, CandleRendererOptions, ChartPadding, ChartVerticalMarker, ChartHighlightRange } from "./components/chart-base/chart-types.js";
+// chart GPU infrastructure (for external GPUDevice injection)
+export { ChartGPUContext } from "./components/chart-base/gpu/chart-gpu-context.js";
 // mixins
 export { LocalizedMixin } from "./mixins/localized-mixin/localized-mixin.js";
 export { PressedEffectMixin } from "./mixins/pressed-effect-mixin/pressed-effect-mixin.js";

@@ -1,11 +1,16 @@
-// Abstract base class for canvas-rendered chart web components.
+// Abstract base class for WebGPU-rendered chart web components.
 // Extends WebComponentBase for repaint coalescing and array comparison utilities.
-// Provides shared canvas lifecycle, axis/grid drawing utilities, and scaling math.
+// Provides GPU lifecycle management, shared projection uniform, and scaling math.
+//
+// The first paint() call triggers async GPU initialisation. Subsequent frames
+// render synchronously using the cached GPUDevice and ChartGPURenderer.
 
 import type { ChartPadding } from "./chart-types.js";
 import { WebComponentBase } from "../web-component-base/web-component-base.js";
+import { ChartGPUContext } from "./gpu/chart-gpu-context.js";
+import { ChartGPURenderer } from "./gpu/chart-gpu-renderer.js";
 
-// --- Pure utility functions ---
+// --- Pure utility functions (unchanged from Canvas 2D era) ---
 
 /** Parses a JSON string safely, returning the original value on failure. */
 const parseJsonSafely = (value: string): unknown => {
@@ -53,11 +58,40 @@ const DEFAULT_PADDING: ChartPadding = { top: 12, right: 12, bottom: 28, left: 48
 // --- ChartBase abstract class ---
 
 abstract class ChartBase extends WebComponentBase {
+  // ── GPU state ──────────────────────────────────────────────────────
+
+  /** The GPU renderer shared across frames. Created on first paint. */
+  protected gpuRenderer: ChartGPURenderer | null = null;
+
+  /** WebGPU canvas context — configured on first paint. */
+  private _gpuCanvasCtx: GPUCanvasContext | null = null;
+
+  /** Externally injected GPUDevice (e.g. from brainiac-engine). */
+  private _externalDevice: GPUDevice | null = null;
+
+  /** In-flight GPU init promise (prevents double-init). */
+  private _gpuInitPromise: Promise<void> | null = null;
+
+  /** Whether GPU init has completed (for fast sync path). */
+  private _gpuReady = false;
+
   constructor() {
     super();
     if (!this.shadowRoot) {
       this.attachShadow({ mode: "open" });
     }
+  }
+
+  // --- GPU device injection ---
+
+  /** Inject an external GPUDevice (e.g. from brainiac-engine's presentation layer). */
+  set gpuDevice(device: GPUDevice | null) {
+    this._externalDevice = device;
+    if (device) ChartGPUContext.setDevice(device);
+  }
+
+  get gpuDevice(): GPUDevice | null {
+    return this._externalDevice;
   }
 
   // --- Attribute observation ---
@@ -96,14 +130,53 @@ abstract class ChartBase extends WebComponentBase {
   /** Subclasses must implement the actual chart rendering here. */
   abstract paint(): void;
 
-  // --- Canvas helpers ---
+  // --- GPU lifecycle ---
 
-  /** Creates or retrieves the canvas element inside the shadow root. */
-  protected ensureCanvas(): HTMLCanvasElement | null {
+  /**
+   * Initialise the WebGPU device, canvas context, and renderer.
+   * Called automatically on first paint. Safe to call multiple times
+   * (returns cached promise on subsequent calls).
+   */
+  protected async initGPU(): Promise<void> {
+    if (this._gpuReady) return;
+    if (this._gpuInitPromise) return this._gpuInitPromise;
+
+    this._gpuInitPromise = this._doInitGPU();
+    await this._gpuInitPromise;
+    this._gpuInitPromise = null;
+    this._gpuReady = true;
+  }
+
+  private async _doInitGPU(): Promise<void> {
+    const device = await ChartGPUContext.getShared();
+    const canvas = this._ensureGPUCanvas();
+    if (!canvas) throw new Error('ChartBase: cannot create canvas element');
+
+    const ctx = canvas.getContext('webgpu') as GPUCanvasContext | null;
+    if (!ctx) throw new Error('ChartBase: cannot obtain WebGPU canvas context');
+
+    const format = navigator.gpu.getPreferredCanvasFormat();
+    ctx.configure({ device, format, alphaMode: 'premultiplied' });
+    this._gpuCanvasCtx = ctx;
+
+    this.gpuRenderer = ChartGPURenderer.create(device, format);
+  }
+
+  /** Get the current frame's texture view for endFrame(). */
+  protected getTargetView(): GPUTextureView | null {
+    if (!this._gpuCanvasCtx) return null;
+    return this._gpuCanvasCtx.getCurrentTexture().createView();
+  }
+
+  // --- Canvas element management ---
+
+  /** Creates or retrieves the canvas element inside the shadow root.
+   *  Sets width/height attributes to match chart dimensions.
+   */
+  private _ensureGPUCanvas(): HTMLCanvasElement | null {
     if (!this.shadowRoot) return null;
     let canvas = this.shadowRoot.querySelector("canvas") as HTMLCanvasElement | null;
     if (!canvas) {
-      // Clear shadow root and rebuild
       this.shadowRoot.innerHTML = "";
       const style = document.createElement("style");
       style.textContent = `:host { display: inline-block; } canvas { display: block; }`;
@@ -124,57 +197,46 @@ abstract class ChartBase extends WebComponentBase {
     return computed || fallback;
   }
 
-  // --- Grid and axis drawing utilities ---
+  // --- GPU drawing utilities ---
+  // These are convenience methods that call through to gpuRenderer.
+  // They match the conceptual API of the old Canvas 2D helpers but
+  // produce GPU draw commands instead.
 
-  /** Fills the entire canvas with a background color. */
-  protected drawBackground(ctx: CanvasRenderingContext2D, w: number, h: number, color: string): void {
-    // Always clear the canvas first to remove previous frame's pixels.
-    // This is critical for transparent overlays (e.g. indicator lines
-    // stacked on top of a candlestick chart).
-    ctx.clearRect(0, 0, w, h);
-    if (color !== "transparent") {
-      ctx.fillStyle = color;
-      ctx.fillRect(0, 0, w, h);
-    }
+  /** Push a background rect covering the entire canvas. */
+  protected gpuDrawBackground(w: number, h: number, cssColor: string): void {
+    this.gpuRenderer!.pushRect(0, 0, w, h, cssColor);
   }
 
-  /** Draws horizontal grid lines in the plot area. */
-  protected drawHorizontalGrid(
-    ctx: CanvasRenderingContext2D,
+  /** Push horizontal grid lines in the plot area. */
+  protected gpuDrawHorizontalGrid(
     padding: ChartPadding,
     plotHeight: number,
     count: number,
-    color: string,
+    cssColor: string,
+    canvasWidth: number,
   ): void {
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1;
     const step = plotHeight / (count - 1);
     for (let i = 0; i < count; i++) {
       const y = Math.round(padding.top + i * step) + 0.5;
-      ctx.beginPath();
-      ctx.moveTo(padding.left, y);
-      ctx.lineTo(ctx.canvas.width - padding.right, y);
-      ctx.stroke();
+      this.gpuRenderer!.pushLine(padding.left, y, canvasWidth - padding.right, y, cssColor, 1);
     }
   }
 
-  /** Draws Y-axis tick labels (right-aligned to the left padding). */
-  protected drawYAxisLabels(
-    ctx: CanvasRenderingContext2D,
+  /** Push Y-axis tick labels (right-aligned to the left padding). */
+  protected gpuDrawYAxisLabels(
     padding: ChartPadding,
     ticks: number[],
     plotHeight: number,
-    color: string,
-    font: string,
+    cssColor: string,
+    fontSize: number,
   ): void {
-    ctx.fillStyle = color;
-    ctx.font = font;
-    ctx.textAlign = "right";
-    ctx.textBaseline = "middle";
     for (let i = 0; i < ticks.length; i++) {
-      // Ticks are ordered min→max, but Y-axis is inverted (max at top).
       const y = padding.top + plotHeight - (i / (ticks.length - 1)) * plotHeight;
-      ctx.fillText(formatAxisValue(ticks[i]), padding.left - 6, y);
+      this.gpuRenderer!.pushText(
+        formatAxisValue(ticks[i]),
+        padding.left - 6, y,
+        cssColor, fontSize, 'right', 'middle',
+      );
     }
   }
 

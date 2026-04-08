@@ -3,10 +3,10 @@
  * @vi-environment jsdom
  */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ChartBase, mapToRange, generateTicks, formatAxisValue, formatDateShort } from "./chart-base.js";
 
-// --- Pure function tests ---
+// --- Pure function tests (unchanged — rendering-agnostic) ---
 
 describe("mapToRange", () => {
   it("maps a value linearly from domain to range", () => {
@@ -72,7 +72,6 @@ describe("formatAxisValue", () => {
 
 describe("formatDateShort", () => {
   it("formats a timestamp as M/D", () => {
-    // 2026-01-15 — months are 0-indexed in JS Date
     const ts = new Date(2026, 0, 15).getTime();
     expect(formatDateShort(ts)).toBe("1/15");
   });
@@ -85,7 +84,6 @@ describe("formatDateShort", () => {
 
 // --- ChartBase abstract class tests ---
 
-// Concrete subclass for testing the abstract base.
 class TestChart extends ChartBase {
   paintCallCount = 0;
 
@@ -122,33 +120,9 @@ describe("ChartBase", () => {
     expect(p.left).toBeGreaterThan(0);
   });
 
-  it("ensures canvas creates a canvas element in shadow DOM", () => {
-    const el = new TestChart();
-    const canvas = el.ensureCanvas();
-    expect(canvas).toBeInstanceOf(HTMLCanvasElement);
-    expect(el.shadowRoot?.querySelector("canvas")).toBe(canvas);
-  });
-
-  it("ensures canvas reuses existing canvas element", () => {
-    const el = new TestChart();
-    const c1 = el.ensureCanvas();
-    const c2 = el.ensureCanvas();
-    expect(c1).toBe(c2);
-  });
-
-  it("ensures canvas dimensions match chart dimensions", () => {
-    const el = new TestChart();
-    el.setAttribute("width", "400");
-    el.setAttribute("height", "200");
-    const canvas = el.ensureCanvas();
-    expect(canvas?.width).toBe(400);
-    expect(canvas?.height).toBe(200);
-  });
-
   it("scheduleRepaint calls paint on next animation frame", async () => {
     const el = new TestChart();
     el.scheduleRepaint();
-    // paint is called on rAF
     await new Promise((r) => requestAnimationFrame(r));
     expect(el.paintCallCount).toBeGreaterThanOrEqual(1);
   });
@@ -179,31 +153,70 @@ describe("ChartBase", () => {
     expect(el.parseJsonAttribute("data", [42])).toEqual([42]);
   });
 
-  it("drawBackground fills the canvas area", () => {
+  // --- GPU lifecycle ---
+
+  it("gpuDevice property sets and reads external device", () => {
     const el = new TestChart();
-    const canvas = el.ensureCanvas()!;
-    const ctx = canvas.getContext("2d")!;
-    el.drawBackground(ctx, 100, 50, "#000");
-    expect(ctx.fillRect).toHaveBeenCalledWith(0, 0, 100, 50);
+    const mockDevice = { __brand: 'GPUDevice' } as unknown as GPUDevice;
+    el.gpuDevice = mockDevice;
+    expect(el.gpuDevice).toBe(mockDevice);
   });
 
-  it("drawHorizontalGrid draws the correct number of lines", () => {
+  it("gpuRenderer is null before initGPU", () => {
     const el = new TestChart();
-    const canvas = el.ensureCanvas()!;
-    const ctx = canvas.getContext("2d")!;
-    const padding = { top: 10, right: 10, bottom: 10, left: 10 };
-    el.drawHorizontalGrid(ctx, padding, 100, 5, "#ccc");
-    // 5 grid lines → 5 beginPath + 5 moveTo + 5 lineTo + 5 stroke
-    expect(ctx.beginPath).toHaveBeenCalledTimes(5);
-    expect(ctx.stroke).toHaveBeenCalledTimes(5);
+    expect(el.gpuRenderer).toBeNull();
   });
 
-  it("drawYAxisLabels draws the correct number of labels", () => {
+  it("initGPU creates the GPU renderer", async () => {
     const el = new TestChart();
-    const canvas = el.ensureCanvas()!;
-    const ctx = canvas.getContext("2d")!;
-    const ticks = [0, 25, 50, 75, 100];
-    el.drawYAxisLabels(ctx, { top: 10, right: 10, bottom: 10, left: 40 }, ticks, 100, "#fff", "10px mono");
-    expect(ctx.fillText).toHaveBeenCalledTimes(5);
+    document.body.appendChild(el);
+    await el.initGPU();
+    expect(el.gpuRenderer).not.toBeNull();
+    document.body.removeChild(el);
+  });
+
+  it("initGPU is idempotent (safe to call multiple times)", async () => {
+    const el = new TestChart();
+    document.body.appendChild(el);
+    await el.initGPU();
+    const renderer1 = el.gpuRenderer;
+    await el.initGPU();
+    expect(el.gpuRenderer).toBe(renderer1);
+    document.body.removeChild(el);
+  });
+
+  // --- GPU drawing utilities ---
+
+  it("gpuDrawBackground pushes a rect to the renderer", async () => {
+    const el = new TestChart();
+    document.body.appendChild(el);
+    await el.initGPU();
+    const spy = vi.spyOn(el.gpuRenderer!, 'pushRect');
+    el.gpuRenderer!.beginFrame(320, 180, [0, 0, 0, 1]);
+    el.gpuDrawBackground(320, 180, '#000000');
+    expect(spy).toHaveBeenCalledWith(0, 0, 320, 180, '#000000');
+    document.body.removeChild(el);
+  });
+
+  it("gpuDrawHorizontalGrid pushes lines to the renderer", async () => {
+    const el = new TestChart();
+    document.body.appendChild(el);
+    await el.initGPU();
+    const spy = vi.spyOn(el.gpuRenderer!, 'pushLine');
+    el.gpuRenderer!.beginFrame(320, 180, [0, 0, 0, 1]);
+    el.gpuDrawHorizontalGrid({ top: 12, right: 12, bottom: 28, left: 48 }, 140, 5, '#ccc', 320);
+    expect(spy).toHaveBeenCalledTimes(5);
+    document.body.removeChild(el);
+  });
+
+  it("gpuDrawYAxisLabels pushes text to the renderer", async () => {
+    const el = new TestChart();
+    document.body.appendChild(el);
+    await el.initGPU();
+    const spy = vi.spyOn(el.gpuRenderer!, 'pushText');
+    el.gpuRenderer!.beginFrame(320, 180, [0, 0, 0, 1]);
+    el.gpuDrawYAxisLabels({ top: 12, right: 12, bottom: 28, left: 48 }, [0, 25, 50, 75, 100], 140, '#fff', 10);
+    expect(spy).toHaveBeenCalledTimes(5);
+    document.body.removeChild(el);
   });
 });

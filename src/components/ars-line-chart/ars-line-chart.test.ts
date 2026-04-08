@@ -1,5 +1,5 @@
 /**
- * Tests for ArsLineChart web component.
+ * Tests for ArsLineChart web component (WebGPU rendering).
  * @vi-environment jsdom
  */
 
@@ -64,7 +64,6 @@ describe("ArsLineChart", () => {
   it("data property returns the internal reference (zero-copy)", () => {
     element.data = [1, 2, 3];
     const retrieved = element.data;
-    // Callers must not mutate — but the reference is the same array.
     expect(retrieved).toBe(element.data);
   });
 
@@ -83,91 +82,122 @@ describe("ArsLineChart", () => {
     expect(observed).toContain("show-dots");
   });
 
-  // --- Rendering (paint) ---
+  // --- GPU rendering ---
 
-  it("paint runs without error on empty data", () => {
+  it("paint runs without error on empty data (triggers GPU init)", () => {
     expect(() => element.paint()).not.toThrow();
   });
 
-  it("paint runs without error on valid data", () => {
+  it("paint runs without error on valid data (triggers GPU init)", () => {
     element.data = [18, 22, 19, 26, 24, 30];
     expect(() => element.paint()).not.toThrow();
   });
 
-  it("paint creates a canvas in the shadow root", () => {
-    element.data = [1, 2, 3];
-    element.paint();
-    expect(element.shadowRoot?.querySelector("canvas")).toBeInstanceOf(HTMLCanvasElement);
-  });
+  it("paint with GPU renderer pushes rect, line, and text commands", async () => {
+    document.body.appendChild(element);
+    await element.initGPU();
 
-  it("paint calls canvas drawing methods for line and dots", () => {
     element.data = [10, 20, 30, 40];
+    const renderer = element.gpuRenderer!;
+    const pushRectSpy = vi.spyOn(renderer, 'pushRect');
+    const pushLineSpy = vi.spyOn(renderer, 'pushLine');
+    const pushTextSpy = vi.spyOn(renderer, 'pushText');
+    const pushCircleSpy = vi.spyOn(renderer, 'pushCircle');
+
     element.paint();
-    const canvas = element.shadowRoot?.querySelector("canvas") as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d")!;
-    // Line path: beginPath + 1 moveTo + 3 lineTo + stroke
-    expect(ctx.beginPath).toHaveBeenCalled();
-    expect(ctx.moveTo).toHaveBeenCalled();
-    expect(ctx.lineTo).toHaveBeenCalled();
-    expect(ctx.stroke).toHaveBeenCalled();
-    // Dots: arc + fill for each data point
-    expect(ctx.arc).toHaveBeenCalled();
-    expect(ctx.fill).toHaveBeenCalled();
+
+    // Background rect.
+    expect(pushRectSpy).toHaveBeenCalled();
+    // Line segments (3 for 4 data points).
+    expect(pushLineSpy.mock.calls.length).toBeGreaterThanOrEqual(3);
+    // Dots for each data point (4).
+    expect(pushCircleSpy).toHaveBeenCalledTimes(4);
+    // Y-axis labels + X-axis labels.
+    expect(pushTextSpy).toHaveBeenCalled();
+
+    document.body.removeChild(element);
   });
 
-  it("paint respects show-dots=false by not drawing arcs for dots", () => {
+  it("show-dots=false skips circle rendering", async () => {
+    document.body.appendChild(element);
+    await element.initGPU();
+
     element.setAttribute("show-dots", "false");
     element.data = [10, 20, 30];
+    const pushCircleSpy = vi.spyOn(element.gpuRenderer!, 'pushCircle');
+
     element.paint();
-    const canvas = element.shadowRoot?.querySelector("canvas") as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d")!;
-    // Grid drawing also calls beginPath/stroke, but arc is only used for dots
-    // When show-dots is false, arc should only be called from grid (which doesn't use arc)
-    // So we check arc was NOT called
-    expect(ctx.arc).not.toHaveBeenCalled();
+
+    expect(pushCircleSpy).not.toHaveBeenCalled();
+    document.body.removeChild(element);
   });
 
-  it("paint draws Y-axis labels with fillText", () => {
-    element.data = [10, 20, 30];
-    element.paint();
-    const canvas = element.shadowRoot?.querySelector("canvas") as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d")!;
-    // fillText is called for Y-axis labels + X-axis labels + background fillRect
-    expect(ctx.fillText).toHaveBeenCalled();
-  });
-
-  it("paint uses custom colors from attributes", () => {
-    element.setAttribute("background-color", "#111");
-    element.setAttribute("line-color", "#f00");
-    element.data = [5, 10];
-    element.paint();
-    const canvas = element.shadowRoot?.querySelector("canvas") as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d")!;
-    // Verify that fillStyle was set (at minimum for background)
-    expect(ctx.fillRect).toHaveBeenCalled();
-  });
-
-  it("handles single data point without division by zero", () => {
+  it("handles single data point without division by zero", async () => {
+    document.body.appendChild(element);
+    await element.initGPU();
     element.data = [42];
     expect(() => element.paint()).not.toThrow();
+    document.body.removeChild(element);
   });
 
-  it("handles data with all identical values", () => {
+  it("handles data with all identical values", async () => {
+    document.body.appendChild(element);
+    await element.initGPU();
     element.data = [10, 10, 10, 10];
     expect(() => element.paint()).not.toThrow();
+    document.body.removeChild(element);
+  });
+
+  it("renders markers as dashed lines with optional labels", async () => {
+    document.body.appendChild(element);
+    await element.initGPU();
+
+    element.data = [10, 20, 30, 40, 50];
+    element.markers = [{ index: 2, label: "Gen 1" }];
+    const pushDashedSpy = vi.spyOn(element.gpuRenderer!, 'pushDashedLine');
+    const pushTextSpy = vi.spyOn(element.gpuRenderer!, 'pushText');
+
+    element.paint();
+
+    expect(pushDashedSpy).toHaveBeenCalledTimes(1);
+    // Label text for marker.
+    const markerTextCall = pushTextSpy.mock.calls.find((c: any) => c[0] === "Gen 1");
+    expect(markerTextCall).toBeDefined();
+
+    document.body.removeChild(element);
+  });
+
+  // --- yDomain ---
+
+  it("yDomain property controls fixed Y axis range", () => {
+    element.yDomain = [0, 100];
+    expect(element.yDomain).toEqual([0, 100]);
+  });
+
+  it("yDomain null reverts to auto-scaling", () => {
+    element.yDomain = [0, 100];
+    element.yDomain = null;
+    expect(element.yDomain).toBeNull();
   });
 
   // --- Reactivity ---
 
-  it("scheduleRepaint is called when data attribute changes", async () => {
+  it("scheduleRepaint is called when data attribute changes", () => {
     const spy = vi.spyOn(element, "scheduleRepaint");
     element.setAttribute("data", "[1, 2, 3]");
     expect(spy).toHaveBeenCalled();
   });
 
-  it("scheduleRepaint is called when data property is set", async () => {
+  it("scheduleRepaint is called when data property is set", () => {
     const spy = vi.spyOn(element, "scheduleRepaint");
     element.data = [1, 2, 3];
     expect(spy).toHaveBeenCalled();
+  });
+
+  it("data setter skips repaint when data is identical", () => {
+    element.data = [1, 2, 3];
+    const spy = vi.spyOn(element, "scheduleRepaint");
+    element.data = [1, 2, 3];
+    expect(spy).not.toHaveBeenCalled();
   });
 });

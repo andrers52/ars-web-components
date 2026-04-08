@@ -15,7 +15,7 @@ Check out the [live demo](https://andrers52.github.io/src/projects/ars-web-compo
 - **⚡ ES Modules**: Modern module system with proper imports/exports
 - **🔧 Interactive Effects**: Built-in pressed effects and animations
 - **📱 Touch Support**: Full mobile and desktop interaction support
-- **🧪 Vitest Testing**: 698 tests with jsdom environment
+- **🧪 Vitest Testing**: 785 tests with jsdom environment
 - **🧹 ESLint**: Flat-config linting for source, tests, and tool configs
 - **🔒 Proper Encapsulation**: Private methods and static utilities for clean API design
 - **🤝 Mixin Coordination**: Smart pointer coordination system for multiple gesture mixins
@@ -66,7 +66,9 @@ ars-web-components/
 
 ### TypeScript + Web Components
 
-All components extend `WebComponentBase` (which extends `HTMLElement`) and are compiled from TypeScript to ES modules with full type declarations:
+All components extend `WebComponentBase` (which extends `HTMLElement`) and are compiled from TypeScript to ES modules with full type declarations.
+
+Chart components (`ars-line-chart`, `ars-candlestick-chart`) use **WebGPU instanced rendering** for high-performance visualization. Each frame submits 3 GPU draw calls instead of hundreds of sequential Canvas 2D method calls. A shared `GPUDevice` is created lazily on first use, or can be injected externally via `ChartGPUContext.setDevice(device)` for integration with engines like brainiac-engine.
 
 ```typescript
 import WebComponentBase from "../web-component-base/web-component-base.js";
@@ -320,8 +322,8 @@ For projects that need to load components directly without bundling:
 | Dialog | `<ars-dialog>` | Stable | Modal dialog with confirmation and notification modes |
 | Data Roller | `<ars-data-roller>` | Stable | Animated cycling data display |
 | Info Tile | `<ars-info-tile>` | Stable | Structured information card for dashboards |
-| Line Chart | `<ars-line-chart>` | Stable | Canvas-based line chart |
-| Candlestick Chart | `<ars-candlestick-chart>` | Stable | Financial OHLC candlestick chart |
+| Line Chart | `<ars-line-chart>` | Stable | WebGPU-rendered line chart |
+| Candlestick Chart | `<ars-candlestick-chart>` | Stable | WebGPU-rendered financial OHLC candlestick chart |
 | Page Router | `<ars-page>` | Stable | Component-based routing |
 | Relational Node | `<ars-relational-node>` | Deprecated | Use `<ars-info-tile>` instead |
 
@@ -921,7 +923,7 @@ Add the `keep-space-when-hidden` attribute to keep the element's space in the la
 cd ars-web-components
 npm install
 npm run build   # Compile TypeScript → dist/
-npm test        # Run all 681 tests
+npm test        # Run all 785 tests
 npm start       # Start dev server on port 8080
 ```
 
@@ -998,6 +1000,7 @@ export { ArsTabs, ArsTabPanel } from "./components/ars-tabs/ars-tabs.js";
 export { ArsToast } from "./components/ars-toast/ars-toast.js";
 export { ArsToggle } from "./components/ars-toggle/ars-toggle.js";
 export { ChartBase } from "./components/chart-base/chart-base.js";
+export { ChartGPUContext } from "./components/chart-base/gpu/chart-gpu-context.js";
 export { WebComponentBase } from "./components/web-component-base/web-component-base.js";
 
 // Design System
@@ -1016,7 +1019,8 @@ export { SwipeableMixin } from "./mixins/swipeable-mixin/swipeable-mixin.js";
 
 ## Requirements
 
-- Modern browser with ES module support
+- **WebGPU-capable browser** for chart components (Chrome 113+, Safari 17+, Firefox 141+)
+- Modern browser with ES module support for all other components
 - Node.js (for building and testing)
 - `arslib` dependency (automatically installed)
 
