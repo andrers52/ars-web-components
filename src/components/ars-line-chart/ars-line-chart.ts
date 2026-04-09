@@ -29,6 +29,9 @@ const dataExtent = (data: number[]): [number, number] => {
   return [min, max];
 };
 
+/** Padding matching ars-candlestick-chart — used when slot-align="candlestick". */
+const CANDLESTICK_PADDING = { top: 12, right: 12, bottom: 32, left: 52 };
+
 class ArsLineChart extends ChartBase {
   // Cached parsed data to avoid re-parsing on every paint.
   #parsedData: number[] = [];
@@ -41,6 +44,7 @@ class ArsLineChart extends ChartBase {
       ...ChartBase.observedAttributes,
       "data",
       "markers",
+      "slot-align",
       "line-color",
       "background-color",
       "grid-color",
@@ -92,6 +96,19 @@ class ArsLineChart extends ChartBase {
     this.scheduleRepaint();
   }
 
+  /** Whether to use candlestick-compatible slot-center x positioning. */
+  get slotAlign(): boolean {
+    return this.getAttribute("slot-align") === "candlestick";
+  }
+
+  /** Override padding to match candlestick chart when slot-aligned. */
+  getPadding() {
+    if (this.slotAlign) {
+      return { ...CANDLESTICK_PADDING };
+    }
+    return super.getPadding();
+  }
+
   // --- Rendering ---
 
   paint(): void {
@@ -108,7 +125,13 @@ class ArsLineChart extends ChartBase {
     const h = this.getChartHeight();
     const padding = this.getPadding();
     const plotWidth = w - padding.left - padding.right;
-    const plotHeight = h - padding.top - padding.bottom;
+    const fullPlotHeight = h - padding.top - padding.bottom;
+    // When overlaid on a candlestick chart, Y values must map to only the
+    // price area (top ~75%), matching the candlestick's layout split:
+    // priceHeight = totalPlotHeight - volumeHeight(25%) - separatorGap(4px).
+    const plotHeight = this.slotAlign
+      ? fullPlotHeight - fullPlotHeight * 0.25 - 4
+      : fullPlotHeight;
 
     // Resolve colors.
     const bgColor = this.getAttribute("background-color")
@@ -152,19 +175,28 @@ class ArsLineChart extends ChartBase {
       const ticks = generateTicks(dataMin, dataMax, gridLineCount);
       this.gpuDrawYAxisLabels(padding, ticks, plotHeight, axisColor, fontSize);
 
+      // X-position helper. In slot-align mode, use candlestick-compatible
+      // slot-center positioning: x = left + (i + 0.5) / N * width.
+      // Otherwise use edge-to-edge: x = left + i / (N - 1) * width.
+      const useSlotAlign = this.slotAlign && data.length > 1;
+      const xPos = (i: number): number => {
+        if (data.length === 1) return padding.left + plotWidth / 2;
+        if (useSlotAlign) return padding.left + ((i + 0.5) / data.length) * plotWidth;
+        return padding.left + (i / (data.length - 1)) * plotWidth;
+      };
+
       // X-axis index labels.
       const maxLabels = Math.min(data.length, 10);
       const step = Math.max(1, Math.floor(data.length / maxLabels));
       for (let i = 0; i < data.length; i += step) {
-        const x = padding.left + (data.length === 1 ? plotWidth / 2 : (i / (data.length - 1)) * plotWidth);
-        renderer.pushText(String(i), x, h - padding.bottom + 6, axisColor, fontSize, 'center', 'top');
+        renderer.pushText(String(i), xPos(i), h - padding.bottom + 6, axisColor, fontSize, 'center', 'top');
       }
 
       // Line path — one line segment per pair of adjacent points.
       for (let i = 1; i < data.length; i++) {
-        const x0 = padding.left + (data.length === 1 ? plotWidth / 2 : ((i - 1) / (data.length - 1)) * plotWidth);
+        const x0 = xPos(i - 1);
         const y0 = padding.top + plotHeight - mapToRange(data[i - 1], dataMin, dataMax, 0, plotHeight);
-        const x1 = padding.left + (data.length === 1 ? plotWidth / 2 : (i / (data.length - 1)) * plotWidth);
+        const x1 = xPos(i);
         const y1 = padding.top + plotHeight - mapToRange(data[i], dataMin, dataMax, 0, plotHeight);
         renderer.pushLine(x0, y0, x1, y1, lineColor, 2);
       }
@@ -172,7 +204,7 @@ class ArsLineChart extends ChartBase {
       // Data point dots.
       if (showDots) {
         for (let i = 0; i < data.length; i++) {
-          const x = padding.left + (data.length === 1 ? plotWidth / 2 : (i / (data.length - 1)) * plotWidth);
+          const x = xPos(i);
           const y = padding.top + plotHeight - mapToRange(data[i], dataMin, dataMax, 0, plotHeight);
           renderer.pushCircle(x, y, 3, lineColor);
         }
@@ -184,7 +216,9 @@ class ArsLineChart extends ChartBase {
         const chartBottom = padding.top + plotHeight;
 
         for (const marker of this.#parsedMarkers) {
-          const x = Math.round(padding.left + (marker.index / (data.length - 1)) * plotWidth) + 0.5;
+          const x = Math.round(useSlotAlign
+            ? xPos(marker.index)
+            : padding.left + (marker.index / (data.length - 1)) * plotWidth) + 0.5;
           if (x < padding.left || x > w - padding.right) continue;
 
           const color = marker.color ?? "rgba(92, 128, 196, 0.6)";

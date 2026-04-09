@@ -63,6 +63,8 @@ class ArsCandlestickChart extends ChartBase {
   #parsedOrders: CandleOrder[] = [];
   #parsedMarkers: ChartVerticalMarker[] = [];
   #parsedHighlightRange: ChartHighlightRange | null = null;
+  /** Candle index from which order lines start rendering (0 = full width). */
+  #orderStartIndex = 0;
 
   static get observedAttributes(): string[] {
     return [
@@ -143,6 +145,19 @@ class ArsCandlestickChart extends ChartBase {
       value?.endIndex === this.#parsedHighlightRange?.endIndex
     ) return;
     this.#parsedHighlightRange = value;
+    this.scheduleRepaint();
+  }
+
+  /** Candle index from which order lines start rendering.
+   *  Orders only exist within a generation — lines should not extend
+   *  into previous generations' candle regions. */
+  get orderStartIndex(): number {
+    return this.#orderStartIndex;
+  }
+
+  set orderStartIndex(value: number) {
+    if (value === this.#orderStartIndex) return;
+    this.#orderStartIndex = value;
     this.scheduleRepaint();
   }
 
@@ -321,12 +336,17 @@ class ArsCandlestickChart extends ChartBase {
         }
       }
 
-      // Order overlay lines.
+      // Order overlay lines — limited to the current generation's region.
+      // Orders are per-generation; rendering them across the full chart width
+      // would create false overlaps with previous generations' candles.
       if (orders.length > 0) {
         const sellColor = "rgba(255, 170, 70, 0.7)";
         const buyColor = "rgba(90, 160, 255, 0.7)";
         const chartTop = padding.top;
         const chartBottom = padding.top + priceHeight;
+        const orderLeft = this.#orderStartIndex > 0
+          ? padding.left + this.#orderStartIndex * slotWidth
+          : padding.left;
 
         for (const order of orders) {
           const rawY = Math.round(padding.top + priceHeight - mapToRange(order.price, pMin, pMax, 0, priceHeight)) + 0.5;
@@ -334,7 +354,7 @@ class ArsCandlestickChart extends ChartBase {
           const isBuy = order.side === "buy";
           const color = isBuy ? buyColor : sellColor;
 
-          renderer.pushLine(padding.left, y, w - padding.right, y, color, 1);
+          renderer.pushLine(orderLeft, y, w - padding.right, y, color, 1);
         }
       }
     }
