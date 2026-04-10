@@ -24,31 +24,6 @@ import { parseCssColor } from "../chart-base/gpu/color-utils.js";
 
 // --- Pure helpers ---
 
-/** Computes the price extent (min low, max high) across all candles and orders. */
-const priceExtent = (data: CandleDataPoint[], orders: CandleOrder[] = []): [number, number] => {
-  if (data.length === 0) return [0, 0];
-  let min = data[0].low;
-  let max = data[0].high;
-  for (let i = 1; i < data.length; i++) {
-    if (data[i].low < min) min = data[i].low;
-    if (data[i].high > max) max = data[i].high;
-  }
-  for (const order of orders) {
-    if (order.price < min) min = order.price;
-    if (order.price > max) max = order.price;
-  }
-  return [min, max];
-};
-
-/** Computes max volume for scaling. */
-const maxVolume = (data: CandleDataPoint[]): number => {
-  let max = 0;
-  for (const d of data) {
-    if (d.volume > max) max = d.volume;
-  }
-  return max;
-};
-
 /** Applies opacity to a hex color, returning an rgba CSS string.
  *  Used for volume bars which need the up/down color at reduced opacity. */
 const withOpacity = (hex: string, opacity: number): string => {
@@ -58,6 +33,9 @@ const withOpacity = (hex: string, opacity: number): string => {
   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 };
 
+/** Stride for the flat dataBuffer: open, high, low, close, volume, time. */
+const CANDLE_STRIDE = 6;
+
 class ArsCandlestickChart extends ChartBase {
   #parsedData: CandleDataPoint[] = [];
   #parsedOrders: CandleOrder[] = [];
@@ -65,6 +43,15 @@ class ArsCandlestickChart extends ChartBase {
   #parsedHighlightRange: ChartHighlightRange | null = null;
   /** Candle index from which order lines start rendering (0 = full width). */
   #orderStartIndex = 0;
+  /** Indicator line overlays rendered on the same canvas as candles.
+   *  Each entry has a data array and a CSS color. */
+  #indicators: { data: number[] | Float64Array; color: string }[] = [];
+
+  // ── Fast-path flat buffers (zero-copy from WASM) ──────────────────
+  // When set, these are used instead of the object-based #parsedData/etc.
+  // Layout: interleaved [open, high, low, close, volume, time] × N candles.
+  #dataBuffer: Float64Array | null = null;
+  #dataBufferCount = 0;
 
   static get observedAttributes(): string[] {
     return [
@@ -161,6 +148,30 @@ class ArsCandlestickChart extends ChartBase {
     this.scheduleRepaint();
   }
 
+  /** Indicator line overlays rendered on the same canvas.
+   *  Each entry: { data: number[] | Float64Array, color: string }. */
+  get indicators(): { data: number[] | Float64Array; color: string }[] {
+    return this.#indicators;
+  }
+
+  set indicators(value: { data: number[] | Float64Array; color: string }[]) {
+    this.#indicators = value;
+    this.scheduleRepaint();
+  }
+
+  /** Flat OHLCV buffer: interleaved [open,high,low,close,volume,time] × N.
+   *  When set, takes priority over the object-based `data` property.
+   *  Zero-copy fast path from WASM — no JS object allocation per candle. */
+  get dataBuffer(): Float64Array | null {
+    return this.#dataBuffer;
+  }
+
+  set dataBuffer(value: Float64Array | null) {
+    this.#dataBuffer = value;
+    this.#dataBufferCount = value ? value.length / CANDLE_STRIDE : 0;
+    this.scheduleRepaint();
+  }
+
   // --- Overrides ---
 
   getChartWidth(): number {
@@ -211,10 +222,21 @@ class ArsCandlestickChart extends ChartBase {
     const dateTickCount = Number(this.getAttribute("date-tick-count") ?? 5);
     const fontSize = 10;
 
-    const data = this.#parsedData;
     const orders = this.#parsedOrders;
     const markers = this.#parsedMarkers;
     const highlightRange = this.#parsedHighlightRange;
+
+    // Flat buffer fast path: read OHLCV directly from Float64Array.
+    // Falls back to object array if dataBuffer is not set.
+    const buf = this.#dataBuffer;
+    const N = buf ? this.#dataBufferCount : this.#parsedData.length;
+    const data = this.#parsedData; // fallback for date labels
+    const bOpen  = (i: number) => buf ? buf[i * CANDLE_STRIDE]     : data[i].open;
+    const bHigh  = (i: number) => buf ? buf[i * CANDLE_STRIDE + 1] : data[i].high;
+    const bLow   = (i: number) => buf ? buf[i * CANDLE_STRIDE + 2] : data[i].low;
+    const bClose = (i: number) => buf ? buf[i * CANDLE_STRIDE + 3] : data[i].close;
+    const bVol   = (i: number) => buf ? buf[i * CANDLE_STRIDE + 4] : data[i].volume;
+    const bTime  = (i: number) => buf ? buf[i * CANDLE_STRIDE + 5] : data[i].time;
 
     // Layout: price area + separator + volume area.
     const totalPlotWidth = w - padding.left - padding.right;
@@ -230,13 +252,24 @@ class ArsCandlestickChart extends ChartBase {
     // Background.
     this.gpuDrawBackground(w, h, bgColor);
 
-    if (data.length > 0) {
-      // Price extent with margin.
-      const [rawPriceMin, rawPriceMax] = priceExtent(data, orders);
+    if (N > 0) {
+      // Price extent with margin — works with both flat buffer and object array.
+      let rawPriceMin = bLow(0), rawPriceMax = bHigh(0);
+      let vMax = 0;
+      for (let i = 0; i < N; i++) {
+        const lo = bLow(i), hi = bHigh(i), vol = bVol(i);
+        if (lo < rawPriceMin) rawPriceMin = lo;
+        if (hi > rawPriceMax) rawPriceMax = hi;
+        if (vol > vMax) vMax = vol;
+      }
+      for (const order of orders) {
+        if (order.price < rawPriceMin) rawPriceMin = order.price;
+        if (order.price > rawPriceMax) rawPriceMax = order.price;
+      }
       const priceMargin = (rawPriceMax - rawPriceMin) * 0.06 || 1;
       const pMin = rawPriceMin - priceMargin;
       const pMax = rawPriceMax + priceMargin;
-      const vMax = maxVolume(data) || 1;
+      vMax = vMax || 1;
 
       // Grid lines in price area.
       this.gpuDrawHorizontalGrid(padding, priceHeight, priceTickCount, gridColor, w);
@@ -246,11 +279,11 @@ class ArsCandlestickChart extends ChartBase {
       this.gpuDrawYAxisLabels(padding, priceTicks, priceHeight, axisColor, fontSize);
 
       // Candlestick slot geometry.
-      const slotWidth = totalPlotWidth / data.length;
+      const slotWidth = totalPlotWidth / N;
       const bodyWidth = slotWidth * (1 - candleGap);
 
       // Highlight range overlay (behind candles).
-      if (highlightRange && highlightRange.startIndex < data.length) {
+      if (highlightRange && highlightRange.startIndex < N) {
         const fillColor = highlightRange.fillColor ?? "rgba(80, 140, 220, 0.25)";
         const borderColor = highlightRange.borderColor ?? "rgb(80, 180, 255)";
 
@@ -262,27 +295,24 @@ class ArsCandlestickChart extends ChartBase {
         const regionHeight = Math.max(1, chartBottom - chartTop);
 
         renderer.pushRect(x0, chartTop, regionWidth, regionHeight, fillColor);
-        // Top and bottom border lines.
         renderer.pushLine(x0, chartTop + 0.5, x1, chartTop + 0.5, borderColor, 1);
         renderer.pushLine(x0, chartBottom - 0.5, x1, chartBottom - 0.5, borderColor, 1);
       }
 
       // Candles: wick (line) + body (rect).
-      for (let i = 0; i < data.length; i++) {
-        const d = data[i];
-        const isUp = d.close >= d.open;
+      for (let i = 0; i < N; i++) {
+        const open = bOpen(i), high = bHigh(i), low = bLow(i), close = bClose(i);
+        const isUp = close >= open;
         const color = isUp ? upColor : downColor;
         const slotX = padding.left + i * slotWidth;
         const centerX = slotX + slotWidth / 2;
 
-        const highY = padding.top + priceHeight - mapToRange(d.high, pMin, pMax, 0, priceHeight);
-        const lowY = padding.top + priceHeight - mapToRange(d.low, pMin, pMax, 0, priceHeight);
-        const openY = padding.top + priceHeight - mapToRange(d.open, pMin, pMax, 0, priceHeight);
-        const closeY = padding.top + priceHeight - mapToRange(d.close, pMin, pMax, 0, priceHeight);
+        const highY = padding.top + priceHeight - mapToRange(high, pMin, pMax, 0, priceHeight);
+        const lowY = padding.top + priceHeight - mapToRange(low, pMin, pMax, 0, priceHeight);
+        const openY = padding.top + priceHeight - mapToRange(open, pMin, pMax, 0, priceHeight);
+        const closeY = padding.top + priceHeight - mapToRange(close, pMin, pMax, 0, priceHeight);
 
-        // Wick.
         renderer.pushLine(centerX, highY, centerX, lowY, color, 1);
-        // Body.
         const bodyTop = Math.min(openY, closeY);
         const bodyHeight = Math.max(Math.abs(closeY - openY), 1);
         renderer.pushRect(centerX - bodyWidth / 2, bodyTop, bodyWidth, bodyHeight, color);
@@ -294,11 +324,11 @@ class ArsCandlestickChart extends ChartBase {
 
       // Volume bars.
       const volumeTop = padding.top + priceHeight + separatorGap;
-      for (let i = 0; i < data.length; i++) {
-        const d = data[i];
-        const isUp = d.close >= d.open;
+      for (let i = 0; i < N; i++) {
+        const open = bOpen(i), close = bClose(i), vol = bVol(i);
+        const isUp = close >= open;
         const color = isUp ? upColor : downColor;
-        const barHeight = (d.volume / vMax) * volumeHeight;
+        const barHeight = (vol / vMax) * volumeHeight;
         const slotX = padding.left + i * slotWidth;
         const centerX = slotX + slotWidth / 2;
 
@@ -312,10 +342,10 @@ class ArsCandlestickChart extends ChartBase {
       }
 
       // X-axis date labels.
-      const dateStep = Math.max(1, Math.floor(data.length / dateTickCount));
-      for (let i = 0; i < data.length; i += dateStep) {
+      const dateStep = Math.max(1, Math.floor(N / dateTickCount));
+      for (let i = 0; i < N; i += dateStep) {
         const x = padding.left + i * slotWidth + slotWidth / 2;
-        renderer.pushText(formatDateShort(data[i].time), x, h - padding.bottom + 6, axisColor, fontSize, 'center', 'top');
+        renderer.pushText(formatDateShort(bTime(i)), x, h - padding.bottom + 6, axisColor, fontSize, 'center', 'top');
       }
 
       // Vertical marker lines.
@@ -355,6 +385,22 @@ class ArsCandlestickChart extends ChartBase {
           const color = isBuy ? buyColor : sellColor;
 
           renderer.pushLine(orderLeft, y, w - padding.right, y, color, 1);
+        }
+      }
+
+      // Indicator line overlays — rendered on the same canvas using the
+      // same price mapping (pMin/pMax/priceHeight) and slot geometry.
+      // Each indicator is a { data: number[], color: string } object.
+      for (const indicator of this.#indicators) {
+        const iData = indicator.data;
+        if (iData.length < 2) continue;
+        const color = indicator.color;
+        for (let i = 1; i < iData.length && i < N; i++) {
+          const x0 = padding.left + (i - 1) * slotWidth + slotWidth / 2;
+          const y0 = padding.top + priceHeight - mapToRange(iData[i - 1], pMin, pMax, 0, priceHeight);
+          const x1 = padding.left + i * slotWidth + slotWidth / 2;
+          const y1 = padding.top + priceHeight - mapToRange(iData[i], pMin, pMax, 0, priceHeight);
+          renderer.pushLine(x0, y0, x1, y1, color, 2);
         }
       }
     }

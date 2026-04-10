@@ -54,9 +54,10 @@
 
       <div class="info-box">
         <h4>About ARS Line Chart</h4>
-        <p>A canvas-rendered line chart with configurable grid, axis labels, and data-point dots.
-          Supports dynamic data updates, color theming, and responsive sizing via <code>width</code>/<code>height</code> attributes.
-          Extends <code>ChartBase</code> for shared canvas/repaint infrastructure.</p>
+        <p>A WebGPU-rendered line chart with configurable grid, axis labels, and data-point dots.
+          Supports dynamic data updates, color theming, responsive sizing, candlestick-aligned layout
+          (<code>slot-align="candlestick"</code>), fixed Y domain for overlay alignment, and a flat
+          <code>Float64Array</code> fast path for zero-copy WASM integration.</p>
       </div>
 
       <!-- Basic Usage -->
@@ -144,6 +145,65 @@
         </div>
       </div>
 
+      <!-- Slot Alignment -->
+      <div class="demo-section">
+        <h3>Candlestick Slot Alignment</h3>
+        <p style="color: #666; margin-bottom: 12px;">Set <code>slot-align="candlestick"</code> to match the padding and x-positioning of <code>ars-candlestick-chart</code>, enabling pixel-perfect overlay alignment.</p>
+        <div class="chart-row">
+          <div class="chart-card">
+            <h4>Normal Layout</h4>
+            <ars-line-chart id="chart-normal-align" width="460" height="220"
+              line-color="#3aa8ff" show-dots="false"
+              data="[100, 105, 98, 110, 107, 115, 112, 118, 114, 120]">
+            </ars-line-chart>
+          </div>
+          <div class="chart-card">
+            <h4>slot-align="candlestick"</h4>
+            <ars-line-chart id="chart-slot-align" width="460" height="220"
+              slot-align="candlestick"
+              line-color="#3aa8ff" show-dots="false"
+              data="[100, 105, 98, 110, 107, 115, 112, 118, 114, 120]">
+            </ars-line-chart>
+          </div>
+        </div>
+      </div>
+
+      <!-- Y Domain -->
+      <div class="demo-section">
+        <h3>Fixed Y Domain</h3>
+        <p style="color: #666; margin-bottom: 12px;">The <code>yDomain</code> property locks the Y-axis to a fixed <code>[min, max]</code> range, useful for aligning multiple overlay charts to the same scale.</p>
+        <div class="chart-row">
+          <div class="chart-card">
+            <h4>Auto-scaled (default)</h4>
+            <ars-line-chart id="chart-auto-y" width="400" height="160"
+              line-color="#5ad68a"
+              data="[42, 45, 43, 48, 46, 50]">
+            </ars-line-chart>
+          </div>
+          <div class="chart-card">
+            <h4>yDomain = [0, 100]</h4>
+            <ars-line-chart id="chart-fixed-y" width="400" height="160"
+              line-color="#f06b63"
+              data="[42, 45, 43, 48, 46, 50]">
+            </ars-line-chart>
+          </div>
+        </div>
+      </div>
+
+      <!-- Float64Array Fast Path -->
+      <div class="demo-section">
+        <h3>Float64Array Fast Path (<code>dataBuffer</code>)</h3>
+        <p style="color: #666; margin-bottom: 12px;">The <code>dataBuffer</code> property accepts a <code>Float64Array</code> for zero-copy data from WASM. When set, it takes priority over the <code>data</code> property.</p>
+        <div class="chart-row">
+          <div class="chart-card">
+            <h4>From Float64Array (50 points)</h4>
+            <ars-line-chart id="chart-buffer" width="500" height="200"
+              line-color="#c084fc" show-dots="false">
+            </ars-line-chart>
+          </div>
+        </div>
+      </div>
+
       <!-- Interactive Controls -->
       <div class="demo-section">
         <h3>Interactive Controls</h3>
@@ -175,7 +235,8 @@
             <strong>axis-color:</strong> Axis label color<br>
             <strong>background-color:</strong> Canvas background<br>
             <strong>grid-lines:</strong> Number of grid lines<br>
-            <strong>show-dots:</strong> Show data-point dots (default true)
+            <strong>show-dots:</strong> Show data-point dots (default true)<br>
+            <strong>slot-align:</strong> "candlestick" to match candlestick chart padding/positioning
           </p>
         </div>
 
@@ -183,6 +244,9 @@
           <h4>Programmatic API:</h4>
           <p>
             <strong>chart.data = [10, 20, 30];</strong> &mdash; set data via property<br>
+            <strong>chart.dataBuffer = new Float64Array([...]);</strong> &mdash; zero-copy fast path from WASM<br>
+            <strong>chart.yDomain = [0, 100];</strong> &mdash; lock Y-axis to fixed range (null for auto)<br>
+            <strong>chart.slotAlign = true;</strong> &mdash; use candlestick-compatible padding/positioning<br>
             <strong>chart.setAttribute('line-color', '#ff0');</strong> &mdash; change colors at runtime
           </p>
         </div>
@@ -195,6 +259,21 @@
     import '/dist/components/ars-line-chart/ars-line-chart.js';
 
     const chartDefault = document.getElementById('chart-default');
+
+    // --- Fixed Y Domain demo ---
+    const chartFixedY = document.getElementById('chart-fixed-y');
+    chartFixedY.yDomain = [0, 100];
+
+    // --- Float64Array fast path demo ---
+    const chartBuffer = document.getElementById('chart-buffer');
+    const bufLen = 50;
+    const bufArr = new Float64Array(bufLen);
+    let acc = 50;
+    for (let i = 0; i < bufLen; i++) {
+      acc += (Math.random() - 0.48) * 4;
+      bufArr[i] = acc;
+    }
+    chartBuffer.dataBuffer = bufArr;
 
     // Randomize data
     document.getElementById('btn-random').addEventListener('click', () => {

@@ -71,9 +71,11 @@
 
       <div class="info-box">
         <h4>About ARS Candlestick Chart</h4>
-        <p>Canvas-rendered OHLCV candlestick chart with volume bars, configurable grid, axis labels,
-          and optional order overlays with label positioning. Extends <code>ChartBase</code> for shared
-          canvas/repaint infrastructure. Data is provided as an array of <code>{ open, high, low, close, volume, time }</code> objects.</p>
+        <p>WebGPU-rendered OHLCV candlestick chart with volume bars, configurable grid, axis labels,
+          order overlays, and indicator line overlays. Extends <code>ChartBase</code> for shared
+          GPU/repaint infrastructure. Data is provided as an array of
+          <code>{ open, high, low, close, volume, time }</code> objects, or as a flat
+          <code>Float64Array</code> via the <code>dataBuffer</code> property for zero-copy WASM integration.</p>
       </div>
 
       <!-- Basic Candlestick -->
@@ -134,6 +136,46 @@
         </div>
       </div>
 
+      <!-- Indicator Overlays -->
+      <div class="demo-section">
+        <h3>Indicator Line Overlays</h3>
+        <p style="color: #666; margin-bottom: 12px;">Line indicators (e.g. moving averages) rendered on the same canvas via the <code>indicators</code> property. Each entry has a <code>data</code> array and a <code>color</code> string.</p>
+        <div class="chart-row">
+          <div class="chart-card">
+            <h4>SMA-5 + SMA-10 Overlays</h4>
+            <ars-candlestick-chart id="chart-indicators" width="600" height="280"></ars-candlestick-chart>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Start Index -->
+      <div class="demo-section">
+        <h3>Order Start Index</h3>
+        <p style="color: #666; margin-bottom: 12px;">The <code>orderStartIndex</code> property limits order overlay lines to a candle region, preventing false overlaps across generations.</p>
+        <div class="chart-row">
+          <div class="chart-card">
+            <h4>Orders from index 0 (default)</h4>
+            <ars-candlestick-chart id="chart-osi-full"></ars-candlestick-chart>
+          </div>
+          <div class="chart-card">
+            <h4>Orders from index 10</h4>
+            <ars-candlestick-chart id="chart-osi-partial"></ars-candlestick-chart>
+          </div>
+        </div>
+      </div>
+
+      <!-- Float64Array Fast Path -->
+      <div class="demo-section">
+        <h3>Float64Array Fast Path (<code>dataBuffer</code>)</h3>
+        <p style="color: #666; margin-bottom: 12px;">The <code>dataBuffer</code> property accepts a flat <code>Float64Array</code> with interleaved <code>[open, high, low, close, volume, time]</code> &times; N candles &mdash; zero-copy from WASM.</p>
+        <div class="chart-row">
+          <div class="chart-card">
+            <h4>From Float64Array (20 candles)</h4>
+            <ars-candlestick-chart id="chart-buffer" width="600" height="280"></ars-candlestick-chart>
+          </div>
+        </div>
+      </div>
+
       <!-- Interactive Controls -->
       <div class="demo-section">
         <h3>Interactive Controls</h3>
@@ -186,6 +228,19 @@
             <strong>candle-gap:</strong> Gap between candles in pixels<br>
             <strong>price-tick-count / date-tick-count:</strong> Number of axis ticks<br>
             <strong>order-label-position:</strong> "left" or "right" for order labels
+          </p>
+        </div>
+
+        <div class="info-box">
+          <h4>Properties (JS only):</h4>
+          <p>
+            <strong>chart.indicators = [{ data: number[], color: string }, ...];</strong><br>
+            Line overlays (e.g. moving averages) rendered on the same canvas using the price scale.<br><br>
+            <strong>chart.orderStartIndex = 10;</strong><br>
+            Candle index from which order overlay lines begin &mdash; prevents false overlaps across generations.<br><br>
+            <strong>chart.dataBuffer = new Float64Array([...]);</strong><br>
+            Flat interleaved <code>[open,high,low,close,volume,time]</code> &times; N buffer.
+            Zero-copy fast path from WASM &mdash; takes priority over <code>data</code> when set.
           </p>
         </div>
       </div>
@@ -264,6 +319,59 @@
 
     updateAllCharts();
     log('Charts initialized with ' + currentData.length + ' candles');
+
+    // --- Indicator overlay demo ---
+    const chartIndicators = document.getElementById('chart-indicators');
+    const indicatorData = buildCandleData(30);
+    chartIndicators.data = indicatorData;
+
+    // Simple Moving Average helper.
+    function sma(data, period) {
+      const result = [];
+      for (let i = 0; i < data.length; i++) {
+        if (i < period - 1) { result.push(NaN); continue; }
+        let sum = 0;
+        for (let j = i - period + 1; j <= i; j++) sum += data[j].close;
+        result.push(sum / period);
+      }
+      return result;
+    }
+
+    chartIndicators.indicators = [
+      { data: sma(indicatorData, 5), color: '#3aa8ff' },
+      { data: sma(indicatorData, 10), color: '#c084fc' },
+    ];
+    log('Indicator chart: SMA-5 (blue) + SMA-10 (purple)');
+
+    // --- Order Start Index demo ---
+    const chartOsiFull = document.getElementById('chart-osi-full');
+    const chartOsiPartial = document.getElementById('chart-osi-partial');
+    const osiData = buildCandleData(20);
+    const osiOrders = buildOrders(osiData);
+
+    chartOsiFull.data = osiData;
+    chartOsiFull.orders = osiOrders;
+
+    chartOsiPartial.data = osiData;
+    chartOsiPartial.orders = osiOrders;
+    chartOsiPartial.orderStartIndex = 10;
+    log('Order start index demo: full-width vs from candle 10');
+
+    // --- Float64Array fast path demo ---
+    const chartBuffer = document.getElementById('chart-buffer');
+    const bufData = buildCandleData(20);
+    const STRIDE = 6;
+    const flat = new Float64Array(bufData.length * STRIDE);
+    for (let i = 0; i < bufData.length; i++) {
+      flat[i * STRIDE]     = bufData[i].open;
+      flat[i * STRIDE + 1] = bufData[i].high;
+      flat[i * STRIDE + 2] = bufData[i].low;
+      flat[i * STRIDE + 3] = bufData[i].close;
+      flat[i * STRIDE + 4] = bufData[i].volume;
+      flat[i * STRIDE + 5] = bufData[i].time;
+    }
+    chartBuffer.dataBuffer = flat;
+    log('Float64Array chart: ' + bufData.length + ' candles via flat buffer');
 
     // --- Controls ---
     document.getElementById('btn-random').addEventListener('click', () => {

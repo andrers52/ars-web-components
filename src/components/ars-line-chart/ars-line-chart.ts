@@ -15,20 +15,6 @@ import { ChartBase, mapToRange, generateTicks } from "../chart-base/chart-base.j
 import type { ChartVerticalMarker } from "../chart-base/chart-types.js";
 import { parseCssColor } from "../chart-base/gpu/color-utils.js";
 
-// --- Pure rendering helpers ---
-
-/** Computes the min and max of a number array. Returns [0, 0] for empty arrays. */
-const dataExtent = (data: number[]): [number, number] => {
-  if (data.length === 0) return [0, 0];
-  let min = data[0];
-  let max = data[0];
-  for (let i = 1; i < data.length; i++) {
-    if (data[i] < min) min = data[i];
-    if (data[i] > max) max = data[i];
-  }
-  return [min, max];
-};
-
 /** Padding matching ars-candlestick-chart — used when slot-align="candlestick". */
 const CANDLESTICK_PADDING = { top: 12, right: 12, bottom: 32, left: 52 };
 
@@ -38,6 +24,8 @@ class ArsLineChart extends ChartBase {
   #parsedMarkers: ChartVerticalMarker[] = [];
   // Optional fixed Y domain [min, max] — overrides auto-scaling.
   #yDomain: [number, number] | null = null;
+  // Fast-path flat buffer (zero-copy from WASM).
+  #dataBuffer: Float64Array | null = null;
 
   static get observedAttributes(): string[] {
     return [
@@ -72,6 +60,18 @@ class ArsLineChart extends ChartBase {
   set data(value: number[]) {
     if (this.arraysMatch(value, this.#parsedData)) return;
     this.#parsedData = value;
+    this.#dataBuffer = null; // clear fast path when object data is set
+    this.scheduleRepaint();
+  }
+
+  /** Flat Float64Array fast path — zero-copy from WASM.
+   *  When set, takes priority over the object-based `data` property. */
+  get dataBuffer(): Float64Array | null {
+    return this.#dataBuffer;
+  }
+
+  set dataBuffer(value: Float64Array | null) {
+    this.#dataBuffer = value;
     this.scheduleRepaint();
   }
 
@@ -96,9 +96,17 @@ class ArsLineChart extends ChartBase {
     this.scheduleRepaint();
   }
 
-  /** Whether to use candlestick-compatible slot-center x positioning. */
+  /** Whether to use candlestick-compatible layout (slot-center x, price-area y). */
+  #slotAlign = false;
+
   get slotAlign(): boolean {
-    return this.getAttribute("slot-align") === "candlestick";
+    return this.#slotAlign || this.getAttribute("slot-align") === "candlestick";
+  }
+
+  set slotAlign(value: boolean) {
+    if (value === this.#slotAlign) return;
+    this.#slotAlign = value;
+    this.scheduleRepaint();
   }
 
   /** Override padding to match candlestick chart when slot-aligned. */
@@ -125,13 +133,7 @@ class ArsLineChart extends ChartBase {
     const h = this.getChartHeight();
     const padding = this.getPadding();
     const plotWidth = w - padding.left - padding.right;
-    const fullPlotHeight = h - padding.top - padding.bottom;
-    // When overlaid on a candlestick chart, Y values must map to only the
-    // price area (top ~75%), matching the candlestick's layout split:
-    // priceHeight = totalPlotHeight - volumeHeight(25%) - separatorGap(4px).
-    const plotHeight = this.slotAlign
-      ? fullPlotHeight - fullPlotHeight * 0.25 - 4
-      : fullPlotHeight;
+    const plotHeight = h - padding.top - padding.bottom;
 
     // Resolve colors.
     const bgColor = this.getAttribute("background-color")
@@ -145,8 +147,13 @@ class ArsLineChart extends ChartBase {
     const gridLineCount = Number(this.getAttribute("grid-lines") ?? 5);
     const showDots = this.getAttribute("show-dots") !== "false";
 
-    const data = this.#parsedData;
     const fontSize = 10;
+
+    // Flat buffer fast path: use Float64Array when available, fall back to number[].
+    const buf = this.#dataBuffer;
+    const data = this.#parsedData;
+    const N = buf ? buf.length : data.length;
+    const val = (i: number) => buf ? buf[i] : data[i];
 
     // Begin GPU frame.
     const clearColor = parseCssColor(bgColor);
@@ -155,14 +162,19 @@ class ArsLineChart extends ChartBase {
     // Background.
     this.gpuDrawBackground(w, h, bgColor);
 
-    if (data.length > 0) {
+    if (N > 0) {
       // Compute data range.
       let dataMin: number, dataMax: number;
       if (this.#yDomain) {
         dataMin = this.#yDomain[0];
         dataMax = this.#yDomain[1];
       } else {
-        const [rawMin, rawMax] = dataExtent(data);
+        let rawMin = val(0), rawMax = val(0);
+        for (let i = 1; i < N; i++) {
+          const v = val(i);
+          if (v < rawMin) rawMin = v;
+          if (v > rawMax) rawMax = v;
+        }
         const margin = (rawMax - rawMin) * 0.08 || 1;
         dataMin = rawMin - margin;
         dataMax = rawMax + margin;
@@ -175,50 +187,48 @@ class ArsLineChart extends ChartBase {
       const ticks = generateTicks(dataMin, dataMax, gridLineCount);
       this.gpuDrawYAxisLabels(padding, ticks, plotHeight, axisColor, fontSize);
 
-      // X-position helper. In slot-align mode, use candlestick-compatible
-      // slot-center positioning: x = left + (i + 0.5) / N * width.
-      // Otherwise use edge-to-edge: x = left + i / (N - 1) * width.
-      const useSlotAlign = this.slotAlign && data.length > 1;
+      // X-position helper.
+      const useSlotAlign = this.slotAlign && N > 1;
       const xPos = (i: number): number => {
-        if (data.length === 1) return padding.left + plotWidth / 2;
-        if (useSlotAlign) return padding.left + ((i + 0.5) / data.length) * plotWidth;
-        return padding.left + (i / (data.length - 1)) * plotWidth;
+        if (N === 1) return padding.left + plotWidth / 2;
+        if (useSlotAlign) return padding.left + ((i + 0.5) / N) * plotWidth;
+        return padding.left + (i / (N - 1)) * plotWidth;
       };
 
       // X-axis index labels.
-      const maxLabels = Math.min(data.length, 10);
-      const step = Math.max(1, Math.floor(data.length / maxLabels));
-      for (let i = 0; i < data.length; i += step) {
+      const maxLabels = Math.min(N, 10);
+      const step = Math.max(1, Math.floor(N / maxLabels));
+      for (let i = 0; i < N; i += step) {
         renderer.pushText(String(i), xPos(i), h - padding.bottom + 6, axisColor, fontSize, 'center', 'top');
       }
 
-      // Line path — one line segment per pair of adjacent points.
-      for (let i = 1; i < data.length; i++) {
+      // Line path.
+      for (let i = 1; i < N; i++) {
         const x0 = xPos(i - 1);
-        const y0 = padding.top + plotHeight - mapToRange(data[i - 1], dataMin, dataMax, 0, plotHeight);
+        const y0 = padding.top + plotHeight - mapToRange(val(i - 1), dataMin, dataMax, 0, plotHeight);
         const x1 = xPos(i);
-        const y1 = padding.top + plotHeight - mapToRange(data[i], dataMin, dataMax, 0, plotHeight);
+        const y1 = padding.top + plotHeight - mapToRange(val(i), dataMin, dataMax, 0, plotHeight);
         renderer.pushLine(x0, y0, x1, y1, lineColor, 2);
       }
 
       // Data point dots.
       if (showDots) {
-        for (let i = 0; i < data.length; i++) {
+        for (let i = 0; i < N; i++) {
           const x = xPos(i);
-          const y = padding.top + plotHeight - mapToRange(data[i], dataMin, dataMax, 0, plotHeight);
+          const y = padding.top + plotHeight - mapToRange(val(i), dataMin, dataMax, 0, plotHeight);
           renderer.pushCircle(x, y, 3, lineColor);
         }
       }
 
       // Vertical marker lines.
-      if (this.#parsedMarkers.length > 0 && data.length >= 2) {
+      if (this.#parsedMarkers.length > 0 && N >= 2) {
         const chartTop = padding.top;
         const chartBottom = padding.top + plotHeight;
 
         for (const marker of this.#parsedMarkers) {
           const x = Math.round(useSlotAlign
             ? xPos(marker.index)
-            : padding.left + (marker.index / (data.length - 1)) * plotWidth) + 0.5;
+            : padding.left + (marker.index / (N - 1)) * plotWidth) + 0.5;
           if (x < padding.left || x > w - padding.right) continue;
 
           const color = marker.color ?? "rgba(92, 128, 196, 0.6)";

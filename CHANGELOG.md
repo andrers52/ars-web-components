@@ -5,6 +5,58 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-04-09
+
+### Added
+
+- **`ars-candlestick-chart`: indicator line overlays**
+  - New `indicators` property: `{ data: number[] | Float64Array, color: string }[]`.
+    Renders line overlays (e.g. moving averages) on the same canvas using the
+    price scale.  Each indicator is drawn as connected line segments with 2px
+    width, sharing the candle chart's price mapping.
+
+- **`ars-candlestick-chart`: `orderStartIndex` property**
+  - Limits order overlay lines to a candle region starting at the given index.
+    Prevents false overlaps when orders belong to a specific generation within
+    the visible data window.
+
+- **`ars-candlestick-chart`: `dataBuffer` property (Float64Array fast path)**
+  - Accepts a flat `Float64Array` with interleaved
+    `[open, high, low, close, volume, time]` × N candles.
+  - Zero-copy path from WASM — no JS object allocation per candle.
+  - When set, takes priority over the object-based `data` property.
+
+- **`ars-line-chart`: `dataBuffer` property (Float64Array fast path)**
+  - Accepts a `Float64Array` of values.  When set, takes priority over
+    the `data` property.  Zero-copy from WASM.
+
+- **`ars-line-chart`: `slotAlign` property / `slot-align` attribute**
+  - When set to `true` (or attribute `slot-align="candlestick"`), uses the
+    same padding as `ars-candlestick-chart` and centers data points within
+    slot columns, enabling pixel-perfect overlay alignment.
+
+- **`ars-line-chart`: `yDomain` property**
+  - Fixed `[min, max]` Y-axis range that overrides auto-scaling.  Useful for
+    aligning multiple overlay charts to the same scale.
+
+### Changed
+
+- **`ars-candlestick-chart`: inlined price/volume extent computation**
+  - Removed `priceExtent()` and `maxVolume()` helper functions.  Min/max
+    values are now computed inline during the paint loop using the
+    buffer-aware accessor functions (`bOpen`, `bHigh`, etc.), supporting
+    both object arrays and flat `Float64Array` inputs.
+
+- **`ars-line-chart`: inlined data extent computation**
+  - Removed `dataExtent()` helper function.  Min/max values are now computed
+    inline using the `val()` accessor, supporting both `number[]` and
+    `Float64Array` inputs.
+
+### Updated
+
+- Demo pages for both chart components updated with new interactive sections
+  showcasing indicators, orderStartIndex, dataBuffer, slotAlign, and yDomain.
+
 ## [2.0.0] - 2026-04-08
 
 ### Changed (BREAKING)
