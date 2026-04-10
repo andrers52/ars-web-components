@@ -10,7 +10,7 @@
 //   down-color     — bearish candle color (default #f06b63)
 //   background-color — canvas bg (default rgba(8,12,16,0.92))
 //   grid-color     — grid lines (default rgba(255,255,255,0.06))
-//   axis-color     — axis/label color (default rgba(255,255,255,0.2))
+//   axis-color     — axis/label color (default rgba(255,255,255,0.5))
 //   volume-opacity — opacity of volume bars (default 0.35)
 //   volume-height-ratio — fraction of chart height for volume area (default 0.25)
 //   candle-gap     — gap between candles as fraction of slot width (default 0.28)
@@ -214,7 +214,7 @@ class ArsCandlestickChart extends ChartBase {
     const gridColor = this.getAttribute("grid-color")
       ?? this.cssVar("--arswc-chart-grid", "rgba(255, 255, 255, 0.06)");
     const axisColor = this.getAttribute("axis-color")
-      ?? this.cssVar("--arswc-chart-axis", "rgba(255, 255, 255, 0.2)");
+      ?? this.cssVar("--arswc-chart-axis", "rgba(255, 255, 255, 0.5)");
     const volOpacity = Number(this.getAttribute("volume-opacity") ?? 0.35);
     const volRatio = Number(this.getAttribute("volume-height-ratio") ?? 0.25);
     const candleGap = Number(this.getAttribute("candle-gap") ?? 0.28);
