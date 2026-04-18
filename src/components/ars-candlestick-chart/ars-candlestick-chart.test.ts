@@ -214,6 +214,57 @@ describe("ArsCandlestickChart", () => {
     document.body.removeChild(element);
   });
 
+  /**
+   * An OCO position surfaces as two chart entries from the Rust
+   * viz-subscriber: one `side: "sell"` (TP leg) and one
+   * `side: "stop_loss"` (SL leg) sharing the same `order_id`.  The
+   * renderer must draw each as a distinguishable horizontal line —
+   * specifically, the SL line must be red to separate it visually
+   * from the TP (orange).  This test inspects the color argument
+   * of `pushLine` for each order entry to lock that contract.
+   *
+   * Without this assertion a future refactor could silently drop
+   * the SL branch or reuse the sell color, making OCO positions
+   * look identical to bare limit sells on the chart — the bug
+   * this whole wiring exists to prevent.
+   */
+  it("paint draws stop_loss orders in a distinct color from sell orders", async () => {
+    document.body.appendChild(element);
+    await element.initGPU();
+
+    element.data = makeCandleData(5);
+    element.orders = [
+      { side: "sell", amount: 1, price: 108 },      // TP leg
+      { side: "stop_loss", amount: 1, price: 94 },  // SL leg
+      { side: "buy", amount: 1, price: 98 },
+    ];
+    const pushLineSpy = vi.spyOn(element.gpuRenderer!, 'pushLine');
+    element.paint();
+
+    // Collect the color strings from every pushLine call — these
+    // are passed as the 5th positional argument in the signature
+    // `pushLine(x0, y0, x1, y1, color, width)`.
+    const colors = pushLineSpy.mock.calls.map(c => c[4] as string);
+
+    // Must contain the red SL color.
+    expect(
+      colors.some(c => c === "rgba(230, 70, 70, 0.75)"),
+      `expected at least one SL line in red; got colors: ${JSON.stringify(colors)}`
+    ).toBe(true);
+
+    // Must contain the orange TP color.
+    expect(
+      colors.some(c => c === "rgba(255, 170, 70, 0.7)"),
+      "expected at least one TP line in orange"
+    ).toBe(true);
+
+    // SL color must never collide with the TP color — otherwise
+    // the distinction is invisible on screen.
+    expect("rgba(230, 70, 70, 0.75)").not.toBe("rgba(255, 170, 70, 0.7)");
+
+    document.body.removeChild(element);
+  });
+
   it("paint uses custom up/down colors from attributes", async () => {
     document.body.appendChild(element);
     await element.initGPU();

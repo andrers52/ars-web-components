@@ -369,9 +369,19 @@ class ArsCandlestickChart extends ChartBase {
       // Order overlay lines — limited to the current generation's region.
       // Orders are per-generation; rendering them across the full chart width
       // would create false overlaps with previous generations' candles.
+      //
+      // Three semantic colors distinguish the three order kinds the
+      // evolver emits:
+      //   - "buy"       → blue, pending limit buy
+      //   - "sell"      → orange, OCO take-profit leg (or bare limit sell)
+      //   - "stop_loss" → red,    OCO stop-loss leg
+      // An OCO position emits TWO entries (one "sell" + one
+      // "stop_loss") at different prices; the user sees both
+      // bounds of the expected exit range at a glance.
       if (orders.length > 0) {
-        const sellColor = "rgba(255, 170, 70, 0.7)";
-        const buyColor = "rgba(90, 160, 255, 0.7)";
+        const sellColor = "rgba(255, 170, 70, 0.7)";   // TP: orange
+        const buyColor = "rgba(90, 160, 255, 0.7)";    // BUY: blue
+        const stopLossColor = "rgba(230, 70, 70, 0.75)"; // SL: red
         const chartTop = padding.top;
         const chartBottom = padding.top + priceHeight;
         const orderLeft = this.#orderStartIndex > 0
@@ -381,8 +391,12 @@ class ArsCandlestickChart extends ChartBase {
         for (const order of orders) {
           const rawY = Math.round(padding.top + priceHeight - mapToRange(order.price, pMin, pMax, 0, priceHeight)) + 0.5;
           const y = Math.max(chartTop, Math.min(chartBottom, rawY));
-          const isBuy = order.side === "buy";
-          const color = isBuy ? buyColor : sellColor;
+          let color: string;
+          if (order.side === "buy") color = buyColor;
+          else if (order.side === "stop_loss") color = stopLossColor;
+          else color = sellColor; // "sell" (TP) — also the fallback for any
+                                   // unrecognised side so a future wire-protocol
+                                   // extension can't produce an invisible overlay.
 
           renderer.pushLine(orderLeft, y, w - padding.right, y, color, 1);
         }
