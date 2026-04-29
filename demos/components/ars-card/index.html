@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Card - Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+
+  <style>
+    .demo-section {
+      background: var(--arswc-color-surface, #f6f8fb);
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: var(--arswc-radius-md, 10px);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-section h3 { margin: 0 0 12px; font-size: 1rem; }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .event-log {
+      background: #0d1117; color: #c9d1d9;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      max-height: 200px; overflow-y: auto; margin-top: 12px;
+    }
+    .event-log .entry { margin-bottom: 4px; }
+    .event-log .timestamp { color: #8b949e; }
+    .event-log .event-name { color: #79c0ff; }
+    .code-block {
+      background: #161b22; color: #e6edf3;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      overflow-x: auto; margin-top: 8px;
+    }
+    .pet-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-card</h1>
+      <p>Versatile content containers with header, media, body, actions, and footer.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>Flexible card component with slots for header, media, content, actions, and footer.
+           Supports outlined, elevated, and interactive variants with hover states.</p>
+      </div>
+
+      <!-- Variants -->
+      <div class="demo-section">
+        <h3>Variants</h3>
+        <div class="demo-grid">
+          <ars-card>
+            <span slot="header">Default Card</span>
+            Clean and minimal with subtle shadow. Best for lists and grids.
+            <div slot="actions"><button class="btn btn-small" style="font-size:0.75rem;">Action</button></div>
+          </ars-card>
+
+          <ars-card variant="outlined">
+            <span slot="header">Outlined Card</span>
+            Defined border, no shadow. Great for dense layouts and contrast.
+            <div slot="actions"><button class="btn btn-small" style="font-size:0.75rem;">Action</button></div>
+          </ars-card>
+
+          <ars-card variant="elevated">
+            <span slot="header">Elevated Card</span>
+            Prominent shadow with larger radius. Draws attention to key content.
+            <div slot="actions"><button class="btn btn-small" style="font-size:0.75rem;">Action</button></div>
+          </ars-card>
+        </div>
+        <div class="code-block">&lt;ars-card variant="elevated"&gt;
+  &lt;span slot="header"&gt;Title&lt;/span&gt;
+  Content...
+  &lt;div slot="actions"&gt;&lt;button&gt;Action&lt;/button&gt;&lt;/div&gt;
+&lt;/ars-card&gt;</div>
+      </div>
+
+      <!-- Interactive with media -->
+      <div class="demo-section">
+        <h3>Interactive (with media)</h3>
+        <div class="demo-grid">
+          <ars-card interactive variant="elevated">
+            <img slot="media" class="pet-img" src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400&q=80" alt="Dog" />
+            <span slot="header">Golden Retriever &mdash; Lost</span>
+            Last seen near Parque Ibirapuera on April 24. Wearing a red collar with tag.
+            <div slot="footer">Posted 2 hours ago &middot; S&atilde;o Paulo, SP</div>
+          </ars-card>
+        </div>
+        <div class="code-block">&lt;ars-card interactive variant="elevated" href="/pets/123"&gt;
+  &lt;img slot="media" src="photo.jpg" /&gt;
+  &lt;span slot="header"&gt;Title&lt;/span&gt;
+  Content...
+  &lt;div slot="footer"&gt;Metadata&lt;/div&gt;
+&lt;/ars-card&gt;</div>
+      </div>
+
+      <!-- Padding Options -->
+      <div class="demo-section">
+        <h3>Padding Options</h3>
+        <div class="demo-grid">
+          <ars-card padding="sm">
+            <span slot="header">Small Padding</span>
+            Tight spacing for compact layouts.
+          </ars-card>
+          <ars-card padding="lg">
+            <span slot="header">Large Padding</span>
+            Roomy spacing for featured content.
+          </ars-card>
+          <ars-card padding="none">
+            <img class="pet-img" src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80" alt="Cat" />
+          </ars-card>
+        </div>
+        <div class="code-block">&lt;ars-card padding="sm"&gt;...&lt;/ars-card&gt;
+&lt;ars-card padding="lg"&gt;...&lt;/ars-card&gt;
+&lt;ars-card padding="none"&gt;...&lt;/ars-card&gt;</div>
+      </div>
+
+      <!-- Event monitor -->
+      <div class="demo-section">
+        <h3>Event Monitor</h3>
+        <ars-card id="event-card" interactive variant="elevated" padding="lg">
+          <span slot="header">Click Me</span>
+          This card emits ars-card:click events.
+        </ars-card>
+        <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px; margin-top:12px;">Clear Log</button>
+        <div class="event-log" id="event-log">
+          <div class="entry"><span class="timestamp">[ready]</span> Click the card above...</div>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-card
+  variant="elevated"
+  padding="md"
+  interactive
+  href="/pets/123"
+&gt;
+  &lt;img slot="media" src="photo.jpg" /&gt;
+  &lt;span slot="header"&gt;Lost Dog&lt;/span&gt;
+  Last seen near downtown...
+  &lt;div slot="footer"&gt;2 hours ago&lt;/div&gt;
+&lt;/ars-card&gt;
+
+&lt;script&gt;
+  const card = document.querySelector('ars-card');
+  card.addEventListener('ars-card:click', (e) =&gt; {
+    console.log('Card clicked:', e.detail.variant);
+  });
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsCard } from '/dist/components/ars-card/ars-card.js';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
+
+    initializeArsWebComponents({
+      designAdapter: getArsWebComponentsDefaultAdapter('light')
+    });
+
+    const log = document.getElementById('event-log');
+    document.getElementById('event-card').addEventListener('ars-card:click', (e) => {
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+      entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">ars-card:click</span> variant: ${e.detail.variant}`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    });
+
+    document.getElementById('clear-log').addEventListener('click', () => {
+      log.innerHTML = '<div class="entry"><span class="timestamp">[cleared]</span> Listening...</div>';
+    });
+
+    document.getElementById('theme-light').addEventListener('click', () => {
+      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
+    });
+    document.getElementById('theme-dark').addEventListener('click', () => {
+      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('dark') });
+    });
+  </script>
+</body>
+</html>

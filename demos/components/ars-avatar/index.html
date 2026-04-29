@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Avatar - Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+
+  <style>
+    .demo-section {
+      background: var(--arswc-color-surface, #f6f8fb);
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: var(--arswc-radius-md, 10px);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-section h3 { margin: 0 0 12px; font-size: 1rem; }
+    .demo-row {
+      display: flex; flex-wrap: wrap; gap: 12px;
+      align-items: center; margin: 8px 0;
+    }
+    .event-log {
+      background: #0d1117; color: #c9d1d9;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      max-height: 200px; overflow-y: auto; margin-top: 12px;
+    }
+    .event-log .entry { margin-bottom: 4px; }
+    .event-log .timestamp { color: #8b949e; }
+    .event-log .event-name { color: #79c0ff; }
+    .code-block {
+      background: #161b22; color: #e6edf3;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      overflow-x: auto; margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-avatar</h1>
+      <p>Circular and rounded image avatars with fallback initials.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>Renders a profile image with automatic fallback to text initials when the image fails to load
+           or is absent. Supports multiple sizes, shapes, and accessible alt text.</p>
+      </div>
+
+      <!-- Sizes -->
+      <div class="demo-section">
+        <h3>Sizes</h3>
+        <div class="demo-row">
+          <ars-avatar size="sm" fallback="SM"></ars-avatar>
+          <ars-avatar size="md" fallback="MD"></ars-avatar>
+          <ars-avatar size="lg" fallback="LG"></ars-avatar>
+          <ars-avatar size="xl" fallback="XL"></ars-avatar>
+        </div>
+        <div class="code-block">&lt;ars-avatar size="lg" fallback="LG"&gt;&lt;/ars-avatar&gt;</div>
+      </div>
+
+      <!-- Shapes -->
+      <div class="demo-section">
+        <h3>Shapes</h3>
+        <div class="demo-row">
+          <ars-avatar shape="circle" fallback="CI" size="lg"></ars-avatar>
+          <ars-avatar shape="square" fallback="SQ" size="lg"></ars-avatar>
+          <ars-avatar shape="rounded" fallback="RO" size="lg"></ars-avatar>
+        </div>
+        <div class="code-block">&lt;ars-avatar shape="rounded" fallback="RO" size="lg"&gt;&lt;/ars-avatar&gt;</div>
+      </div>
+
+      <!-- With Image -->
+      <div class="demo-section">
+        <h3>With Image</h3>
+        <div class="demo-row">
+          <ars-avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=Fido" alt="Fido" size="lg"></ars-avatar>
+          <ars-avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=Whiskers" alt="Whiskers" size="lg" shape="rounded"></ars-avatar>
+        </div>
+        <div class="code-block">&lt;ars-avatar src="photo.jpg" alt="Fido" size="lg"&gt;&lt;/ars-avatar&gt;</div>
+      </div>
+
+      <!-- Fallback on Error -->
+      <div class="demo-section">
+        <h3>Fallback on Error</h3>
+        <div class="demo-row">
+          <ars-avatar src="https://invalid-url.jpg" fallback="ER" size="lg" id="error-avatar"></ars-avatar>
+        </div>
+        <p id="error-msg" style="font-size:0.85rem;color:var(--arswc-color-danger,#c73e3e);margin-top:8px;"></p>
+        <div class="code-block">&lt;ars-avatar src="broken.jpg" fallback="ER" size="lg"&gt;&lt;/ars-avatar&gt;</div>
+      </div>
+
+      <!-- Event monitor -->
+      <div class="demo-section">
+        <h3>Event Monitor</h3>
+        <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px;">Clear Log</button>
+        <div class="event-log" id="event-log">
+          <div class="entry"><span class="timestamp">[ready]</span> Listening for ars-avatar:error...</div>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-avatar
+  src="https://example.com/photo.jpg"
+  alt="User profile"
+  fallback="JD"
+  size="lg"
+  shape="circle"
+&gt;&lt;/ars-avatar&gt;
+
+&lt;script&gt;
+  const avatar = document.querySelector('ars-avatar');
+  avatar.addEventListener('ars-avatar:error', (e) =&gt; {
+    console.log('Image failed:', e.detail.src);
+  });
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsAvatar } from '/dist/components/ars-avatar/ars-avatar.js';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
+
+    initializeArsWebComponents({
+      designAdapter: getArsWebComponentsDefaultAdapter('light')
+    });
+
+    const log = document.getElementById('event-log');
+    document.addEventListener('ars-avatar:error', (e) => {
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+      entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">ars-avatar:error</span> src: ${e.detail.src}`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+
+      document.getElementById('error-msg').textContent = `Image failed to load: ${e.detail.src}`;
+    });
+
+    document.getElementById('clear-log').addEventListener('click', () => {
+      log.innerHTML = '<div class="entry"><span class="timestamp">[cleared]</span> Listening...</div>';
+      document.getElementById('error-msg').textContent = '';
+    });
+
+    document.getElementById('theme-light').addEventListener('click', () => {
+      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
+    });
+    document.getElementById('theme-dark').addEventListener('click', () => {
+      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('dark') });
+    });
+  </script>
+</body>
+</html>

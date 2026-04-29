@@ -233,7 +233,7 @@ class ArsTabs extends HTMLElement {
   }
 
   static #escapeHtml(value: string): string {
-    return value
+    return (value ?? "")
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
@@ -242,7 +242,7 @@ class ArsTabs extends HTMLElement {
   }
 
   static #escapeAttr(value: string): string {
-    return value.replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+    return (value ?? "").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
   }
 
   static #styles(isVertical: boolean): string {

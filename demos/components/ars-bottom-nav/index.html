@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Bottom Nav - Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+
+  <style>
+    .demo-section {
+      background: var(--arswc-color-surface, #f6f8fb);
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: var(--arswc-radius-md, 10px);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-section h3 { margin: 0 0 12px; font-size: 1rem; }
+    .nav-demo-container {
+      max-width: 400px;
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .page-preview {
+      padding: 24px;
+      text-align: center;
+      min-height: 120px;
+      background: var(--arswc-color-surface, #ffffff);
+    }
+    .page-preview.hidden { display: none; }
+    .event-log {
+      background: #0d1117; color: #c9d1d9;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      max-height: 200px; overflow-y: auto; margin-top: 12px;
+    }
+    .event-log .entry { margin-bottom: 4px; }
+    .event-log .timestamp { color: #8b949e; }
+    .event-log .event-name { color: #79c0ff; }
+    .code-block {
+      background: #161b22; color: #e6edf3;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      overflow-x: auto; margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-bottom-nav</h1>
+      <p>Mobile-optimized bottom tab navigation bar.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>Parent &lt;ars-bottom-nav&gt; manages active state across &lt;ars-bottom-nav-item&gt; children.
+           Each item supports icon and label slots. Ideal for mobile-first navigation patterns.</p>
+      </div>
+
+      <!-- Basic Usage -->
+      <div class="demo-section">
+        <h3>Basic Usage</h3>
+        <div class="nav-demo-container">
+          <div class="page-preview" id="page-home">&#127968; Home</div>
+          <div class="page-preview hidden" id="page-map">&#128506;&#65039; Map</div>
+          <div class="page-preview hidden" id="page-alerts">&#128276; Alerts</div>
+          <div class="page-preview hidden" id="page-profile">&#128100; Profile</div>
+          <ars-bottom-nav value="home" id="demo-nav">
+            <ars-bottom-nav-item value="home">
+              <span slot="icon">&#127968;</span>
+              Home
+            </ars-bottom-nav-item>
+            <ars-bottom-nav-item value="map">
+              <span slot="icon">&#128506;&#65039;</span>
+              Map
+            </ars-bottom-nav-item>
+            <ars-bottom-nav-item value="alerts">
+              <span slot="icon">&#128276;</span>
+              Alerts
+            </ars-bottom-nav-item>
+            <ars-bottom-nav-item value="profile">
+              <span slot="icon">&#128100;</span>
+              Profile
+            </ars-bottom-nav-item>
+          </ars-bottom-nav>
+        </div>
+        <div class="code-block">&lt;ars-bottom-nav value="home"&gt;
+  &lt;ars-bottom-nav-item value="home"&gt;
+    &lt;span slot="icon"&gt;&#127968;&lt;/span&gt;
+    Home
+  &lt;/ars-bottom-nav-item&gt;
+  ...
+&lt;/ars-bottom-nav&gt;</div>
+      </div>
+
+      <!-- Event monitor -->
+      <div class="demo-section">
+        <h3>Event Monitor</h3>
+        <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px;">Clear Log</button>
+        <div class="event-log" id="event-log">
+          <div class="entry"><span class="timestamp">[ready]</span> Switch tabs to see events...</div>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-bottom-nav id="nav" value="home"&gt;...&lt;/ars-bottom-nav&gt;
+
+&lt;script&gt;
+  const nav = document.getElementById('nav');
+  nav.addEventListener('ars-bottom-nav:change', (e) =&gt; {
+    console.log('Switched to:', e.detail.value);
+  });
+  nav.value = 'map'; // programmatic switch
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsBottomNav, ArsBottomNavItem } from '/dist/components/ars-bottom-nav/ars-bottom-nav.js';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
+
+    initializeArsWebComponents({
+      designAdapter: getArsWebComponentsDefaultAdapter('light')
+    });
+
+    const nav = document.getElementById('demo-nav');
+    const log = document.getElementById('event-log');
+
+    nav?.addEventListener('ars-bottom-nav:change', (e) => {
+      const value = e.detail.value;
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+      entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">ars-bottom-nav:change</span> value: ${value}`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+
+      document.querySelectorAll('.page-preview').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`page-${value}`)?.classList.remove('hidden');
+    });
+
+    document.getElementById('clear-log').addEventListener('click', () => {
+      log.innerHTML = '<div class="entry"><span class="timestamp">[cleared]</span> Listening...</div>';
+    });
+
+    document.getElementById('theme-light').addEventListener('click', () => {
+      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
+    });
+    document.getElementById('theme-dark').addEventListener('click', () => {
+      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('dark') });
+    });
+  </script>
+</body>
+</html>

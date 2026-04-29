@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Image Upload - Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+
+  <style>
+    .demo-section {
+      background: var(--arswc-color-surface, #f6f8fb);
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: var(--arswc-radius-md, 10px);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-section h3 { margin: 0 0 12px; font-size: 1rem; }
+    .event-log {
+      background: #0d1117; color: #c9d1d9;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      max-height: 200px; overflow-y: auto; margin-top: 12px;
+    }
+    .event-log .entry { margin-bottom: 4px; }
+    .event-log .timestamp { color: #8b949e; }
+    .event-log .event-name { color: #79c0ff; }
+    .event-log .error { color: #ff7b72; }
+    .code-block {
+      background: #161b22; color: #e6edf3;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      overflow-x: auto; margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-image-upload</h1>
+      <p>Drag-and-drop image uploader with preview thumbnails.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>Accepts image files via drag-and-drop or file picker. Renders preview thumbnails with
+           remove actions. Supports multiple files, max file limits, size validation, and custom accept types.</p>
+      </div>
+
+      <!-- Single File -->
+      <div class="demo-section">
+        <h3>Single File (default)</h3>
+        <ars-image-upload id="single-upload"></ars-image-upload>
+        <div class="code-block">&lt;ars-image-upload&gt;&lt;/ars-image-upload&gt;</div>
+      </div>
+
+      <!-- Multiple Files -->
+      <div class="demo-section">
+        <h3>Multiple Files</h3>
+        <ars-image-upload multiple max-files="4" id="multi-upload"></ars-image-upload>
+        <div class="code-block">&lt;ars-image-upload multiple max-files="4"&gt;&lt;/ars-image-upload&gt;</div>
+      </div>
+
+      <!-- Custom Hint -->
+      <div class="demo-section">
+        <h3>Custom Hint</h3>
+        <ars-image-upload max-files="2" accept="image/jpeg,image/png">
+          <span slot="hint">Only JPG and PNG, max 2 photos</span>
+        </ars-image-upload>
+        <div class="code-block">&lt;ars-image-upload max-files="2" accept="image/jpeg,image/png"&gt;
+  &lt;span slot="hint"&gt;Only JPG and PNG, max 2 photos&lt;/span&gt;
+&lt;/ars-image-upload&gt;</div>
+      </div>
+
+      <!-- Event monitor -->
+      <div class="demo-section">
+        <h3>Event Monitor</h3>
+        <ars-image-upload multiple max-files="2" max-size="1024" id="event-upload">
+          <span>Upload a tiny file (max 1KB) to test errors</span>
+        </ars-image-upload>
+        <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px; margin-top:12px;">Clear Log</button>
+        <div class="event-log" id="event-log">
+          <div class="entry"><span class="timestamp">[ready]</span> Upload or drop images to see events...</div>
+        </div>
+      </div>
+
+      <!-- JavaScript API -->
+      <div class="demo-section">
+        <h3>JavaScript API</h3>
+        <ars-image-upload multiple max-files="3" id="js-upload"></ars-image-upload>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button class="btn" id="js-clear">Clear All</button>
+          <button class="btn btn-secondary" id="js-getfiles">Get Files</button>
+        </div>
+        <div class="code-block">const files = uploader.getFiles();
+uploader.clear();</div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-image-upload
+  id="uploader"
+  multiple
+  max-files="5"
+  max-size="5242880"
+  accept="image/*"
+&gt;
+  &lt;span slot="hint"&gt;Max 5 images, 5MB each&lt;/span&gt;
+&lt;/ars-image-upload&gt;
+
+&lt;script&gt;
+  const uploader = document.getElementById('uploader');
+  uploader.addEventListener('ars-image-upload:change', (e) =&gt; {
+    console.log('Files:', e.detail.files);
+  });
+  uploader.addEventListener('ars-image-upload:error', (e) =&gt; {
+    console.log('Error:', e.detail.reason);
+  });
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsImageUpload } from '/dist/components/ars-image-upload/ars-image-upload.js';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
+
+    initializeArsWebComponents({
+      designAdapter: getArsWebComponentsDefaultAdapter('light')
+    });
+
+    const log = document.getElementById('event-log');
+
+    function setupLog(uploadId, label) {
+      const upload = document.getElementById(uploadId);
+      upload?.addEventListener('ars-image-upload:change', (e) => {
+        const files = e.detail.files;
+        const time = new Date().toLocaleTimeString();
+        const entry = document.createElement('div');
+        entry.className = 'entry';
+        entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">${label}:change</span> ${files.length} file(s): ${files.map((f) => f.name).join(', ')}`;
+        log.appendChild(entry);
+        log.scrollTop = log.scrollHeight;
+      });
+    }
+
+    setupLog('single-upload', 'single');
+    setupLog('multi-upload', 'multi');
+
+    const eventUpload = document.getElementById('event-upload');
+    eventUpload?.addEventListener('ars-image-upload:change', (e) => {
+      const files = e.detail.files;
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+      entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">event:change</span> ${files.length} file(s): ${files.map((f) => f.name).join(', ')}`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    });
+    eventUpload?.addEventListener('ars-image-upload:remove', (e) => {
+      const file = e.detail.file;
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+      entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">event:remove</span> ${file.name}`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    });
+    eventUpload?.addEventListener('ars-image-upload:error', (e) => {
+      const detail = e.detail;
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = 'entry error';
+      entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">event:error</span> ${detail.reason}${detail.file ? ' — ' + detail.file.name : ''}`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    });
+
+    document.getElementById('clear-log').addEventListener('click', () => {
+      log.innerHTML = '<div class="entry"><span class="timestamp">[cleared]</span> Listening...</div>';
+    });
+
+    document.getElementById('js-clear').addEventListener('click', () => {
+      document.getElementById('js-upload').clear();
+    });
+    document.getElementById('js-getfiles').addEventListener('click', () => {
+      const files = document.getElementById('js-upload').getFiles();
+      alert(JSON.stringify(files.map((f) => f.name)));
+    });
+
+    document.getElementById('theme-light').addEventListener('click', () => {
+      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
+    });
+    document.getElementById('theme-dark').addEventListener('click', () => {
+      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('dark') });
+    });
+  </script>
+</body>
+</html>

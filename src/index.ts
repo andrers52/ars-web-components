@@ -23,6 +23,17 @@ export type { ArsToastSeverity, ArsToastPosition, ArsToastOptions } from "./comp
 export { ArsToggle } from "./components/ars-toggle/ars-toggle.js";
 export type { ArsToggleLabelPosition } from "./components/ars-toggle/ars-toggle.js";
 export { WebComponentBase } from "./components/web-component-base/web-component-base.js";
+// --- NEW PetRescue P0 components ---
+export { ArsBadge } from "./components/ars-badge/ars-badge.js";
+export type { ArsBadgeVariant, ArsBadgeSize } from "./components/ars-badge/ars-badge.js";
+export { ArsAvatar } from "./components/ars-avatar/ars-avatar.js";
+export type { ArsAvatarSize, ArsAvatarShape } from "./components/ars-avatar/ars-avatar.js";
+export { ArsFab } from "./components/ars-fab/ars-fab.js";
+export type { ArsFabVariant, ArsFabSize, ArsFabPosition } from "./components/ars-fab/ars-fab.js";
+export { ArsCard } from "./components/ars-card/ars-card.js";
+export type { ArsCardVariant, ArsCardPadding } from "./components/ars-card/ars-card.js";
+export { ArsBottomNav, ArsBottomNavItem } from "./components/ars-bottom-nav/ars-bottom-nav.js";
+export { ArsImageUpload } from "./components/ars-image-upload/ars-image-upload.js";
 // charts
 export { ChartBase } from "./components/chart-base/chart-base.js";
 export { ArsLineChart } from "./components/ars-line-chart/ars-line-chart.js";

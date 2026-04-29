@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS FAB - Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+
+  <style>
+    .demo-section {
+      background: var(--arswc-color-surface, #f6f8fb);
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: var(--arswc-radius-md, 10px);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-section h3 { margin: 0 0 12px; font-size: 1rem; }
+    .demo-row {
+      display: flex; flex-wrap: wrap; gap: 16px;
+      align-items: center; margin: 8px 0;
+    }
+    .fixed-demo-container {
+      position: relative; height: 120px;
+      border: 1px dashed var(--arswc-color-border, #d5dde8);
+      border-radius: 8px; overflow: hidden;
+    }
+    .event-log {
+      background: #0d1117; color: #c9d1d9;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      max-height: 200px; overflow-y: auto; margin-top: 12px;
+    }
+    .event-log .entry { margin-bottom: 4px; }
+    .event-log .timestamp { color: #8b949e; }
+    .event-log .event-name { color: #79c0ff; }
+    .code-block {
+      background: #161b22; color: #e6edf3;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      overflow-x: auto; margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-fab</h1>
+      <p>Floating Action Button for primary actions.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>Prominent circular button for the primary action on a screen. Supports variants, sizes,
+           extended label mode, and fixed positioning for mobile layouts.</p>
+      </div>
+
+      <!-- Variants -->
+      <div class="demo-section">
+        <h3>Variants</h3>
+        <div class="demo-row">
+          <ars-fab variant="primary">+</ars-fab>
+          <ars-fab variant="secondary">+</ars-fab>
+          <ars-fab variant="danger">&times;</ars-fab>
+        </div>
+        <div class="code-block">&lt;ars-fab variant="primary"&gt;+&lt;/ars-fab&gt;</div>
+      </div>
+
+      <!-- Sizes -->
+      <div class="demo-section">
+        <h3>Sizes</h3>
+        <div class="demo-row">
+          <ars-fab size="sm">+</ars-fab>
+          <ars-fab size="md">+</ars-fab>
+          <ars-fab size="lg">+</ars-fab>
+        </div>
+        <div class="code-block">&lt;ars-fab size="lg"&gt;+&lt;/ars-fab&gt;</div>
+      </div>
+
+      <!-- Extended -->
+      <div class="demo-section">
+        <h3>Extended</h3>
+        <div class="demo-row">
+          <ars-fab extended variant="primary">
+            <span slot="label">New Alert</span>
+            +
+          </ars-fab>
+          <ars-fab extended variant="secondary">
+            <span slot="label">Filter</span>
+            &#9881;
+          </ars-fab>
+        </div>
+        <div class="code-block">&lt;ars-fab extended variant="primary"&gt;
+  &lt;span slot="label"&gt;New Alert&lt;/span&gt;
+  +
+&lt;/ars-fab&gt;</div>
+      </div>
+
+      <!-- Disabled -->
+      <div class="demo-section">
+        <h3>Disabled</h3>
+        <div class="demo-row">
+          <ars-fab disabled>+</ars-fab>
+          <ars-fab disabled extended>
+            <span slot="label">Disabled</span>
+            &#128683;
+          </ars-fab>
+        </div>
+        <div class="code-block">&lt;ars-fab disabled&gt;+&lt;/ars-fab&gt;</div>
+      </div>
+
+      <!-- Fixed Position -->
+      <div class="demo-section">
+        <h3>Fixed Position (contained)</h3>
+        <div class="fixed-demo-container">
+          <ars-fab position="fixed" variant="primary" size="md">+</ars-fab>
+        </div>
+        <div class="code-block">&lt;ars-fab position="fixed" variant="primary" size="md"&gt;+&lt;/ars-fab&gt;</div>
+      </div>
+
+      <!-- Event monitor -->
+      <div class="demo-section">
+        <h3>Event Monitor</h3>
+        <div class="demo-row">
+          <ars-fab id="event-fab" variant="primary">+</ars-fab>
+        </div>
+        <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px;">Clear Log</button>
+        <div class="event-log" id="event-log">
+          <div class="entry"><span class="timestamp">[ready]</span> Click the FAB to see events...</div>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-fab
+  id="fab"
+  variant="primary"
+  size="md"
+  position="fixed"
+  extended
+&gt;
+  &lt;span slot="label"&gt;New Alert&lt;/span&gt;
+  +
+&lt;/ars-fab&gt;
+
+&lt;script&gt;
+  document.getElementById('fab').addEventListener('ars-fab:click', (e) =&gt; {
+    console.log('FAB clicked:', e.detail.variant);
+  });
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsFab } from '/dist/components/ars-fab/ars-fab.js';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
+
+    initializeArsWebComponents({
+      designAdapter: getArsWebComponentsDefaultAdapter('light')
+    });
+
+    const log = document.getElementById('event-log');
+    document.getElementById('event-fab').addEventListener('ars-fab:click', (e) => {
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+      entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">ars-fab:click</span> variant: ${e.detail.variant}`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    });
+
+    document.getElementById('clear-log').addEventListener('click', () => {
+      log.innerHTML = '<div class="entry"><span class="timestamp">[cleared]</span> Listening...</div>';
+    });
+
+    document.getElementById('theme-light').addEventListener('click', () => {
+      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
+    });
+    document.getElementById('theme-dark').addEventListener('click', () => {
+      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('dark') });
+    });
+  </script>
+</body>
+</html>
