@@ -107,6 +107,7 @@ class ArsDataRoller extends WebComponentBase {
 
   static #parseDataAttribute(value) {
     try {
+      if (!value || value.trim() === '') return [];
       Assert.assertIsValidJSON(value, '[ars-data-roller] data attribute is not valid JSON');
       return JSON.parse(value);
     } catch (e) {
