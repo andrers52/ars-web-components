@@ -32,9 +32,30 @@
       align-items: center; margin: 8px 0;
     }
     .fixed-demo-container {
-      position: relative; height: 120px;
-      border: 1px dashed var(--arswc-color-border, #d5dde8);
-      border-radius: 8px; overflow: hidden;
+      position: relative;
+      width: 280px; height: 400px;
+      border: 2px solid var(--arswc-color-border, #d5dde8);
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--arswc-color-bg, #ffffff);
+      /* Create a containing block so position:fixed stays inside the demo */
+      transform: translateZ(0);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .fixed-demo-container .mock-content {
+      padding: 16px;
+      font-size: 0.875rem;
+      color: var(--arswc-color-muted, #64748b);
+    }
+    .fixed-demo-container .mock-bar {
+      height: 48px;
+      background: var(--arswc-color-surface, #f6f8fb);
+      border-bottom: 1px solid var(--arswc-color-border, #d5dde8);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      font-weight: 600;
+      font-size: 0.875rem;
     }
     .event-log {
       background: #0d1117; color: #c9d1d9;
@@ -125,8 +146,15 @@
 
       <!-- Fixed Position -->
       <div class="demo-section">
-        <h3>Fixed Position (contained)</h3>
+        <h3>Fixed Position</h3>
+        <p style="font-size:0.875rem;color:var(--arswc-color-muted,#64748b);margin:0 0 12px;">
+          The FAB is pinned to the bottom-right of its nearest containing block (simulating a mobile viewport).
+        </p>
         <div class="fixed-demo-container">
+          <div class="mock-bar">Home</div>
+          <div class="mock-content">
+            <p>Scrollable content area…</p>
+          </div>
           <ars-fab position="fixed" variant="primary" size="md">+</ars-fab>
         </div>
         <div class="code-block">&lt;ars-fab position="fixed" variant="primary" size="md"&gt;+&lt;/ars-fab&gt;</div>
