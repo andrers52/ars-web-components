@@ -26,6 +26,10 @@ export { WebComponentBase } from "./components/web-component-base/web-component-
 // --- NEW PetRescue P0 components ---
 export { ArsBadge } from "./components/ars-badge/ars-badge.js";
 export type { ArsBadgeVariant, ArsBadgeSize } from "./components/ars-badge/ars-badge.js";
+export { ArsMinimap } from "./components/ars-minimap/ars-minimap.js";
+export type { ArsMinimapPoint } from "./components/ars-minimap/ars-minimap.js";
+export { ArsLeaderboard } from "./components/ars-leaderboard/ars-leaderboard.js";
+export type { ArsLeaderboardEntry } from "./components/ars-leaderboard/ars-leaderboard.js";
 export { ArsAvatar } from "./components/ars-avatar/ars-avatar.js";
 export type { ArsAvatarSize, ArsAvatarShape } from "./components/ars-avatar/ars-avatar.js";
 export { ArsFab } from "./components/ars-fab/ars-fab.js";
