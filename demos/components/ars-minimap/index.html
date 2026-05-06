@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Minimap - Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+
+  <style>
+    .demo-section {
+      background: var(--arswc-color-surface, #f6f8fb);
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: var(--arswc-radius-md, 10px);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-section h3 { margin: 0 0 12px; font-size: 1rem; }
+    .demo-row {
+      display: flex; flex-wrap: wrap; gap: 16px;
+      align-items: center; margin: 8px 0;
+    }
+    .code-block {
+      background: #161b22; color: #e6edf3;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      overflow-x: auto; margin-top: 8px;
+    }
+    .minimap-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+    }
+    .minimap-item {
+      text-align: center;
+    }
+    .minimap-item label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--arswc-color-muted, #64748b);
+      margin-top: 8px;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-minimap</h1>
+      <p>Compact canvas-based minimap for spatial overviews and point data.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>Renders colored points on a canvas element. Useful for showing entity positions, heatmaps,
+           or any 2D point data. Configure dimensions and point size via attributes; populate data
+           programmatically with <code>setData()</code>.</p>
+      </div>
+
+      <!-- Basic Usage -->
+      <div class="demo-section">
+        <h3>Basic Usage</h3>
+        <div class="demo-row">
+          <ars-minimap id="basic-minimap" width="200" height="120"></ars-minimap>
+        </div>
+        <div class="code-block">&lt;ars-minimap width="200" height="120"&gt;&lt;/ars-minimap&gt;
+
+const minimap = document.getElementById('basic-minimap');
+minimap.setData([
+  { id: 'a', x: 20, y: 30, color: '#ef4444' },
+  { id: 'b', x: 80, y: 50, color: '#3b82f6' },
+  { id: 'c', x: 150, y: 90, color: '#22c55e' },
+]);</div>
+      </div>
+
+      <!-- Sizes -->
+      <div class="demo-section">
+        <h3>Dimensions</h3>
+        <div class="minimap-grid">
+          <div class="minimap-item">
+            <ars-minimap id="size-sm" width="100" height="80"></ars-minimap>
+            <label>100 &times; 80</label>
+          </div>
+          <div class="minimap-item">
+            <ars-minimap id="size-md" width="160" height="100"></ars-minimap>
+            <label>160 &times; 100</label>
+          </div>
+          <div class="minimap-item">
+            <ars-minimap id="size-lg" width="240" height="140"></ars-minimap>
+            <label>240 &times; 140</label>
+          </div>
+        </div>
+        <div class="code-block">&lt;ars-minimap width="240" height="140"&gt;&lt;/ars-minimap&gt;</div>
+      </div>
+
+      <!-- Point Size -->
+      <div class="demo-section">
+        <h3>Point Size</h3>
+        <div class="minimap-grid">
+          <div class="minimap-item">
+            <ars-minimap id="point-sm" width="160" height="100" point-size="1"></ars-minimap>
+            <label>point-size="1"</label>
+          </div>
+          <div class="minimap-item">
+            <ars-minimap id="point-md" width="160" height="100" point-size="3"></ars-minimap>
+            <label>point-size="3"</label>
+          </div>
+          <div class="minimap-item">
+            <ars-minimap id="point-lg" width="160" height="100" point-size="6"></ars-minimap>
+            <label>point-size="6"</label>
+          </div>
+        </div>
+        <div class="code-block">&lt;ars-minimap width="160" height="100" point-size="3"&gt;&lt;/ars-minimap&gt;</div>
+      </div>
+
+      <!-- Dense Data -->
+      <div class="demo-section">
+        <h3>Dense Data (Heatmap-style)</h3>
+        <div class="demo-row">
+          <ars-minimap id="dense-minimap" width="300" height="160" point-size="2"></ars-minimap>
+        </div>
+        <div class="code-block">// Generate 200 random points for a heatmap effect
+const points = Array.from({ length: 200 }, (_, i) => ({
+  id: i,
+  x: Math.random() * 300,
+  y: Math.random() * 160,
+  color: `hsl(${Math.random() * 60 + 200}, 70%, 60%)`,
+}));
+minimap.setData(points);</div>
+      </div>
+
+      <!-- Interactive Controls -->
+      <div class="demo-section">
+        <h3>Interactive Controls</h3>
+        <div class="demo-row">
+          <ars-minimap id="interactive-minimap" width="280" height="160" point-size="4"></ars-minimap>
+        </div>
+        <div class="controls">
+          <button class="btn" id="btn-random">Randomize</button>
+          <button class="btn" id="btn-cluster">Cluster</button>
+          <button class="btn" id="btn-spiral">Spiral</button>
+          <button class="btn" id="btn-clear">Clear</button>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-minimap
+  id="minimap"
+  width="300"
+  height="200"
+  point-size="3"
+&gt;&lt;/ars-minimap&gt;
+
+&lt;script type="module"&gt;
+  import { ArsMinimap } from '/dist/components/ars-minimap/ars-minimap.js';
+
+  const minimap = document.getElementById('minimap');
+
+  // Render points
+  minimap.setData([
+    { id: 'entity-1', x: 50, y: 80, color: '#ff0000' },
+    { id: 'entity-2', x: 120, y: 40, color: '#00ff00' },
+    { id: 'entity-3', x: 200, y: 150, color: '#0000ff' },
+  ]);
+
+  // Clear all points
+  minimap.clear();
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsMinimap } from '/dist/components/ars-minimap/ars-minimap.js';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
+
+    initializeArsWebComponents({
+      designAdapter: getArsWebComponentsDefaultAdapter('light')
+    });
+
+    // --- Helper: generate random points ---
+    function randomPoints(count, w, h, colorFn) {
+      return Array.from({ length: count }, (_, i) => ({
+        id: i,
+        x: Math.random() * w,
+        y: Math.random() * h,
+        color: colorFn ? colorFn(i) : `hsl(${Math.random() * 360}, 70%, 55%)`,
+      }));
+    }
+
+    // --- Basic ---
+    document.getElementById('basic-minimap').setData([
+      { id: 'a', x: 20, y: 30, color: '#ef4444' },
+      { id: 'b', x: 80, y: 50, color: '#3b82f6' },
+      { id: 'c', x: 150, y: 90, color: '#22c55e' },
+      { id: 'd', x: 60, y: 100, color: '#f59e0b' },
+      { id: 'e', x: 180, y: 40, color: '#8b5cf6' },
+    ]);
+
+    // --- Sizes ---
+    [
+      ['size-sm', 100, 80],
+      ['size-md', 160, 100],
+      ['size-lg', 240, 140],
+    ].forEach(([id, w, h]) => {
+      document.getElementById(id).setData(randomPoints(30, w, h));
+    });
+
+    // --- Point sizes ---
+    [
+      'point-sm',
+      'point-md',
+      'point-lg',
+    ].forEach(id => {
+      document.getElementById(id).setData(randomPoints(20, 160, 100));
+    });
+
+    // --- Dense ---
+    const dense = document.getElementById('dense-minimap');
+    dense.setData(randomPoints(200, 300, 160, i =>
+      `hsl(${Math.random() * 60 + 200}, 70%, 60%)`
+    ));
+
+    // --- Interactive ---
+    const interactive = document.getElementById('interactive-minimap');
+    const iw = 280, ih = 160;
+
+    function drawRandom() {
+      interactive.setData(randomPoints(50, iw, ih));
+    }
+
+    function drawCluster() {
+      const cx = iw / 2, cy = ih / 2;
+      const points = Array.from({ length: 60 }, (_, i) => {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = Math.random() * 50;
+        return {
+          id: i,
+          x: cx + Math.cos(angle) * radius,
+          y: cy + Math.sin(angle) * radius,
+          color: `hsl(${120 + Math.random() * 60}, 70%, 50%)`,
+        };
+      });
+      interactive.setData(points);
+    }
+
+    function drawSpiral() {
+      const points = Array.from({ length: 80 }, (_, i) => {
+        const angle = i * 0.3;
+        const radius = i * 1.2;
+        return {
+          id: i,
+          x: iw / 2 + Math.cos(angle) * radius,
+          y: ih / 2 + Math.sin(angle) * radius,
+          color: `hsl(${i * 4}, 70%, 55%)`,
+        };
+      });
+      interactive.setData(points);
+    }
+
+    drawRandom();
+
+    document.getElementById('btn-random').addEventListener('click', drawRandom);
+    document.getElementById('btn-cluster').addEventListener('click', drawCluster);
+    document.getElementById('btn-spiral').addEventListener('click', drawSpiral);
+    document.getElementById('btn-clear').addEventListener('click', () => interactive.clear());
+
+    // --- Theme ---
+    document.getElementById('theme-light').addEventListener('click', () => {
+      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
+    });
+    document.getElementById('theme-dark').addEventListener('click', () => {
+      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('dark') });
+    });
+  </script>
+</body>
+</html>

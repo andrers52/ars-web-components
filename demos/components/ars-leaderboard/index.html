@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARS Leaderboard - Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+
+  <style>
+    .demo-section {
+      background: var(--arswc-color-surface, #f6f8fb);
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: var(--arswc-radius-md, 10px);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-section h3 { margin: 0 0 12px; font-size: 1rem; }
+    .demo-row {
+      display: flex; flex-wrap: wrap; gap: 16px;
+      align-items: center; margin: 8px 0;
+    }
+    .code-block {
+      background: #161b22; color: #e6edf3;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem; padding: 12px; border-radius: 6px;
+      overflow-x: auto; margin-top: 8px;
+    }
+    .leaderboard-wrap {
+      max-width: 480px;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-leaderboard</h1>
+      <p>Sorted score table with optional row highlighting and entry limiting.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>Renders a sorted score table. Entries are automatically ordered by score descending.
+           Supports a <code>max-entries</code> limit and <code>highlight-id</code> to visually
+           emphasize a specific row. Data is injected programmatically via <code>setEntries()</code>.</p>
+      </div>
+
+      <!-- Basic Usage -->
+      <div class="demo-section">
+        <h3>Basic Usage</h3>
+        <div class="leaderboard-wrap">
+          <ars-leaderboard id="basic-board"></ars-leaderboard>
+        </div>
+        <div class="code-block">&lt;ars-leaderboard&gt;&lt;/ars-leaderboard&gt;
+
+const board = document.getElementById('basic-board');
+board.setEntries([
+  { id: 'a', name: 'Alice', score: 1250 },
+  { id: 'b', name: 'Bob', score: 3400 },
+  { id: 'c', name: 'Carol', score: 2100 },
+]);</div>
+      </div>
+
+      <!-- With Highlight -->
+      <div class="demo-section">
+        <h3>Highlighted Row</h3>
+        <div class="leaderboard-wrap">
+          <ars-leaderboard id="highlight-board" highlight-id="player-2"></ars-leaderboard>
+        </div>
+        <div class="code-block">&lt;ars-leaderboard highlight-id="player-2"&gt;&lt;/ars-leaderboard&gt;</div>
+      </div>
+
+      <!-- Max Entries -->
+      <div class="demo-section">
+        <h3>Max Entries (Top 5)</h3>
+        <div class="leaderboard-wrap">
+          <ars-leaderboard id="top5-board" max-entries="5"></ars-leaderboard>
+        </div>
+        <div class="code-block">&lt;ars-leaderboard max-entries="5"&gt;&lt;/ars-leaderboard&gt;</div>
+      </div>
+
+      <!-- With Meta Column -->
+      <div class="demo-section">
+        <h3>With Meta Column</h3>
+        <div class="leaderboard-wrap">
+          <ars-leaderboard id="meta-board" highlight-id="p3"></ars-leaderboard>
+        </div>
+        <div class="code-block">board.setEntries([
+  { id: 'p1', name: 'Alice', score: 1250, meta: 'Level 12' },
+  { id: 'p2', name: 'Bob', score: 3400, meta: 'Level 24' },
+  { id: 'p3', name: 'Carol', score: 2100, meta: 'Level 18' },
+]);</div>
+      </div>
+
+      <!-- Interactive Controls -->
+      <div class="demo-section">
+        <h3>Interactive Controls</h3>
+        <div class="leaderboard-wrap">
+          <ars-leaderboard id="interactive-board" max-entries="8"></ars-leaderboard>
+        </div>
+        <div class="controls">
+          <button class="btn" id="btn-shuffle">Shuffle Scores</button>
+          <button class="btn" id="btn-highlight">Cycle Highlight</button>
+          <button class="btn" id="btn-add">Add Player</button>
+          <button class="btn" id="btn-reset">Reset</button>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-leaderboard
+  id="leaderboard"
+  max-entries="10"
+  highlight-id="player-1"
+&gt;&lt;/ars-leaderboard&gt;
+
+&lt;script type="module"&gt;
+  import { ArsLeaderboard } from '/dist/components/ars-leaderboard/ars-leaderboard.js';
+
+  const board = document.getElementById('leaderboard');
+
+  board.setEntries([
+    { id: 'player-1', name: 'Alice', score: 3400, meta: 'Level 24' },
+    { id: 'player-2', name: 'Bob', score: 2100 },
+    { id: 'player-3', name: 'Carol', score: 1250, meta: 'Level 12' },
+  ]);
+
+  // Highlight a different row
+  board.highlightId = 'player-2';
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsLeaderboard } from '/dist/components/ars-leaderboard/ars-leaderboard.js';
+    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
+
+    initializeArsWebComponents({
+      designAdapter: getArsWebComponentsDefaultAdapter('light')
+    });
+
+    // --- Sample data ---
+    const sampleEntries = [
+      { id: 'a', name: 'Alice', score: 1250 },
+      { id: 'b', name: 'Bob', score: 3400 },
+      { id: 'c', name: 'Carol', score: 2100 },
+      { id: 'd', name: 'David', score: 890 },
+      { id: 'e', name: 'Eve', score: 2750 },
+      { id: 'f', name: 'Frank', score: 1560 },
+    ];
+
+    const metaEntries = [
+      { id: 'p1', name: 'Alice', score: 1250, meta: 'Level 12' },
+      { id: 'p2', name: 'Bob', score: 3400, meta: 'Level 24' },
+      { id: 'p3', name: 'Carol', score: 2100, meta: 'Level 18' },
+      { id: 'p4', name: 'David', score: 890, meta: 'Level 7' },
+      { id: 'p5', name: 'Eve', score: 2750, meta: 'Level 20' },
+    ];
+
+    const bigPool = [
+      { id: '1', name: 'Alice', score: 1250 },
+      { id: '2', name: 'Bob', score: 3400 },
+      { id: '3', name: 'Carol', score: 2100 },
+      { id: '4', name: 'David', score: 890 },
+      { id: '5', name: 'Eve', score: 2750 },
+      { id: '6', name: 'Frank', score: 1560 },
+      { id: '7', name: 'Grace', score: 4100 },
+      { id: '8', name: 'Heidi', score: 1820 },
+      { id: '9', name: 'Ivan', score: 950 },
+      { id: '10', name: 'Judy', score: 2980 },
+      { id: '11', name: 'Kevin', score: 1340 },
+      { id: '12', name: 'Liam', score: 3670 },
+    ];
+
+    // --- Static demos ---
+    document.getElementById('basic-board').setEntries(sampleEntries);
+    document.getElementById('highlight-board').setEntries(sampleEntries);
+    document.getElementById('top5-board').setEntries(bigPool);
+    document.getElementById('meta-board').setEntries(metaEntries);
+
+    // --- Interactive ---
+    const interactive = document.getElementById('interactive-board');
+    let currentEntries = bigPool.slice(0, 8);
+    let highlightIds = currentEntries.map(e => String(e.id));
+    let highlightIndex = 0;
+
+    interactive.setEntries(currentEntries);
+    interactive.highlightId = highlightIds[0];
+
+    document.getElementById('btn-shuffle').addEventListener('click', () => {
+      currentEntries = currentEntries.map(e => ({
+        ...e,
+        score: Math.floor(Math.random() * 4000) + 500,
+      }));
+      interactive.setEntries(currentEntries);
+    });
+
+    document.getElementById('btn-highlight').addEventListener('click', () => {
+      highlightIndex = (highlightIndex + 1) % highlightIds.length;
+      interactive.highlightId = highlightIds[highlightIndex];
+    });
+
+    let nextId = 100;
+    document.getElementById('btn-add').addEventListener('click', () => {
+      const names = ['Mallory', 'Niaj', 'Olivia', 'Peggy', 'Quentin', 'Rupert', 'Sybil', 'Trent', 'Ursula', 'Victor'];
+      const name = names[Math.floor(Math.random() * names.length)];
+      const newEntry = {
+        id: String(nextId++),
+        name: `${name} #${nextId - 100}`,
+        score: Math.floor(Math.random() * 4000) + 500,
+      };
+      currentEntries = [...currentEntries, newEntry];
+      highlightIds = currentEntries.map(e => String(e.id));
+      interactive.setEntries(currentEntries);
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      currentEntries = bigPool.slice(0, 8);
+      highlightIds = currentEntries.map(e => String(e.id));
+      highlightIndex = 0;
+      interactive.setEntries(currentEntries);
+      interactive.highlightId = highlightIds[0];
+    });
+
+    // --- Theme ---
+    document.getElementById('theme-light').addEventListener('click', () => {
+      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
+    });
+    document.getElementById('theme-dark').addEventListener('click', () => {
+      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('dark') });
+    });
+  </script>
+</body>
+</html>
