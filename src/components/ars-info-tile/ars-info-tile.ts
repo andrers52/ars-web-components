@@ -101,20 +101,34 @@ class ArsInfoTile extends HTMLElement {
   }
 
   // Normalizes either record-based or array-based property payloads into a single render shape.
+  // Filters out "title" (already shown in the header) and sorts keys logically
+  // (STARTS_AT before ENDS_AT, alphabetical otherwise).
   static #normalizeProperties(properties: ArsInfoTileData["properties"]): ArsInfoTileProperty[] {
-    if (Array.isArray(properties)) {
-      return properties.map((property) => ({
-        key: String(property.key ?? ""),
-        value: String(property.value ?? ""),
-      }));
-    }
-    if (!properties) {
-      return [];
-    }
-    return Object.entries(properties).map(([key, value]) => ({
-      key,
-      value: String(value ?? ""),
-    }));
+    const raw: ArsInfoTileProperty[] = Array.isArray(properties)
+      ? properties.map((property) => ({
+          key: String(property.key ?? ""),
+          value: String(property.value ?? ""),
+        }))
+      : properties
+        ? Object.entries(properties).map(([key, value]) => ({
+            key,
+            value: String(value ?? ""),
+          }))
+        : [];
+
+    // Filter out "title" — already displayed in the header
+    const filtered = raw.filter((p) => p.key.toLowerCase() !== "title");
+
+    // Sort: STARTS_AT before ENDS_AT, alphabetical otherwise
+    filtered.sort((a, b) => {
+      const aUpper = a.key.toUpperCase();
+      const bUpper = b.key.toUpperCase();
+      if (aUpper === "STARTS_AT" && bUpper === "ENDS_AT") return -1;
+      if (aUpper === "ENDS_AT" && bUpper === "STARTS_AT") return 1;
+      return aUpper.localeCompare(bUpper);
+    });
+
+    return filtered;
   }
 
   // Merges property data with attributes so host frameworks can choose either integration style.
@@ -196,10 +210,9 @@ class ArsInfoTile extends HTMLElement {
         }
 
         .header {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) auto;
-          gap: 12px;
-          align-items: start;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
           padding: 14px 16px 12px;
           background:
             linear-gradient(90deg, color-mix(in srgb, ${viewModel.accentColor} 22%, transparent), transparent 58%),
@@ -208,6 +221,7 @@ class ArsInfoTile extends HTMLElement {
         }
 
         .title-block {
+          text-align: center;
           min-width: 0;
         }
 
@@ -217,7 +231,6 @@ class ArsInfoTile extends HTMLElement {
           font-weight: 700;
           line-height: 1.2;
           color: var(--arswc-color-text, #ecf3ff);
-          word-break: break-word;
         }
 
         .subtitle {
@@ -226,20 +239,6 @@ class ArsInfoTile extends HTMLElement {
           color: var(--arswc-color-muted, #95aac8);
           text-transform: uppercase;
           letter-spacing: 0.08em;
-        }
-
-        .tile-id {
-          flex-shrink: 0;
-          max-width: min(46%, 220px);
-          padding: 4px 8px;
-          border-radius: 999px;
-          background: color-mix(in srgb, ${viewModel.accentColor} 18%, transparent);
-          color: ${viewModel.accentColor};
-          font-family: var(--arswc-font-family-mono, ui-monospace, monospace);
-          font-size: 0.72rem;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
         }
 
         .content {
@@ -279,7 +278,6 @@ class ArsInfoTile extends HTMLElement {
             <h3 class="title">${ArsInfoTile.#escapeHtml(viewModel.title)}</h3>
             <div class="subtitle">${ArsInfoTile.#escapeHtml(viewModel.subtitle)}</div>
           </div>
-          <div class="tile-id" title="${ArsInfoTile.#escapeHtml(viewModel.id)}">${ArsInfoTile.#escapeHtml(viewModel.id)}</div>
         </header>
         <section class="content">
           ${propertiesHtml}

@@ -71,7 +71,7 @@ describe('ArsPage', () => {
       element.showPage('page1');
       
       expect(element._currentPage).toBe('page1');
-      expect(page1.style.display).toBe('block');
+      expect(page1.style.display).toBe('');
     });
 
     it('should hide previous page when showing new one', () => {
@@ -79,7 +79,7 @@ describe('ArsPage', () => {
       element.showPage('page2');
       
       expect(page1.style.display).toBe('none');
-      expect(page2.style.display).toBe('block');
+      expect(page2.style.display).toBe('');
     });
 
     it('should hide a page', () => {
@@ -94,8 +94,8 @@ describe('ArsPage', () => {
     it('should show all pages', () => {
       element.showAllPages();
       
-      expect(page1.style.display).toBe('block');
-      expect(page2.style.display).toBe('block');
+      expect(page1.style.display).toBe('');
+      expect(page2.style.display).toBe('');
     });
 
     it('should hide all pages', () => {

@@ -249,7 +249,7 @@ class ArsPage extends WebComponentBase {
       this._pages.get(previousPage).style.display = "none";
     }
     const pageElement = this._pages.get(pageId);
-    pageElement.style.display = "block";
+    pageElement.style.display = "";
     this._currentPage = pageId;
 
     // Update browser URL if requested
@@ -318,7 +318,7 @@ class ArsPage extends WebComponentBase {
 
   showAllPages() {
     this._pages.forEach((element) => {
-      (element as HTMLElement).style.display = "block";
+      (element as HTMLElement).style.display = "";
     });
     return { success: true, pagesShown: this._pages.size };
   }

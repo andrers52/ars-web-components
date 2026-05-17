@@ -78,7 +78,8 @@ describe("ArsTabs", () => {
   it("shows only the active panel", () => {
     createTabsWithPanels();
     const panels = element.querySelectorAll("ars-tab-panel");
-    expect((panels[0] as HTMLElement).style.display).toBe("block");
+    expect((panels[0] as HTMLElement).style.display).toBe("flex");
+    expect((panels[0] as HTMLElement).style.flex).toBe("1 1 0%");
     expect((panels[1] as HTMLElement).style.display).toBe("none");
     expect((panels[2] as HTMLElement).style.display).toBe("none");
   });
@@ -88,14 +89,16 @@ describe("ArsTabs", () => {
     element.activeTab = "two";
     const panels = element.querySelectorAll("ars-tab-panel");
     expect((panels[0] as HTMLElement).style.display).toBe("none");
-    expect((panels[1] as HTMLElement).style.display).toBe("block");
+    expect((panels[1] as HTMLElement).style.display).toBe("flex");
+    expect((panels[1] as HTMLElement).style.flex).toBe("1 1 0%");
   });
 
   it("changes active tab via attribute", () => {
     createTabsWithPanels();
     element.setAttribute("active-tab", "three");
     const panels = element.querySelectorAll("ars-tab-panel");
-    expect((panels[2] as HTMLElement).style.display).toBe("block");
+    expect((panels[2] as HTMLElement).style.display).toBe("flex");
+    expect((panels[2] as HTMLElement).style.flex).toBe("1 1 0%");
   });
 
   // --- Tab click ---

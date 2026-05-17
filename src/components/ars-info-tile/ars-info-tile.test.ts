@@ -53,8 +53,6 @@ describe("ArsInfoTile", () => {
 
     expect(element.shadowRoot?.querySelector(".title")?.textContent).toContain("Scalper BTC");
     expect(element.shadowRoot?.querySelector(".subtitle")?.textContent).toContain("trading bot");
-    expect(element.shadowRoot?.querySelector(".tile-id")?.textContent).toContain("bot_scalper");
-    expect(element.shadowRoot?.querySelector(".tile-id")?.getAttribute("title")).toContain("bot_scalper");
   });
 
   it("normalizes record properties into rows", () => {
@@ -69,7 +67,7 @@ describe("ArsInfoTile", () => {
     document.body.appendChild(element);
 
     const propertyKeys = Array.from(element.shadowRoot?.querySelectorAll(".property-key") ?? []).map((node) => node.textContent?.trim());
-    expect(propertyKeys).toEqual(["status", "owner"]);
+    expect(propertyKeys).toEqual(["owner", "status"]);
   });
 
   it("normalizes array properties into rows", () => {
@@ -84,7 +82,7 @@ describe("ArsInfoTile", () => {
     document.body.appendChild(element);
 
     const propertyValues = Array.from(element.shadowRoot?.querySelectorAll(".property-value") ?? []).map((node) => node.textContent?.trim());
-    expect(propertyValues).toEqual(["active", "high"]);
+    expect(propertyValues).toEqual(["high", "active"]);
   });
 
   it("shows empty state when no properties are set", () => {

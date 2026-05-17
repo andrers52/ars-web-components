@@ -157,7 +157,10 @@ class ArsTabs extends HTMLElement {
 
     // Show/hide panels using display
     panels.forEach((panel) => {
-      panel.style.display = panel.tabId === this._activeTab ? "block" : "none";
+      const isActive = panel.tabId === this._activeTab;
+      panel.style.display = isActive ? "flex" : "none";
+      panel.style.flexDirection = isActive ? "column" : "";
+      panel.style.flex = isActive ? "1" : "";
       panel.setAttribute("role", "tabpanel");
       panel.setAttribute("id", `panel-${panel.tabId}`);
       if (panel.tabId === this._activeTab) {
@@ -248,12 +251,15 @@ class ArsTabs extends HTMLElement {
   static #styles(isVertical: boolean): string {
     return `
       :host {
-        display: block;
+        display: flex;
+        flex-direction: column;
         font-family: var(--arswc-font-family-sans, system-ui, sans-serif);
       }
 
       .tabs-container {
+        flex: 1;
         display: flex;
+        min-height: 0;
         ${isVertical ? "" : "flex-direction: column;"}
       }
 
@@ -341,7 +347,27 @@ class ArsTabs extends HTMLElement {
       .panels {
         flex: 1;
         min-width: 0;
+        min-height: 0;
         padding: var(--arswc-spacing-md, 16px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .panels slot {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      ::slotted(ars-tab-panel:not([hidden])) {
+        flex: 1;
+        display: flex !important;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
       }
     `;
   }
