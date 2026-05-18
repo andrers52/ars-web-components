@@ -282,6 +282,19 @@ class ArsCalendar extends ArsCalendarBase {
     calendar.customCSS = null;
     calendar.cssVars = {};
     calendar.defaultCSS = DEFAULT_CSS;
+    // Visual treatment for days that carry one or more events.
+    //   "pie"   (default) — paint the cell background with a pie-chart
+    //                       canvas built from each event's `color`. Bold
+    //                       and great for color-coding, but visually
+    //                       heavy on dark themes where the colours pop.
+    //   "badge"           — quieter: an inner border on the cell plus a
+    //                       small count badge in the top-right corner.
+    //                       The cell stays readable and the count gives
+    //                       at-a-glance density information.
+    // The chosen style is purely cosmetic; click handling, selection,
+    // and the `.has-events` class are unaffected so downstream styling
+    // hooks still work in both modes.
+    calendar.eventMarkStyle = "pie";
     calendar._cellWidth = 30;
     calendar._cellHeight = 30;
     calendar._resizeHandler = ArsCalendar.#createResizeHandler(calendar);
@@ -400,11 +413,44 @@ class ArsCalendar extends ArsCalendarBase {
           if (!dayElement) continue;
 
           const backgroundCanvas = this.daySlotsColors[daySlotIndex];
+          const dayNumberForSlot = this.daySlots[daySlotIndex];
+          const isBadgeMode = this.eventMarkStyle === "badge";
 
-          if (backgroundCanvas) {
-            (dayElement as HTMLElement).style.backgroundImage = `url(${backgroundCanvas.toDataURL()})`;
-          } else {
+          // Badge mode owns its presentation through CSS (`.has-events`
+          // + `data-event-count`), so the pie-chart background must be
+          // cleared on every render in case the style was just toggled.
+          if (isBadgeMode) {
             (dayElement as HTMLElement).style.backgroundImage = "none";
+            if (dayNumberForSlot) {
+              const count = ArsCalendar.#getEventsByDate(
+                this.events,
+                dayNumberForSlot,
+                this.monthToShow,
+                this.yearToShow,
+              ).length;
+              if (count > 0) {
+                // attr() in CSS only picks up the value when set
+                // explicitly; we never read this back from JS so a data-
+                // attribute (not aria) is the right surface.
+                (dayElement as HTMLElement).setAttribute(
+                  "data-event-count",
+                  String(count),
+                );
+              } else {
+                (dayElement as HTMLElement).removeAttribute("data-event-count");
+              }
+            } else {
+              (dayElement as HTMLElement).removeAttribute("data-event-count");
+            }
+          } else {
+            // Pie mode — paint the canvas, scrub any badge data-attr left
+            // over from a previous render under the other style.
+            if (backgroundCanvas) {
+              (dayElement as HTMLElement).style.backgroundImage = `url(${backgroundCanvas.toDataURL()})`;
+            } else {
+              (dayElement as HTMLElement).style.backgroundImage = "none";
+            }
+            (dayElement as HTMLElement).removeAttribute("data-event-count");
           }
 
           (dayElement as HTMLElement).innerText = this.daySlots[daySlotIndex] || "";
@@ -556,6 +602,7 @@ class ArsCalendar extends ArsCalendarBase {
       "custom-css",
       "css-vars",
       "global-events-enabled",
+      "event-mark-style",
     ];
   }
 
@@ -593,6 +640,14 @@ class ArsCalendar extends ArsCalendarBase {
       this.globalEventsEnabled = newVal !== "false";
       this._unbindGlobalEvents();
       this._bindGlobalEvents();
+    }
+    if (attrName === "event-mark-style") {
+      // Only "pie" and "badge" are supported; an unknown value
+      // falls back to "pie" so a typo isn't silently invisible —
+      // the user still sees event-bearing days marked, just in the
+      // default style.
+      this.eventMarkStyle = newVal === "badge" ? "badge" : "pie";
+      this.render();
     }
   }
 

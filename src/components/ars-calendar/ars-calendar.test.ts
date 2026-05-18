@@ -209,6 +209,90 @@ describe('ArsCalendar', () => {
     });
   });
 
+  describe('Event mark style', () => {
+    // Two visual treatments for days that have events:
+    //   "pie"   (default) — full-cell background pie chart of event colors
+    //   "badge"           — inner border + a count chip in the corner
+    // The two modes must be cleanly switchable so a single instance can
+    // toggle styles without leaking residual state from the other mode.
+
+    beforeEach(() => {
+      document.body.appendChild(element);
+      vi.advanceTimersByTime(10);
+      // Park the calendar on a known month so test events land on
+      // visible days in the rendered grid.
+      element.monthToShow = 0;   // January
+      element.yearToShow = 2024;
+    });
+
+    function findDayCell(dayNumber: number): HTMLElement | null {
+      // jsdom doesn't implement innerText reliably — use textContent.
+      const cells = element.shadowRoot!.querySelectorAll<HTMLElement>(
+        '.calendar-body > .calendar-day',
+      );
+      for (const c of Array.from(cells)) {
+        if ((c.textContent ?? '').trim() === String(dayNumber)) return c;
+      }
+      return null;
+    }
+
+    it('defaults to "pie" style (background-image set, no data-event-count)', () => {
+      element.addEvent({ day: 15, month: 0, year: 2024, text: 'E', color: 'red' });
+      element.render();
+
+      const cell = findDayCell(15)!;
+      expect(cell.style.backgroundImage).not.toBe('');
+      expect(cell.style.backgroundImage).not.toBe('none');
+      expect(cell.hasAttribute('data-event-count')).toBe(false);
+      expect(cell.classList.contains('has-events')).toBe(true);
+    });
+
+    it('with event-mark-style="badge" clears the bg-image and stamps data-event-count', () => {
+      element.addEvent({ day: 15, month: 0, year: 2024, text: 'A', color: 'red' });
+      element.addEvent({ day: 15, month: 0, year: 2024, text: 'B', color: 'blue' });
+      element.addEvent({ day: 15, month: 0, year: 2024, text: 'C', color: 'green' });
+      element.setAttribute('event-mark-style', 'badge');
+
+      const cell = findDayCell(15)!;
+      // Same `.has-events` class — selectors built on top of it keep working.
+      expect(cell.classList.contains('has-events')).toBe(true);
+      // No pie background — that was the point of switching modes.
+      expect(cell.style.backgroundImage === '' || cell.style.backgroundImage === 'none').toBe(true);
+      // The CSS `::after` rule picks up the count from this attribute.
+      expect(cell.getAttribute('data-event-count')).toBe('3');
+    });
+
+    it('cells without events get no data-event-count even in badge mode', () => {
+      element.addEvent({ day: 15, month: 0, year: 2024, text: 'E', color: 'red' });
+      element.setAttribute('event-mark-style', 'badge');
+
+      const cellWithoutEvents = findDayCell(20)!;
+      expect(cellWithoutEvents.hasAttribute('data-event-count')).toBe(false);
+      expect(cellWithoutEvents.classList.contains('has-events')).toBe(false);
+    });
+
+    it('switching from badge back to pie scrubs the data-event-count attr', () => {
+      // Without scrubbing, a stale data-attr would survive into the new
+      // style and cause the CSS `::after` count to render on top of the
+      // pie chart — a visual bug.
+      element.addEvent({ day: 15, month: 0, year: 2024, text: 'E', color: 'red' });
+      element.setAttribute('event-mark-style', 'badge');
+      expect(findDayCell(15)!.getAttribute('data-event-count')).toBe('1');
+
+      element.setAttribute('event-mark-style', 'pie');
+      expect(findDayCell(15)!.hasAttribute('data-event-count')).toBe(false);
+    });
+
+    it('treats unknown values as "pie" (silent fallback)', () => {
+      element.addEvent({ day: 15, month: 0, year: 2024, text: 'E', color: 'red' });
+      element.setAttribute('event-mark-style', 'totally-made-up');
+
+      const cell = findDayCell(15)!;
+      // Pie-style behaviour: background painted, no badge data-attr.
+      expect(cell.hasAttribute('data-event-count')).toBe(false);
+    });
+  });
+
   describe('Date selection', () => {
     beforeEach(() => {
       document.body.appendChild(element);

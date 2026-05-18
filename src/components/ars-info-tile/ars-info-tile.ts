@@ -245,6 +245,18 @@ class ArsInfoTile extends HTMLElement {
           display: grid;
           gap: 10px;
           padding: 14px 16px 16px;
+          /* Safety net for tiles whose host gives them too little
+             vertical room for the number of properties they carry.
+             Without this the property rows beyond the card's height
+             are hard-clipped (the card has overflow: hidden), which
+             silently drops information the user needs.
+             flex: 1 1 auto + min-height: 0 lets the content area
+             shrink inside the flex column, and overflow-y: auto only
+             surfaces a scrollbar when actually needed — short tiles
+             render scrollbar-free. */
+          flex: 1 1 auto;
+          min-height: 0;
+          overflow-y: auto;
         }
 
         .property-row {

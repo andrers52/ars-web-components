@@ -97,5 +97,43 @@ export const DEFAULT_CSS = `
   .calendar-day.other-month {
     color: var(--ars-calendar-other-month-color, var(--arswc-color-muted, #adb5bd));
   }
-  /* Event indicator dot removed — events now use the full cell background image */
+  /* "badge" event-mark style.
+     Activated by setting attribute event-mark-style="badge" on the
+     ars-calendar element (the component then clears the pie-chart
+     background and stamps data-event-count onto each cell that has
+     events). Gives the cell a quieter visual: inset box-shadow as an
+     inner border + a small count chip in the top-right corner via
+     ::after, picking up the count from attr(data-event-count).
+     Both colors expose CSS-vars so host apps can theme without
+     overriding the whole stylesheet. */
+  .calendar-day.has-events[data-event-count] {
+    box-shadow: inset 0 0 0 var(
+        --ars-calendar-event-border-width,
+        2px
+      )
+      var(--ars-calendar-event-border-color, var(--arswc-color-accent, #54dfff));
+  }
+  .calendar-day.has-events[data-event-count]::after {
+    content: attr(data-event-count);
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(
+      --ars-calendar-event-badge-bg,
+      var(--arswc-color-accent, #54dfff)
+    );
+    color: var(
+      --ars-calendar-event-badge-color,
+      var(--arswc-color-accent-contrast, #052236)
+    );
+    font-size: 0.7em;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    box-sizing: border-box;
+  }
 `;
