@@ -122,6 +122,24 @@ describe("ArsInfoTile", () => {
     expect(element.hasAttribute("selected")).toBe(false);
   });
 
+  it("supports the selected property getter/setter", () => {
+    document.body.appendChild(element);
+
+    // Initially not selected.
+    expect(element.selected).toBe(false);
+
+    // Set via property.
+    element.selected = true;
+    expect(element.selected).toBe(true);
+    expect(element.hasAttribute("selected")).toBe(true);
+    expect(element.shadowRoot?.querySelector(".card")?.getAttribute("data-selected")).toBe("true");
+
+    // Unset via property.
+    element.selected = false;
+    expect(element.selected).toBe(false);
+    expect(element.hasAttribute("selected")).toBe(false);
+  });
+
   // --- Layout ---
 
   it("styles the card to fill an explicitly sized host box", () => {

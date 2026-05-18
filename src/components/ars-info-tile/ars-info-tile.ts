@@ -14,6 +14,7 @@
 //
 // Properties:
 //   data         — { id, title, subtitle, accentColor, properties } object
+//   selected     — boolean, when true applies the selection highlight ring
 //
 // Events:
 //   ars-info-tile:activate — fired on double-click (composed, bubbles)
@@ -60,6 +61,17 @@ class ArsInfoTile extends HTMLElement {
   set data(value: ArsInfoTileData) {
     this._data = { ...value };
     this.#render();
+  }
+
+  // Property setter so the brainiac-engine `update_dom_properties` can
+  // toggle selection via `(el as any).selected = true`.  Mirrors the
+  // attribute-based path (`setSelected`) so both integration styles work.
+  get selected(): boolean {
+    return this.hasAttribute("selected");
+  }
+
+  set selected(value: boolean) {
+    this.setSelected(!!value);
   }
 
   // Exposes selection changes to host apps without forcing them to manipulate attributes directly.
@@ -196,10 +208,21 @@ class ArsInfoTile extends HTMLElement {
         }
 
         .card[data-selected="true"] {
+          /* The selection cue is intentionally hard to miss — the
+             previous 1px @ 50%-alpha ring blended into the dark
+             surface and read as "tint", not "selected".  We stack two
+             reinforcing signals at full opacity:
+               1. Border switches to the accent colour (no transparency).
+               2. A 3 px solid accent ring sits outside the border via
+                  box-shadow spread.  Rendered OUTSIDE the border-box,
+                  so no interior reflow on selection.
+             Border-width stays at 1 px to avoid jittering the content
+             area (box-sizing: border-box would otherwise shrink the
+             inner column by 2 px on toggle). */
           border-color: ${viewModel.accentColor};
           box-shadow:
-            0 0 0 1px color-mix(in srgb, ${viewModel.accentColor} 50%, transparent),
-            0 14px 28px rgb(0 0 0 / 0.32);
+            0 0 0 3px ${viewModel.accentColor},
+            0 14px 28px rgb(0 0 0 / 0.36);
         }
 
         .card[data-dragging="true"] {

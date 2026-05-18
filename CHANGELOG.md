@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **`ars-info-tile`: `selected` JS property setter (2026-05-18).**
+  Mirrors the existing attribute path (`setSelected` / `selected` HTML
+  attribute) so host integrations can flip selection through a plain
+  property assignment — the access pattern used by brainiac-engine's
+  `update_dom_properties` / `merge_dom_properties` reconciler.  The
+  setter delegates to `setSelected`, which toggles the attribute and
+  triggers a re-render.  Tests:
+  `ars-info-tile.test.ts::supports the selected property getter/setter`.
+
+### Changed
+
+- **`ars-info-tile`: selection highlight made unmistakable (2026-05-18).**
+  Replaced the prior 1 px @ 50%-alpha box-shadow ring (which read as a
+  faint tint against dark surfaces) with a 3 px solid accent-coloured
+  ring rendered outside the border-box, plus a full-opacity accent
+  border-colour and a deeper drop shadow.  Border-width stays at 1 px
+  so the interior column does not jitter when selection toggles
+  (`box-sizing: border-box` would otherwise reflow content by 2 px).
+
 ## [2.1.0] - 2026-04-09
 
 ### Added
