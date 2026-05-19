@@ -261,8 +261,164 @@ describe("ArsInfoTile", () => {
     expect(ArsInfoTile.observedAttributes).toContain("subtitle");
     expect(ArsInfoTile.observedAttributes).toContain("selected");
     expect(ArsInfoTile.observedAttributes).toContain("dragging");
+    expect(ArsInfoTile.observedAttributes).toContain("collapsed");
+    expect(ArsInfoTile.observedAttributes).toContain("not-collapsible");
     expect(ArsInfoTile.observedAttributes).toContain("accent-color");
     expect(ArsInfoTile.observedAttributes).toContain("tile-id");
+  });
+
+  // --- Collapsibility (button visibility) ---
+
+  it("renders the collapse button by default", () => {
+    document.body.appendChild(element);
+    expect(element.collapsible).toBe(true);
+    expect(element.shadowRoot?.querySelector(".collapse-btn")).toBeTruthy();
+  });
+
+  it("hides the collapse button when collapsible is set to false", () => {
+    document.body.appendChild(element);
+    element.collapsible = false;
+    expect(element.collapsible).toBe(false);
+    expect(element.hasAttribute("not-collapsible")).toBe(true);
+    expect(element.shadowRoot?.querySelector(".collapse-btn")).toBeNull();
+  });
+
+  it("restores the collapse button when collapsible flips back to true", () => {
+    document.body.appendChild(element);
+    element.collapsible = false;
+    expect(element.shadowRoot?.querySelector(".collapse-btn")).toBeNull();
+    element.collapsible = true;
+    expect(element.hasAttribute("not-collapsible")).toBe(false);
+    expect(element.shadowRoot?.querySelector(".collapse-btn")).toBeTruthy();
+  });
+
+  it("does not throw and dispatches no toggle event for a non-collapsible tile", () => {
+    document.body.appendChild(element);
+    element.collapsible = false;
+
+    const events: unknown[] = [];
+    element.addEventListener("ars-info-tile:toggle-collapse", (event) => {
+      events.push(event);
+    });
+
+    // No button to click — re-rendering / re-binding should be safe.
+    element.data = { id: "x", title: "Leaf", properties: {} };
+    expect(element.shadowRoot?.querySelector(".collapse-btn")).toBeNull();
+    expect(events).toEqual([]);
+  });
+
+  // --- Collapse toggle ---
+
+  it("renders collapsed state through the host API", () => {
+    document.body.appendChild(element);
+
+    element.setCollapsed(true);
+
+    expect(element.hasAttribute("collapsed")).toBe(true);
+    expect(element.shadowRoot?.querySelector(".card")?.getAttribute("data-collapsed")).toBe("true");
+  });
+
+  it("supports the collapsed property getter/setter", () => {
+    document.body.appendChild(element);
+
+    expect(element.collapsed).toBe(false);
+    element.collapsed = true;
+    expect(element.collapsed).toBe(true);
+    expect(element.hasAttribute("collapsed")).toBe(true);
+    element.collapsed = false;
+    expect(element.collapsed).toBe(false);
+  });
+
+  it("dispatches ars-info-tile:toggle-collapse with the requested next state on button click", () => {
+    document.body.appendChild(element);
+
+    const events: Array<{ collapsed: boolean }> = [];
+    element.addEventListener("ars-info-tile:toggle-collapse", (event) => {
+      events.push((event as CustomEvent).detail);
+    });
+
+    const button = element.shadowRoot?.querySelector(".collapse-btn") as HTMLButtonElement | null;
+    expect(button).toBeTruthy();
+    button!.click();
+    // First click: not currently collapsed → request collapsed=true.
+    expect(events).toEqual([{ collapsed: true }]);
+
+    // Host applies the new state; second click should request false.
+    element.setCollapsed(true);
+    button!.click();
+    expect(events).toEqual([{ collapsed: true }, { collapsed: false }]);
+  });
+
+  it("does NOT flip its own collapsed attribute on button click", () => {
+    // Host is the single source of truth for collapse state;
+    // the tile fires a request event but must not self-modify,
+    // or the host's authoritative view and the tile visual will
+    // desync if the host rejects/defers the toggle.
+    document.body.appendChild(element);
+
+    const button = element.shadowRoot?.querySelector(".collapse-btn") as HTMLButtonElement | null;
+    expect(element.hasAttribute("collapsed")).toBe(false);
+    button!.click();
+    expect(element.hasAttribute("collapsed")).toBe(false);
+  });
+
+  it("does NOT trigger ars-info-tile:activate when the user double-clicks the collapse button", () => {
+    // Without the dblclick stopPropagation on the button, two fast
+    // clicks on the toggle get promoted to a dblclick and bubble to
+    // the shadow-root activation listener — firing an activation
+    // event on what the user thinks is a flip-flop collapse gesture.
+    document.body.appendChild(element);
+
+    const activations: string[] = [];
+    element.addEventListener("ars-info-tile:activate", () => {
+      activations.push("fired");
+    });
+    const button = element.shadowRoot?.querySelector(".collapse-btn") as HTMLButtonElement | null;
+    expect(button).toBeTruthy();
+    // Fire a dblclick on the button.  Use bubbles+composed so the
+    // event reaches the shadow-root listener through the host
+    // boundary — the same path a real double-click takes.
+    button!.dispatchEvent(new MouseEvent("dblclick", { bubbles: true, composed: true }));
+    expect(activations).toEqual([]);
+  });
+
+  // --- Opacity property ---
+
+  it("applies opacity as an inline host style and clamps to [0, 1]", () => {
+    document.body.appendChild(element);
+
+    element.opacity = 0.4;
+    expect(element.style.opacity).toBe("0.4");
+    expect(element.opacity).toBeCloseTo(0.4);
+
+    // Out-of-range values clamp.
+    element.opacity = 5;
+    expect(element.style.opacity).toBe(""); // 1 ⇒ remove inline style
+    element.opacity = -2;
+    expect(element.style.opacity).toBe("0");
+
+    // Reset to 1 removes the inline style.
+    element.opacity = 0.5;
+    expect(element.style.opacity).toBe("0.5");
+    element.opacity = 1;
+    expect(element.style.opacity).toBe("");
+  });
+
+  it("re-binds the collapse-button listener after a data-driven re-render", () => {
+    document.body.appendChild(element);
+
+    const events: Array<{ collapsed: boolean }> = [];
+    element.addEventListener("ars-info-tile:toggle-collapse", (event) => {
+      events.push((event as CustomEvent).detail);
+    });
+
+    // Force a re-render via data assignment — the inner button is
+    // replaced because `#render` rewrites innerHTML wholesale.
+    element.data = { id: "x", title: "X", properties: {} };
+
+    const button = element.shadowRoot?.querySelector(".collapse-btn") as HTMLButtonElement | null;
+    button!.click();
+    expect(events).toEqual([{ collapsed: true }]);
   });
 
   // --- XSS protection ---

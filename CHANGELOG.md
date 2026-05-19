@@ -9,16 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`ars-info-tile`: collapse/expand toggle (2026-05-19).**
+  New `collapsed` boolean property/attribute and `collapsible` boolean
+  property/attribute (stored as `not-collapsible` so the default is
+  collapsible).  When `collapsible` is true a small caret button appears
+  in the header.  Clicking it fires a composed `ars-info-tile:toggle-collapse`
+  event carrying the *requested* next state (`detail.collapsed`).  The tile
+  does **not** self-mutate — the host owns the authoritative state and
+  reflects it back via the `collapsed` property.  Double-clicking the
+  button is intercepted so it does not bubble to the shadow-root
+  activation listener.  Tests:
+  `ars-info-tile.test.ts::Collapsibility` and `ars-info-tile.test.ts::Collapse toggle` suites.
+
 - **`ars-info-tile`: `selected` JS property setter (2026-05-18).**
   Mirrors the existing attribute path (`setSelected` / `selected` HTML
   attribute) so host integrations can flip selection through a plain
-  property assignment — the access pattern used by brainiac-engine's
-  `update_dom_properties` / `merge_dom_properties` reconciler.  The
-  setter delegates to `setSelected`, which toggles the attribute and
-  triggers a re-render.  Tests:
+  property assignment.  The setter delegates to `setSelected`, which
+  toggles the attribute and triggers a re-render.  Tests:
   `ars-info-tile.test.ts::supports the selected property getter/setter`.
 
 ### Changed
+
+- **`ars-info-tile`: all comments and documentation decoupled from host
+  applications (2026-05-19).**
+  Removed references to internal consuming apps (brainiac-engine,
+  nexus-rules, Rust reconciler) from source comments, test docstrings,
+  and aria-labels.  The component is now fully generic: collapse is
+  described as "collapse/expand content" rather than "connected nodes";
+  host ownership is described in framework-agnostic terms.
 
 - **`ars-info-tile`: selection highlight made unmistakable (2026-05-18).**
   Replaced the prior 1 px @ 50%-alpha box-shadow ring (which read as a
@@ -102,7 +120,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **WebGPU rendering infrastructure** (`src/components/chart-base/gpu/`)
   - `ChartGPUContext` — GPUDevice lifecycle with external injection
-    (for brainiac-engine integration) or lazy shared singleton (standalone).
+    (for host-app integration) or lazy shared singleton (standalone).
   - `ChartGPURenderer` — orchestrates rect, line, and text pipelines.
     Provides a high-level command API: `pushRect`, `pushLine`,
     `pushDashedLine`, `pushCircle`, `pushText`.
@@ -120,8 +138,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `rgba()`, named colors) to float4 tuples for GPU uniform data.
 
 - **`gpuDevice` property on `ChartBase`** — allows external GPUDevice
-  injection so brainiac-engine (or any host) can share its device with
-  chart components, avoiding redundant adapter negotiation.
+  injection so hosts can share their device with chart components,
+  avoiding redundant adapter negotiation.
 
 - **`ChartGPUContext` export from `index.ts`** — consumers can call
   `ChartGPUContext.setDevice(device)` before any chart renders to inject
