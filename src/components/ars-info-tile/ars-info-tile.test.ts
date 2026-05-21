@@ -51,8 +51,12 @@ describe("ArsInfoTile", () => {
 
     document.body.appendChild(element);
 
-    expect(element.shadowRoot?.querySelector(".title")?.textContent).toContain("Scalper BTC");
-    expect(element.shadowRoot?.querySelector(".subtitle")?.textContent).toContain("trading bot");
+    expect(element.shadowRoot?.querySelector(".title")?.textContent).toContain(
+      "Scalper BTC",
+    );
+    expect(
+      element.shadowRoot?.querySelector(".subtitle")?.textContent,
+    ).toContain("trading bot");
   });
 
   it("normalizes record properties into rows", () => {
@@ -66,7 +70,9 @@ describe("ArsInfoTile", () => {
 
     document.body.appendChild(element);
 
-    const propertyKeys = Array.from(element.shadowRoot?.querySelectorAll(".property-key") ?? []).map((node) => node.textContent?.trim());
+    const propertyKeys = Array.from(
+      element.shadowRoot?.querySelectorAll(".property-key") ?? [],
+    ).map((node) => node.textContent?.trim());
     expect(propertyKeys).toEqual(["owner", "status"]);
   });
 
@@ -81,7 +87,9 @@ describe("ArsInfoTile", () => {
 
     document.body.appendChild(element);
 
-    const propertyValues = Array.from(element.shadowRoot?.querySelectorAll(".property-value") ?? []).map((node) => node.textContent?.trim());
+    const propertyValues = Array.from(
+      element.shadowRoot?.querySelectorAll(".property-value") ?? [],
+    ).map((node) => node.textContent?.trim());
     expect(propertyValues).toEqual(["high", "active"]);
   });
 
@@ -90,7 +98,9 @@ describe("ArsInfoTile", () => {
 
     document.body.appendChild(element);
 
-    expect(element.shadowRoot?.querySelector(".empty-state")?.textContent).toContain("No properties");
+    expect(
+      element.shadowRoot?.querySelector(".empty-state")?.textContent,
+    ).toContain("No properties");
   });
 
   // --- Selection / Dragging states ---
@@ -101,7 +111,9 @@ describe("ArsInfoTile", () => {
     element.setSelected(true);
 
     expect(element.hasAttribute("selected")).toBe(true);
-    expect(element.shadowRoot?.querySelector(".card")?.getAttribute("data-selected")).toBe("true");
+    expect(
+      element.shadowRoot?.querySelector(".card")?.getAttribute("data-selected"),
+    ).toBe("true");
   });
 
   it("renders dragging state through the host API", () => {
@@ -110,7 +122,9 @@ describe("ArsInfoTile", () => {
     element.setDragging(true);
 
     expect(element.hasAttribute("dragging")).toBe(true);
-    expect(element.shadowRoot?.querySelector(".card")?.getAttribute("data-dragging")).toBe("true");
+    expect(
+      element.shadowRoot?.querySelector(".card")?.getAttribute("data-dragging"),
+    ).toBe("true");
   });
 
   it("deselects when setSelected(false) is called", () => {
@@ -132,7 +146,9 @@ describe("ArsInfoTile", () => {
     element.selected = true;
     expect(element.selected).toBe(true);
     expect(element.hasAttribute("selected")).toBe(true);
-    expect(element.shadowRoot?.querySelector(".card")?.getAttribute("data-selected")).toBe("true");
+    expect(
+      element.shadowRoot?.querySelector(".card")?.getAttribute("data-selected"),
+    ).toBe("true");
 
     // Unset via property.
     element.selected = false;
@@ -145,7 +161,8 @@ describe("ArsInfoTile", () => {
   it("styles the card to fill an explicitly sized host box", () => {
     document.body.appendChild(element);
 
-    const styles = element.shadowRoot?.querySelector("style")?.textContent ?? "";
+    const styles =
+      element.shadowRoot?.querySelector("style")?.textContent ?? "";
     expect(styles).toContain("min-height: 100%");
     expect(styles).toContain("height: 100%");
   });
@@ -153,9 +170,15 @@ describe("ArsInfoTile", () => {
   it("measures intrinsic height from card sections instead of the stretched host box", () => {
     document.body.appendChild(element);
 
-    const header = element.shadowRoot?.querySelector(".header") as HTMLElement | null;
-    const content = element.shadowRoot?.querySelector(".content") as HTMLElement | null;
-    const card = element.shadowRoot?.querySelector(".card") as HTMLElement | null;
+    const header = element.shadowRoot?.querySelector(
+      ".header",
+    ) as HTMLElement | null;
+    const content = element.shadowRoot?.querySelector(
+      ".content",
+    ) as HTMLElement | null;
+    const card = element.shadowRoot?.querySelector(
+      ".card",
+    ) as HTMLElement | null;
     expect(header).toBeTruthy();
     expect(content).toBeTruthy();
     expect(card).toBeTruthy();
@@ -163,20 +186,28 @@ describe("ArsInfoTile", () => {
       throw new Error("ArsInfoTile test requires card sections.");
     }
 
-    Object.defineProperty(header, "scrollHeight", { configurable: true, value: 52 });
-    Object.defineProperty(content, "scrollHeight", { configurable: true, value: 34 });
-    const getComputedStyleSpy = vi.spyOn(window, "getComputedStyle").mockImplementation((node) => {
-      if (node === card) {
-        return {
-          borderTopWidth: "1px",
-          borderBottomWidth: "1px",
-        } as CSSStyleDeclaration;
-      }
-      return {
-        borderTopWidth: "0px",
-        borderBottomWidth: "0px",
-      } as CSSStyleDeclaration;
+    Object.defineProperty(header, "scrollHeight", {
+      configurable: true,
+      value: 52,
     });
+    Object.defineProperty(content, "scrollHeight", {
+      configurable: true,
+      value: 34,
+    });
+    const getComputedStyleSpy = vi
+      .spyOn(window, "getComputedStyle")
+      .mockImplementation((node) => {
+        if (node === card) {
+          return {
+            borderTopWidth: "1px",
+            borderBottomWidth: "1px",
+          } as CSSStyleDeclaration;
+        }
+        return {
+          borderTopWidth: "0px",
+          borderBottomWidth: "0px",
+        } as CSSStyleDeclaration;
+      });
 
     expect(element.measureIntrinsicHeight()).toBe(88);
 
@@ -195,7 +226,9 @@ describe("ArsInfoTile", () => {
 
     document.body.appendChild(element);
 
-    expect(element.shadowRoot?.querySelector(".title")?.textContent).toContain("fallback_tile");
+    expect(element.shadowRoot?.querySelector(".title")?.textContent).toContain(
+      "fallback_tile",
+    );
   });
 
   it("uses accent-color attribute when no data accentColor is set", () => {
@@ -203,7 +236,8 @@ describe("ArsInfoTile", () => {
 
     document.body.appendChild(element);
 
-    const styles = element.shadowRoot?.querySelector("style")?.textContent ?? "";
+    const styles =
+      element.shadowRoot?.querySelector("style")?.textContent ?? "";
     expect(styles).toContain("#ff00ff");
   });
 
@@ -226,10 +260,12 @@ describe("ArsInfoTile", () => {
       activations.push((event as CustomEvent).detail.originalEventType);
     });
 
-    element.shadowRoot?.querySelector(".card")?.dispatchEvent(new MouseEvent("dblclick", {
-      bubbles: true,
-      composed: true,
-    }));
+    element.shadowRoot?.querySelector(".card")?.dispatchEvent(
+      new MouseEvent("dblclick", {
+        bubbles: true,
+        composed: true,
+      }),
+    );
 
     expect(activations).toEqual(["dblclick"]);
   });
@@ -245,10 +281,12 @@ describe("ArsInfoTile", () => {
       activations.push((event as CustomEvent).detail.originalEventType);
     });
 
-    element.shadowRoot?.querySelector(".card")?.dispatchEvent(new MouseEvent("dblclick", {
-      bubbles: true,
-      composed: true,
-    }));
+    element.shadowRoot?.querySelector(".card")?.dispatchEvent(
+      new MouseEvent("dblclick", {
+        bubbles: true,
+        composed: true,
+      }),
+    );
 
     // Should only fire once, not twice
     expect(activations).toEqual(["dblclick"]);
@@ -315,7 +353,11 @@ describe("ArsInfoTile", () => {
     element.setCollapsed(true);
 
     expect(element.hasAttribute("collapsed")).toBe(true);
-    expect(element.shadowRoot?.querySelector(".card")?.getAttribute("data-collapsed")).toBe("true");
+    expect(
+      element.shadowRoot
+        ?.querySelector(".card")
+        ?.getAttribute("data-collapsed"),
+    ).toBe("true");
   });
 
   it("supports the collapsed property getter/setter", () => {
@@ -337,7 +379,9 @@ describe("ArsInfoTile", () => {
       events.push((event as CustomEvent).detail);
     });
 
-    const button = element.shadowRoot?.querySelector(".collapse-btn") as HTMLButtonElement | null;
+    const button = element.shadowRoot?.querySelector(
+      ".collapse-btn",
+    ) as HTMLButtonElement | null;
     expect(button).toBeTruthy();
     button!.click();
     // First click: not currently collapsed → request collapsed=true.
@@ -356,7 +400,9 @@ describe("ArsInfoTile", () => {
     // desync if the host rejects/defers the toggle.
     document.body.appendChild(element);
 
-    const button = element.shadowRoot?.querySelector(".collapse-btn") as HTMLButtonElement | null;
+    const button = element.shadowRoot?.querySelector(
+      ".collapse-btn",
+    ) as HTMLButtonElement | null;
     expect(element.hasAttribute("collapsed")).toBe(false);
     button!.click();
     expect(element.hasAttribute("collapsed")).toBe(false);
@@ -373,12 +419,16 @@ describe("ArsInfoTile", () => {
     element.addEventListener("ars-info-tile:activate", () => {
       activations.push("fired");
     });
-    const button = element.shadowRoot?.querySelector(".collapse-btn") as HTMLButtonElement | null;
+    const button = element.shadowRoot?.querySelector(
+      ".collapse-btn",
+    ) as HTMLButtonElement | null;
     expect(button).toBeTruthy();
     // Fire a dblclick on the button.  Use bubbles+composed so the
     // event reaches the shadow-root listener through the host
     // boundary — the same path a real double-click takes.
-    button!.dispatchEvent(new MouseEvent("dblclick", { bubbles: true, composed: true }));
+    button!.dispatchEvent(
+      new MouseEvent("dblclick", { bubbles: true, composed: true }),
+    );
     expect(activations).toEqual([]);
   });
 
@@ -416,8 +466,84 @@ describe("ArsInfoTile", () => {
     // replaced because `#render` rewrites innerHTML wholesale.
     element.data = { id: "x", title: "X", properties: {} };
 
-    const button = element.shadowRoot?.querySelector(".collapse-btn") as HTMLButtonElement | null;
+    const button = element.shadowRoot?.querySelector(
+      ".collapse-btn",
+    ) as HTMLButtonElement | null;
     button!.click();
+    expect(events).toEqual([{ collapsed: true }]);
+  });
+
+  it("does not destroy the collapse button when only selected/dragging attributes change", () => {
+    element.data = { id: "x", title: "X", properties: {} };
+    document.body.appendChild(element);
+
+    const button = element.shadowRoot?.querySelector(
+      ".collapse-btn",
+    ) as HTMLButtonElement | null;
+    expect(button).not.toBeNull();
+    const originalButton = button!;
+
+    // Simulate what happens when the engine sets the `selected` DOM
+    // property via diffAndUpdate: `(el as any).selected = true`.
+    // Previously this triggered a full #render() that replaced
+    // innerHTML and destroyed the button, preventing the browser
+    // from generating a click event (mousedown target ≠ mouseup target).
+    (element as unknown as Record<string, unknown>)["selected"] = true;
+
+    // Button should still be the same element (not destroyed/recreated)
+    const buttonAfter = element.shadowRoot?.querySelector(
+      ".collapse-btn",
+    ) as HTMLButtonElement | null;
+    expect(buttonAfter).toBe(originalButton);
+
+    // Verify the .card data-selected attribute was updated
+    const card = element.shadowRoot?.querySelector(".card");
+    expect(card?.getAttribute("data-selected")).toBe("true");
+
+    // Same for dragging — use the public method since there's no
+    // implicit property setter for `dragging`
+    const originalButton2 = buttonAfter!;
+    element.setDragging(true);
+    const buttonAfter2 = element.shadowRoot?.querySelector(
+      ".collapse-btn",
+    ) as HTMLButtonElement | null;
+    expect(buttonAfter2).toBe(originalButton2);
+  });
+
+  it("collapse button click survives a mousedown → select → mouseup sequence", async () => {
+    element.data = { id: "x", title: "X", properties: {} };
+    document.body.appendChild(element);
+
+    const events: Array<{ collapsed: boolean }> = [];
+    element.addEventListener("ars-info-tile:toggle-collapse", (event) => {
+      events.push((event as CustomEvent).detail);
+    });
+
+    const button = element.shadowRoot?.querySelector(
+      ".collapse-btn",
+    ) as HTMLButtonElement | null;
+    expect(button).not.toBeNull();
+
+    // Simulate the exact browser event sequence that caused the bug:
+    // 1. mousedown on button
+    // 2. Engine sets selected=true → triggers targeted attr update (not full re-render)
+    // 3. mouseup on same button → click fires
+    button!.dispatchEvent(
+      new MouseEvent("mousedown", { bubbles: true, composed: true }),
+    );
+
+    // Engine reaction: sets selected property (simulating diffAndUpdate path)
+    (element as unknown as Record<string, unknown>)["selected"] = true;
+
+    // mouseup on the same button element
+    button!.dispatchEvent(
+      new MouseEvent("mouseup", { bubbles: true, composed: true }),
+    );
+
+    // Now click the button (simulating the browser's click event)
+    button!.click();
+
+    // The toggle-collapse event should fire
     expect(events).toEqual([{ collapsed: true }]);
   });
 

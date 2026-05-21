@@ -54,7 +54,16 @@ class ArsInfoTile extends HTMLElement {
   private _activationEventsBound = false;
 
   static get observedAttributes() {
-    return ["title", "subtitle", "selected", "dragging", "collapsed", "not-collapsible", "accent-color", "tile-id"];
+    return [
+      "title",
+      "subtitle",
+      "selected",
+      "dragging",
+      "collapsed",
+      "not-collapsible",
+      "accent-color",
+      "tile-id",
+    ];
   }
 
   constructor() {
@@ -67,7 +76,20 @@ class ArsInfoTile extends HTMLElement {
     this.#bindActivationEvents();
   }
 
-  attributeChangedCallback() {
+  attributeChangedCallback(
+    name: string,
+    _oldValue: string | null,
+    _newValue: string | null,
+  ) {
+    // For attributes that only affect data-* attributes on the .card
+    // element, update directly without full re-render. This prevents
+    // destroying the button element between mousedown and mouseup,
+    // which would prevent the browser from generating a click event
+    // (mousedown target ≠ mouseup target → no click).
+    if (name === "selected" || name === "dragging") {
+      this.#updateCardDataAttrs();
+      return;
+    }
     this.#render();
   }
 
@@ -170,16 +192,23 @@ class ArsInfoTile extends HTMLElement {
     }
 
     const card = this.shadowRoot.querySelector(".card") as HTMLElement | null;
-    const header = this.shadowRoot.querySelector(".header") as HTMLElement | null;
-    const content = this.shadowRoot.querySelector(".content") as HTMLElement | null;
+    const header = this.shadowRoot.querySelector(
+      ".header",
+    ) as HTMLElement | null;
+    const content = this.shadowRoot.querySelector(
+      ".content",
+    ) as HTMLElement | null;
     if (!card || !header || !content) {
       return 0;
     }
 
     const cardStyle = getComputedStyle(card);
     const borderTop = Number.parseFloat(cardStyle.borderTopWidth || "0") || 0;
-    const borderBottom = Number.parseFloat(cardStyle.borderBottomWidth || "0") || 0;
-    return Math.ceil(header.scrollHeight + content.scrollHeight + borderTop + borderBottom);
+    const borderBottom =
+      Number.parseFloat(cardStyle.borderBottomWidth || "0") || 0;
+    return Math.ceil(
+      header.scrollHeight + content.scrollHeight + borderTop + borderBottom,
+    );
   }
 
   static #escapeHtml(value: unknown): string {
@@ -194,7 +223,9 @@ class ArsInfoTile extends HTMLElement {
   // Normalizes either record-based or array-based property payloads into a single render shape.
   // Filters out "title" (already shown in the header) and sorts keys logically
   // (STARTS_AT before ENDS_AT, alphabetical otherwise).
-  static #normalizeProperties(properties: ArsInfoTileData["properties"]): ArsInfoTileProperty[] {
+  static #normalizeProperties(
+    properties: ArsInfoTileData["properties"],
+  ): ArsInfoTileProperty[] {
     const raw: ArsInfoTileProperty[] = Array.isArray(properties)
       ? properties.map((property) => ({
           key: String(property.key ?? ""),
@@ -224,9 +255,17 @@ class ArsInfoTile extends HTMLElement {
 
   // Merges property data with attributes so host frameworks can choose either integration style.
   #getViewModel() {
-    const title = this._data.title ?? this.getAttribute("title") ?? this._data.id ?? this.getAttribute("tile-id") ?? "";
+    const title =
+      this._data.title ??
+      this.getAttribute("title") ??
+      this._data.id ??
+      this.getAttribute("tile-id") ??
+      "";
     const subtitle = this._data.subtitle ?? this.getAttribute("subtitle") ?? "";
-    const accentColor = this._data.accentColor ?? this.getAttribute("accent-color") ?? "var(--arswc-color-accent, #4cc2ff)";
+    const accentColor =
+      this._data.accentColor ??
+      this.getAttribute("accent-color") ??
+      "var(--arswc-color-accent, #4cc2ff)";
     return {
       id: this._data.id ?? this.getAttribute("tile-id") ?? "",
       title,
@@ -240,24 +279,36 @@ class ArsInfoTile extends HTMLElement {
     };
   }
 
+  // Update only the data-* attributes on the .card element without
+  // tearing down the full shadow DOM.  Used for `selected` and `dragging`
+  // changes that are purely cosmetic.  Prevents button destruction between
+  // mousedown and mouseup, which would suppress the click event.
+  #updateCardDataAttrs(): void {
+    const card = this.shadowRoot?.querySelector<HTMLElement>(".card");
+    if (!card) return;
+    card.setAttribute("data-selected", String(this.hasAttribute("selected")));
+    card.setAttribute("data-dragging", String(this.hasAttribute("dragging")));
+  }
+
   // Redraws the full shadow DOM because the tile is small and host updates are infrequent.
   #render() {
     if (!this.shadowRoot) {
       return;
     }
     const viewModel = this.#getViewModel();
-    const propertiesHtml = viewModel.properties.length > 0
-      ? viewModel.properties
-          .map(
-            (property) => `
+    const propertiesHtml =
+      viewModel.properties.length > 0
+        ? viewModel.properties
+            .map(
+              (property) => `
               <div class="property-row">
                 <span class="property-key">${ArsInfoTile.#escapeHtml(property.key)}</span>
                 <span class="property-value">${ArsInfoTile.#escapeHtml(property.value)}</span>
               </div>
             `,
-          )
-          .join("")
-      : `<div class="empty-state">No properties</div>`;
+            )
+            .join("")
+        : `<div class="empty-state">No properties</div>`;
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -441,14 +492,18 @@ class ArsInfoTile extends HTMLElement {
             <h3 class="title">${ArsInfoTile.#escapeHtml(viewModel.title)}</h3>
             <div class="subtitle">${ArsInfoTile.#escapeHtml(viewModel.subtitle)}</div>
           </div>
-          ${viewModel.isCollapsible ? `<button
+          ${
+            viewModel.isCollapsible
+              ? `<button
             type="button"
             class="collapse-btn"
             part="collapse-btn"
             aria-pressed="${String(viewModel.isCollapsed)}"
             aria-label="${viewModel.isCollapsed ? "Expand content" : "Collapse content"}"
             title="${viewModel.isCollapsed ? "Expand content" : "Collapse content"}"
-          ><span class="caret" aria-hidden="true">▾</span></button>` : ""}
+          ><span class="caret" aria-hidden="true">▾</span></button>`
+              : ""
+          }
         </header>
         <section class="content">
           ${propertiesHtml}
@@ -472,13 +527,15 @@ class ArsInfoTile extends HTMLElement {
 
     this.shadowRoot.addEventListener("dblclick", (event) => {
       event.stopPropagation();
-      this.dispatchEvent(new CustomEvent("ars-info-tile:activate", {
-        bubbles: true,
-        composed: true,
-        detail: {
-          originalEventType: event.type,
-        },
-      }));
+      this.dispatchEvent(
+        new CustomEvent("ars-info-tile:activate", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            originalEventType: event.type,
+          },
+        }),
+      );
     });
 
     this._activationEventsBound = true;
@@ -501,13 +558,15 @@ class ArsInfoTile extends HTMLElement {
       // drag-start handlers or other host-level listeners.
       event.stopPropagation();
       const requested = !this.hasAttribute("collapsed");
-      this.dispatchEvent(new CustomEvent("ars-info-tile:toggle-collapse", {
-        bubbles: true,
-        composed: true,
-        detail: {
-          collapsed: requested,
-        },
-      }));
+      this.dispatchEvent(
+        new CustomEvent("ars-info-tile:toggle-collapse", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            collapsed: requested,
+          },
+        }),
+      );
     });
     // Stop dblclick on the button from reaching the shadow-root
     // activation listener.  Without this, two fast clicks on the
@@ -522,12 +581,18 @@ class ArsInfoTile extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-info-tile")) {
+if (
+  typeof customElements !== "undefined" &&
+  !customElements.get("ars-info-tile")
+) {
   customElements.define("ars-info-tile", ArsInfoTile);
 }
 
 // Deprecated alias — register the old tag name so existing consumers continue to work during transition.
-if (typeof customElements !== "undefined" && !customElements.get("ars-relational-node")) {
+if (
+  typeof customElements !== "undefined" &&
+  !customElements.get("ars-relational-node")
+) {
   customElements.define("ars-relational-node", class extends ArsInfoTile {});
 }
 
