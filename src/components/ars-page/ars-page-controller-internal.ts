@@ -236,11 +236,9 @@ class ArsPageControllerInternal extends WebComponentBase {
 
     const router = this._resolveRouter();
     if (!router) {
-      console.log("Router component not found in target element");
       return false;
     }
 
-    console.log("Calling (router as any).showPage with:", pageId);
     const result = (router as any).showPage(pageId);
 
     if (result && result.success) {
@@ -269,11 +267,9 @@ class ArsPageControllerInternal extends WebComponentBase {
 
     const router = this._resolveRouter();
     if (!router) {
-      console.log("Router component not found in target element");
       return false;
     }
 
-    console.log("Calling (router as any).navigateToRoute with:", route);
     const result = (router as any).navigateToRoute(route);
 
     if (result && result.success) {
@@ -300,7 +296,6 @@ class ArsPageControllerInternal extends WebComponentBase {
       const router = this._resolveRouter();
       if (router) {
         const pageInfo = (router as any).getCurrentPage();
-        console.log("Got page info from router:", pageInfo);
         return pageInfo.currentPage; // Extract the current page ID
       }
     }
@@ -312,7 +307,6 @@ class ArsPageControllerInternal extends WebComponentBase {
       const router = this._resolveRouter();
       if (router) {
         const routeInfo = (router as any).getCurrentRoute();
-        console.log("Got route info from router:", routeInfo);
         return routeInfo.currentRoute; // Extract the current route
       }
     }

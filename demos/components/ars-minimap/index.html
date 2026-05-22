@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ARS Minimap - Demo</title>
+  <title>ars-minimap — Demo</title>
 
   <script type="importmap">
   {
@@ -17,26 +17,9 @@
   <link rel="stylesheet" href="/demos/css/base.css">
   <link rel="stylesheet" href="/demos/css/components.css">
   <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
 
   <style>
-    .demo-section {
-      background: var(--arswc-color-surface, #f6f8fb);
-      border: 1px solid var(--arswc-color-border, #d5dde8);
-      border-radius: var(--arswc-radius-md, 10px);
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    .demo-section h3 { margin: 0 0 12px; font-size: 1rem; }
-    .demo-row {
-      display: flex; flex-wrap: wrap; gap: 16px;
-      align-items: center; margin: 8px 0;
-    }
-    .code-block {
-      background: #161b22; color: #e6edf3;
-      font-family: var(--arswc-font-family-mono, monospace);
-      font-size: 0.8rem; padding: 12px; border-radius: 6px;
-      overflow-x: auto; margin-top: 8px;
-    }
     .minimap-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -50,12 +33,6 @@
       font-size: 0.8rem;
       color: var(--arswc-color-muted, #64748b);
       margin-top: 8px;
-    }
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
     }
   </style>
 </head>
@@ -165,7 +142,7 @@ minimap.setData(points);</div>
       <!-- Theme toggle -->
       <div class="demo-section">
         <h3>Theme Toggle</h3>
-        <div style="display:flex;gap:8px;">
+        <div class="demo-row">
           <button class="btn" id="theme-light">Light</button>
           <button class="btn" id="theme-dark">Dark</button>
         </div>
@@ -203,11 +180,10 @@ minimap.setData(points);</div>
 
   <script type="module">
     import { ArsMinimap } from '/dist/components/ars-minimap/ars-minimap.js';
-    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
+    import { initDesignSystem, initThemeToggles } from '/demos/js/demo-utils.js';
 
-    initializeArsWebComponents({
-      designAdapter: getArsWebComponentsDefaultAdapter('light')
-    });
+    initDesignSystem('light');
+    initThemeToggles();
 
     // --- Helper: generate random points ---
     function randomPoints(count, w, h, colorFn) {
@@ -295,14 +271,6 @@ minimap.setData(points);</div>
     document.getElementById('btn-cluster').addEventListener('click', drawCluster);
     document.getElementById('btn-spiral').addEventListener('click', drawSpiral);
     document.getElementById('btn-clear').addEventListener('click', () => interactive.clear());
-
-    // --- Theme ---
-    document.getElementById('theme-light').addEventListener('click', () => {
-      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
-    });
-    document.getElementById('theme-dark').addEventListener('click', () => {
-      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('dark') });
-    });
   </script>
 </body>
 </html>

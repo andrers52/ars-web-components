@@ -571,4 +571,31 @@ describe("ArsInfoTile", () => {
     // No script elements should exist in shadow DOM
     expect(element.shadowRoot?.querySelector("script")).toBeNull();
   });
+
+  // --- data setter no-op guard ---
+
+  it("does not re-render when data is set to structurally identical values", () => {
+    element.data = {
+      id: "node-1",
+      title: "Test",
+      properties: { status: "active" },
+    };
+    document.body.appendChild(element);
+
+    // Grab the initial collapse button reference
+    const buttonBefore = element.shadowRoot?.querySelector(".collapse-btn");
+    expect(buttonBefore).toBeTruthy();
+
+    // Spy on the internal render by watching innerHTML mutation.
+    // Re-setting data to the same value must NOT destroy the button.
+    element.data = {
+      id: "node-1",
+      title: "Test",
+      properties: { status: "active" },
+    };
+
+    // The collapse button must be the SAME node (not destroyed + recreated)
+    const buttonAfter = element.shadowRoot?.querySelector(".collapse-btn");
+    expect(buttonAfter).toBe(buttonBefore);
+  });
 });

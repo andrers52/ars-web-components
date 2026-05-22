@@ -4,9 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ARS Line Chart - Demo</title>
+  <title>ars-line-chart — Demo</title>
 
-  <!-- Import Map for module resolution -->
   <script type="importmap">
   {
     "imports": {
@@ -15,10 +14,10 @@
   }
   </script>
 
-  <!-- Common CSS -->
   <link rel="stylesheet" href="/demos/css/base.css">
   <link rel="stylesheet" href="/demos/css/components.css">
   <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
 
   <style>
     .chart-card {
@@ -46,7 +45,7 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>ARS Line Chart</h1>
+      <h1>ars-line-chart</h1>
       <p>Canvas-rendered line chart web component</p>
     </div>
     <div class="content">
@@ -217,6 +216,15 @@
         </div>
       </div>
 
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
       <!-- Usage Instructions -->
       <div class="demo-section">
         <h3>Usage Instructions</h3>
@@ -257,6 +265,10 @@
 
   <script type="module">
     import '/dist/components/ars-line-chart/ars-line-chart.js';
+    import { initDesignSystem, initThemeToggles } from '/demos/js/demo-utils.js';
+
+    initDesignSystem('light');
+    initThemeToggles();
 
     const chartDefault = document.getElementById('chart-default');
 

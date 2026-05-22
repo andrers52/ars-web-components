@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ars-date-picker — Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
+
+  <style>
+    .picker-demo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+    .picker-result {
+      background: white;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 10px 0;
+      min-height: 60px;
+      width: 100%;
+    }
+    .picker-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      width: 100%;
+    }
+    .picker-type {
+      text-align: center;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+    .picker-type h4 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .picker-type p {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .dark-surface {
+      background: #11111b;
+      padding: 24px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-date-picker</h1>
+      <p>Inline date selector with confirm / cancel actions</p>
+    </div>
+
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h4>About ARS Date Picker</h4>
+        <p>A lightweight custom element wrapping a native date input with styled
+          OK / Cancel buttons.  Emits <code>ars-date-picker:select</code> and
+          <code>ars-date-picker:cancel</code> events so hosts stay declarative.</p>
+      </div>
+
+      <!-- Basic Usage -->
+      <div class="demo-section">
+        <h3>Basic Usage</h3>
+        <div class="picker-controls">
+
+          <div class="picker-type">
+            <h4>Default (light theme)</h4>
+            <p>Standard appearance on a light background</p>
+            <ars-date-picker id="lightPicker" open label="Choose a date"></ars-date-picker>
+          </div>
+
+          <div class="picker-type" style="background:#1e1e2e;border-color:#333;">
+            <h4 style="color:#cdd6f4">Dark theme</h4>
+            <p style="color:#9fb4cf">Native dark appearance via CSS variables</p>
+            <div class="dark-surface">
+              <ars-date-picker id="darkPicker" open label="Choose a date"></ars-date-picker>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Programmatic Control -->
+      <div class="demo-section">
+        <h3>Programmatic Control</h3>
+        <div class="picker-demo">
+          <div class="controls">
+            <button class="btn" onclick="if(typeof showPicker === 'function') showPicker()">Open Picker</button>
+            <button class="btn btn-secondary" onclick="if(typeof closePicker === 'function') closePicker()">Close Picker</button>
+            <button class="btn" onclick="if(typeof setToday === 'function') setToday()">Set Today</button>
+            <button class="btn" onclick="if(typeof setChristmas === 'function') setChristmas()">Set Christmas</button>
+          </div>
+
+          <div class="dark-surface" style="min-height:180px;">
+            <ars-date-picker id="programmaticPicker" label="Programmatic picker"></ars-date-picker>
+          </div>
+
+          <div class="picker-result" id="pickerResult">
+            <strong>Last action:</strong> <span id="resultText">No interaction yet</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Event Monitoring -->
+      <div class="demo-section">
+        <h3>Event Monitoring</h3>
+        <p style="margin-bottom: 15px; color: #666;">All picker interactions are logged below.</p>
+
+        <div class="demo-output">
+          <h4>Event Log:</h4>
+          <div class="event-log" id="eventLog">Ready to capture picker events...
+</div>
+          <div class="controls">
+            <button class="btn btn-secondary" onclick="if(typeof clearLog === 'function') clearLog()">Clear Log</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage Instructions -->
+      <div class="demo-section">
+        <h3>Usage Instructions</h3>
+        <div class="info-box">
+          <h4>ES Module Import:</h4>
+          <div class="code-block">import ArsDatePicker from '/dist/components/ars-date-picker/ars-date-picker.js'</div>
+        </div>
+
+        <div class="info-box">
+          <h4>HTML Usage:</h4>
+          <div class="code-block">&lt;ars-date-picker open label="Select date"&gt;&lt;/ars-date-picker&gt;</div>
+        </div>
+
+        <div class="info-box">
+          <h4>Programmatic API:</h4>
+          <div class="code-block">const picker = document.querySelector('ars-date-picker');
+picker.open();          // show
+picker.close();         // hide
+picker.value = '2026-05-21'; // set date</div>
+        </div>
+
+        <div class="info-box">
+          <h4>Event Handling:</h4>
+          <div class="code-block">picker.addEventListener('ars-date-picker:select', (e) =&gt; {
+  console.log('Selected:', e.detail.date);
+});
+
+picker.addEventListener('ars-date-picker:cancel', () =&gt; {
+  console.log('Cancelled');
+});</div>
+        </div>
+
+        <div class="info-box">
+          <h4>CSS Custom Properties:</h4>
+          <div class="code-block">--ars-date-picker-bg
+--ars-date-picker-border-color
+--ars-date-picker-header-color
+--ars-date-picker-input-bg
+--ars-date-picker-ok-bg
+--ars-date-picker-cancel-color
+...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load the component -->
+  <script type="module">
+    import { initDesignSystem, initThemeToggles } from '/demos/js/demo-utils.js';
+    import ArsDatePicker from "/dist/components/ars-date-picker/ars-date-picker.js";
+
+    window.ArsDatePicker = ArsDatePicker;
+
+    initDesignSystem('dark');
+    initThemeToggles();
+
+    const eventLog = document.getElementById('eventLog');
+    const resultText = document.getElementById('resultText');
+
+    function logEvent(message) {
+      const timestamp = new Date().toLocaleTimeString();
+      const logEntry = `[${timestamp}] ${message}\n`;
+      eventLog.textContent += logEntry;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function updateResult(text, color = '#333') {
+      resultText.textContent = text;
+      resultText.style.color = color;
+    }
+
+    window.logEvent = logEvent;
+    window.updateResult = updateResult;
+
+    // Wire up all pickers on the page
+    document.querySelectorAll('ars-date-picker').forEach((picker) => {
+      picker.addEventListener('ars-date-picker:select', (e) => {
+        const detail = e.detail;
+        logEvent(`SELECT  → date = "${detail.date}" (from ${picker.id || 'anonymous'})`);
+      });
+      picker.addEventListener('ars-date-picker:cancel', () => {
+        logEvent(`CANCEL  → ${picker.id || 'anonymous'}`);
+      });
+    });
+
+    // Programmatic demo
+    const prog = document.getElementById('programmaticPicker');
+
+    window.showPicker = function () {
+      prog.open();
+      updateResult('Picker opened', '#2196f3');
+      logEvent('Programmatic open() called');
+    };
+
+    window.closePicker = function () {
+      prog.close();
+      updateResult('Picker closed', '#f44336');
+      logEvent('Programmatic close() called');
+    };
+
+    window.setToday = function () {
+      const today = new Date().toISOString().split('T')[0];
+      prog.value = today;
+      prog.open();
+      updateResult(`Value set to today (${today})`, '#4caf50');
+      logEvent(`Value set to today: ${today}`);
+    };
+
+    window.setChristmas = function () {
+      prog.value = '2026-12-25';
+      prog.open();
+      updateResult('Value set to 2026-12-25', '#4caf50');
+      logEvent('Value set to Christmas 2026');
+    };
+
+    window.clearLog = function () {
+      eventLog.textContent = 'Event log cleared...\n';
+    };
+
+    window.addEventListener('load', function () {
+      logEvent('ARS Date Picker test page loaded');
+    });
+  </script>
+</body>
+
+</html>

@@ -4,6 +4,7 @@ export { ArsCalendar } from "./components/ars-calendar/ars-calendar.js";
 export { ArsInput } from "./components/ars-input/ars-input.js";
 export type { ArsInputType } from "./components/ars-input/ars-input.js";
 export { ArsColorSelect } from "./components/ars-color-select/ars-color-select.js";
+export { ArsDatePicker } from "./components/ars-date-picker/ars-date-picker.js";
 export { ArsDataRoller } from "./components/ars-data-roller/ars-data-roller.js";
 export { ArsDialog } from "./components/ars-dialog/ars-dialog.js";
 export { ArsPageController } from "./components/ars-page/ars-page-controller.js";
@@ -23,6 +24,11 @@ export type { ArsToastSeverity, ArsToastPosition, ArsToastOptions } from "./comp
 export { ArsToggle } from "./components/ars-toggle/ars-toggle.js";
 export type { ArsToggleLabelPosition } from "./components/ars-toggle/ars-toggle.js";
 export { WebComponentBase } from "./components/web-component-base/web-component-base.js";
+export { ArsChatPanel } from "./components/ars-chat-panel/ars-chat-panel.js";
+export type { ArsChatMessage } from "./components/ars-chat-panel/ars-chat-panel.js";
+export { ArsToolbar } from "./components/ars-toolbar/ars-toolbar.js";
+export type { ArsToolbarItem } from "./components/ars-toolbar/ars-toolbar.js";
+export { ArsPropertyEditor } from "./components/ars-property-editor/ars-property-editor.js";
 // --- NEW PetRescue P0 components ---
 export { ArsBadge } from "./components/ars-badge/ars-badge.js";
 export type { ArsBadgeVariant, ArsBadgeSize } from "./components/ars-badge/ars-badge.js";

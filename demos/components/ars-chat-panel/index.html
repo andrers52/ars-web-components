@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ars-chat-panel — Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
+
+  <style>
+    .chat-host {
+      height: 420px;
+      border-radius: var(--arswc-radius-md, 10px);
+      overflow: hidden;
+    }
+    .event-log-light {
+      background: var(--arswc-color-bg, #ffffff);
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: var(--arswc-radius-sm, 6px);
+      padding: 12px;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem;
+      min-height: 80px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+    .event-log-light .entry { margin-bottom: 4px; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-chat-panel</h1>
+      <p>Reusable chat / conversation panel with message bubbles and typing indicator.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>A self-contained chat interface with user/assistant/system message bubbles, text input,
+           send button, typing indicator, and clear action. Events bubble up as custom events for
+           the host application to handle.</p>
+      </div>
+
+      <!-- Live Demo -->
+      <div class="demo-section">
+        <h3>Live Demo</h3>
+        <div class="chat-host">
+          <ars-chat-panel id="chatDemo"
+            title="Support Chat"
+            subtitle="Ask us anything"
+            placeholder="Type your message..."></ars-chat-panel>
+        </div>
+      </div>
+
+      <!-- Event Log -->
+      <div class="demo-section">
+        <h3>Event Log</h3>
+        <div class="event-log-light" id="eventLog"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn" id="clearLog">Clear Log</button>
+          <button class="btn" id="simulateTyping">Simulate Typing</button>
+          <button class="btn" id="simulateReply">Simulate Reply</button>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-chat-panel
+  title="Support Chat"
+  subtitle="Ask us anything"
+  placeholder="Type your message..."
+&gt;&lt;/ars-chat-panel&gt;
+
+&lt;script&gt;
+  const chat = document.querySelector('ars-chat-panel');
+  chat.messages = [
+    { role: 'assistant', content: 'Hello! How can I help?' },
+    { role: 'user', content: 'I need help with my order.' }
+  ];
+  chat.addEventListener('ars-chat-panel:send', (e) =&gt; {
+    console.log('User sent:', e.detail.message);
+  });
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsChatPanel } from '/dist/components/ars-chat-panel/ars-chat-panel.js';
+    import { initDesignSystem, initThemeToggles } from '/demos/js/demo-utils.js';
+
+    initDesignSystem('light');
+    initThemeToggles();
+
+    const chat = document.getElementById('chatDemo');
+    const log = document.getElementById('eventLog');
+
+    function appendLog(text) {
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+      entry.textContent = `${new Date().toLocaleTimeString()} — ${text}`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    chat.addEventListener('ars-chat-panel:send', (e) => {
+      appendLog(`send: "${e.detail.message}"`);
+    });
+
+    chat.addEventListener('ars-chat-panel:clear', () => {
+      appendLog('clear');
+    });
+
+    document.getElementById('clearLog').addEventListener('click', () => {
+      log.innerHTML = '';
+    });
+
+    document.getElementById('simulateTyping').addEventListener('click', () => {
+      chat.typing = !chat.typing;
+      appendLog(`typing = ${chat.typing}`);
+    });
+
+    document.getElementById('simulateReply').addEventListener('click', () => {
+      const current = chat.messages;
+      chat.messages = [
+        ...current,
+        { role: 'assistant', content: 'This is a simulated reply.' }
+      ];
+      appendLog('appended simulated reply');
+    });
+  </script>
+</body>
+
+</html>

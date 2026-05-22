@@ -1,0 +1,133 @@
+/* ==========================================================================
+   Shared demo page layout primitives
+   Extracted from demos/components/*/index.html to eliminate duplication.
+   Include this *after* base.css, components.css, and buttons.css.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Demo section — card-like container for each example group
+   -------------------------------------------------------------------------- */
+
+.demo-section {
+  background: var(--arswc-color-surface, #f6f8fb);
+  border: 1px solid var(--arswc-color-border, #d5dde8);
+  border-radius: var(--arswc-radius-md, 10px);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.demo-section h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  color: var(--arswc-color-text, #1b2430);
+}
+
+/* --------------------------------------------------------------------------
+   Demo row — horizontal flex layout for component variants
+   -------------------------------------------------------------------------- */
+
+.demo-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin: 8px 0;
+}
+
+/* --------------------------------------------------------------------------
+   Demo grid — responsive grid for cards or larger items
+   -------------------------------------------------------------------------- */
+
+.demo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   Code block — dark terminal-style snippet display
+   -------------------------------------------------------------------------- */
+
+.code-block {
+  background: #161b22;
+  color: #e6edf3;
+  font-family: var(--arswc-font-family-mono, monospace);
+  font-size: 0.8rem;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-top: 8px;
+  white-space: pre;
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   Event log — dark terminal-style scrollable log
+   -------------------------------------------------------------------------- */
+
+.event-log {
+  background: #0d1117;
+  color: #c9d1d9;
+  font-family: var(--arswc-font-family-mono, monospace);
+  font-size: 0.8rem;
+  padding: 12px;
+  border-radius: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 12px;
+}
+
+.event-log .entry {
+  margin-bottom: 4px;
+}
+
+.event-log .timestamp {
+  color: #8b949e;
+}
+
+.event-log .event-name {
+  color: #79c0ff;
+}
+
+/* Light variant for pages that need it */
+.event-log-light {
+  background: var(--arswc-color-bg, #ffffff);
+  border: 1px solid var(--arswc-color-border, #d5dde8);
+  border-radius: var(--arswc-radius-sm, 6px);
+  padding: 12px;
+  font-family: var(--arswc-font-family-mono, monospace);
+  font-size: 0.8rem;
+  min-height: 80px;
+  max-height: 160px;
+  overflow-y: auto;
+  margin-top: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Demo output — bordered panel for results / previews
+   -------------------------------------------------------------------------- */
+
+.demo-output {
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.demo-output h4 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+/* --------------------------------------------------------------------------
+   Controls — button group helper
+   -------------------------------------------------------------------------- */
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}

@@ -98,7 +98,17 @@ class ArsInfoTile extends HTMLElement {
   }
 
   set data(value: ArsInfoTileData) {
-    this._data = { ...value };
+    // Guard: skip re-render when data is structurally identical.
+    // The DOMRenderer re-applies ALL properties whenever ANY property
+    // changes (e.g. `selected` is toggled). Without this guard,
+    // re-setting `data` to the same value triggers #render(), which
+    // rebuilds the shadow DOM and destroys the collapse button between
+    // mousedown and mouseup — the browser then suppresses the click
+    // event (different mousedown/mouseup targets) and the toggle
+    // never fires on the first click.
+    const newData = { ...value };
+    if (JSON.stringify(this._data) === JSON.stringify(newData)) return;
+    this._data = newData;
     this.#render();
   }
 
@@ -537,6 +547,36 @@ class ArsInfoTile extends HTMLElement {
         }),
       );
     });
+
+    // Forward right-click as a composed custom event so brainiac-engine
+    // agents receive it via DOMPresentationState.forward_events.
+    // Listen on the host element in the capturing phase so we intercept
+    // the native event *before* it reaches any shadow-DOM children;
+    // this guarantees preventDefault() wins even on browsers where
+    // shadow-root bubbling behaves oddly for contextmenu.
+    this.addEventListener(
+      "contextmenu",
+      (event: Event) => {
+        // Ignore our own synthetic CustomEvent to avoid an infinite loop.
+        if (event instanceof CustomEvent) {
+          return;
+        }
+        const mouseEvent = event as MouseEvent;
+        mouseEvent.preventDefault();
+        mouseEvent.stopPropagation();
+        this.dispatchEvent(
+          new CustomEvent("contextmenu", {
+            bubbles: true,
+            composed: true,
+            detail: {
+              x: mouseEvent.clientX,
+              y: mouseEvent.clientY,
+            },
+          }),
+        );
+      },
+      true,
+    );
 
     this._activationEventsBound = true;
   }

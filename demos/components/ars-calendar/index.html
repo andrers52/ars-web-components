@@ -4,9 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ARS Calendar - Test Page</title>
+  <title>ars-calendar — Demo</title>
 
-  <!-- Import Map for module resolution -->
   <script type="importmap">
   {
     "imports": {
@@ -15,20 +14,18 @@
   }
   </script>
 
-  <!-- Common CSS -->
   <link rel="stylesheet" href="/demos/css/base.css">
   <link rel="stylesheet" href="/demos/css/components.css">
   <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
 
   <style>
-    /* Component-specific styles */
     .calendar-demo {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 20px;
     }
-
     .event-form {
       display: flex;
       gap: 16px;
@@ -37,19 +34,16 @@
       justify-content: center;
       margin-bottom: 20px;
     }
-
     .form-group {
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
-
     .form-label {
       font-weight: 600;
       font-size: 0.85rem;
       color: #555;
     }
-
     .form-input {
       padding: 8px 12px;
       border: 1px solid #d5dde8;
@@ -58,11 +52,9 @@
       color: #333;
       background: #fff;
     }
-
     .form-input::placeholder {
       color: #999;
     }
-
     .event-preview {
       background: white;
       border: 2px solid #e9ecef;
@@ -71,30 +63,25 @@
       margin: 10px 0;
       min-height: 60px;
     }
-
     .selected-date {
       font-weight: bold;
       color: #667eea;
       font-size: 1.1rem;
     }
-
     .localization-demo {
       background: #f8f9fa;
       padding: 15px;
       border-radius: 8px;
       margin: 10px 0;
     }
-
     /* Jewel theme button styles */
     .emerald-btn,
     .sapphire-btn,
     .onyx-btn {
       position: relative;
       padding-left: 40px;
-      /* Space for icon */
       line-height: 20px;
     }
-
     .emerald-btn::before,
     .sapphire-btn::before,
     .onyx-btn::before {
@@ -109,71 +96,61 @@
       background-repeat: no-repeat;
       background-position: center;
     }
-
     .emerald-btn::before {
       background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M8 2H20L26 8V20L20 26H8L2 20V8L8 2Z' fill='%2310B981' stroke='%23065F46' stroke-width='2'/%3e%3cpath d='M8 2L20 26M20 2L8 26M2 8L26 20M2 20L26 8' stroke='rgba(255,255,255,0.3)' stroke-width='1'/%3e%3c/svg%3e");
     }
-
     .sapphire-btn::before {
       background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M14 2L2 10L14 26L26 10L14 2Z' fill='%232563EB' stroke='%231E3A8A' stroke-width='2'/%3e%3cpath d='M2 10L26 10M14 2L7 10L14 14L21 10L14 2Z' stroke='rgba(255,255,255,0.5)' stroke-width='1.5'/%3e%3c/svg%3e");
     }
-
     .onyx-btn::before {
       background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='14' cy='14' r='12' fill='%2318181B' stroke='%233F3F46' stroke-width='2'/%3e%3cpath d='M8 8 A 10 10, 0, 0, 1, 20 20' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='2'/%3e%3c/svg%3e");
     }
-
     .emerald-btn {
       background: linear-gradient(135deg, #10b981, #059669);
       color: white;
       border: 2px solid #065f46;
       box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
     }
-
     .emerald-btn:hover {
       background: linear-gradient(135deg, #34d399, #10b981);
       box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
       transform: translateY(-1px);
     }
-
     .sapphire-btn {
       background: linear-gradient(135deg, #2563eb, #1d4ed8);
       color: white;
       border: 2px solid #1e3a8a;
       box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
     }
-
     .sapphire-btn:hover {
       background: linear-gradient(135deg, #3b82f6, #2563eb);
       box-shadow: 0 6px 12px rgba(37, 99, 235, 0.4);
       transform: translateY(-1px);
     }
-
     .onyx-btn {
       background: linear-gradient(135deg, #18181b, #09090b);
       color: #facc15;
       border: 2px solid #3f3f46;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     }
-
     .onyx-btn:hover {
       background: linear-gradient(135deg, #27272a, #18181b);
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
       transform: translateY(-1px);
       color: #fbbf24;
     }
-
   </style>
 </head>
 
 <body>
   <div class="container">
     <div class="header">
-      <h1>📅 ARS Calendar</h1>
-      <p>Interactive Calendar Component Test</p>
+      <h1>ars-calendar</h1>
+      <p>Interactive Calendar Component</p>
     </div>
 
     <div class="content">
-      <a href="/" class="back-link">← Back to Demo Page</a>
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
 
       <div class="info-box">
         <h4>About ARS Calendar</h4>
@@ -183,7 +160,7 @@
 
       <!-- Basic Usage -->
       <div class="demo-section">
-        <h3>🎯 Basic Calendar</h3>
+        <h3>Basic Calendar</h3>
         <div class="calendar-demo">
           <p style="color: #666; text-align: center; margin-bottom: 15px;">
             To add events set the event and color, then
@@ -212,7 +189,7 @@
 
       <!-- Localized Calendar -->
       <div class="demo-section">
-        <h3>🌍 Localized Calendar (Portuguese)</h3>
+        <h3>Localized Calendar (Portuguese)</h3>
         <div class="calendar-demo">
           <div class="localization-demo">
             <h4>Localization Features:</h4>
@@ -228,7 +205,7 @@
 
       <!-- CSS Customization -->
       <div class="demo-section">
-        <h3>🎨 CSS Customization</h3>
+        <h3>CSS Customization</h3>
         <div class="calendar-demo">
           <div class="localization-demo">
             <h4>Customization Features:</h4>
@@ -254,19 +231,19 @@
 
       <!-- Interactive Features -->
       <div class="demo-section">
-        <h3>⚡ Interactive Features</h3>
+        <h3>Interactive Features</h3>
         <div class="controls">
-          <button class="btn" onclick="addSampleEvent()">📝 Add Sample Event</button>
-          <button class="btn" onclick="clearEvents()">🗑️ Clear All Events</button>
-          <button class="btn" onclick="goToToday()">📅 Go to Today</button>
-          <button class="btn btn-secondary" onclick="exportEvents()">📄 Export Events</button>
+          <button class="btn" onclick="addSampleEvent()">Add Sample Event</button>
+          <button class="btn" onclick="clearEvents()">Clear All Events</button>
+          <button class="btn" onclick="goToToday()">Go to Today</button>
+          <button class="btn btn-secondary" onclick="exportEvents()">Export Events</button>
         </div>
 
         <div class="demo-output">
           <h4>Calendar Controls:</h4>
           <div class="controls">
-            <button class="btn-small" onclick="previousMonth()">⬅️ Previous Month</button>
-            <button class="btn-small" onclick="nextMonth()">➡️ Next Month</button>
+            <button class="btn-small" onclick="previousMonth()">Previous Month</button>
+            <button class="btn-small" onclick="nextMonth()">Next Month</button>
             <button class="btn-small" onclick="goToMonth(0)">January</button>
             <button class="btn-small" onclick="goToMonth(11)">December</button>
           </div>
@@ -275,22 +252,32 @@
 
       <!-- Event Monitoring -->
       <div class="demo-section">
-        <h3>📡 Event Monitoring</h3>
+        <h3>Event Monitoring</h3>
         <p style="margin-bottom: 15px; color: #666;">All calendar interactions are logged below.</p>
 
         <div class="demo-output">
           <h4>Event Log:</h4>
-          <div class="event-log" id="eventLog">Ready to capture calendar events...\n</div>
+          <div class="event-log" id="eventLog">Ready to capture calendar events...
+</div>
           <div class="controls">
-            <button class="btn btn-secondary" onclick="clearLog()">🗑️ Clear Log</button>
-            <button class="btn btn-secondary" onclick="exportLog()">📄 Export Log</button>
+            <button class="btn btn-secondary" onclick="clearLog()">Clear Log</button>
+            <button class="btn btn-secondary" onclick="exportLog()">Export Log</button>
           </div>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
         </div>
       </div>
 
       <!-- Usage Instructions -->
       <div class="demo-section">
-        <h3>📖 Usage Instructions</h3>
+        <h3>Usage Instructions</h3>
         <div class="info-box">
           <h4>HTML Usage:</h4>
           <p><strong>&lt;ars-calendar id="myCalendar"&gt;&lt;/ars-calendar&gt;</strong></p>
@@ -320,7 +307,7 @@
 
       <!-- Attribute-based Localization Demo (ars-calendar) -->
       <div class="demo-section">
-        <h3>📅 Attribute-based Localization (ars-calendar)</h3>
+        <h3>Attribute-based Localization (ars-calendar)</h3>
         <p>
           <strong>Demo:</strong> The calendar below is localized using <code>&lt;localized-mixin&gt;</code> and the <code>data-localize-map</code> convention.<br>
           Use the language selector below to see the calendar update its day and month names!
@@ -330,11 +317,11 @@
         <div class="localization-demo">
           <h4>Language Selector:</h4>
           <div class="controls">
-            <button class="btn" onclick="setCalendarLanguage('en')">🇺🇸 English</button>
-            <button class="btn" onclick="setCalendarLanguage('es')">🇪🇸 Español</button>
-            <button class="btn" onclick="setCalendarLanguage('pt')">🇵🇹 Português</button>
-            <button class="btn" onclick="setCalendarLanguage('fr')">🇫🇷 Français</button>
-            <button class="btn" onclick="setCalendarLanguage('de')">🇩🇪 Deutsch</button>
+            <button class="btn" onclick="setCalendarLanguage('en')">English</button>
+            <button class="btn" onclick="setCalendarLanguage('es')">Español</button>
+            <button class="btn" onclick="setCalendarLanguage('pt')">Português</button>
+            <button class="btn" onclick="setCalendarLanguage('fr')">Français</button>
+            <button class="btn" onclick="setCalendarLanguage('de')">Deutsch</button>
           </div>
           <p><strong>Current Language:</strong> <span id="currentCalendarLanguage">English</span></p>
         </div>
@@ -342,7 +329,7 @@
         <localized-mixin locale="en" id="calendar-mixin">
           <ars-calendar data-localize-map='{"localized_abbreviated_days":["days.sun","days.mon","days.tue","days.wed","days.thu","days.fri","days.sat"],"localized_months":["months.jan","months.feb","months.mar","months.apr","months.may","months.jun","months.jul","months.aug","months.sep","months.oct","months.nov","months.dec"],"localized_today":"today"}'></ars-calendar>
         </localized-mixin>
-        <div class="instructions">
+        <div class="info-box">
           <h4>How it works:</h4>
           <ul>
             <li>The <code>&lt;ars-calendar&gt;</code> component declares which attributes it wants localized and which translation keys to use via <code>data-localize-map</code>.</li>
@@ -350,36 +337,30 @@
             <li>This pattern is generic and works for any component that follows the convention.</li>
           </ul>
         </div>
-        <div class="code-example">
-          &lt;localized-mixin locale="en"&gt;<br>
-          &nbsp;&nbsp;&lt;ars-calendar <br>
-          &nbsp;&nbsp;&nbsp;&nbsp;data-localize-map='{"localized_abbreviated_days":["days.sun","days.mon","days.tue","days.wed","days.thu","days.fri","days.sat"],<br>
-          &nbsp;&nbsp;&nbsp;&nbsp;"localized_months":["months.jan","months.feb","months.mar","months.apr","months.may","months.jun","months.jul","months.aug","months.sep","months.oct","months.nov","months.dec"],<br>
-          &nbsp;&nbsp;&nbsp;&nbsp;"localized_today":"today"}'&gt;&lt;/ars-calendar&gt;<br>
-          &lt;/localized-mixin&gt;
-        </div>
+        <div class="code-block">&lt;localized-mixin locale="en"&gt;
+  &lt;ars-calendar 
+    data-localize-map='{"localized_abbreviated_days":["days.sun","days.mon","days.tue","days.wed","days.thu","days.fri","days.sat"],
+    "localized_months":["months.jan","months.feb","months.mar","months.apr","months.may","months.jun","months.jul","months.aug","months.sep","months.oct","months.nov","months.dec"],
+    "localized_today":"today"}'&gt;&lt;/ars-calendar&gt;
+&lt;/localized-mixin&gt;</div>
       </div>
     </div>
   </div>
 
   <!-- Load the components -->
   <script type="module">
-    import { getArsWebComponentsDefaultAdapter, initializeArsWebComponents } from "/dist/design-system.js";
+    import { initDesignSystem, initThemeToggles } from '/demos/js/demo-utils.js';
+
+    initDesignSystem('dark');
+    initThemeToggles();
 
     window.__arswcInitLight = function () {
-      initializeArsWebComponents({
-        designAdapter: getArsWebComponentsDefaultAdapter("light"),
-      });
+      initDesignSystem('light');
     };
 
     window.__arswcInitDark = function () {
-      initializeArsWebComponents({
-        designAdapter: getArsWebComponentsDefaultAdapter("dark"),
-      });
+      initDesignSystem('dark');
     };
-
-    // Demo default: explicit dark template.
-    window.__arswcInitDark();
   </script>
   <script type="module" src="/dist/components/ars-calendar/ars-calendar.js"></script>
   <script type="module" src="/dist/components/ars-color-select/ars-color-select.js"></script>

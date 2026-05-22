@@ -222,13 +222,11 @@ class ArsPage extends WebComponentBase {
     }
   }
 
-  _handlePopState(event) {
+  _handlePopState(_event) {
     if (!this._usesBrowserRouting()) {
       return;
     }
-    console.log("[ars-page] Popstate event:", event);
     const currentPath = this._getBrowserWindow()?.location.pathname || "";
-    console.log("[ars-page] Current path from popstate:", currentPath);
 
     const pageId = this._getPageIdFromRoute(currentPath);
 

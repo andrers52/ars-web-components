@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ARS Color Select - Carousel Demo</title>
+  <title>ars-color-select — Demo</title>
 
   <script type="importmap">
   {
@@ -17,20 +17,9 @@
   <link rel="stylesheet" href="/demos/css/base.css">
   <link rel="stylesheet" href="/demos/css/components.css">
   <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
 
   <style>
-    .demo-section {
-      background: var(--arswc-color-surface, #f6f8fb);
-      border: 1px solid var(--arswc-color-border, #d5dde8);
-      border-radius: var(--arswc-radius-md, 10px);
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    .demo-section h3 {
-      margin: 0 0 12px;
-      font-size: 1rem;
-      color: var(--arswc-color-text, #1b2430);
-    }
     .demo-row {
       display: flex;
       flex-wrap: wrap;
@@ -44,30 +33,6 @@
       border-radius: var(--arswc-radius-md, 10px);
       border: 2px solid var(--arswc-color-border, #d5dde8);
       transition: background-color 200ms ease;
-    }
-    .event-log {
-      background: #0d1117;
-      color: #c9d1d9;
-      font-family: var(--arswc-font-family-mono, monospace);
-      font-size: 0.8rem;
-      padding: 12px;
-      border-radius: 6px;
-      max-height: 200px;
-      overflow-y: auto;
-      margin-top: 12px;
-    }
-    .event-log .entry { margin-bottom: 4px; }
-    .event-log .timestamp { color: #8b949e; }
-    .event-log .event-name { color: #79c0ff; }
-    .code-block {
-      background: #161b22;
-      color: #e6edf3;
-      font-family: var(--arswc-font-family-mono, monospace);
-      font-size: 0.8rem;
-      padding: 12px;
-      border-radius: 6px;
-      overflow-x: auto;
-      margin-top: 8px;
     }
   </style>
 </head>
@@ -83,112 +48,112 @@
       <a href="/" class="back-link">&larr; Back to Demo Page</a>
 
       <div class="info-box">
-    <h3>About</h3>
-    <p>Redesigned as a horizontal carousel strip of circular color swatches.
-       Navigate with arrow buttons, keyboard arrows, Home/End keys.
-       Colors arranged in spectrum order (red &rarr; orange &rarr; yellow &rarr; green &rarr; blue &rarr; purple &rarr; pink &rarr; neutrals).</p>
-  </div>
-
-  <!-- Default carousel -->
-  <div class="demo-section">
-    <h3>Default Carousel</h3>
-    <ars-color-select id="default-picker"></ars-color-select>
-    <div class="code-block">&lt;ars-color-select&gt;&lt;/ars-color-select&gt;</div>
-  </div>
-
-  <!-- Swatch sizes -->
-  <div class="demo-section">
-    <h3>Swatch Sizes</h3>
-    <div class="demo-row">
-      <div>
-        <p style="margin:0 0 4px;font-size:0.8rem;color:var(--arswc-color-muted)">Small</p>
-        <ars-color-select swatch-size="sm" visible-count="5"></ars-color-select>
+        <h3>About</h3>
+        <p>Redesigned as a horizontal carousel strip of circular color swatches.
+           Navigate with arrow buttons, keyboard arrows, Home/End keys.
+           Colors arranged in spectrum order (red &rarr; orange &rarr; yellow &rarr; green &rarr; blue &rarr; purple &rarr; pink &rarr; neutrals).</p>
       </div>
-      <div>
-        <p style="margin:0 0 4px;font-size:0.8rem;color:var(--arswc-color-muted)">Medium (default)</p>
-        <ars-color-select swatch-size="md" visible-count="5"></ars-color-select>
-      </div>
-      <div>
-        <p style="margin:0 0 4px;font-size:0.8rem;color:var(--arswc-color-muted)">Large</p>
-        <ars-color-select swatch-size="lg" visible-count="5"></ars-color-select>
-      </div>
-    </div>
-  </div>
 
-  <!-- Custom palette -->
-  <div class="demo-section">
-    <h3>Custom Palette</h3>
-    <ars-color-select id="custom-palette" visible-count="5"></ars-color-select>
-    <div class="code-block">&lt;ars-color-select id="picker"&gt;&lt;/ars-color-select&gt;
+      <!-- Default carousel -->
+      <div class="demo-section">
+        <h3>Default Carousel</h3>
+        <ars-color-select id="default-picker"></ars-color-select>
+        <div class="code-block">&lt;ars-color-select&gt;&lt;/ars-color-select&gt;</div>
+      </div>
+
+      <!-- Swatch sizes -->
+      <div class="demo-section">
+        <h3>Swatch Sizes</h3>
+        <div class="demo-row">
+          <div>
+            <p style="margin:0 0 4px;font-size:0.8rem;color:var(--arswc-color-muted)">Small</p>
+            <ars-color-select swatch-size="sm" visible-count="5"></ars-color-select>
+          </div>
+          <div>
+            <p style="margin:0 0 4px;font-size:0.8rem;color:var(--arswc-color-muted)">Medium (default)</p>
+            <ars-color-select swatch-size="md" visible-count="5"></ars-color-select>
+          </div>
+          <div>
+            <p style="margin:0 0 4px;font-size:0.8rem;color:var(--arswc-color-muted)">Large</p>
+            <ars-color-select swatch-size="lg" visible-count="5"></ars-color-select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom palette -->
+      <div class="demo-section">
+        <h3>Custom Palette</h3>
+        <ars-color-select id="custom-palette" visible-count="5"></ars-color-select>
+        <div class="code-block">&lt;ars-color-select id="picker"&gt;&lt;/ars-color-select&gt;
 &lt;script&gt;
   document.getElementById('picker').palette = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF'];
 &lt;/script&gt;</div>
-  </div>
-
-  <!-- Visible count -->
-  <div class="demo-section">
-    <h3>Visible Count</h3>
-    <div class="demo-row">
-      <div>
-        <p style="margin:0 0 4px;font-size:0.8rem;color:var(--arswc-color-muted)">3 visible</p>
-        <ars-color-select visible-count="3"></ars-color-select>
       </div>
-      <div>
-        <p style="margin:0 0 4px;font-size:0.8rem;color:var(--arswc-color-muted)">9 visible</p>
-        <ars-color-select visible-count="9"></ars-color-select>
+
+      <!-- Visible count -->
+      <div class="demo-section">
+        <h3>Visible Count</h3>
+        <div class="demo-row">
+          <div>
+            <p style="margin:0 0 4px;font-size:0.8rem;color:var(--arswc-color-muted)">3 visible</p>
+            <ars-color-select visible-count="3"></ars-color-select>
+          </div>
+          <div>
+            <p style="margin:0 0 4px;font-size:0.8rem;color:var(--arswc-color-muted)">9 visible</p>
+            <ars-color-select visible-count="9"></ars-color-select>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Disabled -->
-  <div class="demo-section">
-    <h3>Disabled</h3>
-    <ars-color-select disabled color="#3B82F6"></ars-color-select>
-  </div>
+      <!-- Disabled -->
+      <div class="demo-section">
+        <h3>Disabled</h3>
+        <ars-color-select disabled color="#3B82F6"></ars-color-select>
+      </div>
 
-  <!-- Keyboard navigation -->
-  <div class="demo-section">
-    <h3>Keyboard Navigation</h3>
-    <p>Focus the picker below and use: <strong>Arrow Left/Right</strong> to move,
-       <strong>Home</strong> for first, <strong>End</strong> for last.</p>
-    <ars-color-select id="keyboard-demo" visible-count="7"></ars-color-select>
-  </div>
+      <!-- Keyboard navigation -->
+      <div class="demo-section">
+        <h3>Keyboard Navigation</h3>
+        <p>Focus the picker below and use: <strong>Arrow Left/Right</strong> to move,
+           <strong>Home</strong> for first, <strong>End</strong> for last.</p>
+        <ars-color-select id="keyboard-demo" visible-count="7"></ars-color-select>
+      </div>
 
-  <!-- Programmatic control -->
-  <div class="demo-section">
-    <h3>Programmatic Control</h3>
-    <div class="demo-row">
-      <ars-color-select id="prog-picker" visible-count="7"></ars-color-select>
-      <button class="btn" id="set-red">Set Red</button>
-      <button class="btn" id="set-blue">Set Blue</button>
-      <button class="btn" id="read-color">Read Color</button>
-      <span id="color-readout" style="font-family:monospace;"></span>
-    </div>
-  </div>
+      <!-- Programmatic control -->
+      <div class="demo-section">
+        <h3>Programmatic Control</h3>
+        <div class="demo-row">
+          <ars-color-select id="prog-picker" visible-count="7"></ars-color-select>
+          <button class="btn" id="set-red">Set Red</button>
+          <button class="btn" id="set-blue">Set Blue</button>
+          <button class="btn" id="read-color">Read Color</button>
+          <span id="color-readout" style="font-family:monospace;"></span>
+        </div>
+      </div>
 
-  <!-- Integration: preview -->
-  <div class="demo-section">
-    <h3>Integration Example</h3>
-    <p>Selected color applied to a preview card:</p>
-    <div class="demo-row">
-      <ars-color-select id="preview-picker" visible-count="7"></ars-color-select>
-      <div class="color-preview" id="preview-card"></div>
-    </div>
-  </div>
+      <!-- Integration: preview -->
+      <div class="demo-section">
+        <h3>Integration Example</h3>
+        <p>Selected color applied to a preview card:</p>
+        <div class="demo-row">
+          <ars-color-select id="preview-picker" visible-count="7"></ars-color-select>
+          <div class="color-preview" id="preview-card"></div>
+        </div>
+      </div>
 
-  <!-- Event monitor -->
-  <div class="demo-section">
-    <h3>Event Monitor</h3>
-    <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px;">Clear Log</button>
-    <div class="event-log" id="event-log">
-      <div class="entry"><span class="timestamp">[ready]</span> Listening for ars-color-select:change events...</div>
-    </div>
-  </div>
+      <!-- Event monitor -->
+      <div class="demo-section">
+        <h3>Event Monitor</h3>
+        <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px;">Clear Log</button>
+        <div class="event-log" id="event-log">
+          <div class="entry"><span class="timestamp">[ready]</span> Listening for ars-color-select:change events...</div>
+        </div>
+      </div>
 
       <!-- Theme toggle -->
       <div class="demo-section">
         <h3>Theme Toggle</h3>
-        <div style="display:flex;gap:8px;">
+        <div class="demo-row">
           <button class="btn" id="theme-light">Light</button>
           <button class="btn" id="theme-dark">Dark</button>
         </div>
@@ -198,11 +163,10 @@
 
   <script type="module">
     import { ArsColorSelect } from '/dist/components/ars-color-select/ars-color-select.js';
-    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
+    import { initDesignSystem, initThemeToggles, createEventLog } from '/demos/js/demo-utils.js';
 
-    initializeArsWebComponents({
-      designAdapter: getArsWebComponentsDefaultAdapter('light')
-    });
+    initDesignSystem('light');
+    initThemeToggles();
 
     // Custom palette
     document.getElementById('custom-palette').palette = [
@@ -228,27 +192,11 @@
     });
 
     // Event log
-    const log = document.getElementById('event-log');
+    const log = createEventLog('event-log', 'clear-log');
     document.addEventListener('ars-color-select:change', (e) => {
-      const time = new Date().toLocaleTimeString();
-      const entry = document.createElement('div');
-      entry.className = 'entry';
-      entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">ars-color-select:change</span> color=${e.detail.color} prev=${e.detail.previousColor || 'none'}`;
-      log.appendChild(entry);
-      log.scrollTop = log.scrollHeight;
-    });
-
-    document.getElementById('clear-log').addEventListener('click', () => {
-      log.innerHTML = '<div class="entry"><span class="timestamp">[cleared]</span> Listening...</div>';
-    });
-
-    // Theme
-    document.getElementById('theme-light').addEventListener('click', () => {
-      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
-    });
-    document.getElementById('theme-dark').addEventListener('click', () => {
-      initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('dark') });
+      log.append('ars-color-select:change', `color=${e.detail.color} prev=${e.detail.previousColor || 'none'}`);
     });
   </script>
 </body>
+
 </html>

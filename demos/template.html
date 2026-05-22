@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ars-COMPONENT — Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <!-- Base demo styles -->
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+  <!-- Shared layout primitives -->
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
+
+  <!-- Component-specific styles only -->
+  <style>
+    /* Add only styles unique to this component demo */
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-COMPONENT</h1>
+      <p>One-line description of what this component does.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>Longer description of the component, its purpose, and key features.</p>
+      </div>
+
+      <!-- ================================================================
+           Example: Variants section
+           ================================================================ -->
+      <div class="demo-section">
+        <h3>Variants</h3>
+        <div class="demo-row">
+          <!-- Component instances go here -->
+        </div>
+        <div class="code-block">&lt;ars-COMPONENT variant="primary"&gt;&lt;/ars-COMPONENT&gt;</div>
+      </div>
+
+      <!-- ================================================================
+           Example: Event Monitor section
+           ================================================================ -->
+      <div class="demo-section">
+        <h3>Event Monitor</h3>
+        <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px;">Clear Log</button>
+        <div class="event-log" id="event-log">
+          <div class="entry"><span class="timestamp">[ready]</span> Listening for ars-COMPONENT:event...</div>
+        </div>
+      </div>
+
+      <!-- ================================================================
+           Theme Toggle
+           ================================================================ -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- ================================================================
+           Usage / Code Example
+           ================================================================ -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-COMPONENT attribute="value"&gt;&lt;/ars-COMPONENT&gt;
+
+&lt;script&gt;
+  const el = document.querySelector('ars-COMPONENT');
+  el.addEventListener('ars-COMPONENT:event', (e) => {
+    console.log('Event:', e.detail);
+  });
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsCOMPONENT } from '/dist/components/ars-COMPONENT/ars-COMPONENT.js';
+    import { initDesignSystem, initThemeToggles, createEventLog } from '/demos/js/demo-utils.js';
+
+    // Initialise design system and theme toggles
+    initDesignSystem('light');
+    initThemeToggles();
+
+    // Set up event log
+    const log = createEventLog('event-log', 'clear-log');
+
+    // Component-specific demo logic
+    document.addEventListener('ars-COMPONENT:event', (e) => {
+      log.append('ars-COMPONENT:event', JSON.stringify(e.detail).slice(0, 120));
+    });
+  </script>
+</body>
+
+</html>

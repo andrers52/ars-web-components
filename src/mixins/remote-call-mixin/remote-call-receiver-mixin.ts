@@ -87,10 +87,4 @@ class RemoteCallReceiverMixin extends MixinBase() {
 
 customElements.define('remote-call-receiver-mixin', RemoteCallReceiverMixin);
 
-if (typeof module !== 'undefined') {
-  module.exports = { RemoteCallReceiverMixin };
-} else if (typeof window !== 'undefined') {
-  (window as any).RemoteCallReceiverMixin = RemoteCallReceiverMixin;
-}
-
 export { RemoteCallReceiverMixin };

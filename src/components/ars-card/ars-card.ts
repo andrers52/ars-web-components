@@ -122,7 +122,7 @@ class ArsCard extends HTMLElement {
 
     // Remove old listener if any (innerHTML rebuilds the DOM each re-render)
     // Since we rebuild, listeners are gone. Just attach:
-    card.addEventListener("click", (e) => {
+    card.addEventListener("click", (_e) => {
       if (this.interactive || this.href) {
         this.dispatchEvent(
           new CustomEvent("ars-card:click", {

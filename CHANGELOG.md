@@ -7,7 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-05-22
+
 ### Added
+
+- **Shared demo infrastructure (`demos/css/demo-layout.css`, `demos/js/demo-utils.js`, `demos/template.html`)**
+  - `demo-layout.css` — shared layout primitives extracted from 25 demo pages:
+    `.demo-section`, `.demo-row`, `.demo-grid`, `.code-block`, `.event-log`,
+    `.event-log-light`, `.controls`, `.demo-output`.
+  - `demo-utils.js` — three shared helpers:
+    - `initDesignSystem(mode)` — initializes components with light/dark adapter.
+    - `initThemeToggles()` — wires `#theme-light` / `#theme-dark` buttons.
+    - `createEventLog(logId, clearId, opts)` — returns `{ append, clear }` event-log helper.
+  - `template.html` — copy-paste starter skeleton for new demo pages using all shared assets.
+
+- **`ars-data-roller`: comprehensive test suite (2026-05-22).**
+  33 tests covering data parsing (strings, title-value objects, key-value objects),
+  rendering, public API (`startRolling`, `stopRolling`, `nextItem`, `setData`,
+  `setInterval`, `setAnimationDuration`), attribute changes, lifecycle
+  (`connectedCallback` / `disconnectedCallback`), shadow DOM structure, and
+  edge cases (empty data, invalid JSON, single-item data, rapid updates,
+  animation guard).  Fills the last gap in component test coverage.
 
 - **`ars-info-tile`: collapse/expand toggle (2026-05-19).**
   New `collapsed` boolean property/attribute and `collapsible` boolean

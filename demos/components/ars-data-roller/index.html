@@ -4,9 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ARS Data Roller - Test Page</title>
+  <title>ars-data-roller — Demo</title>
 
-  <!-- Import Map for module resolution -->
   <script type="importmap">
   {
     "imports": {
@@ -15,13 +14,12 @@
   }
   </script>
 
-  <!-- Common CSS -->
   <link rel="stylesheet" href="/demos/css/base.css">
   <link rel="stylesheet" href="/demos/css/components.css">
   <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
 
   <style>
-    /* Component-specific styles */
     .roller-display {
       background: #f8f9fa;
       border: 2px solid #e9ecef;
@@ -33,7 +31,6 @@
       align-items: center;
       justify-content: center;
     }
-
     .data-preview {
       background: #f1f3f4;
       border-radius: 4px;
@@ -44,25 +41,21 @@
       overflow-y: auto;
       white-space: pre-wrap;
     }
-
     .control-panel {
       background: #e3f2fd;
       border-radius: 8px;
       padding: 15px;
       margin: 15px 0;
     }
-
     .control-group {
       margin-bottom: 15px;
     }
-
     .control-group label {
       display: block;
       margin-bottom: 5px;
       font-weight: 500;
       color: #1976d2;
     }
-
     .status-indicator {
       display: inline-block;
       padding: 4px 8px;
@@ -70,22 +63,18 @@
       font-size: 0.8rem;
       font-weight: 500;
     }
-
     .status-active {
       background: #4caf50;
       color: white;
     }
-
     .status-paused {
       background: #ff9800;
       color: white;
     }
-
     .status-stopped {
       background: #f44336;
       color: white;
     }
-
     .example-card {
       background: white;
       border: 1px solid #e9ecef;
@@ -93,13 +82,11 @@
       padding: 20px;
       margin-bottom: 20px;
     }
-
     .example-card h4 {
       color: #333;
       margin-bottom: 15px;
       font-size: 1.1rem;
     }
-
     .example-description {
       color: #666;
       margin-bottom: 15px;
@@ -111,12 +98,12 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>🔄 ARS Data Roller</h1>
-      <p>Animated Data Display Component Test</p>
+      <h1>ars-data-roller</h1>
+      <p>Animated Data Display Component</p>
     </div>
 
     <div class="content">
-      <a href="/" class="back-link">← Back to Demo Page</a>
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
 
       <div class="info-box">
         <h4>About ARS Data Roller</h4>
@@ -125,7 +112,7 @@
 
       <!-- Basic Usage -->
       <div class="demo-section">
-        <h3>🎯 Basic Usage</h3>
+        <h3>Basic Usage</h3>
         <div class="example-card">
           <h4>Simple String Array</h4>
           <div class="example-description">Display a simple array of strings with default settings.</div>
@@ -133,8 +120,8 @@
             <ars-data-roller id="basicRoller" data='["Hello World", "Welcome to ARS", "Data Roller Demo", "Smooth Animations"]'></ars-data-roller>
           </div>
           <div class="controls">
-            <button class="btn" onclick="toggleBasicRoller()">⏸️ Toggle Rolling</button>
-            <button class="btn btn-secondary" onclick="nextBasicItem()">⏭️ Next Item</button>
+            <button class="btn" onclick="toggleBasicRoller()">Toggle Rolling</button>
+            <button class="btn btn-secondary" onclick="nextBasicItem()">Next Item</button>
             <span class="status-indicator status-active" id="basicStatus">Active</span>
           </div>
         </div>
@@ -142,7 +129,7 @@
 
       <!-- Object Data Examples -->
       <div class="demo-section">
-        <h3>📊 Object Data Examples</h3>
+        <h3>Object Data Examples</h3>
 
         <div class="example-card">
           <h4>Title-Value Pairs</h4>
@@ -151,8 +138,8 @@
             <ars-data-roller id="titleValueRoller" data='[{"title": "CPU Usage", "value": "45%"}, {"title": "Memory", "value": "2.3GB"}, {"title": "Network", "value": "1.2MB/s"}, {"title": "Disk Space", "value": "75%"}]'></ars-data-roller>
           </div>
           <div class="controls">
-            <button class="btn" onclick="toggleTitleValueRoller()">⏸️ Toggle Rolling</button>
-            <button class="btn btn-secondary" onclick="changeTitleValueInterval()">⚡ Change Speed</button>
+            <button class="btn" onclick="toggleTitleValueRoller()">Toggle Rolling</button>
+            <button class="btn btn-secondary" onclick="changeTitleValueInterval()">Change Speed</button>
             <span class="status-indicator status-active" id="titleValueStatus">Active</span>
           </div>
         </div>
@@ -164,8 +151,8 @@
             <ars-data-roller id="keyValueRoller" data='[{"name": "John Doe", "age": 30, "city": "New York"}, {"name": "Jane Smith", "age": 25, "city": "Los Angeles"}, {"name": "Bob Johnson", "age": 35, "city": "Chicago"}]'></ars-data-roller>
           </div>
           <div class="controls">
-            <button class="btn" onclick="toggleKeyValueRoller()">⏸️ Toggle Rolling</button>
-            <button class="btn btn-secondary" onclick="updateKeyValueData()">🔄 Update Data</button>
+            <button class="btn" onclick="toggleKeyValueRoller()">Toggle Rolling</button>
+            <button class="btn btn-secondary" onclick="updateKeyValueData()">Update Data</button>
             <span class="status-indicator status-active" id="keyValueStatus">Active</span>
           </div>
         </div>
@@ -173,7 +160,7 @@
 
       <!-- Customization Examples -->
       <div class="demo-section">
-        <h3>⚙️ Customization Examples</h3>
+        <h3>Customization Examples</h3>
 
         <div class="example-card">
           <h4>Fast Animation (1 second interval)</h4>
@@ -182,7 +169,7 @@
             <ars-data-roller id="fastRoller" data='["Fast", "Quick", "Rapid", "Swift", "Speedy"]' interval="1000" animation-duration="300"></ars-data-roller>
           </div>
           <div class="controls">
-            <button class="btn" onclick="toggleFastRoller()">⏸️ Toggle Rolling</button>
+            <button class="btn" onclick="toggleFastRoller()">Toggle Rolling</button>
             <span class="status-indicator status-active" id="fastStatus">Active</span>
           </div>
         </div>
@@ -194,8 +181,8 @@
             <ars-data-roller id="slowRoller" data='["Relaxed", "Calm", "Peaceful", "Tranquil", "Serene"]' interval="5000" animation-duration="800"></ars-data-roller>
           </div>
           <div class="controls">
-            <button class="btn" onclick="toggleSlowRoller()">⏸️ Toggle Rolling</button>
-            <button class="btn btn-secondary" onclick="nextSlowItem()">⏭️ Next Item</button>
+            <button class="btn" onclick="toggleSlowRoller()">Toggle Rolling</button>
+            <button class="btn btn-secondary" onclick="nextSlowItem()">Next Item</button>
             <span class="status-indicator status-active" id="slowStatus">Active</span>
           </div>
         </div>
@@ -203,7 +190,7 @@
 
       <!-- Interactive Control Panel -->
       <div class="demo-section">
-        <h3>🎮 Interactive Control Panel</h3>
+        <h3>Interactive Control Panel</h3>
         <div class="control-panel">
           <h4>Dynamic Data Roller</h4>
           <p>Create and control your own data roller with custom settings.</p>
@@ -225,10 +212,10 @@
           </div>
 
           <div class="controls">
-            <button class="btn" onclick="updateCustomRoller()">🔄 Update Roller</button>
-            <button class="btn" onclick="toggleCustomRoller()">⏸️ Toggle Rolling</button>
-            <button class="btn btn-secondary" onclick="nextCustomItem()">⏭️ Next Item</button>
-            <button class="btn btn-secondary" onclick="resetCustomRoller()">🔄 Reset</button>
+            <button class="btn" onclick="updateCustomRoller()">Update Roller</button>
+            <button class="btn" onclick="toggleCustomRoller()">Toggle Rolling</button>
+            <button class="btn btn-secondary" onclick="nextCustomItem()">Next Item</button>
+            <button class="btn btn-secondary" onclick="resetCustomRoller()">Reset</button>
             <span class="status-indicator status-active" id="customStatus">Active</span>
           </div>
 
@@ -240,10 +227,10 @@
 
       <!-- Real-world Examples -->
       <div class="demo-section">
-        <h3>🌍 Real-world Examples</h3>
+        <h3>Real-world Examples</h3>
 
         <div class="example-card">
-          <h4>📈 Trading Statistics</h4>
+          <h4>Trading Statistics</h4>
           <div class="example-description">Display trading statistics with real-time feel.</div>
           <div class="roller-display">
             <ars-data-roller id="tradingRoller" data='[{"title": "BTC Price", "value": "$45,230"}, {"title": "24h Volume", "value": "$2.1B"}, {"title": "Market Cap", "value": "$890B"}, {"title": "Change 24h", "value": "+2.3%"}]' interval="2500"></ars-data-roller>
@@ -251,7 +238,7 @@
         </div>
 
         <div class="example-card">
-          <h4>🖥️ System Monitor</h4>
+          <h4>System Monitor</h4>
           <div class="example-description">System monitoring information display.</div>
           <div class="roller-display">
             <ars-data-roller id="systemRoller" data='[{"title": "CPU", "value": "23%"}, {"title": "RAM", "value": "4.2GB"}, {"title": "Disk", "value": "156GB"}, {"title": "Network", "value": "45MB/s"}]' interval="3000"></ars-data-roller>
@@ -259,7 +246,7 @@
         </div>
 
         <div class="example-card">
-          <h4>📱 Social Media Feed</h4>
+          <h4>Social Media Feed</h4>
           <div class="example-description">Social media status updates.</div>
           <div class="roller-display">
             <ars-data-roller id="socialRoller" data='["New post from @technews", "3 new followers", "Like from @developer", "Comment on your photo", "Trending: #WebComponents"]' interval="4000"></ars-data-roller>
@@ -269,7 +256,7 @@
 
       <!-- Usage Instructions -->
       <div class="demo-section">
-        <h3>📖 Usage Instructions</h3>
+        <h3>Usage Instructions</h3>
         <div class="info-box">
           <h4>HTML Usage:</h4>
           <p><strong>&lt;ars-data-roller data='["item1", "item2"]' interval="3000" animation-duration="500"&gt;&lt;/ars-data-roller&gt;</strong></p>
@@ -301,23 +288,30 @@
 
       <!-- Styling Example -->
       <div class="demo-section">
-        <h3>🎨 Styling the Data Roller</h3>
+        <h3>Styling the Data Roller</h3>
         <div class="info-box">
           <h4>Customizing with CSS Variables</h4>
           <p>You can style <strong>ars-data-roller</strong> using CSS variables for background, text color, border radius, font size, and label color. Example:</p>
-          <div class="code" style="margin-bottom:10px;">
-            ars-data-roller.custom-theme {
-              --ars-roller-bg: #222;
-              --ars-roller-color: #fff;
-              --ars-roller-radius: 16px;
-              --ars-roller-font-size: 1.2em;
-              --ars-roller-label-color: #90caf9;
-            }
-          </div>
+          <div class="code-block">ars-data-roller.custom-theme {
+  --ars-roller-bg: #222;
+  --ars-roller-color: #fff;
+  --ars-roller-radius: 16px;
+  --ars-roller-font-size: 1.2em;
+  --ars-roller-label-color: #90caf9;
+}</div>
           <p>Just add a class to your roller and style it in your CSS!</p>
         </div>
         <div class="roller-display">
           <ars-data-roller class="custom-theme" data='[{"title": "Styled!", "value": "🎨"}, {"title": "Dark Mode", "value": "Enabled"}, {"title": "Font Size", "value": "1.2em"}]' interval="2000"></ars-data-roller>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
         </div>
       </div>
     </div>
@@ -494,6 +488,12 @@
     window.addEventListener('load', function () {
       console.log('ARS Data Roller test page loaded');
     });
+  </script>
+
+  <script type="module">
+    import { initDesignSystem, initThemeToggles } from '/demos/js/demo-utils.js';
+    initDesignSystem('light');
+    initThemeToggles();
   </script>
 </body>
 

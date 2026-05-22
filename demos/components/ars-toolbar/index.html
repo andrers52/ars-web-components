@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ars-toolbar — Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
+
+  <style>
+    .toolbar-host {
+      height: 72px;
+      border-radius: var(--arswc-radius-md, 10px);
+      overflow: hidden;
+    }
+    .event-log-light {
+      background: var(--arswc-color-bg, #ffffff);
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: var(--arswc-radius-sm, 6px);
+      padding: 12px;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem;
+      min-height: 80px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+    .event-log-light .entry { margin-bottom: 4px; }
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #66f0ff, #43a7ff);
+      color: #07111d;
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-toolbar</h1>
+      <p>Application toolbar with brand area, navigation items, and status indicator.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>A responsive header bar with a brand section (title, subtitle, and optional mark slot),
+           centered navigation pills, and a right-aligned status area. Navigation clicks emit
+           a composed custom event for the host to handle.</p>
+      </div>
+
+      <!-- Live Demo -->
+      <div class="demo-section">
+        <h3>Live Demo</h3>
+        <div class="toolbar-host">
+          <ars-toolbar id="toolbarDemo"
+            title="Nexus"
+            subtitle="Knowledge Operations Surface"
+            status="Ready"
+            active-item="graph">
+            <div slot="brand-mark" class="brand-mark">NX</div>
+          </ars-toolbar>
+        </div>
+      </div>
+
+      <!-- Event Log -->
+      <div class="demo-section">
+        <h3>Event Log</h3>
+        <div class="event-log-light" id="eventLog"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn" id="clearLog">Clear Log</button>
+          <button class="btn" id="cycleActive">Cycle Active Item</button>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-toolbar
+  title="My App"
+  subtitle="v2.0"
+  status="Online"
+  active-item="home"
+&gt;
+  &lt;div slot="brand-mark"&gt;MA&lt;/div&gt;
+&lt;/ars-toolbar&gt;
+
+&lt;script&gt;
+  const toolbar = document.querySelector('ars-toolbar');
+  toolbar.items = [
+    { id: 'home', label: 'Home' },
+    { id: 'settings', label: 'Settings' }
+  ];
+  toolbar.addEventListener('ars-toolbar:navigate', (e) =&gt; {
+    console.log('Navigated to:', e.detail.id);
+  });
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsToolbar } from '/dist/components/ars-toolbar/ars-toolbar.js';
+    import { initDesignSystem, initThemeToggles } from '/demos/js/demo-utils.js';
+
+    initDesignSystem('light');
+    initThemeToggles();
+
+    const toolbar = document.getElementById('toolbarDemo');
+    const log = document.getElementById('eventLog');
+
+    toolbar.items = [
+      { id: 'graph', label: 'Knowledge Graph' },
+      { id: 'calendar', label: 'Calendar View' },
+      { id: 'settings', label: 'Settings' }
+    ];
+
+    function appendLog(text) {
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+      entry.textContent = `${new Date().toLocaleTimeString()} — ${text}`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    toolbar.addEventListener('ars-toolbar:navigate', (e) => {
+      appendLog(`navigate: "${e.detail.id}"`);
+    });
+
+    document.getElementById('clearLog').addEventListener('click', () => {
+      log.innerHTML = '';
+    });
+
+    const itemIds = ['graph', 'calendar', 'settings'];
+    let activeIndex = 0;
+    document.getElementById('cycleActive').addEventListener('click', () => {
+      activeIndex = (activeIndex + 1) % itemIds.length;
+      toolbar.activeItem = itemIds[activeIndex];
+      appendLog(`active-item = "${toolbar.activeItem}"`);
+    });
+  </script>
+</body>
+
+</html>

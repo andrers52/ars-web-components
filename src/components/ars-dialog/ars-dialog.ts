@@ -1,23 +1,3 @@
-// usage:
-
-// -- DIALOG --
-// const result = await ArsDialog.dialog(`content: <br> <input id='test'></input>`,'dialog_tittle')
-// if(!result) {console.log('cancel data returned'); return}
-// // this is an example of how to retrieve information from the dialog
-// console.log(`data inside input is ${result.querySelector('input').value}`)
-
-// -- NOTIFICATION --
-// - option to wait for the user to close notification
-//  await ArsDialog.notify('content', 'title')
-//  console.log('you just closed the notification!')
-// - option to continue right away (fire and forget)
-//  ArsDialog.notify('content', 'title')
-
-// -- EXTRA STYLING ---
-// You can add styles to the elements of the component
-// by puting them in the "css/components/ars-dialog.css" file
-// or setting the attribute "extra-css-file"
-
 import WebComponentBase from "../web-component-base/web-component-base.js";
 import { DEFAULT_CSS } from "./ars-dialog-css.js";
 import "../../mixins/pressed-effect-mixin/pressed-effect-mixin.js";

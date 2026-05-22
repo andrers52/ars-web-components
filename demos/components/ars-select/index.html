@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ARS Select - Demo</title>
+  <title>ars-select — Demo</title>
 
   <script type="importmap">
   {
@@ -17,36 +17,14 @@
   <link rel="stylesheet" href="/demos/css/base.css">
   <link rel="stylesheet" href="/demos/css/components.css">
   <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
 
   <style>
-    .demo-section {
-      background: var(--arswc-color-surface, #f6f8fb);
-      border: 1px solid var(--arswc-color-border, #d5dde8);
-      border-radius: var(--arswc-radius-md, 10px);
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    .demo-section h3 { margin: 0 0 12px; font-size: 1rem; }
     .demo-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 24px;
       margin: 12px 0;
-    }
-    .event-log {
-      background: #0d1117; color: #c9d1d9;
-      font-family: var(--arswc-font-family-mono, monospace);
-      font-size: 0.8rem; padding: 12px; border-radius: 6px;
-      max-height: 200px; overflow-y: auto; margin-top: 12px;
-    }
-    .event-log .entry { margin-bottom: 4px; }
-    .event-log .timestamp { color: #8b949e; }
-    .event-log .event-name { color: #79c0ff; }
-    .code-block {
-      background: #161b22; color: #e6edf3;
-      font-family: var(--arswc-font-family-mono, monospace);
-      font-size: 0.8rem; padding: 12px; border-radius: 6px;
-      overflow-x: auto; margin-top: 8px;
     }
   </style>
 </head>
@@ -61,93 +39,94 @@
       <a href="/" class="back-link">&larr; Back to Demo Page</a>
 
       <div class="info-box">
-    <h3>About</h3>
-    <p>Dropdown select with keyboard navigation (Arrow/Enter/Escape),
-       searchable filtering, multiple selection, option groups, and ARIA combobox semantics.</p>
-  </div>
+        <h3>About</h3>
+        <p>Dropdown select with keyboard navigation (Arrow/Enter/Escape),
+           searchable filtering, multiple selection, option groups, and ARIA combobox semantics.</p>
+      </div>
 
-  <!-- Basic single select -->
-  <div class="demo-section">
-    <h3>Basic Single Select</h3>
-    <div class="demo-grid">
-      <ars-select id="basic-select" label="Favorite Fruit" placeholder="Choose a fruit..."></ars-select>
-      <ars-select id="preselected" label="Pre-selected" value="banana"></ars-select>
-    </div>
-  </div>
+      <!-- Basic single select -->
+      <div class="demo-section">
+        <h3>Basic Single Select</h3>
+        <div class="demo-grid">
+          <ars-select id="basic-select" label="Favorite Fruit" placeholder="Choose a fruit..."></ars-select>
+          <ars-select id="preselected" label="Pre-selected" value="banana"></ars-select>
+        </div>
+      </div>
 
-  <!-- Searchable -->
-  <div class="demo-section">
-    <h3>Searchable</h3>
-    <ars-select id="searchable-select" label="Search Countries" searchable placeholder="Type to search..."></ars-select>
-  </div>
+      <!-- Searchable -->
+      <div class="demo-section">
+        <h3>Searchable</h3>
+        <ars-select id="searchable-select" label="Search Countries" searchable placeholder="Type to search..."></ars-select>
+      </div>
 
-  <!-- Multiple -->
-  <div class="demo-section">
-    <h3>Multiple Selection</h3>
-    <ars-select id="multi-select" label="Select Toppings" multiple placeholder="Choose toppings..."></ars-select>
-  </div>
+      <!-- Multiple -->
+      <div class="demo-section">
+        <h3>Multiple Selection</h3>
+        <ars-select id="multi-select" label="Select Toppings" multiple placeholder="Choose toppings..."></ars-select>
+      </div>
 
-  <!-- Option groups -->
-  <div class="demo-section">
-    <h3>Option Groups</h3>
-    <ars-select id="grouped-select" label="Select a Pet" placeholder="Choose..."></ars-select>
-  </div>
+      <!-- Option groups -->
+      <div class="demo-section">
+        <h3>Option Groups</h3>
+        <ars-select id="grouped-select" label="Select a Pet" placeholder="Choose..."></ars-select>
+      </div>
 
-  <!-- Disabled & Error -->
-  <div class="demo-section">
-    <h3>Disabled &amp; Error States</h3>
-    <div class="demo-grid">
-      <ars-select id="disabled-select" label="Disabled" disabled></ars-select>
-      <ars-select id="error-select" label="With Error" error="Please select a value"></ars-select>
-    </div>
-  </div>
+      <!-- Disabled & Error -->
+      <div class="demo-section">
+        <h3>Disabled &amp; Error States</h3>
+        <div class="demo-grid">
+          <ars-select id="disabled-select" label="Disabled" disabled></ars-select>
+          <ars-select id="error-select" label="With Error" error="Please select a value"></ars-select>
+        </div>
+      </div>
 
-  <!-- Keyboard navigation -->
-  <div class="demo-section">
-    <h3>Keyboard Navigation</h3>
-    <p><strong>Enter/Space/ArrowDown</strong> to open, <strong>Arrow keys</strong> to navigate,
-       <strong>Enter</strong> to select, <strong>Escape</strong> to close.</p>
-    <ars-select id="keyboard-select" label="Navigate with keyboard" placeholder="Focus and press Enter..."></ars-select>
-  </div>
+      <!-- Keyboard navigation -->
+      <div class="demo-section">
+        <h3>Keyboard Navigation</h3>
+        <p><strong>Enter/Space/ArrowDown</strong> to open, <strong>Arrow keys</strong> to navigate,
+           <strong>Enter</strong> to select, <strong>Escape</strong> to close.</p>
+        <ars-select id="keyboard-select" label="Navigate with keyboard" placeholder="Focus and press Enter..."></ars-select>
+      </div>
 
-  <!-- Programmatic API -->
-  <div class="demo-section">
-    <h3>Property-Driven Options</h3>
-    <div class="code-block">const select = document.querySelector('ars-select');
+      <!-- Programmatic API -->
+      <div class="demo-section">
+        <h3>Property-Driven Options</h3>
+        <div class="code-block">const select = document.querySelector('ars-select');
 select.options = [
   { value: 'opt1', label: 'Option 1' },
   { value: 'opt2', label: 'Option 2', group: 'Group A' },
   { value: 'opt3', label: 'Option 3', disabled: true }
 ];
 select.value = 'opt1';</div>
-  </div>
+      </div>
 
-  <!-- Event monitor -->
-  <div class="demo-section">
-    <h3>Event Monitor</h3>
-    <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px;">Clear</button>
-    <div class="event-log" id="event-log">
-      <div class="entry"><span class="timestamp">[ready]</span> Listening...</div>
-    </div>
-  </div>
+      <!-- Event monitor -->
+      <div class="demo-section">
+        <h3>Event Monitor</h3>
+        <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px;">Clear</button>
+        <div class="event-log" id="event-log">
+          <div class="entry"><span class="timestamp">[ready]</span> Listening...</div>
+        </div>
+      </div>
 
-  <!-- Theme toggle -->
-  <div class="demo-section">
-    <h3>Theme Toggle</h3>
-    <div style="display:flex;gap:8px;">
-      <button class="btn" id="theme-light">Light</button>
-      <button class="btn" id="theme-dark">Dark</button>
-    </div>
-  </div>
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
 
     </div>
   </div>
 
   <script type="module">
     import { ArsSelect } from '/dist/components/ars-select/ars-select.js';
-    import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from '/dist/design-system.js';
+    import { initDesignSystem, initThemeToggles, createEventLog } from '/demos/js/demo-utils.js';
 
-    initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
+    initDesignSystem('light');
+    initThemeToggles();
 
     const fruits = [
       { value: 'apple', label: 'Apple' },
@@ -193,26 +172,13 @@ select.value = 'opt1';</div>
     document.getElementById('disabled-select').options = fruits;
     document.getElementById('error-select').options = fruits;
 
-    // Event log
-    const log = document.getElementById('event-log');
+    const log = createEventLog('event-log', 'clear-log');
     for (const evtName of ['ars-select:change', 'ars-select:open', 'ars-select:close']) {
       document.addEventListener(evtName, (e) => {
-        const time = new Date().toLocaleTimeString();
-        const entry = document.createElement('div');
-        entry.className = 'entry';
-        const detail = e.detail ? JSON.stringify(e.detail) : '';
-        entry.innerHTML = `<span class="timestamp">[${time}]</span> <span class="event-name">${evtName}</span> ${detail}`;
-        log.appendChild(entry);
-        log.scrollTop = log.scrollHeight;
+        log.append(evtName, e.detail ? JSON.stringify(e.detail) : '');
       });
     }
-    document.getElementById('clear-log').onclick = () => {
-      log.innerHTML = '<div class="entry"><span class="timestamp">[cleared]</span> Listening...</div>';
-    };
-
-    // Theme
-    document.getElementById('theme-light').onclick = () => initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('light') });
-    document.getElementById('theme-dark').onclick = () => initializeArsWebComponents({ designAdapter: getArsWebComponentsDefaultAdapter('dark') });
   </script>
 </body>
+
 </html>

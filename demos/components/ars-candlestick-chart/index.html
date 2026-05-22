@@ -4,9 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ARS Candlestick Chart - Demo</title>
+  <title>ars-candlestick-chart — Demo</title>
 
-  <!-- Import Map for module resolution -->
   <script type="importmap">
   {
     "imports": {
@@ -15,10 +14,10 @@
   }
   </script>
 
-  <!-- Common CSS -->
   <link rel="stylesheet" href="/demos/css/base.css">
   <link rel="stylesheet" href="/demos/css/components.css">
   <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
 
   <style>
     .chart-card {
@@ -46,24 +45,14 @@
       text-align: center;
       margin-top: 8px;
     }
-    .event-log {
-      background: #0d1117;
-      color: #c9d1d9;
-      font-family: monospace;
-      font-size: 0.8rem;
-      padding: 12px;
-      border-radius: 6px;
-      max-height: 200px;
-      overflow-y: auto;
-      margin-top: 12px;
-    }
+
   </style>
 </head>
 
 <body>
   <div class="container">
     <div class="header">
-      <h1>ARS Candlestick Chart</h1>
+      <h1>ars-candlestick-chart</h1>
       <p>OHLCV Candlestick Chart Component</p>
     </div>
     <div class="content">
@@ -176,6 +165,15 @@
         </div>
       </div>
 
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
       <!-- Interactive Controls -->
       <div class="demo-section">
         <h3>Interactive Controls</h3>
@@ -186,7 +184,8 @@
           <button class="btn" id="btn-label-pos">Toggle Label Position</button>
           <button class="btn" id="btn-vol-ratio">Cycle Volume Ratio</button>
         </div>
-        <div class="event-log" id="event-log">Ready to capture interactions...\n</div>
+        <div class="event-log" id="event-log">Ready to capture interactions...
+</div>
       </div>
 
       <!-- Usage Instructions -->
@@ -250,6 +249,10 @@
 
   <script type="module">
     import '/dist/components/ars-candlestick-chart/ars-candlestick-chart.js';
+    import { initDesignSystem, initThemeToggles } from '/demos/js/demo-utils.js';
+
+    initDesignSystem('light');
+    initThemeToggles();
 
     const eventLog = document.getElementById('event-log');
 

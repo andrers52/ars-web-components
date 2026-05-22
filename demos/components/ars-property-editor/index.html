@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ars-property-editor — Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
+
+  <style>
+    .event-log-light {
+      background: var(--arswc-color-bg, #ffffff);
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: var(--arswc-radius-sm, 6px);
+      padding: 12px;
+      font-family: var(--arswc-font-family-mono, monospace);
+      font-size: 0.8rem;
+      min-height: 80px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+    .event-log-light .entry { margin-bottom: 4px; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-property-editor</h1>
+      <p>Reusable key/value property editor with dynamic add/remove rows.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>Edit dynamic key/value pairs — useful for metadata editors, config panels, tag editors,
+           and graph node property sheets. Emits a change event with the current properties map
+           on every edit, add, or remove.</p>
+      </div>
+
+      <!-- Live Demo -->
+      <div class="demo-section">
+        <h3>Live Demo (Editable)</h3>
+        <ars-property-editor id="editorDemo"></ars-property-editor>
+      </div>
+
+      <!-- Readonly Demo -->
+      <div class="demo-section">
+        <h3>Read-only Mode</h3>
+        <ars-property-editor id="readonlyDemo" readonly></ars-property-editor>
+      </div>
+
+      <!-- Event Log -->
+      <div class="demo-section">
+        <h3>Event Log</h3>
+        <div class="event-log-light" id="eventLog"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn" id="clearLog">Clear Log</button>
+          <button class="btn" id="presetProps">Load Preset Properties</button>
+          <button class="btn" id="toggleReadonly">Toggle Readonly</button>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-property-editor id="editor"&gt;&lt;/ars-property-editor&gt;
+
+&lt;script&gt;
+  const editor = document.getElementById('editor');
+  editor.properties = { name: 'Alice', role: 'admin' };
+  editor.addEventListener('ars-property-editor:change', (e) =&gt; {
+    console.log('Properties:', e.detail.properties);
+  });
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsPropertyEditor } from '/dist/components/ars-property-editor/ars-property-editor.js';
+    import { initDesignSystem, initThemeToggles } from '/demos/js/demo-utils.js';
+
+    initDesignSystem('light');
+    initThemeToggles();
+
+    const editor = document.getElementById('editorDemo');
+    const readonlyEditor = document.getElementById('readonlyDemo');
+    const log = document.getElementById('eventLog');
+
+    editor.properties = {
+      'Entity Type': 'Person',
+      'Department': 'Engineering',
+      'Location': 'Remote'
+    };
+
+    readonlyEditor.properties = {
+      'Readonly Key A': 'Value A',
+      'Readonly Key B': 'Value B'
+    };
+
+    function appendLog(text) {
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+      entry.textContent = `${new Date().toLocaleTimeString()} — ${text}`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    editor.addEventListener('ars-property-editor:change', (e) => {
+      appendLog(`change: ${JSON.stringify(e.detail.properties)}`);
+    });
+
+    document.getElementById('clearLog').addEventListener('click', () => {
+      log.innerHTML = '';
+    });
+
+    document.getElementById('presetProps').addEventListener('click', () => {
+      editor.properties = {
+        'Project': 'Nexus',
+        'Status': 'In Progress',
+        'Priority': 'High'
+      };
+      appendLog('loaded preset properties');
+    });
+
+    document.getElementById('toggleReadonly').addEventListener('click', () => {
+      editor.readonly = !editor.readonly;
+      appendLog(`readonly = ${editor.readonly}`);
+    });
+  </script>
+</body>
+
+</html>

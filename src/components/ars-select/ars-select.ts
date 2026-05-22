@@ -32,6 +32,7 @@ class ArsSelect extends HTMLElement {
   private _searchTerm = "";
   private _highlightedIdx = -1;
   private _eventsBound = false;
+  private _outsideClickHandler: ((e: MouseEvent) => void) | null = null;
 
   static get observedAttributes() {
     return ["value", "placeholder", "label", "disabled", "searchable", "multiple", "error"];
@@ -47,6 +48,14 @@ class ArsSelect extends HTMLElement {
     this.#bindEvents();
     if (!this.hasAttribute("tabindex")) {
       this.setAttribute("tabindex", "0");
+    }
+  }
+
+  disconnectedCallback() {
+    if (this._outsideClickHandler) {
+      document.removeEventListener("click", this._outsideClickHandler);
+      this._outsideClickHandler = null;
+      this._eventsBound = false;
     }
   }
 
@@ -339,11 +348,12 @@ class ArsSelect extends HTMLElement {
     });
 
     // Close on outside click
-    document.addEventListener("click", (e) => {
+    this._outsideClickHandler = (e) => {
       if (this._isOpen && !this.contains(e.target as Node)) {
         this.close();
       }
-    });
+    };
+    document.addEventListener("click", this._outsideClickHandler);
   }
 
   static #escapeHtml(value: string): string {
