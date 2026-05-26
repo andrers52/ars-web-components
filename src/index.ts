@@ -29,6 +29,7 @@ export type { ArsChatMessage } from "./components/ars-chat-panel/ars-chat-panel.
 export { ArsToolbar } from "./components/ars-toolbar/ars-toolbar.js";
 export type { ArsToolbarItem } from "./components/ars-toolbar/ars-toolbar.js";
 export { ArsPropertyEditor } from "./components/ars-property-editor/ars-property-editor.js";
+export { ArsTypedPropertyEditor } from "./components/ars-typed-property-editor/ars-typed-property-editor.js";
 // --- NEW PetRescue P0 components ---
 export { ArsBadge } from "./components/ars-badge/ars-badge.js";
 export type { ArsBadgeVariant, ArsBadgeSize } from "./components/ars-badge/ars-badge.js";

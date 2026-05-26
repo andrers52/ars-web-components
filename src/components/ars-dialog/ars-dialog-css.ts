@@ -29,6 +29,7 @@ export const DEFAULT_CSS = `
   }
 
   .body {
+    position: relative;
     max-width: var(--ars-dialog-max-width, 80vw);
     min-width: var(--ars-dialog-min-width, 320px);
     min-height: var(--ars-dialog-min-height, 150px);
@@ -51,6 +52,19 @@ export const DEFAULT_CSS = `
   .overlay[style*="visible"] .body {
     transform: scale(1);
     opacity: 1;
+  }
+
+  .dialog-close {
+    position: absolute; top: 12px; right: 16px;
+    background: none; border: none; cursor: pointer;
+    color: var(--ars-dialog-close-color, var(--arswc-color-muted, #6b7280));
+    font-size: 1.2rem; padding: 4px 8px; border-radius: 6px;
+    line-height: 1; z-index: 1;
+    transition: all 0.15s ease;
+  }
+  .dialog-close:hover {
+    background: var(--ars-dialog-close-hover-bg, var(--arswc-color-surface-hover, #f3f4f6));
+    color: var(--ars-dialog-close-hover-color, var(--arswc-color-text, #1f2937));
   }
 
   .title {

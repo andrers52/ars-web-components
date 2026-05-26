@@ -103,6 +103,54 @@ describe("ArsInfoTile", () => {
     ).toContain("No properties");
   });
 
+  it("renders a centered name block when data.name is provided", () => {
+    element.data = {
+      id: "nexus",
+      title: "System",
+      name: "Nexus",
+    };
+
+    document.body.appendChild(element);
+
+    const nameEl = element.shadowRoot?.querySelector(".node-name");
+    expect(nameEl).toBeTruthy();
+    expect(nameEl?.textContent?.trim()).toBe("Nexus");
+  });
+
+  it("hides empty-state when name is present but properties are empty", () => {
+    element.data = {
+      id: "nexus",
+      title: "System",
+      name: "Nexus",
+      properties: {},
+    };
+
+    document.body.appendChild(element);
+
+    expect(element.shadowRoot?.querySelector(".empty-state")).toBeNull();
+    expect(element.shadowRoot?.querySelector(".node-name")?.textContent?.trim()).toBe(
+      "Nexus",
+    );
+  });
+
+  it("filters out HAS_NAME from property rows", () => {
+    element.data = {
+      id: "nexus",
+      properties: {
+        HAS_NAME: "Nexus",
+        status: "active",
+      },
+    };
+
+    document.body.appendChild(element);
+
+    const keys = Array.from(
+      element.shadowRoot?.querySelectorAll(".property-key") ?? [],
+    ).map((node) => node.textContent?.trim());
+    expect(keys).not.toContain("HAS_NAME");
+    expect(keys).toContain("status");
+  });
+
   // --- Selection / Dragging states ---
 
   it("renders selected state through the host API", () => {
@@ -598,4 +646,178 @@ describe("ArsInfoTile", () => {
     const buttonAfter = element.shadowRoot?.querySelector(".collapse-btn");
     expect(buttonAfter).toBe(buttonBefore);
   });
+
+  // --- Inline editing ---
+
+  it("observes the editing attribute", () => {
+    expect(ArsInfoTile.observedAttributes).toContain("editing");
+  });
+
+  it("renders inputs when editing is true", () => {
+    element.data = {
+      id: "n1",
+      title: "System",
+      name: "Nexus",
+      properties: { status: "active" },
+    };
+    element.editing = true;
+    document.body.appendChild(element);
+
+    expect(element.shadowRoot?.querySelector(".edit-input")).toBeTruthy();
+    expect(element.shadowRoot?.querySelector(".save-btn")).toBeTruthy();
+    expect(element.shadowRoot?.querySelector(".cancel-btn")).toBeTruthy();
+    expect(element.shadowRoot?.querySelector(".property-row")).toBeNull();
+  });
+
+  it("renders a date input for date-typed properties in edit mode", () => {
+    element.data = {
+      id: "n1",
+      title: "Event",
+      properties: { start_date: "2026-05-25" },
+      types: { start_date: "date" },
+    };
+    element.editing = true;
+    document.body.appendChild(element);
+
+    const input = element.shadowRoot?.querySelector(".edit-input") as HTMLInputElement | null;
+    expect(input?.type).toBe("date");
+    expect(input?.value).toBe("2026-05-25");
+  });
+
+  it("dispatches edit-save with updated values on save button click", () => {
+    element.data = {
+      id: "n1",
+      title: "System",
+      name: "Nexus",
+      properties: { status: "active" },
+    };
+    element.editing = true;
+    document.body.appendChild(element);
+
+    const saves: Array<{ name?: string; properties: Record<string, string> }> = [];
+    element.addEventListener("ars-info-tile:edit-save", (e) => {
+      saves.push((e as CustomEvent).detail);
+    });
+
+    const inputs = Array.from(element.shadowRoot?.querySelectorAll<HTMLInputElement>(".edit-input") ?? []);
+    expect(inputs.length).toBe(2); // name + status
+
+    // Simulate user changing the name field.
+    inputs[0]!.value = "Renamed Nexus";
+    inputs[1]!.value = "inactive";
+
+    element.shadowRoot?.querySelector<HTMLButtonElement>(".save-btn")?.click();
+
+    expect(saves.length).toBe(1);
+    expect(saves[0].name).toBe("Renamed Nexus");
+    expect(saves[0].properties).toEqual({ status: "inactive" });
+  });
+
+  it("dispatches edit-cancel on cancel button click", () => {
+    element.data = { id: "n1", title: "System", properties: {} };
+    element.editing = true;
+    document.body.appendChild(element);
+
+    const cancels: unknown[] = [];
+    element.addEventListener("ars-info-tile:edit-cancel", (e) => {
+      cancels.push((e as CustomEvent).detail);
+    });
+
+    element.shadowRoot?.querySelector<HTMLButtonElement>(".cancel-btn")?.click();
+    expect(cancels.length).toBe(1);
+  });
+
+  it("dispatches edit-save on Enter key", () => {
+    element.data = { id: "n1", title: "System", properties: { status: "active" } };
+    element.editing = true;
+    document.body.appendChild(element);
+
+    const saves: unknown[] = [];
+    element.addEventListener("ars-info-tile:edit-save", () => saves.push(null));
+
+    const input = element.shadowRoot?.querySelector(".edit-input");
+    input?.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+
+    expect(saves.length).toBe(1);
+  });
+
+  it("dispatches edit-cancel on Escape key", () => {
+    element.data = { id: "n1", title: "System", properties: { status: "active" } };
+    element.editing = true;
+    document.body.appendChild(element);
+
+    const cancels: unknown[] = [];
+    element.addEventListener("ars-info-tile:edit-cancel", () => cancels.push(null));
+
+    const input = element.shadowRoot?.querySelector(".edit-input");
+    input?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+
+    expect(cancels.length).toBe(1);
+  });
+
+  it("hides collapse button in edit mode", () => {
+    element.data = { id: "n1", title: "System", properties: {} };
+    element.editing = true;
+    document.body.appendChild(element);
+
+    expect(element.shadowRoot?.querySelector(".collapse-btn")).toBeNull();
+    expect(element.shadowRoot?.querySelector(".save-btn")).toBeTruthy();
+  });
+
+  it("shows display mode again when editing is set to false", () => {
+    element.data = { id: "n1", title: "System", name: "Nexus", properties: { status: "active" } };
+    element.editing = true;
+    document.body.appendChild(element);
+
+    expect(element.shadowRoot?.querySelector(".edit-input")).toBeTruthy();
+
+    element.editing = false;
+
+    expect(element.shadowRoot?.querySelector(".edit-input")).toBeNull();
+    expect(element.shadowRoot?.querySelector(".property-row")).toBeTruthy();
+    expect(element.shadowRoot?.querySelector(".node-name")?.textContent?.trim()).toBe("Nexus");
+  });
+
+  it("renders email input type for email-typed properties", () => {
+    element.data = {
+      id: "n1",
+      title: "Contact",
+      properties: { email: "test@example.com" },
+      types: { email: "email" },
+    };
+    element.editing = true;
+    document.body.appendChild(element);
+
+    const input = element.shadowRoot?.querySelector(".edit-input") as HTMLInputElement | null;
+    expect(input?.type).toBe("email");
+  });
+
+  it("omits name input when data has no name field", () => {
+    element.data = { id: "n1", title: "System", properties: { status: "active" } };
+    element.editing = true;
+    document.body.appendChild(element);
+
+    // Only one input: the status property (no __name__ row)
+    const rows = Array.from(element.shadowRoot?.querySelectorAll(".edit-row") ?? []);
+    const keys = rows.map((r) => (r as HTMLElement).dataset["propKey"]);
+    expect(keys).not.toContain("__name__");
+    expect(keys).toContain("status");
+  });
+
+  it("escapes HTML in input values during editing", () => {
+    element.data = {
+      id: "n1",
+      title: "System",
+      name: '<img src=x onerror=alert(1)>',
+      properties: {},
+    };
+    element.editing = true;
+    document.body.appendChild(element);
+
+    // The malicious string should appear as the input value attribute, not as an element
+    const input = element.shadowRoot?.querySelector(".edit-input") as HTMLInputElement | null;
+    expect(input?.value).toBe('<img src=x onerror=alert(1)>');
+    expect(element.shadowRoot?.querySelector("img")).toBeNull();
+  });
 });
+

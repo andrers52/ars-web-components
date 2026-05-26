@@ -12,6 +12,9 @@
 //   selected      — boolean attribute for selection highlight
 //   dragging      — boolean attribute for drag-in-progress state
 //   collapsed     — boolean attribute reflecting collapse-toggle state
+//   editing       — boolean attribute; when true the tile renders inline
+//                   inputs for name and properties so the user can edit
+//                   in-place instead of opening a separate dialog.
 //   not-collapsible — boolean attribute that HIDES the collapse button
 //                     (presence = hidden; absence = visible).  The
 //                     attribute name carries the negation because most
@@ -21,11 +24,12 @@
 //                     (nothing to collapse), single-node graphs, etc.
 //
 // Properties:
-//   data         — { id, title, subtitle, accentColor, properties } object
+//   data         — { id, title, subtitle, name, accentColor, properties, types } object
 //   selected     — boolean, when true applies the selection highlight ring
 //   collapsed    — boolean, when true renders the toggle button in its
 //                  "collapsed" state (caret pointing right). Hosts read
 //                  the `ars-info-tile:toggle-collapse` event to react.
+//   editing      — boolean, when true renders inline inputs and save/cancel
 //
 // Events:
 //   ars-info-tile:activate         — fired on double-click (composed, bubbles)
@@ -35,6 +39,9 @@
 //                                    *requested* next state (NOT yet
 //                                    applied — the host decides whether
 //                                    to flip the property).
+//   ars-info-tile:edit-save        — fired when the user confirms an
+//                                    inline edit. Detail: { name?, properties }.
+//   ars-info-tile:edit-cancel      — fired when the user cancels inline edit.
 
 export interface ArsInfoTileProperty {
   key: string;
@@ -45,13 +52,16 @@ export interface ArsInfoTileData {
   id?: string;
   title?: string;
   subtitle?: string;
+  name?: string;
   accentColor?: string;
   properties?: Record<string, unknown> | ArsInfoTileProperty[];
+  types?: Record<string, string>;
 }
 
 class ArsInfoTile extends HTMLElement {
   private _data: ArsInfoTileData = {};
   private _activationEventsBound = false;
+  private _editAbortController: AbortController | null = null;
 
   static get observedAttributes() {
     return [
@@ -60,6 +70,7 @@ class ArsInfoTile extends HTMLElement {
       "selected",
       "dragging",
       "collapsed",
+      "editing",
       "not-collapsible",
       "accent-color",
       "tile-id",
@@ -150,6 +161,18 @@ class ArsInfoTile extends HTMLElement {
     this.toggleAttribute("collapsed", isCollapsed);
   }
 
+  get editing(): boolean {
+    return this.hasAttribute("editing");
+  }
+
+  set editing(value: boolean) {
+    this.toggleAttribute("editing", !!value);
+  }
+
+  setEditing(isEditing: boolean) {
+    this.toggleAttribute("editing", isEditing);
+  }
+
   // Whether the collapse-toggle button is rendered.  Stored as the
   // negative attribute `not-collapsible` so the default (no attribute
   // present) renders the button — symmetric with how most boolean
@@ -173,10 +196,10 @@ class ArsInfoTile extends HTMLElement {
   // Opacity hook for dimming or fading out a tile.  Hosts write
   // through the property setter, which applies the value as an inline
   // style on the element.  Reading the same value back from
-  // `getPropertyValue` keeps the getter consistent with what's on the
-  // element regardless of who set it (host framework vs. application
-  // code).  Range is the standard CSS [0, 1]; values outside are
-  // clamped to protect against typo-induced invisibility.
+  // `getPropertyValue` keeps the getter consistent with what's on
+  // the element regardless of who set it (host framework vs.
+  // application code).  Range is the standard CSS [0, 1]; values
+  // outside are clamped to protect against typo-induced invisibility.
   get opacity(): number {
     const raw = this.style.getPropertyValue("opacity");
     if (raw === "") return 1;
@@ -231,8 +254,8 @@ class ArsInfoTile extends HTMLElement {
   }
 
   // Normalizes either record-based or array-based property payloads into a single render shape.
-  // Filters out "title" (already shown in the header) and sorts keys logically
-  // (STARTS_AT before ENDS_AT, alphabetical otherwise).
+  // Filters out "title" and "HAS_NAME" (already shown in the header or as the dedicated
+  // name block) and sorts keys logically (STARTS_AT before ENDS_AT, alphabetical otherwise).
   static #normalizeProperties(
     properties: ArsInfoTileData["properties"],
   ): ArsInfoTileProperty[] {
@@ -248,8 +271,11 @@ class ArsInfoTile extends HTMLElement {
           }))
         : [];
 
-    // Filter out "title" — already displayed in the header
-    const filtered = raw.filter((p) => p.key.toLowerCase() !== "title");
+    // Filter out "title" and "HAS_NAME" — already displayed in the header or name block
+    const filtered = raw.filter((p) => {
+      const lower = p.key.toLowerCase();
+      return lower !== "title" && lower !== "has_name";
+    });
 
     // Sort: STARTS_AT before ENDS_AT, alphabetical otherwise
     filtered.sort((a, b) => {
@@ -261,6 +287,28 @@ class ArsInfoTile extends HTMLElement {
     });
 
     return filtered;
+  }
+
+  // Maps a wire-type tag to the HTML <input> type that best suits it.
+  // Defined as an instance method to avoid static-private-method access
+  // issues across different transpiler/runtime combinations.
+  #inferInputType(typeTag: string | undefined): string {
+    switch (typeTag) {
+      case "email":
+        return "email";
+      case "date":
+        return "date";
+      case "time":
+        return "time";
+      case "number":
+        return "number";
+      case "url":
+        return "url";
+      case "tel":
+        return "tel";
+      default:
+        return "text";
+    }
   }
 
   // Merges property data with attributes so host frameworks can choose either integration style.
@@ -280,12 +328,15 @@ class ArsInfoTile extends HTMLElement {
       id: this._data.id ?? this.getAttribute("tile-id") ?? "",
       title,
       subtitle,
+      name: this._data.name ?? "",
       accentColor,
       properties: ArsInfoTile.#normalizeProperties(this._data.properties),
+      types: this._data.types ?? {},
       isSelected: this.hasAttribute("selected"),
       isDragging: this.hasAttribute("dragging"),
       isCollapsed: this.hasAttribute("collapsed"),
       isCollapsible: !this.hasAttribute("not-collapsible"),
+      isEditing: this.hasAttribute("editing"),
     };
   }
 
@@ -300,25 +351,104 @@ class ArsInfoTile extends HTMLElement {
     card.setAttribute("data-dragging", String(this.hasAttribute("dragging")));
   }
 
+  // Builds the edit-mode markup for a single property row.
+  #renderEditRow(property: ArsInfoTileProperty, typeTag: string): string {
+    const safeKey = ArsInfoTile.#escapeHtml(property.key);
+    const safeValue = ArsInfoTile.#escapeHtml(property.value);
+    const inputType = this.#inferInputType(typeTag);
+    const labelText = safeKey.toLowerCase() === "has_name" ? "Name" : safeKey;
+    const extraAttr = inputType === "date" || inputType === "time"
+      ? ' style="color-scheme:dark;"'
+      : "";
+    return `
+      <div class="edit-row" data-prop-key="${safeKey}">
+        <label>${ArsInfoTile.#escapeHtml(labelText)}</label>
+        <input type="${inputType}" value="${safeValue}" class="edit-input"${extraAttr}>
+      </div>
+    `;
+  }
+
   // Redraws the full shadow DOM because the tile is small and host updates are infrequent.
   #render() {
     if (!this.shadowRoot) {
       return;
     }
     const viewModel = this.#getViewModel();
-    const propertiesHtml =
-      viewModel.properties.length > 0
-        ? viewModel.properties
-            .map(
-              (property) => `
-              <div class="property-row">
-                <span class="property-key">${ArsInfoTile.#escapeHtml(property.key)}</span>
-                <span class="property-value">${ArsInfoTile.#escapeHtml(property.value)}</span>
-              </div>
-            `,
-            )
-            .join("")
-        : `<div class="empty-state">No properties</div>`;
+
+    let headerHtml: string;
+    let contentHtml: string;
+
+    if (viewModel.isEditing) {
+      // ── Edit mode ──
+      // Only render a name input when the data payload explicitly includes a
+      // name field.  We check _data directly because viewModel.name defaults
+      // to "" (empty string) which is truthy enough to show the row.
+      const hasExplicitName = "name" in this._data;
+      const nameInput = hasExplicitName
+        ? `<div class="edit-row" data-prop-key="__name__">
+             <label>Name</label>
+             <input type="text" value="${ArsInfoTile.#escapeHtml(viewModel.name)}" class="edit-input">
+           </div>`
+        : "";
+
+      const propertyInputs = viewModel.properties
+        .map((p) => {
+          const typeTag = viewModel.types[p.key];
+          return this.#renderEditRow(p, typeTag);
+        })
+        .join("");
+
+      headerHtml = `
+        <div class="title-block">
+          <h3 class="title">${ArsInfoTile.#escapeHtml(viewModel.title)}</h3>
+        </div>
+        <div class="edit-actions">
+          <button type="button" class="edit-btn save-btn" title="Save" aria-label="Save">&#10003;</button>
+          <button type="button" class="edit-btn cancel-btn" title="Cancel" aria-label="Cancel">&#10007;</button>
+        </div>
+      `;
+
+      contentHtml = `${nameInput}${propertyInputs}`;
+    } else {
+      // ── Display mode ──
+      const nameHtml = viewModel.name
+        ? `<div class="node-name">${ArsInfoTile.#escapeHtml(viewModel.name)}</div>`
+        : "";
+      const propertiesHtml =
+        viewModel.properties.length > 0
+          ? viewModel.properties
+              .map(
+                (property) => `
+                <div class="property-row">
+                  <span class="property-key">${ArsInfoTile.#escapeHtml(property.key)}</span>
+                  <span class="property-value">${ArsInfoTile.#escapeHtml(property.value)}</span>
+                </div>
+              `,
+              )
+              .join("")
+          : (viewModel.name ? "" : `<div class="empty-state">No properties</div>`);
+
+      headerHtml = `
+        <div class="title-block">
+          <h3 class="title">${ArsInfoTile.#escapeHtml(viewModel.title)}</h3>
+          <div class="subtitle">${ArsInfoTile.#escapeHtml(viewModel.subtitle)}</div>
+        </div>
+        ${
+          viewModel.isCollapsible
+            ? `<button
+          type="button"
+          class="collapse-btn"
+          part="collapse-btn"
+          aria-pressed="${String(viewModel.isCollapsed)}"
+          aria-label="${viewModel.isCollapsed ? "Expand content" : "Collapse content"}"
+          title="${viewModel.isCollapsed ? "Expand content" : "Collapse content"}"
+        ><span class="caret" aria-hidden="true">▾</span></button>`
+            : ""
+        }
+      `;
+
+      contentHtml = `${nameHtml}${propertiesHtml}`;
+    }
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -350,17 +480,6 @@ class ArsInfoTile extends HTMLElement {
         }
 
         .card[data-selected="true"] {
-          /* The selection cue is intentionally hard to miss — the
-             previous 1px @ 50%-alpha ring blended into the dark
-             surface and read as "tint", not "selected".  We stack two
-             reinforcing signals at full opacity:
-               1. Border switches to the accent colour (no transparency).
-               2. A 3 px solid accent ring sits outside the border via
-                  box-shadow spread.  Rendered OUTSIDE the border-box,
-                  so no interior reflow on selection.
-             Border-width stays at 1 px to avoid jittering the content
-             area (box-sizing: border-box would otherwise shrink the
-             inner column by 2 px on toggle). */
           border-color: ${viewModel.accentColor};
           box-shadow:
             0 0 0 3px ${viewModel.accentColor},
@@ -391,11 +510,6 @@ class ArsInfoTile extends HTMLElement {
           min-width: 0;
         }
 
-        /* Collapse/expand affordance.  Pure cosmetic — the toggle event
-           is delivered to the host, which decides whether to flip the
-           'collapsed' property and apply any application-level effects.
-           The button is intentionally small and low-contrast so it
-           doesn't compete with the tile content. */
         .collapse-btn {
           all: unset;
           box-sizing: border-box;
@@ -424,9 +538,6 @@ class ArsInfoTile extends HTMLElement {
           outline-offset: 2px;
         }
 
-        /* Caret rotates 90° clockwise when collapsed, so the same
-           character renders as either "down/expand" (default) or
-           "right/collapsed" without swapping glyphs. */
         .collapse-btn .caret {
           display: inline-block;
           transition: transform 160ms ease;
@@ -457,15 +568,6 @@ class ArsInfoTile extends HTMLElement {
           display: grid;
           gap: 10px;
           padding: 14px 16px 16px;
-          /* Safety net for tiles whose host gives them too little
-             vertical room for the number of properties they carry.
-             Without this the property rows beyond the card's height
-             are hard-clipped (the card has overflow: hidden), which
-             silently drops information the user needs.
-             flex: 1 1 auto + min-height: 0 lets the content area
-             shrink inside the flex column, and overflow-y: auto only
-             surfaces a scrollbar when actually needed — short tiles
-             render scrollbar-free. */
           flex: 1 1 auto;
           min-height: 0;
           overflow-y: auto;
@@ -474,6 +576,15 @@ class ArsInfoTile extends HTMLElement {
         .property-row {
           display: grid;
           gap: 4px;
+        }
+
+        .node-name {
+          text-align: center;
+          font-size: 1.05rem;
+          font-weight: 600;
+          color: var(--arswc-color-text, #ecf3ff);
+          line-height: 1.4;
+          word-break: break-word;
         }
 
         .property-key {
@@ -495,38 +606,167 @@ class ArsInfoTile extends HTMLElement {
           font-size: 0.82rem;
           font-style: italic;
         }
+
+        /* Inline editing styles */
+        .edit-actions {
+          display: flex;
+          gap: 6px;
+          align-items: center;
+        }
+
+        .edit-btn {
+          all: unset;
+          box-sizing: border-box;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 26px;
+          height: 26px;
+          border-radius: 6px;
+          font-size: 0.85rem;
+          line-height: 1;
+          cursor: pointer;
+          border: 1px solid color-mix(in srgb, var(--arswc-color-border, #3a4d69) 64%, transparent);
+          transition: background 120ms ease, color 120ms ease;
+        }
+
+        .edit-btn:hover {
+          color: var(--arswc-color-text, #ecf3ff);
+        }
+
+        .save-btn {
+          color: #7df5b9;
+          background: color-mix(in srgb, #7df5b9 12%, transparent);
+        }
+
+        .save-btn:hover {
+          background: color-mix(in srgb, #7df5b9 22%, transparent);
+        }
+
+        .cancel-btn {
+          color: #ff7e88;
+          background: color-mix(in srgb, #ff7e88 12%, transparent);
+        }
+
+        .cancel-btn:hover {
+          background: color-mix(in srgb, #ff7e88 22%, transparent);
+        }
+
+        .edit-row {
+          display: grid;
+          gap: 4px;
+        }
+
+        .edit-row label {
+          color: var(--arswc-color-muted, #95aac8);
+          font-size: 0.72rem;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+
+        .edit-row input {
+          width: 100%;
+          box-sizing: border-box;
+          min-width: 0;
+          padding: 8px 10px;
+          border: 1px solid var(--arswc-color-border, #3a4d69);
+          border-radius: 8px;
+          background: color-mix(in srgb, var(--arswc-color-canvas, #07111d) 72%, white 2%);
+          color: var(--arswc-color-text, #ecf3ff);
+          font: inherit;
+          font-size: 0.88rem;
+        }
+
+        .edit-row input:focus-visible {
+          outline: none;
+          border-color: var(--arswc-color-accent, #4cc2ff);
+          box-shadow: 0 0 0 2px color-mix(in srgb, var(--arswc-color-accent, #4cc2ff) 30%, transparent);
+        }
       </style>
       <article class="card" data-selected="${String(viewModel.isSelected)}" data-dragging="${String(viewModel.isDragging)}" data-collapsed="${String(viewModel.isCollapsed)}" data-collapsible="${String(viewModel.isCollapsible)}">
         <header class="header">
-          <div class="title-block">
-            <h3 class="title">${ArsInfoTile.#escapeHtml(viewModel.title)}</h3>
-            <div class="subtitle">${ArsInfoTile.#escapeHtml(viewModel.subtitle)}</div>
-          </div>
-          ${
-            viewModel.isCollapsible
-              ? `<button
-            type="button"
-            class="collapse-btn"
-            part="collapse-btn"
-            aria-pressed="${String(viewModel.isCollapsed)}"
-            aria-label="${viewModel.isCollapsed ? "Expand content" : "Collapse content"}"
-            title="${viewModel.isCollapsed ? "Expand content" : "Collapse content"}"
-          ><span class="caret" aria-hidden="true">▾</span></button>`
-              : ""
-          }
+          ${headerHtml}
         </header>
         <section class="content">
-          ${propertiesHtml}
+          ${contentHtml}
         </section>
       </article>
     `;
-    // Re-bind collapse-button listener after every re-render: `#render`
-    // replaces `innerHTML`, which destroys the previous button element.
-    // The activation (dblclick) listener attaches at the shadow root and
-    // survives re-renders; the button is created fresh each time when
-    // the tile is collapsible — `#bindCollapseButton` is a no-op when
-    // the button isn't present.
-    this.#bindCollapseButton();
+
+    if (viewModel.isEditing) {
+      this.#bindEditListeners();
+    } else {
+      this.#bindCollapseButton();
+    }
+  }
+
+  // Wire save/cancel buttons and Enter/Escape keys for inline editing.
+  // Uses an AbortController so repeated renders don't accumulate listeners.
+  #bindEditListeners() {
+    if (!this.shadowRoot) return;
+
+    // Tear down any previous edit listeners (e.g. from a prior render).
+    this._editAbortController?.abort();
+    this._editAbortController = new AbortController();
+    const { signal } = this._editAbortController;
+
+    const saveBtn = this.shadowRoot.querySelector(".save-btn");
+    const cancelBtn = this.shadowRoot.querySelector(".cancel-btn");
+
+    saveBtn?.addEventListener("click", () => this.#emitEditSave(), { signal });
+    cancelBtn?.addEventListener("click", () => this.#emitEditCancel(), { signal });
+
+    // Enter to save, Escape to cancel.
+    this.shadowRoot.addEventListener(
+      "keydown",
+      (e) => {
+        const keyEvent = e as KeyboardEvent;
+        if (keyEvent.key === "Enter") {
+          e.preventDefault();
+          this.#emitEditSave();
+        } else if (keyEvent.key === "Escape") {
+          e.preventDefault();
+          this.#emitEditCancel();
+        }
+      },
+      { signal },
+    );
+  }
+
+  // Collect edited values and dispatch the save event.
+  #emitEditSave() {
+    if (!this.shadowRoot) return;
+
+    const properties: Record<string, string> = {};
+    let name: string | undefined;
+
+    for (const row of Array.from(this.shadowRoot.querySelectorAll(".edit-row"))) {
+      const key = (row as HTMLElement).dataset["propKey"] ?? "";
+      const input = row.querySelector<HTMLInputElement>(".edit-input");
+      if (!input) continue;
+      if (key === "__name__") {
+        name = input.value.trim();
+      } else if (key) {
+        properties[key] = input.value.trim();
+      }
+    }
+
+    this.dispatchEvent(
+      new CustomEvent("ars-info-tile:edit-save", {
+        bubbles: true,
+        composed: true,
+        detail: { name, properties },
+      }),
+    );
+  }
+
+  #emitEditCancel() {
+    this.dispatchEvent(
+      new CustomEvent("ars-info-tile:edit-cancel", {
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   // Republishes activation from the shadow tree so host apps can reliably react to real double-clicks.

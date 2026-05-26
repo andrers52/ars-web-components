@@ -22,7 +22,7 @@ class ArsDialog extends WebComponentBase {
   }
 
   static get observedAttributes() {
-    return ["open", "localizedOk", "localizedCancel", "custom-css", "css-vars"];
+    return ["open", "localizedOk", "localizedCancel", "localized-close", "show-close-button", "custom-css", "css-vars"];
   }
 
   attributeChangedCallback(attrName, oldVal, newVal) {
@@ -190,7 +190,17 @@ class ArsDialog extends WebComponentBase {
     }
   }
 
+  static #getShowCloseButton(component) {
+    const attr = component.getAttribute("show-close-button");
+    return attr === null || attr !== "false";
+  }
+
+  static #getLocalizedClose(component) {
+    return component.getAttribute("localized-close") || "✕";
+  }
+
   static #createTemplate(component) {
+    const showClose = ArsDialog.#getShowCloseButton(component);
     return `
       <style>
         ${component.defaultCSS}
@@ -198,6 +208,7 @@ class ArsDialog extends WebComponentBase {
       </style>
       <div id="overlay" class="overlay" style="visibility: hidden;">
         <div id="body" class="body">
+          ${showClose ? `<button id="dialog_close:${component.id}" class="dialog-close" title="Close">${ArsDialog.#getLocalizedClose(component)}</button>` : ""}
           <div id="title" class="title">
             ${ArsDialog.#getTitle(component)}
           </div>
@@ -239,6 +250,16 @@ class ArsDialog extends WebComponentBase {
     );
     if (cancelButton)
       cancelButton.onclick = ArsDialog.#createButtonHandler(component, "cancel");
+
+    const closeButton = component.shadowRoot.getElementById(
+      `dialog_close:${component.id}`,
+    );
+    if (closeButton) {
+      closeButton.onclick = () => {
+        component.onbuttonclick && component.onbuttonclick(null);
+        component.#deactivate();
+      };
+    }
   }
 
   static #showOverlay(component) {

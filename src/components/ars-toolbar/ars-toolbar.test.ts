@@ -32,7 +32,8 @@ describe("ArsToolbar", () => {
     expect(element.shadowRoot?.querySelector(".toolbar")).toBeTruthy();
     expect(element.shadowRoot?.querySelector(".brand")).toBeTruthy();
     expect(element.shadowRoot?.querySelector("nav")).toBeTruthy();
-    expect(element.shadowRoot?.querySelector(".status")).toBeTruthy();
+    // Status pill is rendered when status is non-empty.
+    expect(element.shadowRoot?.querySelector(".status")).toBeNull();
   });
 
   it("defaults title to empty string", () => {
@@ -195,7 +196,8 @@ describe("ArsToolbar", () => {
     expect(slot).toBeTruthy();
   });
 
-  it("provides a status slot", () => {
+  it("provides a status slot when status is set", () => {
+    element.setAttribute("status", "Active");
     document.body.appendChild(element);
     const slot = element.shadowRoot?.querySelector('slot[name="status"]');
     expect(slot).toBeTruthy();

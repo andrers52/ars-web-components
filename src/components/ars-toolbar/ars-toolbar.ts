@@ -16,6 +16,9 @@
 //
 // Events:
 //   ars-toolbar:navigate — composed CustomEvent with detail { id }
+//
+// Slots:
+//   actions      — action icons / buttons placed to the right of the status pill
 
 export interface ArsToolbarItem {
   id: string;
@@ -119,8 +122,11 @@ class ArsToolbar extends HTMLElement {
             )
             .join("")}
         </nav>
-        <div class="status">
-          <slot name="status">${ArsToolbar.#escapeHtml(this.status)}</slot>
+        <div class="trailing">
+          ${this.status.trim() ? `<div class="status"><slot name="status">${ArsToolbar.#escapeHtml(this.status)}</slot></div>` : ""}
+          <div class="actions">
+            <slot name="actions"></slot>
+          </div>
         </div>
       </section>
     `;
@@ -242,8 +248,14 @@ class ArsToolbar extends HTMLElement {
         border-color: transparent;
       }
 
-      .status {
+      .trailing {
+        display: flex;
+        align-items: center;
+        gap: var(--arswc-spacing-sm, 8px);
         justify-self: end;
+      }
+
+      .status {
         max-width: 240px;
         padding: var(--arswc-spacing-sm, 8px) var(--arswc-spacing-md, 16px);
         border: 1px solid var(--arswc-color-border, #d5dde8);
@@ -255,6 +267,16 @@ class ArsToolbar extends HTMLElement {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+      }
+
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: var(--arswc-spacing-xs, 4px);
+      }
+
+      .actions:empty {
+        display: none;
       }
 
       @media (max-width: 900px) {
@@ -269,9 +291,13 @@ class ArsToolbar extends HTMLElement {
           justify-content: flex-start;
         }
 
-        .status {
+        .trailing {
           justify-self: stretch;
+        }
+
+        .status {
           max-width: none;
+          flex: 1 1 auto;
         }
       }
     `;
