@@ -257,6 +257,10 @@ class ArsDialog extends WebComponentBase {
     if (closeButton) {
       closeButton.onclick = () => {
         component.onbuttonclick && component.onbuttonclick(null);
+        component.dispatchEvent(new CustomEvent("dialog:close", {
+          bubbles: true,
+          composed: true,
+        }));
         component.#deactivate();
       };
     }
