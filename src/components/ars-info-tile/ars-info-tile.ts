@@ -414,9 +414,14 @@ class ArsInfoTile extends HTMLElement {
       const nameHtml = viewModel.name
         ? `<div class="node-name">${ArsInfoTile.#escapeHtml(viewModel.name)}</div>`
         : "";
+      // Hide empty properties in view mode so optional concept fields
+      // (text, image, url) don't clutter the tile when unset.
+      const visibleProperties = viewModel.properties.filter(
+        (p) => p.value.trim() !== "",
+      );
       const propertiesHtml =
-        viewModel.properties.length > 0
-          ? viewModel.properties
+        visibleProperties.length > 0
+          ? visibleProperties
               .map(
                 (property) => `
                 <div class="property-row">

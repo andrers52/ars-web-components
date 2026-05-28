@@ -306,10 +306,9 @@ class ArsChatPanel extends HTMLElement {
         font-size: var(--arswc-font-size-sm, 0.75rem);
       }
 
-      .clear:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
+      /* .clear:disabled intentionally unstyled — the component already
+         sets disabled=true functionally; we keep the visual appearance
+         unchanged so the UI doesn't flicker during agent typing. */
 
       .messages {
         overflow: auto;
@@ -367,10 +366,9 @@ class ArsChatPanel extends HTMLElement {
         box-shadow: var(--arswc-focus-ring, 0 0 0 3px rgba(37, 99, 235, 0.3));
       }
 
-      input:disabled {
-        background: var(--arswc-color-disabled-bg, #f3f4f6);
-        color: var(--arswc-color-disabled, #9ca3af);
-      }
+      /* input:disabled intentionally unstyled — the component already
+         sets disabled=true functionally; we keep the visual appearance
+         unchanged so the UI doesn't flicker during agent typing. */
 
       button.send {
         border: none;
@@ -387,11 +385,9 @@ class ArsChatPanel extends HTMLElement {
         font-weight: 700;
       }
 
-      button.send:disabled {
-        background: var(--arswc-color-disabled-bg, #f3f4f6);
-        color: var(--arswc-color-disabled, #9ca3af);
-        cursor: not-allowed;
-      }
+      /* button.send:disabled intentionally unstyled — the component already
+         sets disabled=true functionally; we keep the visual appearance
+         unchanged so the UI doesn't flicker during agent typing. */
 
       .typing {
         color: var(--arswc-color-muted, #64748b);

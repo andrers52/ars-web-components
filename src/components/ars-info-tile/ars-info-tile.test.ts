@@ -819,5 +819,49 @@ describe("ArsInfoTile", () => {
     expect(input?.value).toBe('<img src=x onerror=alert(1)>');
     expect(element.shadowRoot?.querySelector("img")).toBeNull();
   });
+
+  it("hides empty properties in view mode but shows them in edit mode", () => {
+    element.data = {
+      id: "n1",
+      title: "Concept",
+      name: "My Concept",
+      properties: {
+        status: "active",
+        text: "",
+        url: "",
+      },
+    };
+    document.body.appendChild(element);
+
+    // View mode: only non-empty properties visible
+    const viewRows = element.shadowRoot?.querySelectorAll(".property-row");
+    expect(viewRows?.length).toBe(1);
+    expect(viewRows?.[0]?.textContent).toContain("status");
+    expect(viewRows?.[0]?.textContent).toContain("active");
+
+    // Edit mode: all properties visible, including empty ones
+    element.editing = true;
+    const editRows = element.shadowRoot?.querySelectorAll(".edit-row");
+    const keys = Array.from(editRows ?? []).map(
+      (r) => (r as HTMLElement).dataset["propKey"],
+    );
+    expect(keys).toContain("__name__");
+    expect(keys).toContain("status");
+    expect(keys).toContain("text");
+    expect(keys).toContain("url");
+  });
+
+  it("shows empty-state when all properties are empty and no name is set", () => {
+    element.data = {
+      id: "n1",
+      title: "Concept",
+      properties: { text: "", url: "" },
+    };
+    document.body.appendChild(element);
+
+    expect(
+      element.shadowRoot?.querySelector(".empty-state")?.textContent,
+    ).toBe("No properties");
+  });
 });
 
