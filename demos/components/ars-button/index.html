@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ars-button — Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
+
+  <style>
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-button</h1>
+      <p>Styled, accessible button with variant, size, and state support.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>A native-button-based web component with 4 variants (primary, secondary, danger, ghost),
+           3 sizes (sm, md, lg), loading spinner, disabled state, and prefix/suffix icon slots.
+           Fires <code>ars-button:click</code> with <code>{ variant }</code> detail.</p>
+      </div>
+
+      <!-- Variants -->
+      <div class="demo-section">
+        <h3>Variants</h3>
+        <div class="btn-group">
+          <ars-button variant="primary">Primary</ars-button>
+          <ars-button variant="secondary">Secondary</ars-button>
+          <ars-button variant="danger">Danger</ars-button>
+          <ars-button variant="ghost">Ghost</ars-button>
+        </div>
+        <div class="code-block">&lt;ars-button variant="primary"&gt;Primary&lt;/ars-button&gt;
+&lt;ars-button variant="secondary"&gt;Secondary&lt;/ars-button&gt;
+&lt;ars-button variant="danger"&gt;Danger&lt;/ars-button&gt;
+&lt;ars-button variant="ghost"&gt;Ghost&lt;/ars-button&gt;</div>
+      </div>
+
+      <!-- Sizes -->
+      <div class="demo-section">
+        <h3>Sizes</h3>
+        <div class="btn-group">
+          <ars-button size="sm">Small</ars-button>
+          <ars-button size="md">Medium</ars-button>
+          <ars-button size="lg">Large</ars-button>
+        </div>
+        <div class="code-block">&lt;ars-button size="sm"&gt;Small&lt;/ars-button&gt;
+&lt;ars-button size="md"&gt;Medium&lt;/ars-button&gt;
+&lt;ars-button size="lg"&gt;Large&lt;/ars-button&gt;</div>
+      </div>
+
+      <!-- Loading -->
+      <div class="demo-section">
+        <h3>Loading State</h3>
+        <div class="btn-group">
+          <ars-button loading>Loading…</ars-button>
+          <ars-button variant="secondary" loading>Processing</ars-button>
+          <ars-button variant="danger" loading>Deleting</ars-button>
+        </div>
+        <div class="code-block">&lt;ars-button loading&gt;Loading…&lt;/ars-button&gt;</div>
+      </div>
+
+      <!-- Disabled -->
+      <div class="demo-section">
+        <h3>Disabled State</h3>
+        <div class="btn-group">
+          <ars-button disabled>Disabled Primary</ars-button>
+          <ars-button variant="secondary" disabled>Disabled Secondary</ars-button>
+          <ars-button variant="danger" disabled>Disabled Danger</ars-button>
+          <ars-button variant="ghost" disabled>Disabled Ghost</ars-button>
+        </div>
+        <div class="code-block">&lt;ars-button disabled&gt;Disabled&lt;/ars-button&gt;</div>
+      </div>
+
+      <!-- Prefix & Suffix slots -->
+      <div class="demo-section">
+        <h3>Prefix &amp; Suffix Slots</h3>
+        <div class="btn-group">
+          <ars-button variant="primary">
+            <span slot="prefix">➕</span>
+            Add Item
+          </ars-button>
+          <ars-button variant="danger">
+            Delete
+            <span slot="suffix">🗑️</span>
+          </ars-button>
+          <ars-button variant="secondary">
+            <span slot="prefix">📤</span>
+            Upload
+            <span slot="suffix">↗</span>
+          </ars-button>
+        </div>
+        <div class="code-block">&lt;ars-button variant="primary"&gt;
+  &lt;span slot="prefix"&gt;➕&lt;/span&gt;
+  Add Item
+&lt;/ars-button&gt;</div>
+      </div>
+
+      <!-- Button types -->
+      <div class="demo-section">
+        <h3>Button Types</h3>
+        <div class="btn-group">
+          <ars-button type="button">type="button"</ars-button>
+          <ars-button type="submit" variant="success">type="submit"</ars-button>
+          <ars-button type="reset" variant="secondary">type="reset"</ars-button>
+        </div>
+        <div class="code-block">&lt;ars-button type="submit"&gt;Submit&lt;/ars-button&gt;</div>
+      </div>
+
+      <!-- Interactive demo -->
+      <div class="demo-section">
+        <h3>Interactive — Toggle Loading</h3>
+        <div class="btn-group">
+          <ars-button id="toggle-btn" variant="primary">Click to simulate async</ars-button>
+        </div>
+        <p id="toggle-status" style="margin-top:8px; font-size:0.9rem; color:#64748b;"></p>
+      </div>
+
+      <!-- Event Monitor -->
+      <div class="demo-section">
+        <h3>Event Monitor</h3>
+        <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px;">Clear</button>
+        <div class="event-log" id="event-log">
+          <div class="entry"><span class="timestamp">[ready]</span> Listening for ars-button:click…</div>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-button variant="danger" size="lg"&gt;Delete&lt;/ars-button&gt;
+
+&lt;script type="module"&gt;
+  import { ArsButton } from 'ars-web-components';
+  document.querySelector('ars-button')
+    .addEventListener('ars-button:click', (e) =&gt; {
+      console.log('Variant:', e.detail.variant);
+    });
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsButton } from '/dist/components/ars-button/ars-button.js';
+    import { initDesignSystem, initThemeToggles, createEventLog } from '/demos/js/demo-utils.js';
+
+    initDesignSystem('light');
+    initThemeToggles();
+
+    // Event log
+    const log = createEventLog('event-log', 'clear-log');
+    document.addEventListener('ars-button:click', (e) => {
+      log.append('ars-button:click', JSON.stringify(e.detail));
+    });
+
+    // Interactive loading toggle
+    const toggleBtn = document.getElementById('toggle-btn');
+    const toggleStatus = document.getElementById('toggle-status');
+    toggleBtn.addEventListener('ars-button:click', () => {
+      toggleBtn.loading = true;
+      toggleBtn.textContent = 'Loading…';
+      toggleStatus.textContent = 'Simulating async operation…';
+      setTimeout(() => {
+        toggleBtn.loading = false;
+        toggleBtn.textContent = 'Click to simulate async';
+        toggleStatus.textContent = 'Done!';
+        setTimeout(() => { toggleStatus.textContent = ''; }, 2000);
+      }, 2000);
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ars-group — Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
+
+  <style>
+    .demo-box {
+      padding: 12px 16px;
+      border: 1px dashed var(--arswc-color-border, #d5dde8);
+      border-radius: 6px;
+      background: var(--arswc-color-surface, #f8f9fa);
+      font-size: 0.85rem;
+      color: var(--arswc-color-text, #1b2430);
+      text-align: center;
+    }
+    .demo-group-container {
+      border: 2px solid #667eea33;
+      border-radius: 8px;
+      padding: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-group</h1>
+      <p>Flex container with direction and gap support for layout composition.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>A lightweight flex layout container used by the engine's DomAdapter to arrange child elements in rows or columns.
+           Supports <code>direction</code> (row | column | none) and <code>gap</code> (any CSS gap value) attributes.
+           Children live in the light DOM for easy reparenting.</p>
+      </div>
+
+      <!-- Column direction (default) -->
+      <div class="demo-section">
+        <h3>Column Direction (default)</h3>
+        <div class="demo-group-container">
+          <ars-group direction="column" gap="12px">
+            <div class="demo-box">Item 1</div>
+            <div class="demo-box">Item 2</div>
+            <div class="demo-box">Item 3</div>
+          </ars-group>
+        </div>
+        <div class="code-block">&lt;ars-group direction="column" gap="12px"&gt;
+  &lt;div&gt;Item 1&lt;/div&gt;
+  &lt;div&gt;Item 2&lt;/div&gt;
+  &lt;div&gt;Item 3&lt;/div&gt;
+&lt;/ars-group&gt;</div>
+      </div>
+
+      <!-- Row direction -->
+      <div class="demo-section">
+        <h3>Row Direction</h3>
+        <div class="demo-group-container">
+          <ars-group direction="row" gap="16px">
+            <div class="demo-box" style="flex:1;">A</div>
+            <div class="demo-box" style="flex:1;">B</div>
+            <div class="demo-box" style="flex:1;">C</div>
+          </ars-group>
+        </div>
+        <div class="code-block">&lt;ars-group direction="row" gap="16px"&gt;
+  &lt;div style="flex:1"&gt;A&lt;/div&gt;
+  &lt;div style="flex:1"&gt;B&lt;/div&gt;
+  &lt;div style="flex:1"&gt;C&lt;/div&gt;
+&lt;/ars-group&gt;</div>
+      </div>
+
+      <!-- None direction -->
+      <div class="demo-section">
+        <h3>No Direction ("none")</h3>
+        <div class="demo-group-container">
+          <ars-group direction="none">
+            <div class="demo-box" style="display:inline-block; margin:4px;">Inline A</div>
+            <div class="demo-box" style="display:inline-block; margin:4px;">Inline B</div>
+          </ars-group>
+        </div>
+        <div class="code-block">&lt;ars-group direction="none"&gt;…&lt;/ars-group&gt;</div>
+      </div>
+
+      <!-- Gap values -->
+      <div class="demo-section">
+        <h3>Gap Values</h3>
+        <div class="demo-group-container">
+          <ars-group direction="row" gap="4px">
+            <div class="demo-box">gap 4px</div>
+            <div class="demo-box">gap 4px</div>
+          </ars-group>
+        </div>
+        <div style="height:12px;"></div>
+        <div class="demo-group-container">
+          <ars-group direction="row" gap="24px">
+            <div class="demo-box">gap 24px</div>
+            <div class="demo-box">gap 24px</div>
+          </ars-group>
+        </div>
+        <div class="code-block">&lt;ars-group direction="row" gap="4px"&gt;…&lt;/ars-group&gt;
+&lt;ars-group direction="row" gap="24px"&gt;…&lt;/ars-group&gt;</div>
+      </div>
+
+      <!-- Nested groups -->
+      <div class="demo-section">
+        <h3>Nested Groups</h3>
+        <div class="demo-group-container">
+          <ars-group direction="column" gap="12px">
+            <ars-group direction="row" gap="8px">
+              <div class="demo-box" style="flex:1;">Row A-1</div>
+              <div class="demo-box" style="flex:1;">Row A-2</div>
+            </ars-group>
+            <ars-group direction="row" gap="8px">
+              <div class="demo-box" style="flex:1;">Row B-1</div>
+              <div class="demo-box" style="flex:1;">Row B-2</div>
+            </ars-group>
+          </ars-group>
+        </div>
+        <div class="code-block">&lt;ars-group direction="column" gap="12px"&gt;
+  &lt;ars-group direction="row" gap="8px"&gt;
+    &lt;div&gt;Row A-1&lt;/div&gt;&lt;div&gt;Row A-2&lt;/div&gt;
+  &lt;/ars-group&gt;
+  &lt;ars-group direction="row" gap="8px"&gt;
+    &lt;div&gt;Row B-1&lt;/div&gt;&lt;div&gt;Row B-2&lt;/div&gt;
+  &lt;/ars-group&gt;
+&lt;/ars-group&gt;</div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-group direction="row" gap="16px"&gt;
+  &lt;ars-button variant="primary"&gt;Save&lt;/ars-button&gt;
+  &lt;ars-button variant="secondary"&gt;Cancel&lt;/ars-button&gt;
+&lt;/ars-group&gt;
+
+&lt;script type="module"&gt;
+  import { ArsGroup } from 'ars-web-components';
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsGroup } from '/dist/components/ars-group/ars-group.js';
+    import { initDesignSystem, initThemeToggles } from '/demos/js/demo-utils.js';
+
+    initDesignSystem('light');
+    initThemeToggles();
+  </script>
+</body>
+
+</html>

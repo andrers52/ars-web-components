@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ars-markdown — Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
+
+  <style>
+    .editor-area {
+      width: 100%;
+      min-height: 200px;
+      padding: 12px;
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      resize: vertical;
+      background: var(--arswc-color-bg, #ffffff);
+      color: var(--arswc-color-text, #1b2430);
+    }
+    .preview-label {
+      margin-top: 16px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--arswc-color-text, #1b2430);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-markdown</h1>
+      <p>Renders Markdown source as HTML inside Shadow DOM.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>A self-contained Markdown renderer with a built-in parser — no external dependencies.
+           Supports headings, bold, italic, inline code, code blocks, links, ordered and unordered lists,
+           and horizontal rules. Set the <code>source</code> attribute or property to update the rendered output.</p>
+      </div>
+
+      <!-- Static rendering -->
+      <div class="demo-section">
+        <h3>Static Markdown</h3>
+        <ars-markdown source="# Hello World
+
+This is a **bold** and *italic* demo with `inline code`.
+
+## Features
+
+* Headings (h1–h6)
+* **Bold**, *italic*, ***bold+italic***
+* `Inline code` and code blocks
+* [Links](https://example.com)
+
+---
+
+### Ordered List
+
+1. First item
+2. Second item
+3. Third item"></ars-markdown>
+        <div class="code-block">&lt;ars-markdown source="# Hello World\n\nThis is **bold** text."&gt;&lt;/ars-markdown&gt;</div>
+      </div>
+
+      <!-- Live editor -->
+      <div class="demo-section">
+        <h3>Live Editor</h3>
+        <p>Edit the markdown below and see the rendered output update in real-time.</p>
+        <textarea class="editor-area" id="md-editor">## Live Preview
+
+Try editing this **markdown** text!
+
+### Code Block
+
+```js
+const greeting = "Hello, world!";
+console.log(greeting);
+```
+
+### Links & Lists
+
+- [MDN Web Docs](https://developer.mozilla.org)
+- [GitHub](https://github.com)
+- [W3C](https://www.w3.org)</textarea>
+        <div class="preview-label">Preview:</div>
+        <ars-markdown id="live-preview"></ars-markdown>
+      </div>
+
+      <!-- Code blocks -->
+      <div class="demo-section">
+        <h3>Code Blocks</h3>
+        <ars-markdown source="Here is some code:
+
+```
+function greet(name) {
+  return `Hello, ${name}!`;
+}
+```
+
+And `inline code` inside a paragraph."></ars-markdown>
+      </div>
+
+      <!-- Headings -->
+      <div class="demo-section">
+        <h3>All Heading Levels</h3>
+        <ars-markdown source="# Heading 1
+## Heading 2
+### Heading 3
+#### Heading 4
+##### Heading 5
+###### Heading 6"></ars-markdown>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-markdown source="# Title\n\nParagraph text."&gt;&lt;/ars-markdown&gt;
+
+&lt;script type="module"&gt;
+  import { ArsMarkdown } from 'ars-web-components';
+  const md = document.querySelector('ars-markdown');
+  md.source = '# Updated\n\nNew content.';
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsMarkdown } from '/dist/components/ars-markdown/ars-markdown.js';
+    import { initDesignSystem, initThemeToggles } from '/demos/js/demo-utils.js';
+
+    initDesignSystem('light');
+    initThemeToggles();
+
+    // Live editor
+    const editor = document.getElementById('md-editor');
+    const preview = document.getElementById('live-preview');
+    preview.source = editor.value;
+    editor.addEventListener('input', () => {
+      preview.source = editor.value;
+    });
+  </script>
+</body>
+
+</html>

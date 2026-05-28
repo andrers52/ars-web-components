@@ -460,7 +460,6 @@ class ArsInfoTile extends HTMLElement {
         :host {
           display: block;
           width: 100%;
-          max-width: 100%;
           min-width: 0;
           color: var(--arswc-color-text, #ecf3ff);
           font-family: var(--arswc-font-family-sans, system-ui, sans-serif);

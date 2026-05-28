@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ars-panel — Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
+
+  <style>
+    .panel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    .panel-content {
+      font-size: 0.875rem;
+      color: var(--arswc-color-text, #1b2430);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-panel</h1>
+      <p>Surface container with optional padding and elevation.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>A lightweight container component used by the engine's DomAdapter for world-space and screen-space UI panels.
+           Supports 5 padding presets (<code>none</code>, <code>sm</code>, <code>md</code>, <code>lg</code>, <code>xl</code>)
+           and an <code>elevated</code> attribute for drop-shadow. Children are rendered in the light DOM.</p>
+      </div>
+
+      <!-- Padding sizes -->
+      <div class="demo-section">
+        <h3>Padding Sizes</h3>
+        <div class="panel-grid">
+          <ars-panel padding="none">
+            <div class="panel-content">padding="none" — No padding at all. Content touches edges.</div>
+          </ars-panel>
+          <ars-panel padding="sm">
+            <div class="panel-content">padding="sm" — Small padding for tight layouts.</div>
+          </ars-panel>
+          <ars-panel padding="md">
+            <div class="panel-content">padding="md" — Default medium padding.</div>
+          </ars-panel>
+          <ars-panel padding="lg">
+            <div class="panel-content">padding="lg" — Large padding for spacious content.</div>
+          </ars-panel>
+          <ars-panel padding="xl">
+            <div class="panel-content">padding="xl" — Extra large padding for hero areas.</div>
+          </ars-panel>
+        </div>
+        <div class="code-block">&lt;ars-panel padding="md"&gt;
+  &lt;p&gt;Content here&lt;/p&gt;
+&lt;/ars-panel&gt;</div>
+      </div>
+
+      <!-- Elevated -->
+      <div class="demo-section">
+        <h3>Elevated (Shadow)</h3>
+        <div class="panel-grid">
+          <ars-panel padding="md" elevated>
+            <div class="panel-content">
+              <strong>Elevated panel</strong>
+              <p style="margin:4px 0 0;">Adds a box-shadow for a floating card effect.</p>
+            </div>
+          </ars-panel>
+          <ars-panel padding="md">
+            <div class="panel-content">
+              <strong>Flat panel</strong>
+              <p style="margin:4px 0 0;">Default without elevation — border only.</p>
+            </div>
+          </ars-panel>
+        </div>
+        <div class="code-block">&lt;ars-panel padding="md" elevated&gt;…&lt;/ars-panel&gt;</div>
+      </div>
+
+      <!-- Nested panels -->
+      <div class="demo-section">
+        <h3>Nested Panels</h3>
+        <ars-panel padding="lg" elevated>
+          <h4 style="margin:0 0 12px; font-size:0.95rem;">Outer Panel</h4>
+          <ars-panel padding="md">
+            <div class="panel-content">Inner panel — flat, nested inside the elevated outer panel.</div>
+          </ars-panel>
+        </ars-panel>
+        <div class="code-block">&lt;ars-panel padding="lg" elevated&gt;
+  &lt;h4&gt;Outer Panel&lt;/h4&gt;
+  &lt;ars-panel padding="md"&gt;Inner content&lt;/ars-panel&gt;
+&lt;/ars-panel&gt;</div>
+      </div>
+
+      <!-- With components -->
+      <div class="demo-section">
+        <h3>With Components Inside</h3>
+        <ars-panel padding="md" elevated>
+          <h4 style="margin:0 0 12px; font-size:0.95rem;">User Profile</h4>
+          <ars-group direction="row" gap="8px">
+            <ars-button variant="primary" size="sm">Edit</ars-button>
+            <ars-button variant="ghost" size="sm">Cancel</ars-button>
+          </ars-group>
+        </ars-panel>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-panel padding="lg" elevated&gt;
+  &lt;h2&gt;Card Title&lt;/h2&gt;
+  &lt;p&gt;Content inside the panel.&lt;/p&gt;
+&lt;/ars-panel&gt;
+
+&lt;script type="module"&gt;
+  import { ArsPanel } from 'ars-web-components';
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsPanel } from '/dist/components/ars-panel/ars-panel.js';
+    import { ArsButton } from '/dist/components/ars-button/ars-button.js';
+    import { ArsGroup } from '/dist/components/ars-group/ars-group.js';
+    import { initDesignSystem, initThemeToggles } from '/demos/js/demo-utils.js';
+
+    initDesignSystem('light');
+    initThemeToggles();
+  </script>
+</body>
+
+</html>

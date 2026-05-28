@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ars-list — Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
+
+  <style>
+    .list-item {
+      padding: 10px 14px;
+      border: 1px solid var(--arswc-color-border, #d5dde8);
+      border-radius: 6px;
+      background: var(--arswc-color-bg, #ffffff);
+      font-size: 0.875rem;
+      color: var(--arswc-color-text, #1b2430);
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 700px) {
+      .demo-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-list</h1>
+      <p>List container with optional item selection support.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>A simple list container that renders child elements in a vertical stack with consistent spacing.
+           When the <code>selectable</code> attribute is set, items become clickable and the component
+           fires <code>ars-list:select</code> events with <code>{ index, item }</code> detail.</p>
+      </div>
+
+      <!-- Static list -->
+      <div class="demo-section">
+        <h3>Static List (non-selectable)</h3>
+        <ars-list>
+          <div class="list-item">🍎 Apple</div>
+          <div class="list-item">🍌 Banana</div>
+          <div class="list-item">🍒 Cherry</div>
+          <div class="list-item">🍇 Grape</div>
+        </ars-list>
+        <div class="code-block">&lt;ars-list&gt;
+  &lt;div class="list-item"&gt;🍎 Apple&lt;/div&gt;
+  &lt;div class="list-item"&gt;🍌 Banana&lt;/div&gt;
+  &lt;div class="list-item"&gt;🍒 Cherry&lt;/div&gt;
+&lt;/ars-list&gt;</div>
+      </div>
+
+      <!-- Selectable list -->
+      <div class="demo-section">
+        <h3>Selectable List</h3>
+        <p>Click an item to select it. Fires <code>ars-list:select</code>.</p>
+        <ars-list id="selectable-list" selectable>
+          <div class="list-item">📨 Inbox</div>
+          <div class="list-item">📤 Sent</div>
+          <div class="list-item">📝 Drafts</div>
+          <div class="list-item">⭐ Starred</div>
+          <div class="list-item">🗑️ Trash</div>
+        </ars-list>
+        <p id="selection-status" style="margin-top:8px; font-size:0.85rem; color: #64748b;"></p>
+        <div class="code-block">&lt;ars-list selectable&gt;
+  &lt;div class="list-item"&gt;📨 Inbox&lt;/div&gt;
+  &lt;div class="list-item"&gt;📤 Sent&lt;/div&gt;
+&lt;/ars-list&gt;</div>
+      </div>
+
+      <!-- List with mixed content -->
+      <div class="demo-section">
+        <h3>With Mixed Content</h3>
+        <div class="demo-grid">
+          <ars-list>
+            <div class="list-item"><strong>Task 1</strong> — Design review</div>
+            <div class="list-item"><strong>Task 2</strong> — API integration</div>
+            <div class="list-item"><strong>Task 3</strong> — Unit tests</div>
+          </ars-list>
+          <ars-list id="btn-list">
+            <ars-button variant="primary" size="sm">Action A</ars-button>
+            <ars-button variant="secondary" size="sm">Action B</ars-button>
+            <ars-button variant="danger" size="sm">Action C</ars-button>
+          </ars-list>
+        </div>
+      </div>
+
+      <!-- Event Monitor -->
+      <div class="demo-section">
+        <h3>Event Monitor</h3>
+        <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px;">Clear</button>
+        <div class="event-log" id="event-log">
+          <div class="entry"><span class="timestamp">[ready]</span> Listening for ars-list:select…</div>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-list selectable&gt;
+  &lt;div&gt;Item 1&lt;/div&gt;
+  &lt;div&gt;Item 2&lt;/div&gt;
+&lt;/ars-list&gt;
+
+&lt;script type="module"&gt;
+  import { ArsList } from 'ars-web-components';
+  document.querySelector('ars-list')
+    .addEventListener('ars-list:select', (e) =&gt; {
+      console.log('Selected index:', e.detail.index);
+    });
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsList } from '/dist/components/ars-list/ars-list.js';
+    import { ArsButton } from '/dist/components/ars-button/ars-button.js';
+    import { initDesignSystem, initThemeToggles, createEventLog } from '/demos/js/demo-utils.js';
+
+    initDesignSystem('light');
+    initThemeToggles();
+
+    // Selection feedback
+    const status = document.getElementById('selection-status');
+    document.getElementById('selectable-list')
+      .addEventListener('ars-list:select', (e) => {
+        status.textContent = `Selected index ${e.detail.index}: ${e.detail.item.textContent.trim()}`;
+      });
+
+    // Event log
+    const log = createEventLog('event-log', 'clear-log');
+    document.addEventListener('ars-list:select', (e) => {
+      log.append('ars-list:select', `index=${e.detail.index}`);
+    });
+  </script>
+</body>
+
+</html>

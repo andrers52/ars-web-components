@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ars-relational-node — Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
+
+  <style>
+    .node-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-relational-node</h1>
+      <p>Structured information display for graph nodes and relational data.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>
+          <strong>Note:</strong> <code>ars-relational-node</code> has been consolidated into
+          <code>ars-info-tile</code>. This component re-exports <code>ArsInfoTile</code> for
+          backwards compatibility. New code should use <code>ars-info-tile</code> directly.
+        </p>
+        <p style="margin-top:8px;">
+          Renders a structured information tile with title, subtitle, accent header, and key-value properties.
+          Useful for graph/node visualizations, dashboard widgets, and relational data display.
+          Data is set via the <code>data</code> property (JavaScript object).
+        </p>
+      </div>
+
+      <!-- Basic node -->
+      <div class="demo-section">
+        <h3>Basic Node</h3>
+        <div class="node-grid">
+          <ars-relational-node id="node-basic"></ars-relational-node>
+          <ars-relational-node id="node-colored"></ars-relational-node>
+        </div>
+        <div class="code-block">const node = document.querySelector('ars-relational-node');
+node.data = {
+  title: 'User Node',
+  subtitle: 'Entity',
+  accentHeader: 'User #42',
+  properties: [
+    { key: 'Name', value: 'Alice' },
+    { key: 'Role', value: 'Admin' },
+  ]
+};</div>
+      </div>
+
+      <!-- Multiple nodes -->
+      <div class="demo-section">
+        <h3>Graph-like Nodes</h3>
+        <div class="node-grid">
+          <ars-relational-node id="node-a"></ars-relational-node>
+          <ars-relational-node id="node-b"></ars-relational-node>
+          <ars-relational-node id="node-c"></ars-relational-node>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-relational-node id="my-node"&gt;&lt;/ars-relational-node&gt;
+
+&lt;script type="module"&gt;
+  // ars-relational-node re-exports ArsInfoTile
+  import { ArsRelationalNode } from 'ars-web-components';
+  const node = document.getElementById('my-node');
+  node.data = {
+    title: 'Node',
+    subtitle: 'Type',
+    properties: [{ key: 'ID', value: '123' }]
+  };
+&lt;/script&gt;
+
+&lt;!-- Recommended: use ars-info-tile directly --&gt;
+&lt;ars-info-tile id="my-tile"&gt;&lt;/ars-info-tile&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsRelationalNode } from '/dist/components/ars-relational-node/ars-relational-node.js';
+    import { initDesignSystem, initThemeToggles } from '/demos/js/demo-utils.js';
+
+    initDesignSystem('light');
+    initThemeToggles();
+
+    // Basic node
+    document.getElementById('node-basic').data = {
+      title: 'User Entity',
+      subtitle: 'Database Record',
+      accentHeader: 'User #42',
+      properties: [
+        { key: 'Name', value: 'Alice Johnson' },
+        { key: 'Email', value: 'alice@example.com' },
+        { key: 'Role', value: 'Administrator' },
+        { key: 'Status', value: 'Active' },
+      ],
+    };
+
+    document.getElementById('node-colored').data = {
+      title: 'Server Node',
+      subtitle: 'Infrastructure',
+      accentHeader: 'prod-web-01',
+      properties: [
+        { key: 'IP', value: '10.0.1.42' },
+        { key: 'CPU', value: '78%' },
+        { key: 'Memory', value: '4.2 GB' },
+        { key: 'Status', value: 'Healthy' },
+      ],
+    };
+
+    // Graph-like nodes
+    document.getElementById('node-a').data = {
+      title: 'Order',
+      subtitle: 'Transaction',
+      accentHeader: 'ORD-2024-001',
+      properties: [
+        { key: 'Customer', value: 'Bob Smith' },
+        { key: 'Total', value: '$142.50' },
+      ],
+    };
+
+    document.getElementById('node-b').data = {
+      title: 'Product',
+      subtitle: 'Catalog Item',
+      accentHeader: 'SKU-9921',
+      properties: [
+        { key: 'Name', value: 'Widget Pro' },
+        { key: 'Price', value: '$49.99' },
+        { key: 'Stock', value: '234' },
+      ],
+    };
+
+    document.getElementById('node-c').data = {
+      title: 'Shipment',
+      subtitle: 'Fulfillment',
+      accentHeader: 'SHIP-8842',
+      properties: [
+        { key: 'Carrier', value: 'FedEx' },
+        { key: 'ETA', value: '2024-12-15' },
+      ],
+    };
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ars-toggle — Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
+
+  <style>
+    .toggle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+      align-items: start;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-toggle</h1>
+      <p>Switch/toggle control for boolean state.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>An accessible toggle switch using a hidden checkbox internally for form participation.
+           Supports <code>checked</code>, <code>disabled</code>, <code>label</code>, and <code>label-position</code> attributes.
+           Fires <code>ars-toggle:change</code> with <code>{ checked: boolean }</code> detail.
+           Full keyboard support (Space/Enter to toggle).</p>
+      </div>
+
+      <!-- Basic toggle -->
+      <div class="demo-section">
+        <h3>Basic Toggle</h3>
+        <div class="toggle-grid">
+          <ars-toggle label="Enable notifications"></ars-toggle>
+          <ars-toggle label="Dark mode" checked></ars-toggle>
+        </div>
+        <div class="code-block">&lt;ars-toggle label="Enable notifications"&gt;&lt;/ars-toggle&gt;
+&lt;ars-toggle label="Dark mode" checked&gt;&lt;/ars-toggle&gt;</div>
+      </div>
+
+      <!-- Label positions -->
+      <div class="demo-section">
+        <h3>Label Position</h3>
+        <div class="toggle-grid">
+          <ars-toggle label="Label at end (default)" label-position="end"></ars-toggle>
+          <ars-toggle label="Label at start" label-position="start"></ars-toggle>
+        </div>
+        <div class="code-block">&lt;ars-toggle label="End" label-position="end"&gt;&lt;/ars-toggle&gt;
+&lt;ars-toggle label="Start" label-position="start"&gt;&lt;/ars-toggle&gt;</div>
+      </div>
+
+      <!-- Disabled -->
+      <div class="demo-section">
+        <h3>Disabled State</h3>
+        <div class="toggle-grid">
+          <ars-toggle label="Disabled (off)" disabled></ars-toggle>
+          <ars-toggle label="Disabled (on)" checked disabled></ars-toggle>
+        </div>
+        <div class="code-block">&lt;ars-toggle label="Disabled" disabled&gt;&lt;/ars-toggle&gt;
+&lt;ars-toggle label="Disabled" checked disabled&gt;&lt;/ars-toggle&gt;</div>
+      </div>
+
+      <!-- Settings panel demo -->
+      <div class="demo-section">
+        <h3>Settings Panel</h3>
+        <ars-panel padding="md" elevated>
+          <h4 style="margin:0 0 16px; font-size:0.95rem;">⚙️ Preferences</h4>
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <ars-toggle id="t-notifications" label="Email notifications" checked></ars-toggle>
+            <ars-toggle id="t-sounds" label="Sound effects"></ars-toggle>
+            <ars-toggle id="t-analytics" label="Usage analytics" label-position="start"></ars-toggle>
+            <ars-toggle id="t-autoupdate" label="Auto-update" checked disabled></ars-toggle>
+          </div>
+          <p id="settings-status" style="margin-top:16px; font-size:0.85rem; color:#64748b;"></p>
+        </ars-panel>
+      </div>
+
+      <!-- Custom slot content -->
+      <div class="demo-section">
+        <h3>Custom Label (Slot)</h3>
+        <ars-toggle>
+          <span style="font-weight:600; color:var(--arswc-color-text, #1b2430);">✨ Enable premium features</span>
+        </ars-toggle>
+        <div class="code-block">&lt;ars-toggle&gt;
+  &lt;span&gt;✨ Enable premium features&lt;/span&gt;
+&lt;/ars-toggle&gt;</div>
+      </div>
+
+      <!-- Event Monitor -->
+      <div class="demo-section">
+        <h3>Event Monitor</h3>
+        <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px;">Clear</button>
+        <div class="event-log" id="event-log">
+          <div class="entry"><span class="timestamp">[ready]</span> Listening for ars-toggle:change…</div>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-toggle label="Dark mode" checked&gt;&lt;/ars-toggle&gt;
+
+&lt;script type="module"&gt;
+  import { ArsToggle } from 'ars-web-components';
+  document.querySelector('ars-toggle')
+    .addEventListener('ars-toggle:change', (e) =&gt; {
+      console.log('Checked:', e.detail.checked);
+    });
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsToggle } from '/dist/components/ars-toggle/ars-toggle.js';
+    import { ArsPanel } from '/dist/components/ars-panel/ars-panel.js';
+    import { initDesignSystem, initThemeToggles, createEventLog } from '/demos/js/demo-utils.js';
+
+    initDesignSystem('light');
+    initThemeToggles();
+
+    // Settings panel feedback
+    const settingsStatus = document.getElementById('settings-status');
+    function updateSettingsStatus(e) {
+      const label = e.target.label || 'Toggle';
+      settingsStatus.textContent = `${label}: ${e.detail.checked ? 'ON' : 'OFF'}`;
+    }
+    document.getElementById('t-notifications').addEventListener('ars-toggle:change', updateSettingsStatus);
+    document.getElementById('t-sounds').addEventListener('ars-toggle:change', updateSettingsStatus);
+    document.getElementById('t-analytics').addEventListener('ars-toggle:change', updateSettingsStatus);
+
+    // Event log
+    const log = createEventLog('event-log', 'clear-log');
+    document.addEventListener('ars-toggle:change', (e) => {
+      log.append('ars-toggle:change', `checked=${e.detail.checked}`);
+    });
+  </script>
+</body>
+
+</html>

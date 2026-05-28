@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ars-typed-property-editor — Demo</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "arslib": "/node_modules/arslib/dist/browser/index.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/demos/css/base.css">
+  <link rel="stylesheet" href="/demos/css/components.css">
+  <link rel="stylesheet" href="/demos/css/buttons.css">
+  <link rel="stylesheet" href="/demos/css/demo-layout.css">
+
+  <style>
+    .editor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 24px;
+    }
+    .state-display {
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: var(--arswc-color-surface, #f8f9fa);
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    @media (max-width: 500px) {
+      .editor-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ars-typed-property-editor</h1>
+      <p>Type-aware property editor that renders the right input widget for each property.</p>
+    </div>
+    <div class="content">
+      <a href="/" class="back-link">&larr; Back to Demo Page</a>
+
+      <div class="info-box">
+        <h3>About</h3>
+        <p>Renders the appropriate input widget for each property based on a type tag.
+           Supports types: <code>string</code>, <code>email</code>, <code>date</code>,
+           <code>time</code>, <code>number</code>, <code>url</code>, <code>tel</code>.
+           Fires <code>ars-typed-property-editor:change</code> with <code>{ properties }</code> detail
+           on every input change. Supports <code>readonly</code> mode.</p>
+      </div>
+
+      <!-- Contact form editor -->
+      <div class="demo-section">
+        <h3>Contact Form (mixed types)</h3>
+        <div class="editor-grid">
+          <div>
+            <ars-typed-property-editor id="contact-editor"></ars-typed-property-editor>
+            <div class="state-display" id="contact-state"></div>
+          </div>
+        </div>
+        <div class="code-block">const editor = document.querySelector('ars-typed-property-editor');
+editor.properties = { Name: 'Alice', Email: 'alice@example.com' };
+editor.types = { Name: 'string', Email: 'email' };</div>
+      </div>
+
+      <!-- All types -->
+      <div class="demo-section">
+        <h3>All Supported Types</h3>
+        <ars-typed-property-editor id="all-types-editor"></ars-typed-property-editor>
+      </div>
+
+      <!-- Readonly -->
+      <div class="demo-section">
+        <h3>Readonly Mode</h3>
+        <ars-typed-property-editor id="readonly-editor" readonly></ars-typed-property-editor>
+        <div class="code-block">&lt;ars-typed-property-editor readonly&gt;&lt;/ars-typed-property-editor&gt;
+editor.properties = { Name: 'Bob', Role: 'Admin' };</div>
+      </div>
+
+      <!-- Empty state -->
+      <div class="demo-section">
+        <h3>Empty State</h3>
+        <ars-typed-property-editor id="empty-editor"></ars-typed-property-editor>
+      </div>
+
+      <!-- Event Monitor -->
+      <div class="demo-section">
+        <h3>Event Monitor</h3>
+        <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px;">Clear</button>
+        <div class="event-log" id="event-log">
+          <div class="entry"><span class="timestamp">[ready]</span> Listening for ars-typed-property-editor:change…</div>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <div class="demo-section">
+        <h3>Theme Toggle</h3>
+        <div class="demo-row">
+          <button class="btn" id="theme-light">Light</button>
+          <button class="btn" id="theme-dark">Dark</button>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">&lt;ars-typed-property-editor id="editor"&gt;&lt;/ars-typed-property-editor&gt;
+
+&lt;script type="module"&gt;
+  import { ArsTypedPropertyEditor } from 'ars-web-components';
+  const editor = document.getElementById('editor');
+  editor.properties = {
+    Name: 'Alice',
+    Email: 'alice@example.com',
+    Website: 'https://example.com',
+    Age: '30'
+  };
+  editor.types = {
+    Name: 'string',
+    Email: 'email',
+    Website: 'url',
+    Age: 'number'
+  };
+  editor.addEventListener('ars-typed-property-editor:change', (e) =&gt; {
+    console.log('Properties:', e.detail.properties);
+  });
+&lt;/script&gt;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { ArsTypedPropertyEditor } from '/dist/components/ars-typed-property-editor/ars-typed-property-editor.js';
+    import { initDesignSystem, initThemeToggles, createEventLog } from '/demos/js/demo-utils.js';
+
+    initDesignSystem('light');
+    initThemeToggles();
+
+    // Contact editor
+    const contactEditor = document.getElementById('contact-editor');
+    contactEditor.properties = {
+      Name: 'Alice Johnson',
+      Email: 'alice@example.com',
+      Phone: '+1-555-0123',
+      Website: 'https://alice.dev',
+    };
+    contactEditor.types = {
+      Name: 'string',
+      Email: 'email',
+      Phone: 'tel',
+      Website: 'url',
+    };
+
+    const contactState = document.getElementById('contact-state');
+    function updateContactState(e) {
+      contactState.textContent = JSON.stringify(e.detail.properties, null, 2);
+    }
+    contactState.textContent = JSON.stringify(contactEditor.properties, null, 2);
+    contactEditor.addEventListener('ars-typed-property-editor:change', updateContactState);
+
+    // All types editor
+    const allTypes = document.getElementById('all-types-editor');
+    allTypes.properties = {
+      Name: 'Demo',
+      Email: 'test@example.com',
+      Date: '2024-12-25',
+      Time: '14:30',
+      Count: '42',
+      Website: 'https://example.com',
+      Phone: '+1-555-0000',
+    };
+    allTypes.types = {
+      Name: 'string',
+      Email: 'email',
+      Date: 'date',
+      Time: 'time',
+      Count: 'number',
+      Website: 'url',
+      Phone: 'tel',
+    };
+
+    // Readonly editor
+    const readonlyEditor = document.getElementById('readonly-editor');
+    readonlyEditor.properties = {
+      Name: 'Bob Smith',
+      Role: 'Administrator',
+      Department: 'Engineering',
+    };
+    readonlyEditor.types = {
+      Name: 'string',
+      Role: 'string',
+      Department: 'string',
+    };
+
+    // Event log
+    const log = createEventLog('event-log', 'clear-log');
+    document.addEventListener('ars-typed-property-editor:change', (e) => {
+      const props = e.detail.properties;
+      const summary = Object.entries(props).map(([k,v]) => `${k}="${v}"`).join(', ');
+      log.append('ars-typed-property-editor:change', summary.slice(0, 120));
+    });
+  </script>
+</body>
+
+</html>
