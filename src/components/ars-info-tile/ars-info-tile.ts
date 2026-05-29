@@ -472,6 +472,8 @@ class ArsInfoTile extends HTMLElement {
           height: 100%;
           box-sizing: border-box;
           overflow: hidden;
+          user-select: none;
+          -webkit-user-select: none;
           border: 1px solid color-mix(in srgb, var(--arswc-color-border, #3a4d69) 84%, transparent);
           border-radius: calc(var(--arswc-radius-md, 12px) + 2px);
           background:
@@ -674,6 +676,8 @@ class ArsInfoTile extends HTMLElement {
           min-width: 0;
           padding: 8px 10px;
           border: 1px solid var(--arswc-color-border, #3a4d69);
+          user-select: text;
+          -webkit-user-select: text;
           border-radius: 8px;
           background: color-mix(in srgb, var(--arswc-color-canvas, #07111d) 72%, white 2%);
           color: var(--arswc-color-text, #ecf3ff);
