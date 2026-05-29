@@ -62,6 +62,11 @@ class ArsInfoTile extends HTMLElement {
   private _data: ArsInfoTileData = {};
   private _activationEventsBound = false;
   private _editAbortController: AbortController | null = null;
+  /** MutationObserver that watches the engine-written inline `style`
+   *  (which carries the scene `scale3d`) so we can keep the CSS
+   *  custom property `--counter-scale` in sync while the camera
+   *  animates or the user pans/zooms. */
+  private _scaleObserver: MutationObserver | null = null;
 
   static get observedAttributes() {
     return [
@@ -352,6 +357,8 @@ class ArsInfoTile extends HTMLElement {
   }
 
   // Builds the edit-mode markup for a single property row.
+  // Text properties use a <textarea> for multi-line editing;
+  // specialised types (email, date, etc.) keep <input>.
   #renderEditRow(property: ArsInfoTileProperty, typeTag: string): string {
     const safeKey = ArsInfoTile.#escapeHtml(property.key);
     const safeValue = ArsInfoTile.#escapeHtml(property.value);
@@ -360,10 +367,15 @@ class ArsInfoTile extends HTMLElement {
     const extraAttr = inputType === "date" || inputType === "time"
       ? ' style="color-scheme:dark;"'
       : "";
+
+    const control = inputType === "text"
+      ? `<textarea class="edit-input" rows="3"${extraAttr}>${safeValue}</textarea>`
+      : `<input type="${inputType}" value="${safeValue}" class="edit-input"${extraAttr}>`;
+
     return `
       <div class="edit-row" data-prop-key="${safeKey}">
         <label>${ArsInfoTile.#escapeHtml(labelText)}</label>
-        <input type="${inputType}" value="${safeValue}" class="edit-input"${extraAttr}>
+        ${control}
       </div>
     `;
   }
@@ -407,9 +419,9 @@ class ArsInfoTile extends HTMLElement {
       contentHtml = `${nameInput}${propertyInputs}`;
     } else {
       // ── Display mode ──
-      const nameHtml = viewModel.name
-        ? `<div class="node-name">${ArsInfoTile.#escapeHtml(viewModel.name)}</div>`
-        : "";
+      // Use the name as the subtitle when available; fall back to the
+      // explicit subtitle attribute.
+      const displaySubtitle = viewModel.name || viewModel.subtitle;
       // Hide empty properties in view mode so optional concept fields
       // (text, image, url) don't clutter the tile when unset.
       const visibleProperties = viewModel.properties.filter(
@@ -427,12 +439,12 @@ class ArsInfoTile extends HTMLElement {
               `,
               )
               .join("")
-          : (viewModel.name ? "" : `<div class="empty-state">No properties</div>`);
+          : (displaySubtitle ? "" : `<div class="empty-state">No properties</div>`);
 
       headerHtml = `
         <div class="title-block">
           <h3 class="title">${ArsInfoTile.#escapeHtml(viewModel.title)}</h3>
-          <div class="subtitle">${ArsInfoTile.#escapeHtml(viewModel.subtitle)}</div>
+          ${displaySubtitle ? `<div class="subtitle">${ArsInfoTile.#escapeHtml(displaySubtitle)}</div>` : ""}
         </div>
         ${
           viewModel.isCollapsible
@@ -448,7 +460,7 @@ class ArsInfoTile extends HTMLElement {
         }
       `;
 
-      contentHtml = `${nameHtml}${propertiesHtml}`;
+      contentHtml = propertiesHtml;
     }
 
     this.shadowRoot.innerHTML = `
@@ -666,7 +678,8 @@ class ArsInfoTile extends HTMLElement {
           text-transform: uppercase;
         }
 
-        .edit-row input {
+        .edit-row input,
+        .edit-row textarea {
           width: 100%;
           box-sizing: border-box;
           min-width: 0;
@@ -681,10 +694,41 @@ class ArsInfoTile extends HTMLElement {
           font-size: 0.88rem;
         }
 
-        .edit-row input:focus-visible {
+        .edit-row textarea {
+          resize: vertical;
+          min-height: 60px;
+          field-sizing: content;
+        }
+
+        .edit-row input:focus-visible,
+        .edit-row textarea:focus-visible {
           outline: none;
           border-color: var(--arswc-color-accent, #4cc2ff);
           box-shadow: 0 0 0 2px color-mix(in srgb, var(--arswc-color-accent, #4cc2ff) 30%, transparent);
+        }
+
+        /* ── Edit-mode zoom isolation ───────────────────────────────
+         * When the camera zooms in the engine applies
+         * transform: scale3d(S,S,1) to the tile.  That makes every
+         * pixel inside the shadow DOM render S× larger — a 14 px font
+         * becomes ~45 px and inputs look broken.
+         *
+         * Only .content is counter-scaled; .header (title bar) stays
+         * zoomed so it remains prominent.  We enlarge .content's layout
+         * box by S and scale it back down by 1/S with origin at the
+         * top-left corner so the rendered box exactly fills .card
+         * without overflowing outside it.
+         *
+         * --scene-scale and --counter-scale are written to the
+         * :host inline style by #startCounterScale and updated
+         * via a MutationObserver that watches the engine's transform
+         * changes.
+         */
+        :host([editing]) .content {
+          transform: scale(var(--counter-scale, 1));
+          transform-origin: top left;
+          flex: 0 0 auto;
+          width: calc(100% * var(--scene-scale, 1));
         }
       </style>
       <article class="card" data-selected="${String(viewModel.isSelected)}" data-dragging="${String(viewModel.isDragging)}" data-collapsed="${String(viewModel.isCollapsed)}" data-collapsible="${String(viewModel.isCollapsible)}">
@@ -698,8 +742,14 @@ class ArsInfoTile extends HTMLElement {
     `;
 
     if (viewModel.isEditing) {
+      this.#startCounterScale();
       this.#bindEditListeners();
     } else {
+      // Tear down edit listeners so document-level handlers (Escape,
+      // click-outside) don't leak across edit sessions.
+      this._editAbortController?.abort();
+      this._editAbortController = null;
+      this.#stopCounterScale();
       this.#bindCollapseButton();
     }
   }
@@ -715,11 +765,17 @@ class ArsInfoTile extends HTMLElement {
     const { signal } = this._editAbortController;
 
     // Enter to save (when focus is inside the shadow tree).
+    // For <textarea> Enter inserts a newline; Shift+Enter or
+    // Ctrl+Enter triggers save.
     this.shadowRoot.addEventListener(
       "keydown",
       (e) => {
         const keyEvent = e as KeyboardEvent;
+        const target = e.target as HTMLElement;
         if (keyEvent.key === "Enter") {
+          if (target.tagName === "TEXTAREA" && !keyEvent.shiftKey && !keyEvent.ctrlKey) {
+            return; // let newline be inserted
+          }
           e.preventDefault();
           this.#emitEditSave();
         }
@@ -769,7 +825,7 @@ class ArsInfoTile extends HTMLElement {
 
     for (const row of Array.from(this.shadowRoot.querySelectorAll(".edit-row"))) {
       const key = (row as HTMLElement).dataset["propKey"] ?? "";
-      const input = row.querySelector<HTMLInputElement>(".edit-input");
+      const input = row.querySelector<HTMLInputElement | HTMLTextAreaElement>(".edit-input");
       if (!input) continue;
       if (key === "__name__") {
         name = input.value.trim();
@@ -785,6 +841,50 @@ class ArsInfoTile extends HTMLElement {
         detail: { name, properties },
       }),
     );
+  }
+
+  // ── Counter-scale (edit-mode zoom isolation) ────────────────────────
+
+  /** While the tile is in edit mode the engine scales it via the
+   *  world-scene `transform: scale3d(S,S,1)`.  That scale makes text
+   *  and inputs comically large (e.g. 45 px font at 3.2× zoom).
+   *  We counter-scale `.header` and `.content` so they render at
+   *  their natural size, independent of the camera zoom.
+   *
+   *  The scale is read from the element's own inline transform
+   *  (width is the world width set by the engine; rendered width
+   *  is world-width × scene-scale).  A `MutationObserver` keeps
+   *  the CSS custom property up-to-date during camera animation
+   *  or user pan/zoom without polling.
+   */
+  #startCounterScale() {
+    if (this._scaleObserver) return;
+
+    const update = () => {
+      const rect = this.getBoundingClientRect();
+      const layoutW = this.offsetWidth;
+      if (layoutW <= 0) return;
+      const scale = rect.width / layoutW;
+      if (scale > 0 && isFinite(scale)) {
+        this.style.setProperty("--scene-scale", String(scale));
+        this.style.setProperty("--counter-scale", String(1 / scale));
+      }
+    };
+
+    update();
+    this._scaleObserver = new MutationObserver(update);
+    this._scaleObserver.observe(this, {
+      attributes: true,
+      attributeFilter: ["style"],
+    });
+  }
+
+  #stopCounterScale() {
+    if (!this._scaleObserver) return;
+    this._scaleObserver.disconnect();
+    this._scaleObserver = null;
+    this.style.removeProperty("--scene-scale");
+    this.style.removeProperty("--counter-scale");
   }
 
   #emitEditCancel() {

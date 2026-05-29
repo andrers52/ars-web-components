@@ -103,7 +103,7 @@ describe("ArsInfoTile", () => {
     ).toContain("No properties");
   });
 
-  it("renders a centered name block when data.name is provided", () => {
+  it("renders name as subtitle when data.name is provided", () => {
     element.data = {
       id: "nexus",
       title: "System",
@@ -112,9 +112,9 @@ describe("ArsInfoTile", () => {
 
     document.body.appendChild(element);
 
-    const nameEl = element.shadowRoot?.querySelector(".node-name");
-    expect(nameEl).toBeTruthy();
-    expect(nameEl?.textContent?.trim()).toBe("Nexus");
+    const subtitle = element.shadowRoot?.querySelector(".subtitle");
+    expect(subtitle).toBeTruthy();
+    expect(subtitle?.textContent?.trim()).toBe("Nexus");
   });
 
   it("hides empty-state when name is present but properties are empty", () => {
@@ -128,7 +128,7 @@ describe("ArsInfoTile", () => {
     document.body.appendChild(element);
 
     expect(element.shadowRoot?.querySelector(".empty-state")).toBeNull();
-    expect(element.shadowRoot?.querySelector(".node-name")?.textContent?.trim()).toBe(
+    expect(element.shadowRoot?.querySelector(".subtitle")?.textContent?.trim()).toBe(
       "Nexus",
     );
   });
@@ -732,8 +732,9 @@ describe("ArsInfoTile", () => {
     expect(saves.length).toBe(0);
   });
 
-  it("dispatches edit-save on Enter key", () => {
-    element.data = { id: "n1", title: "System", properties: { status: "active" } };
+  it("dispatches edit-save on Enter key for single-line inputs", () => {
+    // Use an email-typed property so the control is <input>, not <textarea>.
+    element.data = { id: "n1", title: "System", properties: { email: "a@b.com" }, types: { email: "email" } };
     element.editing = true;
     document.body.appendChild(element);
 
@@ -742,6 +743,34 @@ describe("ArsInfoTile", () => {
 
     const input = element.shadowRoot?.querySelector(".edit-input");
     input?.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+
+    expect(saves.length).toBe(1);
+  });
+
+  it("does not dispatch edit-save on plain Enter in textarea", () => {
+    element.data = { id: "n1", title: "System", properties: { body: "hello" } };
+    element.editing = true;
+    document.body.appendChild(element);
+
+    const saves: unknown[] = [];
+    element.addEventListener("ars-info-tile:edit-save", () => saves.push(null));
+
+    const textarea = element.shadowRoot?.querySelector("textarea.edit-input");
+    textarea?.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+
+    expect(saves.length).toBe(0);
+  });
+
+  it("dispatches edit-save on Shift+Enter in textarea", () => {
+    element.data = { id: "n1", title: "System", properties: { body: "hello" } };
+    element.editing = true;
+    document.body.appendChild(element);
+
+    const saves: unknown[] = [];
+    element.addEventListener("ars-info-tile:edit-save", () => saves.push(null));
+
+    const textarea = element.shadowRoot?.querySelector("textarea.edit-input");
+    textarea?.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", shiftKey: true, bubbles: true }));
 
     expect(saves.length).toBe(1);
   });
@@ -780,7 +809,7 @@ describe("ArsInfoTile", () => {
 
     expect(element.shadowRoot?.querySelector(".edit-input")).toBeNull();
     expect(element.shadowRoot?.querySelector(".property-row")).toBeTruthy();
-    expect(element.shadowRoot?.querySelector(".node-name")?.textContent?.trim()).toBe("Nexus");
+    expect(element.shadowRoot?.querySelector(".subtitle")?.textContent?.trim()).toBe("Nexus");
   });
 
   it("renders email input type for email-typed properties", () => {
