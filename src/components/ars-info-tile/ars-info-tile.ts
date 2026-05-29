@@ -402,10 +402,6 @@ class ArsInfoTile extends HTMLElement {
         <div class="title-block">
           <h3 class="title">${ArsInfoTile.#escapeHtml(viewModel.title)}</h3>
         </div>
-        <div class="edit-actions">
-          <button type="button" class="edit-btn save-btn" title="Save" aria-label="Save">&#10003;</button>
-          <button type="button" class="edit-btn cancel-btn" title="Cancel" aria-label="Cancel">&#10007;</button>
-        </div>
       `;
 
       contentHtml = `${nameInput}${propertyInputs}`;
@@ -708,7 +704,7 @@ class ArsInfoTile extends HTMLElement {
     }
   }
 
-  // Wire save/cancel buttons and Enter/Escape keys for inline editing.
+  // Wire Enter/Escape keys and click-outside for inline editing.
   // Uses an AbortController so repeated renders don't accumulate listeners.
   #bindEditListeners() {
     if (!this.shadowRoot) return;
@@ -718,13 +714,7 @@ class ArsInfoTile extends HTMLElement {
     this._editAbortController = new AbortController();
     const { signal } = this._editAbortController;
 
-    const saveBtn = this.shadowRoot.querySelector(".save-btn");
-    const cancelBtn = this.shadowRoot.querySelector(".cancel-btn");
-
-    saveBtn?.addEventListener("click", () => this.#emitEditSave(), { signal });
-    cancelBtn?.addEventListener("click", () => this.#emitEditCancel(), { signal });
-
-    // Enter to save, Escape to cancel.
+    // Enter to save (when focus is inside the shadow tree).
     this.shadowRoot.addEventListener(
       "keydown",
       (e) => {
@@ -732,13 +722,42 @@ class ArsInfoTile extends HTMLElement {
         if (keyEvent.key === "Enter") {
           e.preventDefault();
           this.#emitEditSave();
-        } else if (keyEvent.key === "Escape") {
+        }
+      },
+      { signal },
+    );
+
+    // Escape to cancel (listened on document so it works even when
+    // focus has left the tile's shadow tree).
+    document.addEventListener(
+      "keydown",
+      (e) => {
+        if (e.key === "Escape") {
           e.preventDefault();
           this.#emitEditCancel();
         }
       },
       { signal },
     );
+
+    // Save when clicking outside the tile. Use a timeout to avoid
+    // catching the same click that triggered edit mode.
+    setTimeout(() => {
+      if (signal.aborted) return;
+      document.addEventListener(
+        "click",
+        (e) => {
+          const path = e.composedPath();
+          if (!path.includes(this)) {
+            this.#emitEditSave();
+          }
+        },
+        { signal },
+      );
+    }, 0);
+
+    // Auto-focus the first input so the user can type immediately.
+    this.shadowRoot.querySelector<HTMLElement>(".edit-input")?.focus();
   }
 
   // Collect edited values and dispatch the save event.

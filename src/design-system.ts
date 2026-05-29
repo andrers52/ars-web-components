@@ -11,6 +11,8 @@ export interface InitializeArsWebComponentsOptions {
 }
 
 let lastInitializedSignature = "";
+let lastRootAttributes: Record<string, string> = {};
+let lastCssVariables: Record<string, string> = {};
 
 export function getArsWebComponentsDefaultAdapter(mode: "light" | "dark" = "light"): ArsDesignAdapter {
   if (mode === "dark") {
@@ -132,11 +134,30 @@ export function initializeArsWebComponents(options: InitializeArsWebComponentsOp
     return;
   }
 
-  for (const [name, value] of Object.entries(adapter.rootAttributes ?? {})) {
+  const nextRootAttributes = adapter.rootAttributes ?? {};
+  const nextCssVariables = adapter.cssVariables ?? {};
+
+  // Remove root attributes that were set previously but are absent now.
+  for (const name of Object.keys(lastRootAttributes)) {
+    if (!(name in nextRootAttributes)) {
+      root.removeAttribute(name);
+    }
+  }
+  for (const [name, value] of Object.entries(nextRootAttributes)) {
     root.setAttribute(name, value);
   }
-  for (const [name, value] of Object.entries(adapter.cssVariables ?? {})) {
+
+  // Remove CSS variables that were set previously but are absent now.
+  for (const name of Object.keys(lastCssVariables)) {
+    if (!(name in nextCssVariables)) {
+      root.style.removeProperty(name);
+    }
+  }
+  for (const [name, value] of Object.entries(nextCssVariables)) {
     root.style.setProperty(name, value);
   }
+
   lastInitializedSignature = signature;
+  lastRootAttributes = { ...nextRootAttributes };
+  lastCssVariables = { ...nextCssVariables };
 }

@@ -664,8 +664,6 @@ describe("ArsInfoTile", () => {
     document.body.appendChild(element);
 
     expect(element.shadowRoot?.querySelector(".edit-input")).toBeTruthy();
-    expect(element.shadowRoot?.querySelector(".save-btn")).toBeTruthy();
-    expect(element.shadowRoot?.querySelector(".cancel-btn")).toBeTruthy();
     expect(element.shadowRoot?.querySelector(".property-row")).toBeNull();
   });
 
@@ -684,7 +682,7 @@ describe("ArsInfoTile", () => {
     expect(input?.value).toBe("2026-05-25");
   });
 
-  it("dispatches edit-save with updated values on save button click", () => {
+  it("dispatches edit-save with updated values on click outside", async () => {
     element.data = {
       id: "n1",
       title: "System",
@@ -693,6 +691,9 @@ describe("ArsInfoTile", () => {
     };
     element.editing = true;
     document.body.appendChild(element);
+
+    // Wait for the deferred document click listener to be attached.
+    await new Promise((r) => setTimeout(r, 0));
 
     const saves: Array<{ name?: string; properties: Record<string, string> }> = [];
     element.addEventListener("ars-info-tile:edit-save", (e) => {
@@ -706,25 +707,29 @@ describe("ArsInfoTile", () => {
     inputs[0]!.value = "Renamed Nexus";
     inputs[1]!.value = "inactive";
 
-    element.shadowRoot?.querySelector<HTMLButtonElement>(".save-btn")?.click();
+    // Click outside the tile should trigger save.
+    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
 
     expect(saves.length).toBe(1);
     expect(saves[0].name).toBe("Renamed Nexus");
     expect(saves[0].properties).toEqual({ status: "inactive" });
   });
 
-  it("dispatches edit-cancel on cancel button click", () => {
-    element.data = { id: "n1", title: "System", properties: {} };
+  it("does not dispatch edit-save when clicking inside the tile", async () => {
+    element.data = { id: "n1", title: "System", properties: { status: "active" } };
     element.editing = true;
     document.body.appendChild(element);
 
-    const cancels: unknown[] = [];
-    element.addEventListener("ars-info-tile:edit-cancel", (e) => {
-      cancels.push((e as CustomEvent).detail);
-    });
+    // Wait for the deferred document click listener to be attached.
+    await new Promise((r) => setTimeout(r, 0));
 
-    element.shadowRoot?.querySelector<HTMLButtonElement>(".cancel-btn")?.click();
-    expect(cancels.length).toBe(1);
+    const saves: unknown[] = [];
+    element.addEventListener("ars-info-tile:edit-save", () => saves.push(null));
+
+    const input = element.shadowRoot?.querySelector(".edit-input");
+    input?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+    expect(saves.length).toBe(0);
   });
 
   it("dispatches edit-save on Enter key", () => {
@@ -749,8 +754,9 @@ describe("ArsInfoTile", () => {
     const cancels: unknown[] = [];
     element.addEventListener("ars-info-tile:edit-cancel", () => cancels.push(null));
 
-    const input = element.shadowRoot?.querySelector(".edit-input");
-    input?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    // Escape is listened on document so it works even when focus has
+    // left the tile's shadow tree.
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
 
     expect(cancels.length).toBe(1);
   });
@@ -761,7 +767,6 @@ describe("ArsInfoTile", () => {
     document.body.appendChild(element);
 
     expect(element.shadowRoot?.querySelector(".collapse-btn")).toBeNull();
-    expect(element.shadowRoot?.querySelector(".save-btn")).toBeTruthy();
   });
 
   it("shows display mode again when editing is set to false", () => {
