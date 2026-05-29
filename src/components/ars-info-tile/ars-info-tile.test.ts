@@ -39,12 +39,12 @@ describe("ArsInfoTile", () => {
 
   // --- Data rendering ---
 
-  it("renders title, subtitle and id from data", () => {
+  it("renders title and name-subtitle from data", () => {
     element.data = {
       id: "bot_scalper",
       title: "Scalper BTC",
-      subtitle: "trading bot",
       properties: {
+        HAS_NAME: "trading bot",
         status: "active",
       },
     };
@@ -93,21 +93,25 @@ describe("ArsInfoTile", () => {
     expect(propertyValues).toEqual(["high", "active"]);
   });
 
-  it("shows empty state when no properties are set", () => {
+  it("collapses body when no properties are set", () => {
     element.data = { id: "empty" };
 
     document.body.appendChild(element);
 
+    // Body area has zero height — no empty-state message.
     expect(
-      element.shadowRoot?.querySelector(".empty-state")?.textContent,
-    ).toContain("No properties");
+      element.shadowRoot?.querySelector(".empty-state"),
+    ).toBeNull();
+    expect(
+      element.shadowRoot?.querySelector(".content")?.classList.contains("content--empty"),
+    ).toBe(true);
   });
 
-  it("renders name as subtitle when data.name is provided", () => {
+  it("renders name as subtitle from HAS_NAME property", () => {
     element.data = {
       id: "nexus",
       title: "System",
-      name: "Nexus",
+      properties: { HAS_NAME: "Nexus" },
     };
 
     document.body.appendChild(element);
@@ -117,17 +121,20 @@ describe("ArsInfoTile", () => {
     expect(subtitle?.textContent?.trim()).toBe("Nexus");
   });
 
-  it("hides empty-state when name is present but properties are empty", () => {
+  it("collapses body when only HAS_NAME is present", () => {
     element.data = {
       id: "nexus",
       title: "System",
-      name: "Nexus",
-      properties: {},
+      properties: { HAS_NAME: "Nexus" },
     };
 
     document.body.appendChild(element);
 
-    expect(element.shadowRoot?.querySelector(".empty-state")).toBeNull();
+    // Name is in the subtitle (header), not the content area.
+    // Body collapses since there are no other properties.
+    expect(
+      element.shadowRoot?.querySelector(".content")?.classList.contains("content--empty"),
+    ).toBe(true);
     expect(element.shadowRoot?.querySelector(".subtitle")?.textContent?.trim()).toBe(
       "Nexus",
     );
@@ -344,7 +351,6 @@ describe("ArsInfoTile", () => {
 
   it("observes the expected attributes", () => {
     expect(ArsInfoTile.observedAttributes).toContain("title");
-    expect(ArsInfoTile.observedAttributes).toContain("subtitle");
     expect(ArsInfoTile.observedAttributes).toContain("selected");
     expect(ArsInfoTile.observedAttributes).toContain("dragging");
     expect(ArsInfoTile.observedAttributes).toContain("collapsed");
@@ -657,8 +663,7 @@ describe("ArsInfoTile", () => {
     element.data = {
       id: "n1",
       title: "System",
-      name: "Nexus",
-      properties: { status: "active" },
+      properties: { HAS_NAME: "Nexus", status: "active" },
     };
     element.editing = true;
     document.body.appendChild(element);
@@ -686,8 +691,7 @@ describe("ArsInfoTile", () => {
     element.data = {
       id: "n1",
       title: "System",
-      name: "Nexus",
-      properties: { status: "active" },
+      properties: { HAS_NAME: "Nexus", status: "active" },
     };
     element.editing = true;
     document.body.appendChild(element);
@@ -695,13 +699,13 @@ describe("ArsInfoTile", () => {
     // Wait for the deferred document click listener to be attached.
     await new Promise((r) => setTimeout(r, 0));
 
-    const saves: Array<{ name?: string; properties: Record<string, string> }> = [];
+    const saves: Array<{ properties: Record<string, string> }> = [];
     element.addEventListener("ars-info-tile:edit-save", (e) => {
       saves.push((e as CustomEvent).detail);
     });
 
     const inputs = Array.from(element.shadowRoot?.querySelectorAll<HTMLInputElement>(".edit-input") ?? []);
-    expect(inputs.length).toBe(2); // name + status
+    expect(inputs.length).toBe(2); // HAS_NAME + status
 
     // Simulate user changing the name field.
     inputs[0]!.value = "Renamed Nexus";
@@ -711,8 +715,8 @@ describe("ArsInfoTile", () => {
     document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
 
     expect(saves.length).toBe(1);
-    expect(saves[0].name).toBe("Renamed Nexus");
-    expect(saves[0].properties).toEqual({ status: "inactive" });
+    expect(saves[0].properties["HAS_NAME"]).toBe("Renamed Nexus");
+    expect(saves[0].properties).toEqual({ HAS_NAME: "Renamed Nexus", status: "inactive" });
   });
 
   it("does not dispatch edit-save when clicking inside the tile", async () => {
@@ -799,7 +803,7 @@ describe("ArsInfoTile", () => {
   });
 
   it("shows display mode again when editing is set to false", () => {
-    element.data = { id: "n1", title: "System", name: "Nexus", properties: { status: "active" } };
+    element.data = { id: "n1", title: "System", properties: { HAS_NAME: "Nexus", status: "active" } };
     element.editing = true;
     document.body.appendChild(element);
 
@@ -842,8 +846,9 @@ describe("ArsInfoTile", () => {
     element.data = {
       id: "n1",
       title: "System",
-      name: '<img src=x onerror=alert(1)>',
-      properties: {},
+      properties: {
+        HAS_NAME: '<img src=x onerror=alert(1)>',
+      },
     };
     element.editing = true;
     document.body.appendChild(element);
@@ -858,8 +863,8 @@ describe("ArsInfoTile", () => {
     element.data = {
       id: "n1",
       title: "Concept",
-      name: "My Concept",
       properties: {
+        HAS_NAME: "My Concept",
         status: "active",
         text: "",
         url: "",
@@ -867,25 +872,25 @@ describe("ArsInfoTile", () => {
     };
     document.body.appendChild(element);
 
-    // View mode: only non-empty properties visible
+    // View mode: only non-empty, non-HAS_NAME properties visible
     const viewRows = element.shadowRoot?.querySelectorAll(".property-row");
     expect(viewRows?.length).toBe(1);
     expect(viewRows?.[0]?.textContent).toContain("status");
     expect(viewRows?.[0]?.textContent).toContain("active");
 
-    // Edit mode: all properties visible, including empty ones
+    // Edit mode: all properties visible, including empty ones and HAS_NAME
     element.editing = true;
     const editRows = element.shadowRoot?.querySelectorAll(".edit-row");
     const keys = Array.from(editRows ?? []).map(
       (r) => (r as HTMLElement).dataset["propKey"],
     );
-    expect(keys).toContain("__name__");
+    expect(keys).toContain("HAS_NAME");
     expect(keys).toContain("status");
     expect(keys).toContain("text");
     expect(keys).toContain("url");
   });
 
-  it("shows empty-state when all properties are empty and no name is set", () => {
+  it("collapses body when all properties are empty and no name is set", () => {
     element.data = {
       id: "n1",
       title: "Concept",
@@ -893,9 +898,13 @@ describe("ArsInfoTile", () => {
     };
     document.body.appendChild(element);
 
+    // Body area has zero height — no empty-state message.
     expect(
-      element.shadowRoot?.querySelector(".empty-state")?.textContent,
-    ).toBe("No properties");
+      element.shadowRoot?.querySelector(".empty-state"),
+    ).toBeNull();
+    expect(
+      element.shadowRoot?.querySelector(".content")?.classList.contains("content--empty"),
+    ).toBe(true);
   });
 });
 
