@@ -93,6 +93,78 @@ describe("ArsInfoTile", () => {
     expect(propertyValues).toEqual(["high", "active"]);
   });
 
+  it("uses displayValues in view mode but keeps raw values for edit mode", () => {
+    element.data = {
+      id: "event_1",
+      properties: {
+        "Starts at": "2026-06-02T17:00:00",
+        "Status": "open",
+      },
+      displayValues: {
+        "Starts at": "Jun 2, 2026, 5:00 PM",
+      },
+      types: {
+        "Starts at": "datetime-local",
+      },
+    };
+
+    document.body.appendChild(element);
+
+    const values = Array.from(
+      element.shadowRoot?.querySelectorAll(".property-value") ?? [],
+    ).map((node) => node.textContent?.trim());
+    expect(values).toEqual(["Jun 2, 2026, 5:00 PM", "open"]);
+
+    // Enter edit mode — datetime-local inputs strip seconds for the picker
+    // while text inputs keep the raw value unchanged.
+    element.setAttribute("editing", "");
+    const inputs = Array.from(
+      element.shadowRoot?.querySelectorAll<HTMLInputElement>(".edit-input") ?? [],
+    );
+    const startInput = inputs.find((i) =>
+      i.closest(".edit-row")?.querySelector("label")?.textContent?.includes("Starts at"),
+    );
+    expect(startInput?.type).toBe("datetime-local");
+    expect(startInput?.value).toBe("2026-06-02T17:00");
+  });
+
+  it("normalises datetime-local values to include seconds on save", () => {
+    const saved: CustomEvent[] = [];
+    element.addEventListener("ars-info-tile:edit-save", (e) => {
+      saved.push(e as CustomEvent);
+    });
+
+    element.data = {
+      id: "event_1",
+      properties: {
+        "Starts at": "2026-06-02T17:00:00",
+      },
+      types: {
+        "Starts at": "datetime-local",
+      },
+    };
+
+    document.body.appendChild(element);
+    element.setAttribute("editing", "");
+
+    const input = element.shadowRoot?.querySelector<HTMLInputElement>(
+      '.edit-input[type="datetime-local"]',
+    );
+    expect(input).toBeTruthy();
+
+    // Simulate user changing the datetime-local value (browser emits HH:MM, no seconds).
+    if (input) {
+      input.value = "2026-06-03T09:30";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+
+    // Trigger save via Enter key.
+    element.shadowRoot?.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+
+    expect(saved.length).toBe(1);
+    expect(saved[0].detail.properties["Starts at"]).toBe("2026-06-03T09:30:00");
+  });
+
   it("collapses body when no properties are set", () => {
     element.data = { id: "empty" };
 
@@ -869,6 +941,31 @@ describe("ArsInfoTile", () => {
     expect(keys).toContain("status");
     expect(keys).toContain("text");
     expect(keys).toContain("url");
+  });
+
+  it("hides keys listed in hiddenKeys from view mode but shows them in edit mode", () => {
+    element.data = {
+      id: "n1",
+      title: "System",
+      properties: { Name: "Nexus", status: "active" },
+      hiddenKeys: ["Name"],
+    };
+    document.body.appendChild(element);
+
+    // View mode: Name is hidden, status is visible.
+    const viewKeys = Array.from(
+      element.shadowRoot?.querySelectorAll(".property-key") ?? [],
+    ).map((node) => node.textContent?.trim());
+    expect(viewKeys).not.toContain("Name");
+    expect(viewKeys).toContain("status");
+
+    // Edit mode: both properties are visible (including hiddenKeys).
+    element.editing = true;
+    const editKeys = Array.from(
+      element.shadowRoot?.querySelectorAll(".edit-row") ?? [],
+    ).map((row) => (row as HTMLElement).dataset["propKey"]);
+    expect(editKeys).toContain("Name");
+    expect(editKeys).toContain("status");
   });
 
   it("collapses body when all properties are empty and no subtitle is set", () => {

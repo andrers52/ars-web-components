@@ -23,9 +23,14 @@
 //                     (nothing to collapse), single-node graphs, etc.
 //
 // Properties:
-//   data         — { id, title, subtitle, accentColor, properties, types } object
+//   data         — { id, title, subtitle, accentColor, properties, types,
+//                  displayValues, hiddenKeys } object
 //                  subtitle is an optional secondary heading shown below the title.
 //                  When no properties are present the content area collapses to zero height.
+//                  displayValues maps property keys to human-friendly formatted strings
+//                  (e.g. ISO dates → "Jun 2, 2026, 5:00 PM"). In view mode the tile
+//                  prefers displayValues over the raw property value; edit mode always
+//                  uses the raw value so the host receives unchanged stored data.
 //   selected     — boolean, when true applies the selection highlight ring
 //   collapsed    — boolean, when true renders the toggle button in its
 //                  "collapsed" state (caret pointing right). Hosts read
@@ -56,6 +61,14 @@ export interface ArsInfoTileData {
   accentColor?: string;
   properties?: Record<string, unknown> | ArsInfoTileProperty[];
   types?: Record<string, string>;
+  /** Property keys that should be rendered in edit mode but hidden
+   *  in view mode. Useful when a value is already surfaced elsewhere
+   *  (e.g. a name shown in the title). */
+  hiddenKeys?: string[];
+  /** Formatted display values for view mode.  If a key is present here
+   *  the tile renders it instead of the raw property value, while edit
+   *  mode still uses the raw value from `properties`. */
+  displayValues?: Record<string, string>;
 }
 
 
@@ -300,6 +313,8 @@ class ArsInfoTile extends HTMLElement {
         return "date";
       case "time":
         return "time";
+      case "datetime-local":
+        return "datetime-local";
       case "number":
         return "number";
       case "url":
@@ -309,6 +324,13 @@ class ArsInfoTile extends HTMLElement {
       default:
         return "text";
     }
+  }
+
+  // Convert an ISO-8601 / naive datetime string into the YYYY-MM-DDTHH:MM
+  // format expected by <input type="datetime-local">.
+  #toDateTimeLocal(raw: string): string {
+    const m = raw.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
+    return m ? `${m[1]}T${m[2]}` : raw;
   }
 
   // Merges property data with attributes so host frameworks can choose either integration style.
@@ -331,6 +353,8 @@ class ArsInfoTile extends HTMLElement {
       accentColor,
       properties: normalizedProperties,
       types: this._data.types ?? {},
+      hiddenKeys: this._data.hiddenKeys ?? [],
+      displayValues: this._data.displayValues ?? {},
       isSelected: this.hasAttribute("selected"),
       isDragging: this.hasAttribute("dragging"),
       isCollapsed: this.hasAttribute("collapsed"),
@@ -358,13 +382,19 @@ class ArsInfoTile extends HTMLElement {
     const safeKey = ArsInfoTile.#escapeHtml(property.key);
     const safeValue = ArsInfoTile.#escapeHtml(property.value);
     const inputType = this.#inferInputType(typeTag);
-    const extraAttr = inputType === "date" || inputType === "time"
+    const extraAttr = inputType === "date" || inputType === "time" || inputType === "datetime-local"
       ? ' style="color-scheme:dark;"'
       : "";
 
-    const control = inputType === "text"
-      ? `<textarea class="edit-input" rows="3"${extraAttr}>${safeValue}</textarea>`
-      : `<input type="${inputType}" value="${safeValue}" class="edit-input"${extraAttr}>`;
+    let control: string;
+    if (inputType === "text") {
+      control = `<textarea class="edit-input" rows="3"${extraAttr}>${safeValue}</textarea>`;
+    } else if (inputType === "datetime-local") {
+      const dtLocal = ArsInfoTile.#escapeHtml(this.#toDateTimeLocal(property.value));
+      control = `<input type="datetime-local" value="${dtLocal}" class="edit-input"${extraAttr}>`;
+    } else {
+      control = `<input type="${inputType}" value="${safeValue}" class="edit-input"${extraAttr}>`;
+    }
 
     return `
       <div class="edit-row" data-prop-key="${safeKey}">
@@ -406,9 +436,9 @@ class ArsInfoTile extends HTMLElement {
     } else {
       // ── Display mode ──
       const displaySubtitle = viewModel.subtitle;
-      // Hide empty properties in view mode.
+      // Hide empty properties and keys marked hiddenKeys in view mode.
       const visibleProperties = viewModel.properties.filter(
-        (p) => p.value.trim() !== "",
+        (p) => p.value.trim() !== "" && !viewModel.hiddenKeys.includes(p.key),
       );
       // If there are no visible properties, collapse the body.
       const hasBody = visibleProperties.length > 0;
@@ -416,12 +446,15 @@ class ArsInfoTile extends HTMLElement {
       const propertiesHtml = hasBody
         ? visibleProperties
             .map(
-              (property) => `
+              (property) => {
+                const displayValue = viewModel.displayValues[property.key] ?? property.value;
+                return `
               <div class="property-row">
                 <span class="property-key">${ArsInfoTile.#escapeHtml(property.key)}</span>
-                <span class="property-value">${ArsInfoTile.#escapeHtml(property.value)}</span>
+                <span class="property-value">${ArsInfoTile.#escapeHtml(displayValue)}</span>
               </div>
-            `,
+            `;
+              },
             )
             .join("")
         : "";
@@ -814,7 +847,13 @@ class ArsInfoTile extends HTMLElement {
       const input = row.querySelector<HTMLInputElement | HTMLTextAreaElement>(".edit-input");
       if (!input) continue;
       if (key) {
-        properties[key] = input.value.trim();
+        let value = input.value.trim();
+        // datetime-local inputs emit YYYY-MM-DDTHH:MM (no seconds).
+        // Normalise to YYYY-MM-DDTHH:MM:00 so the backend format stays consistent.
+        if (input.type === "datetime-local" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) {
+          value += ":00";
+        }
+        properties[key] = value;
       }
     }
 

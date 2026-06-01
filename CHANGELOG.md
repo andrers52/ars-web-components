@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`ars-info-tile`: `displayValues` support for formatted property rendering.**
+  The `data` object now accepts an optional `displayValues` record. When a
+  property key exists in `displayValues`, the tile renders that string in
+  **view mode** instead of the raw value from `properties`. **Edit mode**
+  continues to use the raw value, so inline edits are persisted unchanged.
+  This lets hosts (e.g. Nexus) present human-readable dates
+  (`"Jun 2, 2026, 5:00 PM"`) while keeping ISO-8601 raw values for editing
+  and storage.
+
 ## [2.3.0] - 2026-05-22
 
 ### Added
