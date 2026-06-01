@@ -165,6 +165,50 @@ describe("ArsInfoTile", () => {
     expect(saved[0].detail.properties["Starts at"]).toBe("2026-06-03T09:30:00");
   });
 
+  it("renders properties in the explicit `order` rather than alphabetically", () => {
+    // Object key order is alphabetical here (Ends at, Name, Starts at), but
+    // `order` requests the external sequence Name → Starts at → Ends at.
+    element.data = {
+      id: "event_1",
+      properties: {
+        "Ends at": "2026-06-02T20:00:00",
+        Name: "Dentist appointment",
+        "Starts at": "2026-06-02T19:00:00",
+      },
+      order: ["Name", "Starts at", "Ends at"],
+    };
+
+    document.body.appendChild(element);
+    element.setAttribute("editing", "");
+
+    const labels = Array.from(
+      element.shadowRoot?.querySelectorAll(".edit-row label") ?? [],
+    ).map((n) => n.textContent?.trim());
+    expect(labels).toEqual(["Name", "Starts at", "Ends at"]);
+  });
+
+  it("places keys absent from `order` alphabetically after the ordered ones", () => {
+    element.data = {
+      id: "event_1",
+      properties: {
+        Status: "open",
+        "Ends at": "2026-06-02T20:00:00",
+        "Assigned to": "Alice",
+        "Starts at": "2026-06-02T19:00:00",
+      },
+      order: ["Starts at", "Ends at"],
+    };
+
+    document.body.appendChild(element);
+    element.setAttribute("editing", "");
+
+    const labels = Array.from(
+      element.shadowRoot?.querySelectorAll(".edit-row label") ?? [],
+    ).map((n) => n.textContent?.trim());
+    // Ordered first, then the rest A–Z (Assigned to before Status).
+    expect(labels).toEqual(["Starts at", "Ends at", "Assigned to", "Status"]);
+  });
+
   it("collapses body when no properties are set", () => {
     element.data = { id: "empty" };
 

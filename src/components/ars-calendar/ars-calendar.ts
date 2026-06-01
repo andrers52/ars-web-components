@@ -274,6 +274,10 @@ class ArsCalendar extends ArsCalendarBase {
     calendar.localizedToday = ArsCalendar.#DEFAULT_TODAY;
     calendar.monthToShow = currentDate.month;
     calendar.yearToShow = currentDate.year;
+    // Initialize today tracking from the current date at initialization time.
+    calendar.todayDay = currentDate.day;
+    calendar.todayMonth = currentDate.month;
+    calendar.todayYear = currentDate.year;
     calendar.WEEKS_IN_MONTH = ArsCalendar.#WEEKS_IN_MONTH;
     calendar.DAYS_IN_WEEK = ArsCalendar.#DAYS_IN_WEEK;
     calendar.daySlots = ArsCalendar.#createEmptyDaySlots();
@@ -381,6 +385,12 @@ class ArsCalendar extends ArsCalendarBase {
     if (!this.shadowRoot) return;
 
     try {
+      // Refresh today tracking from the current date before rendering so the 'today' highlight stays accurate.
+      const now = new Date();
+      this.todayDay = now.getDate();
+      this.todayMonth = now.getMonth();
+      this.todayYear = now.getFullYear();
+
       ArsCalendar.#fillDaySlots(
         this,
         this.daySlots,

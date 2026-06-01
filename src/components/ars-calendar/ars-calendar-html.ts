@@ -34,10 +34,16 @@ export function renderCalendarHTML(calendar) {
             calendar.selectedDay === day &&
             calendar.selectedMonth === calendar.monthToShow &&
             calendar.selectedYear === calendar.yearToShow;
+          const isToday =
+            day &&
+            calendar.todayDay === day &&
+            calendar.todayMonth === calendar.monthToShow &&
+            calendar.todayYear === calendar.yearToShow;
 
           let classes = "calendar-day";
           if (isOtherMonth) classes += " other-month";
           if (isSelected) classes += " selected";
+          if (isToday) classes += " today";
           if (hasEvents) classes += " has-events";
 
           return `<div class="${classes}">${day || ""}</div>`;

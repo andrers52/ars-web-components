@@ -101,17 +101,21 @@ export const DEFAULT_CSS = `
      Activated by setting attribute event-mark-style="badge" on the
      ars-calendar element (the component then clears the pie-chart
      background and stamps data-event-count onto each cell that has
-     events). Gives the cell a quieter visual: inset box-shadow as an
-     inner border + a small count chip in the top-right corner via
+     events). Shows a small count chip in the top-right corner via
      ::after, picking up the count from attr(data-event-count).
+     The inset border that used to accompany the badge has been moved
+     to .calendar-day.today so the current day is always highlighted.
      Both colors expose CSS-vars so host apps can theme without
      overriding the whole stylesheet. */
-  .calendar-day.has-events[data-event-count] {
+  .calendar-day.today {
     box-shadow: inset 0 0 0 var(
-        --ars-calendar-event-border-width,
-        2px
+        --ars-calendar-today-border-width,
+        var(--ars-calendar-event-border-width, 2px)
       )
-      var(--ars-calendar-event-border-color, var(--arswc-color-accent, #54dfff));
+      var(
+        --ars-calendar-today-border-color,
+        var(--ars-calendar-event-border-color, var(--arswc-color-accent, #54dfff))
+      );
   }
   .calendar-day.has-events[data-event-count]::after {
     content: attr(data-event-count);

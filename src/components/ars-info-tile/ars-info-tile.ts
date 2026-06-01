@@ -69,6 +69,12 @@ export interface ArsInfoTileData {
    *  the tile renders it instead of the raw property value, while edit
    *  mode still uses the raw value from `properties`. */
   displayValues?: Record<string, string>;
+  /** Explicit render order for property keys (the *external* ordering of
+   *  the node's properties). Keys listed here render in the given sequence;
+   *  any property not listed falls back to alphabetical order after them.
+   *  This decouples the displayed order from the JSON-object key order,
+   *  which is not preserved across (de)serialization. */
+  order?: string[];
 }
 
 
@@ -273,10 +279,18 @@ class ArsInfoTile extends HTMLElement {
       .replaceAll("'", "&#39;");
   }
 
-  // Normalizes either record-based or array-based property payloads into a single render shape.
-  // Filters out "title" (already shown in the header) and sorts keys alphabetically.
+  // Normalizes either record-based or array-based property payloads into a
+  // single render shape and applies the *external* property ordering.
+  //
+  // A JSON object's key order is not preserved across (de)serialization
+  // (the backend serializes through a BTreeMap), so the displayed order must
+  // be driven by an explicit `order` array rather than the object's own key
+  // sequence. Keys listed in `order` render first, in the given sequence;
+  // any remaining key falls back to alphabetical order after them. This is
+  // what keeps "Name" first and "Starts at" before "Ends at" in edit mode.
   static #normalizeProperties(
     properties: ArsInfoTileData["properties"],
+    order: string[] = [],
   ): ArsInfoTileProperty[] {
     const raw: ArsInfoTileProperty[] = Array.isArray(properties)
       ? properties.map((property) => ({
@@ -290,14 +304,22 @@ class ArsInfoTile extends HTMLElement {
           }))
         : [];
 
-    // Filter out "title" and "subtitle" — already displayed in the header.
-    const filtered = raw.filter((p) => {
-      const lower = p.key.toLowerCase();
-      return lower !== "title" && lower !== "subtitle";
-    });
+    // NOTE: title/subtitle hiding is handled by the consumer's `hiddenKeys`
+    // array, which hides keys in view mode but preserves them in edit mode.
+    // The old unconditional filter here prevented editing the node name.
+    const filtered = raw;
 
-    // Sort alphabetically.
-    filtered.sort((a, b) => a.key.localeCompare(b.key));
+    // Rank for the explicit order: listed keys take their index; everything
+    // else sinks below them (Number.MAX_SAFE_INTEGER) and ties break A–Z.
+    const rankOf = (key: string): number => {
+      const i = order.indexOf(key);
+      return i === -1 ? Number.MAX_SAFE_INTEGER : i;
+    };
+    filtered.sort((a, b) => {
+      const ra = rankOf(a.key);
+      const rb = rankOf(b.key);
+      return ra === rb ? a.key.localeCompare(b.key) : ra - rb;
+    });
 
     return filtered;
   }
@@ -345,7 +367,10 @@ class ArsInfoTile extends HTMLElement {
       this._data.accentColor ??
       this.getAttribute("accent-color") ??
       "var(--arswc-color-accent, #4cc2ff)";
-    const normalizedProperties = ArsInfoTile.#normalizeProperties(this._data.properties);
+    const normalizedProperties = ArsInfoTile.#normalizeProperties(
+      this._data.properties,
+      this._data.order ?? [],
+    );
     return {
       id: this._data.id ?? this.getAttribute("tile-id") ?? "",
       title,
@@ -689,6 +714,7 @@ class ArsInfoTile extends HTMLElement {
         .edit-row {
           display: grid;
           gap: 4px;
+          padding-right: 35\px;
         }
 
         .edit-row label {

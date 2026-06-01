@@ -429,6 +429,36 @@ describe('ArsCalendar', () => {
     });
   });
 
+  describe('Today highlighting', () => {
+    beforeEach(() => {
+      document.body.appendChild(element);
+      vi.advanceTimersByTime(10);
+    });
+
+    it('should apply today class to the current day cell only', () => {
+      const now = new Date();
+      element.monthToShow = now.getMonth();
+      element.yearToShow = now.getFullYear();
+      element.render();
+
+      const findDayCell = (dayNumber: number) => {
+        const cells = element.shadowRoot!.querySelectorAll<HTMLElement>(
+          '.calendar-body > .calendar-day',
+        );
+        for (const c of Array.from(cells)) {
+          if ((c.textContent ?? '').trim() === String(dayNumber)) return c;
+        }
+        return null;
+      };
+
+      const todayCell = findDayCell(now.getDate())!;
+      const otherCell = findDayCell(now.getDate() === 1 ? 2 : 1)!;
+
+      expect(todayCell.classList.contains('today')).toBe(true);
+      expect(otherCell.classList.contains('today')).toBe(false);
+    });
+  });
+
   describe('Lifecycle', () => {
     it('should have connectedCallback', () => {
       expect(typeof element.connectedCallback).toBe('function');
