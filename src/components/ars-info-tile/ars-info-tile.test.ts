@@ -39,12 +39,12 @@ describe("ArsInfoTile", () => {
 
   // --- Data rendering ---
 
-  it("renders title and name-subtitle from data", () => {
+  it("renders title and subtitle from data", () => {
     element.data = {
       id: "bot_scalper",
       title: "Scalper BTC",
+      subtitle: "trading bot",
       properties: {
-        HAS_NAME: "trading bot",
         status: "active",
       },
     };
@@ -107,11 +107,11 @@ describe("ArsInfoTile", () => {
     ).toBe(true);
   });
 
-  it("renders name as subtitle from HAS_NAME property", () => {
+  it("renders subtitle from data", () => {
     element.data = {
       id: "nexus",
       title: "System",
-      properties: { HAS_NAME: "Nexus" },
+      subtitle: "Nexus",
     };
 
     document.body.appendChild(element);
@@ -121,41 +121,23 @@ describe("ArsInfoTile", () => {
     expect(subtitle?.textContent?.trim()).toBe("Nexus");
   });
 
-  it("collapses body when only HAS_NAME is present", () => {
+  it("collapses body when only subtitle is present and no properties", () => {
     element.data = {
       id: "nexus",
       title: "System",
-      properties: { HAS_NAME: "Nexus" },
+      subtitle: "Nexus",
     };
 
     document.body.appendChild(element);
 
-    // Name is in the subtitle (header), not the content area.
-    // Body collapses since there are no other properties.
+    // Subtitle is in the header, not the content area.
+    // Body collapses since there are no properties.
     expect(
       element.shadowRoot?.querySelector(".content")?.classList.contains("content--empty"),
     ).toBe(true);
     expect(element.shadowRoot?.querySelector(".subtitle")?.textContent?.trim()).toBe(
       "Nexus",
     );
-  });
-
-  it("filters out HAS_NAME from property rows", () => {
-    element.data = {
-      id: "nexus",
-      properties: {
-        HAS_NAME: "Nexus",
-        status: "active",
-      },
-    };
-
-    document.body.appendChild(element);
-
-    const keys = Array.from(
-      element.shadowRoot?.querySelectorAll(".property-key") ?? [],
-    ).map((node) => node.textContent?.trim());
-    expect(keys).not.toContain("HAS_NAME");
-    expect(keys).toContain("status");
   });
 
   // --- Selection / Dragging states ---
@@ -663,7 +645,7 @@ describe("ArsInfoTile", () => {
     element.data = {
       id: "n1",
       title: "System",
-      properties: { HAS_NAME: "Nexus", status: "active" },
+      properties: { name: "Nexus", status: "active" },
     };
     element.editing = true;
     document.body.appendChild(element);
@@ -691,7 +673,7 @@ describe("ArsInfoTile", () => {
     element.data = {
       id: "n1",
       title: "System",
-      properties: { HAS_NAME: "Nexus", status: "active" },
+      properties: { name: "Nexus", status: "active" },
     };
     element.editing = true;
     document.body.appendChild(element);
@@ -705,7 +687,7 @@ describe("ArsInfoTile", () => {
     });
 
     const inputs = Array.from(element.shadowRoot?.querySelectorAll<HTMLInputElement>(".edit-input") ?? []);
-    expect(inputs.length).toBe(2); // HAS_NAME + status
+    expect(inputs.length).toBe(2); // name + status
 
     // Simulate user changing the name field.
     inputs[0]!.value = "Renamed Nexus";
@@ -715,8 +697,8 @@ describe("ArsInfoTile", () => {
     document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
 
     expect(saves.length).toBe(1);
-    expect(saves[0].properties["HAS_NAME"]).toBe("Renamed Nexus");
-    expect(saves[0].properties).toEqual({ HAS_NAME: "Renamed Nexus", status: "inactive" });
+    expect(saves[0].properties["name"]).toBe("Renamed Nexus");
+    expect(saves[0].properties).toEqual({ name: "Renamed Nexus", status: "inactive" });
   });
 
   it("does not dispatch edit-save when clicking inside the tile", async () => {
@@ -803,7 +785,7 @@ describe("ArsInfoTile", () => {
   });
 
   it("shows display mode again when editing is set to false", () => {
-    element.data = { id: "n1", title: "System", properties: { HAS_NAME: "Nexus", status: "active" } };
+    element.data = { id: "n1", title: "System", subtitle: "Nexus", properties: { status: "active" } };
     element.editing = true;
     document.body.appendChild(element);
 
@@ -847,7 +829,7 @@ describe("ArsInfoTile", () => {
       id: "n1",
       title: "System",
       properties: {
-        HAS_NAME: '<img src=x onerror=alert(1)>',
+        name: '<img src=x onerror=alert(1)>',
       },
     };
     element.editing = true;
@@ -863,8 +845,8 @@ describe("ArsInfoTile", () => {
     element.data = {
       id: "n1",
       title: "Concept",
+      subtitle: "My Concept",
       properties: {
-        HAS_NAME: "My Concept",
         status: "active",
         text: "",
         url: "",
@@ -872,25 +854,24 @@ describe("ArsInfoTile", () => {
     };
     document.body.appendChild(element);
 
-    // View mode: only non-empty, non-HAS_NAME properties visible
+    // View mode: only non-empty properties visible
     const viewRows = element.shadowRoot?.querySelectorAll(".property-row");
     expect(viewRows?.length).toBe(1);
     expect(viewRows?.[0]?.textContent).toContain("status");
     expect(viewRows?.[0]?.textContent).toContain("active");
 
-    // Edit mode: all properties visible, including empty ones and HAS_NAME
+    // Edit mode: all properties visible, including empty ones
     element.editing = true;
     const editRows = element.shadowRoot?.querySelectorAll(".edit-row");
     const keys = Array.from(editRows ?? []).map(
       (r) => (r as HTMLElement).dataset["propKey"],
     );
-    expect(keys).toContain("HAS_NAME");
     expect(keys).toContain("status");
     expect(keys).toContain("text");
     expect(keys).toContain("url");
   });
 
-  it("collapses body when all properties are empty and no name is set", () => {
+  it("collapses body when all properties are empty and no subtitle is set", () => {
     element.data = {
       id: "n1",
       title: "Concept",

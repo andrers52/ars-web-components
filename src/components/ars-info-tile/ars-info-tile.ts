@@ -23,11 +23,9 @@
 //                     (nothing to collapse), single-node graphs, etc.
 //
 // Properties:
-//   data         — { id, title, accentColor, properties, types } object
-//                  The subtitle is derived from the HAS_NAME property and
-//                  shown in the header. In edit mode it appears as a regular
-//                  editable property row. When only HAS_NAME is present the
-//                  content area collapses to zero height.
+//   data         — { id, title, subtitle, accentColor, properties, types } object
+//                  subtitle is an optional secondary heading shown below the title.
+//                  When no properties are present the content area collapses to zero height.
 //   selected     — boolean, when true applies the selection highlight ring
 //   collapsed    — boolean, when true renders the toggle button in its
 //                  "collapsed" state (caret pointing right). Hosts read
@@ -43,7 +41,7 @@
 //                                    applied — the host decides whether
 //                                    to flip the property).
 //   ars-info-tile:edit-save        — fired when the user confirms an
-//                                    inline edit. Detail: { name?, properties }.
+//                                    inline edit. Detail: { properties }.
 //   ars-info-tile:edit-cancel      — fired when the user cancels inline edit.
 
 export interface ArsInfoTileProperty {
@@ -54,10 +52,13 @@ export interface ArsInfoTileProperty {
 export interface ArsInfoTileData {
   id?: string;
   title?: string;
+  subtitle?: string;
   accentColor?: string;
   properties?: Record<string, unknown> | ArsInfoTileProperty[];
   types?: Record<string, string>;
 }
+
+
 
 class ArsInfoTile extends HTMLElement {
   private _data: ArsInfoTileData = {};
@@ -72,6 +73,7 @@ class ArsInfoTile extends HTMLElement {
   static get observedAttributes() {
     return [
       "title",
+      "subtitle",
       "selected",
       "dragging",
       "collapsed",
@@ -259,8 +261,7 @@ class ArsInfoTile extends HTMLElement {
   }
 
   // Normalizes either record-based or array-based property payloads into a single render shape.
-  // Filters out "title" (already shown in the header) and sorts keys logically
-  // (HAS_NAME first, then STARTS_AT before ENDS_AT, alphabetical otherwise).
+  // Filters out "title" (already shown in the header) and sorts keys alphabetically.
   static #normalizeProperties(
     properties: ArsInfoTileData["properties"],
   ): ArsInfoTileProperty[] {
@@ -276,25 +277,14 @@ class ArsInfoTile extends HTMLElement {
           }))
         : [];
 
-    // Filter out "title" — already displayed in the header.
-    // Keep "HAS_NAME" — it appears as an editable property in edit mode
-    // and is read as the subtitle source in view mode.
+    // Filter out "title" and "subtitle" — already displayed in the header.
     const filtered = raw.filter((p) => {
       const lower = p.key.toLowerCase();
-      return lower !== "title";
+      return lower !== "title" && lower !== "subtitle";
     });
 
-    // Sort: HAS_NAME first, then STARTS_AT before ENDS_AT, alphabetical otherwise
-    filtered.sort((a, b) => {
-      const aUpper = a.key.toUpperCase();
-      const bUpper = b.key.toUpperCase();
-      // HAS_NAME always first so it's the top property row.
-      if (aUpper === "HAS_NAME" && bUpper !== "HAS_NAME") return -1;
-      if (bUpper === "HAS_NAME" && aUpper !== "HAS_NAME") return 1;
-      if (aUpper === "STARTS_AT" && bUpper === "ENDS_AT") return -1;
-      if (aUpper === "ENDS_AT" && bUpper === "STARTS_AT") return 1;
-      return aUpper.localeCompare(bUpper);
-    });
+    // Sort alphabetically.
+    filtered.sort((a, b) => a.key.localeCompare(b.key));
 
     return filtered;
   }
@@ -334,15 +324,10 @@ class ArsInfoTile extends HTMLElement {
       this.getAttribute("accent-color") ??
       "var(--arswc-color-accent, #4cc2ff)";
     const normalizedProperties = ArsInfoTile.#normalizeProperties(this._data.properties);
-    // The node's name — sourced from the HAS_NAME property.
-    const hasNameProp = normalizedProperties.find(
-      (p) => p.key.toUpperCase() === "HAS_NAME",
-    );
-    const name = hasNameProp?.value ?? "";
     return {
       id: this._data.id ?? this.getAttribute("tile-id") ?? "",
       title,
-      name,
+      subtitle: this._data.subtitle ?? this.getAttribute("subtitle") ?? "",
       accentColor,
       properties: normalizedProperties,
       types: this._data.types ?? {},
@@ -353,6 +338,7 @@ class ArsInfoTile extends HTMLElement {
       isEditing: this.hasAttribute("editing"),
     };
   }
+
 
   // Update only the data-* attributes on the .card element without
   // tearing down the full shadow DOM.  Used for `selected` and `dragging`
@@ -372,7 +358,6 @@ class ArsInfoTile extends HTMLElement {
     const safeKey = ArsInfoTile.#escapeHtml(property.key);
     const safeValue = ArsInfoTile.#escapeHtml(property.value);
     const inputType = this.#inferInputType(typeTag);
-    const labelText = safeKey.toLowerCase() === "has_name" ? "Name" : safeKey;
     const extraAttr = inputType === "date" || inputType === "time"
       ? ' style="color-scheme:dark;"'
       : "";
@@ -383,7 +368,7 @@ class ArsInfoTile extends HTMLElement {
 
     return `
       <div class="edit-row" data-prop-key="${safeKey}">
-        <label>${ArsInfoTile.#escapeHtml(labelText)}</label>
+        <label>${ArsInfoTile.#escapeHtml(safeKey)}</label>
         ${control}
       </div>
     `;
@@ -420,14 +405,12 @@ class ArsInfoTile extends HTMLElement {
       contentHtml = propertyInputs;
     } else {
       // ── Display mode ──
-      // The subtitle is the node's name (from HAS_NAME).
-      const displaySubtitle = viewModel.name;
-      // Hide empty properties and HAS_NAME in view mode. HAS_NAME is
-      // already displayed as the subtitle — no need to repeat it.
+      const displaySubtitle = viewModel.subtitle;
+      // Hide empty properties in view mode.
       const visibleProperties = viewModel.properties.filter(
-        (p) => p.value.trim() !== "" && p.key.toUpperCase() !== "HAS_NAME",
+        (p) => p.value.trim() !== "",
       );
-      // If the name is all the node has, collapse the body.
+      // If there are no visible properties, collapse the body.
       const hasBody = visibleProperties.length > 0;
       bodyEmpty = !hasBody;
       const propertiesHtml = hasBody
@@ -988,6 +971,7 @@ class ArsInfoTile extends HTMLElement {
     });
   }
 }
+
 
 if (
   typeof customElements !== "undefined" &&
