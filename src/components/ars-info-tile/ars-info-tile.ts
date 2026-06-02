@@ -455,6 +455,13 @@ class ArsInfoTile extends HTMLElement {
         <div class="title-block">
           <h3 class="title">${ArsInfoTile.#escapeHtml(viewModel.title)}</h3>
         </div>
+        <button
+          type="button"
+          class="confirm-edit-btn"
+          part="confirm-edit-btn"
+          aria-label="Save changes"
+          title="Save changes"
+        ><span aria-hidden="true">✓</span></button>
       `;
 
       contentHtml = propertyInputs;
@@ -593,6 +600,34 @@ class ArsInfoTile extends HTMLElement {
 
         .collapse-btn:focus-visible {
           outline: 2px solid ${viewModel.accentColor};
+          outline-offset: 2px;
+        }
+
+        .confirm-edit-btn {
+          all: unset;
+          box-sizing: border-box;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 22px;
+          height: 22px;
+          border-radius: 6px;
+          color: #7df5b9;
+          font-size: 0.9rem;
+          line-height: 1;
+          cursor: pointer;
+          border: 1px solid color-mix(in srgb, var(--arswc-color-border, #3a4d69) 64%, transparent);
+          background: color-mix(in srgb, #7df5b9 12%, transparent);
+          transition: background 120ms ease, color 120ms ease, transform 140ms ease;
+        }
+
+        .confirm-edit-btn:hover {
+          color: #fff;
+          background: color-mix(in srgb, #7df5b9 30%, transparent);
+        }
+
+        .confirm-edit-btn:focus-visible {
+          outline: 2px solid #7df5b9;
           outline-offset: 2px;
         }
 
@@ -829,14 +864,14 @@ class ArsInfoTile extends HTMLElement {
       { signal },
     );
 
-    // Escape to cancel (listened on document so it works even when
+    // Escape to save (listened on document so it works even when
     // focus has left the tile's shadow tree).
     document.addEventListener(
       "keydown",
       (e) => {
         if (e.key === "Escape") {
           e.preventDefault();
-          this.#emitEditCancel();
+          this.#emitEditSave();
         }
       },
       { signal },
@@ -858,6 +893,22 @@ class ArsInfoTile extends HTMLElement {
       );
     }, 0);
 
+    // Save when the header confirm button is clicked.
+    const confirmBtn = this.shadowRoot.querySelector(".confirm-edit-btn");
+    if (confirmBtn) {
+      confirmBtn.addEventListener(
+        "click",
+        (e) => {
+          e.stopPropagation();
+          this.#emitEditSave();
+        },
+        { signal },
+      );
+      confirmBtn.addEventListener("dblclick", (e) => {
+        e.stopPropagation();
+      }, { signal });
+    }
+
     // Auto-focus the first input so the user can type immediately.
     this.shadowRoot.querySelector<HTMLElement>(".edit-input")?.focus();
   }
@@ -865,6 +916,15 @@ class ArsInfoTile extends HTMLElement {
   // Collect edited values and dispatch the save event.
   #emitEditSave() {
     if (!this.shadowRoot) return;
+
+    // Tear down edit listeners immediately so rapid follow-up
+    // clicks can't double-fire a save while the async engine
+    // round-trip (edit-save → Rust → editing=false → re-render)
+    // is still in flight.  The attribute-driven #render() path
+    // is the canonical cleanup; this early abort closes the
+    // timing window between dispatch and engine response.
+    this._editAbortController?.abort();
+    this._editAbortController = null;
 
     const properties: Record<string, string> = {};
 

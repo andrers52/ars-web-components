@@ -20,6 +20,7 @@ export function getArsWebComponentsDefaultAdapter(mode: "light" | "dark" = "ligh
       name: "ars-web-components:default-dark",
       cssVariables: {
         "--arswc-color-bg": "#0b1220",
+        "--arswc-color-canvas": "#0b1220",
         "--arswc-color-surface": "#121a2d",
         "--arswc-color-border": "#29405f",
         "--arswc-color-text": "#e8eef9",
@@ -69,6 +70,7 @@ export function getArsWebComponentsDefaultAdapter(mode: "light" | "dark" = "ligh
     name: "ars-web-components:default-light",
     cssVariables: {
       "--arswc-color-bg": "#ffffff",
+      "--arswc-color-canvas": "#ffffff",
       "--arswc-color-surface": "#f6f8fb",
       "--arswc-color-border": "#d5dde8",
       "--arswc-color-text": "#1b2430",

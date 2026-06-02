@@ -877,19 +877,19 @@ describe("ArsInfoTile", () => {
     expect(saves.length).toBe(1);
   });
 
-  it("dispatches edit-cancel on Escape key", () => {
+  it("dispatches edit-save on Escape key", () => {
     element.data = { id: "n1", title: "System", properties: { status: "active" } };
     element.editing = true;
     document.body.appendChild(element);
 
-    const cancels: unknown[] = [];
-    element.addEventListener("ars-info-tile:edit-cancel", () => cancels.push(null));
+    const saves: unknown[] = [];
+    element.addEventListener("ars-info-tile:edit-save", () => saves.push(null));
 
     // Escape is listened on document so it works even when focus has
     // left the tile's shadow tree.
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
 
-    expect(cancels.length).toBe(1);
+    expect(saves.length).toBe(1);
   });
 
   it("hides collapse button in edit mode", () => {
@@ -1027,6 +1027,56 @@ describe("ArsInfoTile", () => {
     expect(
       element.shadowRoot?.querySelector(".content")?.classList.contains("content--empty"),
     ).toBe(true);
+  });
+
+  it("does not dispatch edit-save on second click outside after first already triggered save", async () => {
+    // Regression: the click-outside handler stayed alive until the
+    // async engine round-trip set editing=false, so a second click
+    // before the engine responded would fire a duplicate edit-save.
+    // The fix aborts the AbortController inside #emitEditSave()
+    // itself, closing the timing window.
+    element.data = {
+      id: "n1",
+      title: "System",
+      properties: { status: "active" },
+    };
+    element.editing = true;
+    document.body.appendChild(element);
+
+    // Wait for the deferred document click listener to be attached.
+    await new Promise((r) => setTimeout(r, 0));
+
+    const saves: unknown[] = [];
+    element.addEventListener("ars-info-tile:edit-save", () => saves.push(null));
+
+    // First click outside triggers save.
+    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(saves.length).toBe(1);
+
+    // Second click outside should NOT trigger another save because
+    // #emitEditSave() already tore down the AbortController.
+    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(saves.length).toBe(1);
+  });
+
+  it("does not leak document click listeners across rapid edit toggles", async () => {
+    element.data = { id: "n1", title: "System", properties: { status: "active" } };
+    document.body.appendChild(element);
+
+    const saves: unknown[] = [];
+    element.addEventListener("ars-info-tile:edit-save", () => saves.push(null));
+
+    // Rapidly toggle editing on and off multiple times
+    for (let i = 0; i < 5; i++) {
+      element.editing = true;
+      await new Promise((r) => setTimeout(r, 0));
+      element.editing = false;
+      await new Promise((r) => setTimeout(r, 0));
+    }
+
+    // Now click outside — should NOT dispatch edit-save
+    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(saves.length).toBe(0);
   });
 });
 
