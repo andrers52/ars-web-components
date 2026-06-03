@@ -31,7 +31,7 @@ describe("ArsChatPanel", () => {
     document.body.appendChild(element);
     expect(element.shadowRoot?.querySelector(".panel")).toBeTruthy();
     expect(element.shadowRoot?.querySelector(".messages")).toBeTruthy();
-    expect(element.shadowRoot?.querySelector("input")).toBeTruthy();
+    expect(element.shadowRoot?.querySelector("textarea")).toBeTruthy();
     expect(element.shadowRoot?.querySelector("button.send")).toBeTruthy();
     expect(element.shadowRoot?.querySelector("button.clear")).toBeTruthy();
   });
@@ -93,15 +93,15 @@ describe("ArsChatPanel", () => {
   it("reflects the placeholder attribute to the input", () => {
     element.setAttribute("placeholder", "Ask a question...");
     document.body.appendChild(element);
-    const input = element.shadowRoot?.querySelector("input");
-    expect(input?.getAttribute("placeholder")).toBe("Ask a question...");
+    const textarea = element.shadowRoot?.querySelector("textarea");
+    expect(textarea?.getAttribute("placeholder")).toBe("Ask a question...");
   });
 
   it("updates the placeholder via property setter", () => {
     document.body.appendChild(element);
     element.placeholder = "Type here";
-    const input = element.shadowRoot?.querySelector("input");
-    expect(input?.getAttribute("placeholder")).toBe("Type here");
+    const textarea = element.shadowRoot?.querySelector("textarea");
+    expect(textarea?.getAttribute("placeholder")).toBe("Type here");
   });
 
   // --- Typing attribute/property ---
@@ -109,9 +109,9 @@ describe("ArsChatPanel", () => {
   it("disables input and send button when typing is true", () => {
     element.setAttribute("typing", "");
     document.body.appendChild(element);
-    const input = element.shadowRoot?.querySelector("input");
+    const textarea = element.shadowRoot?.querySelector("textarea");
     const sendBtn = element.shadowRoot?.querySelector<HTMLButtonElement>("button.send");
-    expect(input?.disabled).toBe(true);
+    expect(textarea?.disabled).toBe(true);
     expect(sendBtn?.disabled).toBe(true);
   });
 
@@ -175,9 +175,9 @@ describe("ArsChatPanel", () => {
 
   it("emits ars-chat-panel:send on send button click", () => {
     document.body.appendChild(element);
-    const input = element.shadowRoot?.querySelector("input") as HTMLInputElement;
-    input.value = "Hello world";
-    input.dispatchEvent(new Event("input"));
+    const textarea = element.shadowRoot?.querySelector("textarea") as HTMLTextAreaElement;
+    textarea.value = "Hello world";
+    textarea.dispatchEvent(new Event("input"));
 
     const events: unknown[] = [];
     element.addEventListener("ars-chat-panel:send", (e) => {
@@ -191,16 +191,16 @@ describe("ArsChatPanel", () => {
 
   it("emits ars-chat-panel:send on Enter key", () => {
     document.body.appendChild(element);
-    const input = element.shadowRoot?.querySelector("input") as HTMLInputElement;
-    input.value = "Enter test";
-    input.dispatchEvent(new Event("input"));
+    const textarea = element.shadowRoot?.querySelector("textarea") as HTMLTextAreaElement;
+    textarea.value = "Enter test";
+    textarea.dispatchEvent(new Event("input"));
 
     const events: unknown[] = [];
     element.addEventListener("ars-chat-panel:send", (e) => {
       events.push((e as CustomEvent).detail);
     });
 
-    input.dispatchEvent(new KeyboardEvent("keypress", { key: "Enter" }));
+    textarea.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
 
     expect(events).toEqual([{ message: "Enter test" }]);
   });
@@ -220,28 +220,28 @@ describe("ArsChatPanel", () => {
   it("does not emit send event while typing", () => {
     document.body.appendChild(element);
     element.typing = true;
-    const input = element.shadowRoot?.querySelector("input") as HTMLInputElement;
-    input.value = "blocked";
-    input.dispatchEvent(new Event("input"));
+    const textarea = element.shadowRoot?.querySelector("textarea") as HTMLTextAreaElement;
+    textarea.value = "blocked";
+    textarea.dispatchEvent(new Event("input"));
 
     const events: unknown[] = [];
     element.addEventListener("ars-chat-panel:send", () => {
       events.push(true);
     });
 
-    input.dispatchEvent(new KeyboardEvent("keypress", { key: "Enter" }));
+    textarea.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
     expect(events).toEqual([]);
   });
 
   it("clears draft value after send", () => {
     document.body.appendChild(element);
-    const input = element.shadowRoot?.querySelector("input") as HTMLInputElement;
-    input.value = "will clear";
-    input.dispatchEvent(new Event("input"));
+    const textarea = element.shadowRoot?.querySelector("textarea") as HTMLTextAreaElement;
+    textarea.value = "will clear";
+    textarea.dispatchEvent(new Event("input"));
 
     element.shadowRoot?.querySelector("button.send")?.dispatchEvent(new MouseEvent("click"));
 
-    expect(input.value).toBe("");
+    expect(textarea.value).toBe("");
   });
 
   // --- Events: clear ---
@@ -270,9 +270,9 @@ describe("ArsChatPanel", () => {
       clearComposed = (e as CustomEvent).composed;
     });
 
-    const input = element.shadowRoot?.querySelector("input") as HTMLInputElement;
-    input.value = "x";
-    input.dispatchEvent(new Event("input"));
+    const textarea = element.shadowRoot?.querySelector("textarea") as HTMLTextAreaElement;
+    textarea.value = "x";
+    textarea.dispatchEvent(new Event("input"));
     element.shadowRoot?.querySelector("button.send")?.dispatchEvent(new MouseEvent("click"));
     element.shadowRoot?.querySelector("button.clear")?.dispatchEvent(new MouseEvent("click"));
 
@@ -287,6 +287,8 @@ describe("ArsChatPanel", () => {
     expect(ArsChatPanel.observedAttributes).toContain("subtitle");
     expect(ArsChatPanel.observedAttributes).toContain("placeholder");
     expect(ArsChatPanel.observedAttributes).toContain("typing");
+    expect(ArsChatPanel.observedAttributes).toContain("collapsible");
+    expect(ArsChatPanel.observedAttributes).toContain("collapsed");
   });
 
   // --- CSS token usage ---
@@ -313,5 +315,67 @@ describe("ArsChatPanel", () => {
     element.setAttribute("title", "New Title");
     const titleEl = element.shadowRoot?.querySelector(".title");
     expect(titleEl?.textContent).toBe("New Title");
+  });
+
+  // --- Collapsible attribute/property ---
+
+  it("defaults collapsible to false", () => {
+    expect(element.collapsible).toBe(false);
+  });
+
+  it("toggles collapsible via property setter", () => {
+    element.collapsible = true;
+    expect(element.hasAttribute("collapsible")).toBe(true);
+    element.collapsible = false;
+    expect(element.hasAttribute("collapsible")).toBe(false);
+  });
+
+  it("hides collapse toggle when collapsible is false", () => {
+    document.body.appendChild(element);
+    const toggle = element.shadowRoot?.querySelector(".collapse-toggle") as HTMLElement;
+    expect(toggle?.style.display).toBe("none");
+  });
+
+  it("shows collapse toggle when collapsible is true", () => {
+    element.collapsible = true;
+    document.body.appendChild(element);
+    const toggle = element.shadowRoot?.querySelector(".collapse-toggle") as HTMLElement;
+    expect(toggle?.style.display).toBe("");
+  });
+
+  it("toggles collapsed state on collapse-toggle click", () => {
+    element.collapsible = true;
+    document.body.appendChild(element);
+    const toggle = element.shadowRoot?.querySelector(".collapse-toggle") as HTMLButtonElement;
+    toggle.dispatchEvent(new MouseEvent("click"));
+    expect(element.collapsed).toBe(true);
+    toggle.dispatchEvent(new MouseEvent("click"));
+    expect(element.collapsed).toBe(false);
+  });
+
+  it("applies collapsed class to panel when collapsed", () => {
+    element.collapsible = true;
+    document.body.appendChild(element);
+    element.collapsed = true;
+    const panel = element.shadowRoot?.querySelector(".panel");
+    expect(panel?.classList.contains("collapsed")).toBe(true);
+  });
+
+  // --- Textarea behavior ---
+
+  it("does not emit send on Shift+Enter", () => {
+    document.body.appendChild(element);
+    const textarea = element.shadowRoot?.querySelector("textarea") as HTMLTextAreaElement;
+    textarea.value = "line1";
+    textarea.dispatchEvent(new Event("input"));
+
+    const events: unknown[] = [];
+    element.addEventListener("ars-chat-panel:send", (e) => {
+      events.push((e as CustomEvent).detail);
+    });
+
+    textarea.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", shiftKey: true }));
+
+    expect(events).toEqual([]);
   });
 });

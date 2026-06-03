@@ -6,6 +6,8 @@
 //   subtitle     — panel header subtitle (default "")
 //   placeholder  — input placeholder text (default "Type a message...")
 //   typing       — boolean, shows typing indicator and disables input
+//   collapsible  — boolean, enables collapse/expand toggle
+//   collapsed    — boolean, collapses the panel to a tab
 //
 // Properties:
 //   messages     — ArsChatMessage[]  (set via JS only; array does not reflect to attribute)
@@ -22,9 +24,10 @@ export interface ArsChatMessage {
 class ArsChatPanel extends HTMLElement {
   private _messages: ArsChatMessage[] = [];
   private _draftValue = "";
+  private _expandTimeout: ReturnType<typeof setTimeout> | null = null;
 
   static get observedAttributes() {
-    return ["title", "subtitle", "placeholder", "typing"];
+    return ["title", "subtitle", "placeholder", "typing", "collapsible", "collapsed"];
   }
 
   constructor() {
@@ -34,6 +37,18 @@ class ArsChatPanel extends HTMLElement {
 
   connectedCallback() {
     this.#render();
+    // If initially collapsed, the button uses position:fixed and needs
+    // accurate viewport coordinates. Re-render once after layout.
+    if (this.collapsed) {
+      requestAnimationFrame(() => this.#render());
+    }
+  }
+
+  disconnectedCallback() {
+    if (this._expandTimeout) {
+      clearTimeout(this._expandTimeout);
+      this._expandTimeout = null;
+    }
   }
 
   attributeChangedCallback() {
@@ -76,6 +91,22 @@ class ArsChatPanel extends HTMLElement {
     this.toggleAttribute("typing", value);
   }
 
+  get collapsible(): boolean {
+    return this.hasAttribute("collapsible");
+  }
+
+  set collapsible(value: boolean) {
+    this.toggleAttribute("collapsible", value);
+  }
+
+  get collapsed(): boolean {
+    return this.hasAttribute("collapsed");
+  }
+
+  set collapsed(value: boolean) {
+    this.toggleAttribute("collapsed", value);
+  }
+
   get messages(): ArsChatMessage[] {
     return this._messages.map((m) => ({ ...m }));
   }
@@ -99,17 +130,110 @@ class ArsChatPanel extends HTMLElement {
     const messages = this._messages;
     const isTyping = this.typing;
 
-    // After the first mount, patch only the dynamic parts so the <input>
+    // After the first mount, patch only the dynamic parts so the <textarea>
     // is never destroyed and never loses focus mid-keystroke.
     if (this.shadowRoot.querySelector(".panel")) {
       const sr = this.shadowRoot;
       const messagesEl = sr.querySelector<HTMLElement>(".messages");
-      const inputEl = sr.querySelector<HTMLInputElement>("input");
+      const textareaEl = sr.querySelector<HTMLTextAreaElement>("textarea");
       const sendBtn = sr.querySelector<HTMLButtonElement>("button.send");
       const typingEl = sr.querySelector<HTMLElement>(".typing");
       const clearBtn = sr.querySelector<HTMLButtonElement>("button.clear");
       const titleEl = sr.querySelector<HTMLElement>(".title");
       const subtitleEl = sr.querySelector<HTMLElement>(".subtitle");
+      const panelEl = sr.querySelector<HTMLElement>(".panel");
+      const collapseBtn = sr.querySelector<HTMLButtonElement>(".collapse-toggle");
+
+      if (collapseBtn) {
+        collapseBtn.style.display = this.collapsible ? "" : "none";
+        collapseBtn.classList.toggle("collapsed", this.collapsed);
+        collapseBtn.setAttribute(
+          "aria-label",
+          this.collapsed ? "Expand" : "Collapse",
+        );
+        collapseBtn.innerHTML = this.collapsed
+          ? ArsChatPanel.#messageIcon()
+          : ArsChatPanel.#chevronRightIcon();
+        if (this.collapsed) {
+          // Cancel any in-flight expand animation
+          if (this._expandTimeout) {
+            clearTimeout(this._expandTimeout);
+            this._expandTimeout = null;
+          }
+          const rect = this.getBoundingClientRect();
+          collapseBtn.style.position = "fixed";
+          collapseBtn.style.left = "auto";
+          collapseBtn.style.right = "0px";
+          collapseBtn.style.top = rect.top + "px";
+          collapseBtn.style.zIndex = "9999";
+          collapseBtn.style.width = "56px";
+          collapseBtn.style.height = "72px";
+          collapseBtn.style.borderRadius = "10px 0 0 10px";
+          collapseBtn.style.background = "var(--arswc-color-surface, #f6f8fb)";
+          collapseBtn.style.border = "1px solid var(--arswc-color-border, #d5dde8)";
+          collapseBtn.style.borderRight = "none";
+          collapseBtn.style.display = "grid";
+          collapseBtn.style.placeItems = "center";
+          collapseBtn.style.transition = "";
+        } else if (
+          collapseBtn.style.position === "fixed" &&
+          collapseBtn.style.right === "0px"
+        ) {
+          // The button was sitting at the viewport right-edge (collapsed).
+          // Animate it to its final absolute position inside the host
+          // while the panel slides in, then revert to CSS-driven positioning.
+          const hostRect = this.getBoundingClientRect();
+          const btnRect = collapseBtn.getBoundingClientRect();
+          const targetLeft = hostRect.left + 8;
+          const targetTop = hostRect.top + 12;
+
+          // Lock the current visual position as explicit left/top
+          collapseBtn.style.left = btnRect.left + "px";
+          collapseBtn.style.top = btnRect.top + "px";
+          collapseBtn.style.right = "auto";
+
+          // Force reflow so the browser registers the starting values
+          collapseBtn.offsetHeight;
+
+          // Animate to the final position / size
+          collapseBtn.style.transition =
+            "left 280ms cubic-bezier(0.4, 0, 0.2, 1), " +
+            "top 280ms cubic-bezier(0.4, 0, 0.2, 1), " +
+            "width 280ms cubic-bezier(0.4, 0, 0.2, 1), " +
+            "height 280ms cubic-bezier(0.4, 0, 0.2, 1), " +
+            "border-radius 280ms cubic-bezier(0.4, 0, 0.2, 1)";
+          collapseBtn.style.left = targetLeft + "px";
+          collapseBtn.style.top = targetTop + "px";
+          collapseBtn.style.width = "32px";
+          collapseBtn.style.height = "32px";
+          collapseBtn.style.borderRadius = "6px";
+
+          this._expandTimeout = setTimeout(() => {
+            this._expandTimeout = null;
+            if (this.shadowRoot) {
+              const btn = this.shadowRoot.querySelector<HTMLButtonElement>(
+                ".collapse-toggle",
+              );
+              if (btn && !this.collapsed) {
+                btn.style.position = "";
+                btn.style.left = "";
+                btn.style.right = "";
+                btn.style.top = "";
+                btn.style.zIndex = "";
+                btn.style.width = "";
+                btn.style.height = "";
+                btn.style.borderRadius = "";
+                btn.style.transition = "";
+                btn.style.background = "";
+                btn.style.border = "";
+                btn.style.borderRight = "";
+                btn.style.display = "";
+                btn.style.placeItems = "";
+              }
+            }
+          }, 300);
+        }
+      }
 
       const messagesMarkup = messages.length
         ? messages
@@ -130,13 +254,16 @@ class ArsChatPanel extends HTMLElement {
         }
       }
 
-      if (inputEl) {
-        if (inputEl.value !== this._draftValue) {
-          inputEl.value = this._draftValue;
+      if (textareaEl) {
+        if (textareaEl.value !== this._draftValue) {
+          textareaEl.value = this._draftValue;
+          if (!this._draftValue) {
+            textareaEl.style.height = "auto";
+          }
         }
-        inputEl.disabled = isTyping;
-        if (inputEl.getAttribute("placeholder") !== this.placeholder) {
-          inputEl.setAttribute("placeholder", this.placeholder);
+        textareaEl.disabled = isTyping;
+        if (textareaEl.getAttribute("placeholder") !== this.placeholder) {
+          textareaEl.setAttribute("placeholder", this.placeholder);
         }
       }
 
@@ -161,6 +288,11 @@ class ArsChatPanel extends HTMLElement {
         subtitleEl.style.display = this.subtitle ? "" : "none";
       }
 
+      if (panelEl) {
+        panelEl.classList.toggle("collapsed", this.collapsed);
+        panelEl.classList.toggle("has-collapse-toggle", this.collapsible);
+      }
+
       return;
     }
 
@@ -173,9 +305,28 @@ class ArsChatPanel extends HTMLElement {
           .join("")
       : `<div class="message message-system">Send a message to start.</div>`;
 
+    const panelClasses = [
+      "panel",
+      this.collapsible ? "has-collapse-toggle" : "",
+      this.collapsed ? "collapsed" : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    const rect = this.getBoundingClientRect();
+    const collapsedTop = this.collapsed ? Math.round(rect.top) : 0;
+    const collapseToggleStyle = this.collapsible
+      ? (this.collapsed
+          ? `style="position:fixed;left:auto;right:0;top:${collapsedTop}px;z-index:9999;width:56px;height:72px;border-radius:10px 0 0 10px;background:var(--arswc-color-surface,#f6f8fb);border:1px solid var(--arswc-color-border,#d5dde8);border-right:none;display:grid;place-items:center;"`
+          : "")
+      : 'style="display:none;"';
+
     this.shadowRoot.innerHTML = `
       <style>${ArsChatPanel.#styles()}</style>
-      <section class="panel">
+      <button type="button" class="collapse-toggle ${this.collapsed ? "collapsed" : ""}" ${collapseToggleStyle} aria-label="${this.collapsed ? "Expand" : "Collapse"}">
+        ${this.collapsed ? ArsChatPanel.#messageIcon() : ArsChatPanel.#chevronRightIcon()}
+      </button>
+      <section class="${panelClasses}">
         <div class="header">
           <div>
             <div class="title">${ArsChatPanel.#escapeHtml(this.title)}</div>
@@ -185,28 +336,33 @@ class ArsChatPanel extends HTMLElement {
         </div>
         <div class="messages">${messagesMarkup}</div>
         <div class="input-row">
-          <input type="text" placeholder="${ArsChatPanel.#escapeHtml(this.placeholder)}" value="${ArsChatPanel.#escapeHtml(this._draftValue)}" ${isTyping ? "disabled" : ""}>
-          <button type="button" class="send" ${isTyping ? "disabled" : ""}>Send</button>
+          <textarea placeholder="${ArsChatPanel.#escapeHtml(this.placeholder)}" rows="1" ${isTyping ? "disabled" : ""}>${ArsChatPanel.#escapeHtml(this._draftValue)}</textarea>
+          <button type="button" class="send" ${isTyping ? "disabled" : ""} aria-label="Send">
+            ${ArsChatPanel.#arrowUpIcon()}
+          </button>
         </div>
         <div class="typing">${isTyping ? "Typing..." : ""}</div>
       </section>
     `;
 
-    const input = this.shadowRoot.querySelector<HTMLInputElement>("input");
+    const textarea = this.shadowRoot.querySelector<HTMLTextAreaElement>("textarea");
     const sendButton = this.shadowRoot.querySelector<HTMLButtonElement>("button.send");
     const clearButton = this.shadowRoot.querySelector<HTMLButtonElement>("button.clear");
     const messagesContainer = this.shadowRoot.querySelector<HTMLElement>(".messages");
+    const collapseToggle = this.shadowRoot.querySelector<HTMLButtonElement>(".collapse-toggle");
 
     if (messagesContainer) {
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
-    input?.addEventListener("input", () => {
-      this._draftValue = input.value;
+    textarea?.addEventListener("input", () => {
+      this._draftValue = textarea.value;
+      textarea.style.height = "auto";
+      textarea.style.height = Math.min(textarea.scrollHeight, 120) + "px";
     });
 
-    input?.addEventListener("keypress", (event) => {
-      if (event.key !== "Enter" || this.typing) {
+    textarea?.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" || event.shiftKey || this.typing) {
         return;
       }
       event.preventDefault();
@@ -224,6 +380,10 @@ class ArsChatPanel extends HTMLElement {
           composed: true,
         }),
       );
+    });
+
+    collapseToggle?.addEventListener("click", () => {
+      this.collapsed = !this.collapsed;
     });
   }
 
@@ -253,17 +413,32 @@ class ArsChatPanel extends HTMLElement {
       .replaceAll("'", "&#39;");
   }
 
+  static #arrowUpIcon(): string {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>`;
+  }
+
+  static #chevronRightIcon(): string {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+  }
+
+  static #messageIcon(): string {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
+  }
+
   static #styles(): string {
     return `
       :host {
         display: block;
+        position: relative;
         width: 100%;
         height: 100%;
+        overflow: hidden;
         font-family: var(--arswc-font-family-sans, system-ui, sans-serif);
       }
 
       .panel {
         box-sizing: border-box;
+        position: relative;
         display: grid;
         grid-template-rows: auto minmax(0, 1fr) auto auto;
         gap: var(--arswc-spacing-sm, 8px);
@@ -274,6 +449,49 @@ class ArsChatPanel extends HTMLElement {
         border-radius: var(--arswc-radius-md, 10px);
         background: var(--arswc-color-surface, #f6f8fb);
         color: var(--arswc-color-text, #1b2430);
+        transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .panel.collapsed {
+        transform: translateX(100%);
+        pointer-events: none;
+      }
+
+      .panel.has-collapse-toggle .header {
+        padding-left: 36px;
+      }
+
+      .collapse-toggle {
+        position: absolute;
+        left: 8px;
+        top: 12px;
+        width: 32px;
+        height: 32px;
+        display: grid;
+        place-items: center;
+        border: none;
+        border-radius: var(--arswc-radius-sm, 6px);
+        background: color-mix(in srgb, var(--arswc-color-accent, #2563eb) 15%, transparent);
+        color: var(--arswc-color-accent, #2563eb);
+        cursor: pointer;
+        pointer-events: auto;
+        z-index: 1;
+        box-sizing: border-box;
+        transition: background 120ms ease, color 120ms ease, left 280ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .collapse-toggle:hover {
+        background: color-mix(in srgb, var(--arswc-color-accent, #2563eb) 25%, transparent);
+      }
+
+      .collapse-toggle.collapsed {
+        /* position, left/right/top are set via inline styles (position:fixed) */
+        width: 56px;
+        height: 72px;
+        border-radius: 10px 0 0 10px;
+        background: var(--arswc-color-surface, #f6f8fb);
+        border: 1px solid var(--arswc-color-border, #d5dde8);
+        border-right: none;
       }
 
       .header {
@@ -345,35 +563,46 @@ class ArsChatPanel extends HTMLElement {
       }
 
       .input-row {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: var(--arswc-spacing-sm, 8px);
+        position: relative;
+        display: flex;
+        align-items: flex-end;
       }
 
-      input {
-        min-width: 0;
-        padding: var(--arswc-spacing-sm, 8px) var(--arswc-spacing-md, 16px);
+      textarea {
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 40px;
+        max-height: 120px;
+        padding: var(--arswc-spacing-sm, 8px) 44px var(--arswc-spacing-sm, 8px) var(--arswc-spacing-md, 16px);
         border: 1px solid var(--arswc-color-border, #d5dde8);
         border-radius: var(--arswc-radius-sm, 6px);
         background: var(--arswc-color-bg, #ffffff);
         color: var(--arswc-color-text, #1b2430);
         font: inherit;
+        resize: none;
+        outline: none;
+        line-height: 1.4;
       }
 
-      input:focus-visible {
+      textarea:focus-visible {
         outline: none;
         border-color: var(--arswc-color-accent, #2563eb);
         box-shadow: var(--arswc-focus-ring, 0 0 0 3px rgba(37, 99, 235, 0.3));
       }
 
-      /* input:disabled intentionally unstyled — the component already
+      /* textarea:disabled intentionally unstyled — the component already
          sets disabled=true functionally; we keep the visual appearance
          unchanged so the UI doesn't flicker during agent typing. */
 
       button.send {
+        position: absolute;
+        right: 6px;
+        bottom: 6px;
+        width: 28px;
+        height: 28px;
+        padding: 0;
         border: none;
-        border-radius: var(--arswc-radius-sm, 6px);
-        padding: var(--arswc-spacing-sm, 8px) var(--arswc-spacing-md, 16px);
+        border-radius: 50%;
         background: linear-gradient(
           180deg,
           var(--arswc-button-primary-bg-start, #3b82f6),
@@ -381,13 +610,14 @@ class ArsChatPanel extends HTMLElement {
         );
         color: var(--arswc-button-primary-color, #ffffff);
         cursor: pointer;
-        font: inherit;
-        font-weight: 700;
+        display: grid;
+        place-items: center;
       }
 
-      /* button.send:disabled intentionally unstyled — the component already
-         sets disabled=true functionally; we keep the visual appearance
-         unchanged so the UI doesn't flicker during agent typing. */
+      button.send:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
 
       .typing {
         color: var(--arswc-color-muted, #64748b);
