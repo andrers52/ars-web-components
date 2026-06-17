@@ -65,4 +65,123 @@ describe("ArsMarkdown", () => {
     p = element.shadowRoot?.querySelector("p");
     expect(p?.textContent).toBe("Second");
   });
+
+  // ── View/Edit mode tests ────────────────────────────────────────
+
+  it("defaults to view mode", () => {
+    expect(element.mode).toBe("view");
+  });
+
+  it("renders markdown in view mode", () => {
+    element.source = "**bold**";
+    document.body.appendChild(element);
+    const strong = element.shadowRoot?.querySelector("strong");
+    expect(strong?.textContent).toBe("bold");
+    const textarea = element.shadowRoot?.querySelector("textarea");
+    expect(textarea).toBeNull();
+  });
+
+  it("renders textarea in edit mode", () => {
+    element.source = "raw text";
+    element.mode = "edit";
+    document.body.appendChild(element);
+    const textarea = element.shadowRoot?.querySelector("textarea");
+    expect(textarea).toBeTruthy();
+    expect(textarea?.value).toBe("raw text");
+    const body = element.shadowRoot?.querySelector(".markdown-body");
+    expect(body).toBeNull();
+  });
+
+  it("preserves raw HTML content in edit mode textarea", () => {
+    element.source = "<script>alert('x')</script>";
+    element.mode = "edit";
+    document.body.appendChild(element);
+    const textarea = element.shadowRoot?.querySelector("textarea") as HTMLTextAreaElement;
+    expect(textarea.value).toBe("<script>alert('x')</script>");
+  });
+
+  it("emits ars-markdown:change on textarea input", () => {
+    element.mode = "edit";
+    document.body.appendChild(element);
+    const textarea = element.shadowRoot?.querySelector("textarea") as HTMLTextAreaElement;
+
+    let received: string | null = null;
+    element.addEventListener("ars-markdown:change", ((e: CustomEvent) => {
+      received = e.detail.source;
+    }) as EventListener);
+
+    textarea.value = "new content";
+    textarea.dispatchEvent(new Event("input"));
+
+    expect(received).toBe("new content");
+  });
+
+  it("updates source when textarea changes", () => {
+    element.mode = "edit";
+    document.body.appendChild(element);
+    const textarea = element.shadowRoot?.querySelector("textarea") as HTMLTextAreaElement;
+
+    textarea.value = "updated";
+    textarea.dispatchEvent(new Event("input"));
+
+    expect(element.source).toBe("updated");
+  });
+
+  it("toggling from edit to view renders markdown from edited source", () => {
+    element.source = "initial";
+    element.mode = "edit";
+    document.body.appendChild(element);
+
+    const textarea = element.shadowRoot?.querySelector("textarea") as HTMLTextAreaElement;
+    textarea.value = "**bold**";
+    textarea.dispatchEvent(new Event("input"));
+
+    element.mode = "view";
+    const strong = element.shadowRoot?.querySelector("strong");
+    expect(strong?.textContent).toBe("bold");
+  });
+
+  it("toggling from view to edit preserves source", () => {
+    element.source = "my text";
+    document.body.appendChild(element);
+    element.mode = "edit";
+
+    const textarea = element.shadowRoot?.querySelector("textarea") as HTMLTextAreaElement;
+    expect(textarea.value).toBe("my text");
+  });
+
+  it("toggling mode does not fire change event", () => {
+    element.source = "text";
+    document.body.appendChild(element);
+
+    let changeCount = 0;
+    element.addEventListener("ars-markdown:change", () => {
+      changeCount++;
+    });
+
+    element.mode = "edit";
+    element.mode = "view";
+
+    expect(changeCount).toBe(0);
+  });
+
+  it("sets mode via attribute", () => {
+    element.source = "content";
+    document.body.appendChild(element);
+    element.setAttribute("mode", "edit");
+
+    const textarea = element.shadowRoot?.querySelector("textarea");
+    expect(textarea).toBeTruthy();
+    expect(element.mode).toBe("edit");
+  });
+
+  it("invalid mode attribute defaults to view", () => {
+    element.source = "content";
+    document.body.appendChild(element);
+    element.setAttribute("mode", "invalid");
+
+    expect(element.mode).toBe("view");
+    const body = element.shadowRoot?.querySelector(".markdown-body");
+    expect(body).toBeTruthy();
+  });
 });

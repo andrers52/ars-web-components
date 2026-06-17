@@ -2,19 +2,23 @@
 //
 // Attributes:
 //   source — Raw markdown string to render.
+//   mode   — "view" (default) renders HTML; "edit" shows a textarea.
 //
 // Properties:
 //   source — Same as attribute; setting updates the rendered output.
+//   mode   — "view" | "edit". Toggling re-renders the component.
 //
 // Events:
-//   none
+//   ars-markdown:change — Emitted in edit mode when the user modifies
+//     the textarea. detail: { source: string }.
 
 class ArsMarkdown extends HTMLElement {
   static get observedAttributes() {
-    return ["source"];
+    return ["source", "mode"];
   }
 
   #source = "";
+  #mode: "view" | "edit" = "view";
 
   constructor() {
     super();
@@ -29,6 +33,9 @@ class ArsMarkdown extends HTMLElement {
     if (name === "source" && newValue !== null) {
       this.source = newValue;
     }
+    if (name === "mode") {
+      this.mode = (newValue === "edit") ? "edit" : "view";
+    }
   }
 
   get source(): string {
@@ -42,16 +49,56 @@ class ArsMarkdown extends HTMLElement {
     }
   }
 
+  get mode(): "view" | "edit" {
+    return this.#mode;
+  }
+
+  set mode(value: "view" | "edit") {
+    if (this.#mode === value) return;
+    this.#mode = value;
+    if (this.shadowRoot) {
+      this.#render();
+    }
+  }
+
   #render() {
     if (!this.shadowRoot) return;
-    this.shadowRoot.innerHTML = `
-      <style>${ArsMarkdown.#styles()}</style>
-      <div class="markdown-body" part="markdown"></div>
-    `;
-    const body = this.shadowRoot.querySelector(".markdown-body") as HTMLDivElement;
-    if (body) {
-      body.innerHTML = this.#parseMarkdown(this.#source);
+    if (this.#mode === "edit") {
+      this.shadowRoot.innerHTML = `
+        <style>${ArsMarkdown.#editStyles()}</style>
+        <textarea class="md-editor">${this.#escapeHtml(this.#source)}</textarea>
+      `;
+      const textarea = this.shadowRoot.querySelector("textarea") as HTMLTextAreaElement;
+      if (textarea) {
+        textarea.addEventListener("input", () => {
+          this.#source = textarea.value;
+          this.dispatchEvent(
+            new CustomEvent("ars-markdown:change", {
+              detail: { source: this.#source },
+              bubbles: true,
+              composed: true,
+            })
+          );
+        });
+      }
+    } else {
+      this.shadowRoot.innerHTML = `
+        <style>${ArsMarkdown.#viewStyles()}</style>
+        <div class="markdown-body" part="markdown"></div>
+      `;
+      const body = this.shadowRoot.querySelector(".markdown-body") as HTMLDivElement;
+      if (body) {
+        body.innerHTML = this.#parseMarkdown(this.#source);
+      }
     }
+  }
+
+  #escapeHtml(src: string): string {
+    return src
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
   }
 
   /** Minimal markdown parser covering headings, paragraphs, bold, italic, code,
@@ -149,7 +196,31 @@ class ArsMarkdown extends HTMLElement {
     return html;
   }
 
-  static #styles(): string {
+  static #editStyles(): string {
+    return `
+      :host { display: block; }
+      .md-editor {
+        width: 100%;
+        min-height: 6em;
+        font-family: var(--arsds-font-family-mono, monospace);
+        font-size: var(--arsds-font-size-md, 1rem);
+        line-height: 1.6;
+        padding: 0.5em;
+        border: 1px solid var(--arsds-color-border, #ccc);
+        border-radius: var(--arsds-radius-md, 6px);
+        background: var(--arsds-color-surface, #fff);
+        color: var(--arsds-color-text-primary, inherit);
+        resize: vertical;
+        box-sizing: border-box;
+      }
+      .md-editor:focus {
+        outline: 2px solid var(--arsds-color-accent, #0066cc);
+        outline-offset: -1px;
+      }
+    `;
+  }
+
+  static #viewStyles(): string {
     return `
       :host { display: block; }
       .markdown-body {
