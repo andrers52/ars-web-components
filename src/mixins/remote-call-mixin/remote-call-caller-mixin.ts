@@ -40,7 +40,7 @@ class RemoteCallCallerMixin extends MixinBase() {
     this._removeListeners();
   }
 
-  attributeChangedCallback(name, oldVal, newVal) {
+  attributeChangedCallback(name: string, oldVal: string | null, newVal: string | null) {
     super.attributeChangedCallback && super.attributeChangedCallback(name, oldVal, newVal);
     if (this._isInitialized && oldVal !== newVal && Object.values(AttributeKeys).includes(name)) {
       this._removeListeners();
@@ -48,16 +48,16 @@ class RemoteCallCallerMixin extends MixinBase() {
     }
   }
 
-  _buildArgs(e) {
+  _buildArgs(e: CustomEvent) {
     const mapAttr = this.getAttribute(AttributeKeys.ARGSMAP);
     if (!mapAttr) {
       return [];
     }
     let mapObj;
     try { mapObj = JSON.parse(mapAttr); } catch(err) { console.error('Invalid args-map JSON:', err); return []; }
-    const argsArr = [];
+    const argsArr: unknown[] = [];
     Object.entries(mapObj).forEach(([key, pos])=>{
-      argsArr[pos as any] = e.detail ? e.detail[key] : undefined;
+      argsArr[pos as number] = e.detail ? (e.detail as Record<string, unknown>)[key] : undefined;
     });
     return argsArr;
   }
@@ -68,7 +68,7 @@ class RemoteCallCallerMixin extends MixinBase() {
     if (listenAttr.length === 0) return;
     const target = this.findActualTargetComponent();
     if (!target) { console.warn('RemoteCallCallerMixin: no inner target found'); return; }
-    const handlerFactory = (_evtName) => (e) => {
+    const handlerFactory = (_evtName: string) => (e: CustomEvent) => {
       const targetId = this.getAttribute(AttributeKeys.TARGET);
       const method = this.getAttribute(AttributeKeys.METHOD);
       if (!targetId || !method) {
@@ -80,19 +80,19 @@ class RemoteCallCallerMixin extends MixinBase() {
     };
     listenAttr.forEach(evtName => {
       const h = handlerFactory(evtName);
-      target.addEventListener(evtName, h);
-      this._boundHandlers.push({evt: evtName, handler: h, target});
+      target.addEventListener(evtName, h as EventListener);
+      this._boundHandlers.push({evt: evtName, handler: h as EventListener, target});
     });
   }
 
   _removeListeners() {
-    this._boundHandlers.forEach(({evt, handler, target}) => {
+    this._boundHandlers.forEach(({evt, handler, target}: {evt: string, handler: EventListener, target: Element}) => {
       target.removeEventListener(evt, handler);
     });
     this._boundHandlers = [];
   }
 
-  _callRemote(targetId, methodName, ...args) {
+  _callRemote(targetId: string, methodName: string, ...args: unknown[]) {
     const detail = {
       targetId,
       method: methodName,
@@ -108,12 +108,12 @@ class RemoteCallCallerMixin extends MixinBase() {
   }
 
   // Public API so external scripts (demo) can trigger remote calls programmatically
-  callRemote(targetId, methodName, ...args) {
+  callRemote(targetId: string, methodName: string, ...args: unknown[]) {
     this._callRemote(targetId, methodName, ...args);
   }
 
   // Simple logger used by the demo page
-  log(message, type = 'info') {
+  log(message: string, type: string = 'info') {
     console[type === 'error' ? 'error' : 'log']('[DemoCaller]', message);
   }
 }

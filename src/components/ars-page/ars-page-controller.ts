@@ -76,12 +76,12 @@ class ArsPageController extends WebComponentBase {
     return internalComponent ? (internalComponent as any).getCurrentPage() : null;
   }
 
-  navigateToPage(pageId) {
+  navigateToPage(pageId: string) {
     const internalComponent = this.querySelector('ars-page-controller-internal');
     return internalComponent ? (internalComponent as any).navigateToPage(pageId) : false;
   }
 
-  setNavigationType(type) {
+  setNavigationType(type: string) {
     const internalComponent = this.querySelector('ars-page-controller-internal');
     if (internalComponent) {
       (internalComponent as any).setNavigationType(type);

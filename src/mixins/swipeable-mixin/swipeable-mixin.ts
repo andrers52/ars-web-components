@@ -26,7 +26,11 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
 
     // simple shadow that just renders children "as-is"
     this.attachShadow({ mode: 'open' });
-    this.shadowRoot.innerHTML = `
+    const shadowRoot = this.shadowRoot;
+    if (!shadowRoot) {
+      throw new Error('Failed to attach shadow root');
+    }
+    shadowRoot.innerHTML = `
       <style>
         :host {
           display: flex;
@@ -42,28 +46,28 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
   }
 
   // Private utility functions
-  _validateDistance(distance) {
-    const num = parseInt(distance);
+  _validateDistance(distance: string | null) {
+    const num = parseInt(distance ?? "");
     return !isNaN(num) && num > 0;
   }
 
-  _validateTime(time) {
-    const num = parseInt(time);
+  _validateTime(time: string | null) {
+    const num = parseInt(time ?? "");
     return !isNaN(num) && num > 0;
   }
 
-  _getTouchCoordinates(event) {
-    if (event.touches && event.touches.length > 0) {
+  _getTouchCoordinates(event: PointerEvent | MouseEvent | TouchEvent) {
+    if ('touches' in event && event.touches && event.touches.length > 0) {
       // Touch start or move
       const touch = event.touches[0];
       return { x: touch.clientX, y: touch.clientY };
-    } else if (event.changedTouches && event.changedTouches.length > 0) {
+    } else if ('changedTouches' in event && event.changedTouches && event.changedTouches.length > 0) {
       // Touch end
       const touch = event.changedTouches[0];
       return { x: touch.clientX, y: touch.clientY };
     } else {
       // Mouse event fallback
-      return { x: event.clientX, y: event.clientY };
+      return { x: (event as MouseEvent).clientX, y: (event as MouseEvent).clientY };
     }
   }
 
@@ -81,7 +85,7 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
     return Date.now() - this._touchStartTime;
   }
 
-  _determineSwipeDirection(deltaX, deltaY) {
+  _determineSwipeDirection(deltaX: number, deltaY: number) {
     const absX = Math.abs(deltaX);
     const absY = Math.abs(deltaY);
     if (absX > absY) {
@@ -91,11 +95,11 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
     }
   }
 
-  _isValidSwipe(distance, time) {
+  _isValidSwipe(distance: number, time: number) {
     return distance >= this._minSwipeDistance && time <= this._maxSwipeTime;
   }
 
-  _handleTouchStart = (event) => {
+  _handleTouchStart = (event: PointerEvent | MouseEvent) => {
     event.preventDefault();
     const coords = this._getTouchCoordinates(event);
     this._touchStartX = coords.x;
@@ -103,12 +107,12 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
     this._touchStartTime = Date.now();
   };
 
-  _handleTouchMove = (event) => {
+  _handleTouchMove = (event: PointerEvent | MouseEvent) => {
     event.preventDefault();
     // Prevent scrolling during swipe
   };
 
-  _handleTouchEnd = (event) => {
+  _handleTouchEnd = (event: PointerEvent | MouseEvent) => {
     event.preventDefault();
     const coords = this._getTouchCoordinates(event);
     this._touchEndX = coords.x;
@@ -121,14 +125,14 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
     }
   };
 
-  _handleMouseStart = (event) => {
+  _handleMouseStart = (event: PointerEvent | MouseEvent) => {
     const coords = this._getTouchCoordinates(event);
     this._touchStartX = coords.x;
     this._touchStartY = coords.y;
     this._touchStartTime = Date.now();
   };
 
-  _handleMouseEnd = (event) => {
+  _handleMouseEnd = (event: PointerEvent | MouseEvent) => {
     const coords = this._getTouchCoordinates(event);
     this._touchEndX = coords.x;
     this._touchEndY = coords.y;
@@ -141,19 +145,19 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
   };
 
   // Public API
-  setMinSwipeDistance(distance) {
+  setMinSwipeDistance(distance: string) {
     if (this._validateDistance(distance)) {
       this._minSwipeDistance = parseInt(distance);
     }
   }
 
-  setMaxSwipeTime(time) {
+  setMaxSwipeTime(time: string) {
     if (this._validateTime(time)) {
       this._maxSwipeTime = parseInt(time);
     }
   }
 
-  onSwipe(direction, details) {
+  onSwipe(direction: string, details: Record<string, unknown>) {
     // Always dispatch from the host element, not from shadowRoot or a child
     this.dispatchEvent(new CustomEvent("swipe", {
       detail: { direction, ...details },
@@ -163,15 +167,15 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
   }
 
   connectedCallback() {
-    if (super.connectedCallback) super.connectedCallback();
+    super.connectedCallback();
     // Set initial attributes
     const distance = this.getAttribute("min-swipe-distance");
     if (this._validateDistance(distance)) {
-      this._minSwipeDistance = parseInt(distance);
+      this._minSwipeDistance = parseInt(distance ?? "");
     }
     const time = this.getAttribute("max-swipe-time");
     if (this._validateTime(time)) {
-      this._maxSwipeTime = parseInt(time);
+      this._maxSwipeTime = parseInt(time ?? "");
     }
     // Attach pointer events to the host element
     this.addEventListener("pointerdown", this._handlePointerDown);
@@ -182,7 +186,7 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
   }
 
   disconnectedCallback() {
-    if (super.disconnectedCallback) super.disconnectedCallback();
+    super.disconnectedCallback();
     this.removeEventListener("pointerdown", this._handlePointerDown);
     this.removeEventListener("pointermove", this._handlePointerMove);
     this.removeEventListener("pointerup", this._handlePointerUp);
@@ -190,16 +194,16 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
     this.removeEventListener("pointerleave", this._handlePointerUp);
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (super.attributeChangedCallback) super.attributeChangedCallback(name, oldValue, newValue);
+  attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
+    super.attributeChangedCallback(name, oldValue, newValue);
     if (name === "min-swipe-distance" && this._validateDistance(newValue)) {
-      this._minSwipeDistance = parseInt(newValue);
+      this._minSwipeDistance = parseInt(newValue ?? "");
     } else if (name === "max-swipe-time" && this._validateTime(newValue)) {
-      this._maxSwipeTime = parseInt(newValue);
+      this._maxSwipeTime = parseInt(newValue ?? "");
     }
   }
 
-  _handlePointerDown = (event) => {
+  _handlePointerDown = (event: PointerEvent) => {
     if (this._pointerDown) return; // Only track one pointer
     
     // Try to capture the pointer (only for non-redispatched events)
@@ -227,7 +231,7 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
     }
   };
 
-  _handlePointerMove = (event) => {
+  _handlePointerMove = (event: PointerEvent) => {
     if (!this._pointerDown || event.pointerId !== this._pointerId) return;
     
     // Only process if we captured the pointer or it's a redispatched event from another element
@@ -270,7 +274,7 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
     }));
   };
 
-  _handlePointerUp = (event) => {
+  _handlePointerUp = (event: PointerEvent) => {
     if (!this._pointerDown || event.pointerId !== this._pointerId) return;
     
     // Only process if we captured the pointer or it's a redispatched event from another element

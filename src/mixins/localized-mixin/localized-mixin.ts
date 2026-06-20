@@ -23,19 +23,19 @@ class LocalizedMixin extends MixinBase() {
   /* --------------------------------------------------
    *  Validation helpers
    * -------------------------------------------------- */
-  _isValidLocale(loc) { return typeof loc === 'string' && loc.trim().length > 0; }
-  _isValidTranslations(obj) { return typeof obj === 'object' && obj !== null; }
+  _isValidLocale(loc: string | null) { return typeof loc === 'string' && loc.trim().length > 0; }
+  _isValidTranslations(obj: unknown) { return typeof obj === 'object' && obj !== null; }
 
   /* --------------------------------------------------
    *  Translation lookup helpers
    * -------------------------------------------------- */
-  _findTranslation(key, locale = this._locale) {
-    const tryLocale = (store, loc) => {
+  _findTranslation(key: string, locale: string = this._locale) {
+    const tryLocale = (store: Record<string, Record<string, unknown>>, loc: string): unknown => {
       const parts = key.split('.');
-      let val = store[loc];
+      let val: unknown = store[loc];
       for (const part of parts) {
         if (val && typeof val === 'object') {
-          val = val[part];
+          val = (val as Record<string, unknown>)[part];
         } else {
           return null;
         }
@@ -58,36 +58,35 @@ class LocalizedMixin extends MixinBase() {
     return tryLocale(this._translations, 'en') ?? tryLocale(this._defaultTranslations, 'en');
   }
 
-  _interpolate(str, params) {
+  _interpolate(str: string, params: Record<string, unknown>) {
     if (!str || typeof str !== 'string' || !params) return str;
-    return str.replace(/\{(\w+)\}/g, (m,k)=> (params[k]!==undefined?params[k]:m));
+    return str.replace(/\{(\w+)\}/g, (m, k) => { const v = params[k]; return v !== undefined ? String(v) : m; });
   }
 
   /* --------------------------------------------------
    *  Public API
    * -------------------------------------------------- */
-  setLocale(loc) {
-    if(this._isValidLocale(loc)){
-      this._locale = loc;
-      this._loadTranslations();
-      this._render();
-    }
+  setLocale(loc: string | null) {
+    if(!loc || !this._isValidLocale(loc)) return;
+    this._locale = loc;
+    this._loadTranslations();
+    this._render();
   }
   getLocale(){ return this._locale; }
 
-  addTranslations(locale, obj){
+  addTranslations(locale: string, obj: Record<string, unknown>){
     if(!this._isValidLocale(locale)||!this._isValidTranslations(obj)) return false;
     this._translations[locale] = { ...(this._translations[locale]||{}), ...obj };
     return true;
   }
-  setDefaultTranslations(locale,obj){
+  setDefaultTranslations(locale: string,obj: Record<string, unknown>){
     if(this._isValidLocale(locale)&&this._isValidTranslations(obj)) this._defaultTranslations[locale]={...obj};
   }
 
   // @ts-ignore
   translate(key: any, params?: any): any {
     const t=this._findTranslation(key);
-    return t?this._interpolate(t,params):key;
+    return t?this._interpolate(t as string,params):key;
   }
 
   // Method to reload translations from attribute or global object
@@ -99,18 +98,18 @@ class LocalizedMixin extends MixinBase() {
 
   _loadTranslations() {
     this._translations = {};
-    let translations = this.getAttribute('translations');
-    if (translations) {
+    const translationsAttr = this.getAttribute('translations');
+    if (translationsAttr) {
       try {
-        translations = JSON.parse(translations);
-        Object.entries(translations).forEach(([l, t]) => this.addTranslations(l, t));
+        const parsedTranslations = JSON.parse(translationsAttr);
+        Object.entries(parsedTranslations).forEach(([l, t]) => this.addTranslations(l, t as Record<string, unknown>));
         return;
       } catch (e) {
         console.error('Invalid translations JSON in attribute', e);
       }
     }
     if((window as any).globalTranslations && this._isValidTranslations((window as any).globalTranslations)){
-      Object.entries((window as any).globalTranslations).forEach(([l,t]) => this.addTranslations(l,t));
+      Object.entries((window as any).globalTranslations).forEach(([l,t]) => this.addTranslations(l, t as Record<string, unknown>));
     }
   }
 
@@ -124,16 +123,18 @@ class LocalizedMixin extends MixinBase() {
       this._originalTemplate = target.innerHTML;
     }
     let html = this._originalTemplate;
-    html = html.replace(/\[\[localization\.([^\]]+)\]\]/g,(m,k)=> {
+    html = html.replace(/\[\[localization\.([^\]]+)\]\]/g,(m: string,k: string)=> {
       return this.translate(k);
     });
     target.innerHTML = html;
 
     // --- Attribute-based localization using data-localize-map ---
     if (target.hasAttribute && target.hasAttribute('data-localize-map')) {
+      const mapAttr = target.getAttribute('data-localize-map');
+      if (!mapAttr) return;
       let map;
       try {
-        map = JSON.parse(target.getAttribute('data-localize-map'));
+        map = JSON.parse(mapAttr);
       } catch (e) {
         console.error('Invalid data-localize-map JSON', e);
         return;
@@ -159,7 +160,7 @@ class LocalizedMixin extends MixinBase() {
 
     // Read attributes
     const locAttr = this.getAttribute('locale');
-    if(this._isValidLocale(locAttr)) this._locale = locAttr;
+    if(this._isValidLocale(locAttr)) this.setLocale(locAttr as string);
 
     // Load translations from attribute or global
     this._loadTranslations();
@@ -188,9 +189,9 @@ class LocalizedMixin extends MixinBase() {
     super.disconnectedCallback?.();
   }
 
-  attributeChangedCallback(name, oldVal, newVal){
+  attributeChangedCallback(name: string, oldVal: string | null, newVal: string | null){
     super.attributeChangedCallback?.(name, oldVal, newVal);
-    if(name === 'locale' && this._isValidLocale(newVal)) this.setLocale(newVal);
+    if(name === 'locale' && newVal) this.setLocale(newVal);
     if(name === 'translations') {
       this._loadTranslations();
       this._render();
@@ -198,7 +199,7 @@ class LocalizedMixin extends MixinBase() {
     if(name === 'translations' && newVal){
       try{
         const obj = JSON.parse(newVal);
-        Object.entries(obj).forEach(([l,t]) => this.addTranslations(l,t));
+        Object.entries(obj).forEach(([l,t]) => this.addTranslations(l, t as Record<string, unknown>));
       } catch(e){
         console.error('Invalid translations JSON', e);
       }

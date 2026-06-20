@@ -19,18 +19,22 @@ class ShowIfPropertyTrueMixin extends WebComponentBase {
 
     // simple shadow that just renders children "as-is"
     this.attachShadow({ mode: 'open' });
-    this.shadowRoot.innerHTML = `
+    const shadowRoot = this.shadowRoot;
+    if (!shadowRoot) {
+      throw new Error('Failed to attach shadow root');
+    }
+    shadowRoot.innerHTML = `
       <style>:host{display:contents}</style><slot></slot>`;
   }
 
   /* --------------------------------------------------
    *  Private utility functions
    * -------------------------------------------------- */
-  #validateProperty(property) {
+  #validateProperty(property: string | null) {
     return typeof property === "string" && property.trim().length > 0;
   }
 
-  #getPropertyValue(property) {
+  #getPropertyValue(property: string) {
     if (!this.#validateProperty(property)) {
       return false;
     }
@@ -43,7 +47,7 @@ class ShowIfPropertyTrueMixin extends WebComponentBase {
 
     // Check if property exists on the target component
     if (property in targetComponent) {
-      return Boolean(targetComponent[property]);
+      return Boolean((targetComponent as unknown as Record<string, unknown>)[property]);
     }
 
     // Check if it's a data attribute on the target component
@@ -96,7 +100,7 @@ class ShowIfPropertyTrueMixin extends WebComponentBase {
   /* --------------------------------------------------
    *  Public API
    * -------------------------------------------------- */
-  setShowProperty(property) {
+  setShowProperty(property: string) {
     if (this.#validateProperty(property)) {
       this._showProperty = property;
       this.setAttribute('show-if-property', property);
@@ -128,7 +132,7 @@ class ShowIfPropertyTrueMixin extends WebComponentBase {
     }
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
+  attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
     super.attributeChangedCallback?.(name, oldValue, newValue);
 
     if (name === "show-if-property") {

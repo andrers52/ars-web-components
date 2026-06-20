@@ -1,4 +1,4 @@
-export function renderCalendarHTML(calendar) {
+export function renderCalendarHTML(calendar: any) {
   const css = calendar.customCSS || calendar.defaultCSS;
   const monthName = calendar.months[calendar.monthToShow];
   const year = calendar.yearToShow;
@@ -13,7 +13,7 @@ export function renderCalendarHTML(calendar) {
     </div>
     <div class="calendar-weekdays">
       ${calendar.localizedAbbreviatedDays
-        .map((day) => `<div class="calendar-weekday">${day}</div>`)
+        .map((day: string) => `<div class="calendar-weekday">${day}</div>`)
         .join("")}
     </div>
     <div class="calendar-body">
@@ -24,7 +24,7 @@ export function renderCalendarHTML(calendar) {
           const hasEvents =
             day &&
             calendar.events.some(
-              (event) =>
+              (event: Record<string, unknown>) =>
                 event.day === day &&
                 event.month === calendar.monthToShow &&
                 event.year === calendar.yearToShow,

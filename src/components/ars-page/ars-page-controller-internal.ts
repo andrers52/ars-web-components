@@ -41,7 +41,7 @@ class ArsPageControllerInternal extends WebComponentBase {
     return ["target-page"];
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
+  attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
     if (name === "target-page" && newValue) {
       this._targetPage = newValue;
       this._bindTargetRouterEvents();
@@ -129,7 +129,7 @@ class ArsPageControllerInternal extends WebComponentBase {
     this._navLinks = Array.from(
       this.querySelectorAll("[data-page], [data-route]"),
     );
-    this._navLinks.forEach((link) => {
+    this._navLinks.forEach((link: HTMLElement) => {
       link.addEventListener("click", this._navClickHandler);
     });
 
@@ -139,23 +139,23 @@ class ArsPageControllerInternal extends WebComponentBase {
 
   _removeNavListeners() {
     if (this._navLinks) {
-      this._navLinks.forEach((link) => {
+      this._navLinks.forEach((link: HTMLElement) => {
         link.removeEventListener("click", this._navClickHandler);
       });
     }
     this._navLinks = [];
   }
 
-  _onNavClick(e) {
+  _onNavClick(e: Event) {
     e.preventDefault();
-    const link = e.currentTarget;
+    const link = e.currentTarget as HTMLElement;
     const pageId = link.getAttribute("data-page");
     const route = link.getAttribute("data-route");
 
     if (pageId) {
       this.navigateToPage(pageId);
       // Update active class
-      this._navLinks.forEach((l) => l.classList.remove("active"));
+      this._navLinks.forEach((l: HTMLElement) => l.classList.remove("active"));
       link.classList.add("active");
 
       // Dispatch nav-click event for the remote-call-caller-mixin
@@ -169,7 +169,7 @@ class ArsPageControllerInternal extends WebComponentBase {
       const success = this.navigateToRoute(route);
       if (success) {
         // Update active class
-        this._navLinks.forEach((l) => l.classList.remove("active"));
+        this._navLinks.forEach((l: HTMLElement) => l.classList.remove("active"));
         link.classList.add("active");
       }
       // Don't dispatch nav-click event for route-based navigation
@@ -187,7 +187,7 @@ class ArsPageControllerInternal extends WebComponentBase {
 
   _updateActiveState() {
     // Update active class based on current page
-    this._navLinks?.forEach((link) => {
+    this._navLinks?.forEach((link: HTMLElement) => {
       const pageId = link.getAttribute("data-page");
       const route = link.getAttribute("data-route");
 
@@ -214,7 +214,7 @@ class ArsPageControllerInternal extends WebComponentBase {
     const currentRoute = this.getCurrentRoute();
 
     // Set active class on the corresponding nav link
-    this._navLinks.forEach((link) => {
+    this._navLinks.forEach((link: HTMLElement) => {
       const pageId = link.getAttribute("data-page");
       const route = link.getAttribute("data-route");
 
@@ -229,7 +229,7 @@ class ArsPageControllerInternal extends WebComponentBase {
   }
 
   // Public methods
-  navigateToPage(pageId) {
+  navigateToPage(pageId: string) {
     if (!this._targetPage) {
       return false;
     }
@@ -243,7 +243,7 @@ class ArsPageControllerInternal extends WebComponentBase {
 
     if (result && result.success) {
       // Update active class
-      this._navLinks.forEach((link) => {
+      this._navLinks.forEach((link: HTMLElement) => {
         const linkPageId = link.getAttribute("data-page");
         const linkRoute = link.getAttribute("data-route");
         if (
@@ -260,7 +260,7 @@ class ArsPageControllerInternal extends WebComponentBase {
     return false;
   }
 
-  navigateToRoute(route) {
+  navigateToRoute(route: string) {
     if (!this._targetPage) {
       return false;
     }
@@ -274,7 +274,7 @@ class ArsPageControllerInternal extends WebComponentBase {
 
     if (result && result.success) {
       // Update active class
-      this._navLinks.forEach((link) => {
+      this._navLinks.forEach((link: HTMLElement) => {
         const linkPageId = link.getAttribute("data-page");
         const linkRoute = link.getAttribute("data-route");
         if (
@@ -320,7 +320,7 @@ class ArsPageControllerInternal extends WebComponentBase {
   }
 
   // Method to be called by the remote-call-caller-mixin
-  _callRemote(targetId, methodName, ...args) {
+  _callRemote(targetId: string, methodName: string, ...args: unknown[]) {
     const detail = {
       targetId,
       method: methodName,

@@ -19,11 +19,15 @@
 import { Assert } from 'arslib';
 import WebComponentBase from '../../components/web-component-base/web-component-base.js';
 
-const MixinBase = (BaseClass = WebComponentBase) => class extends BaseClass {
-  [key: string]: any;
+const MixinBase = <T extends Constructor<HTMLElement> = Constructor<WebComponentBase>>(
+  BaseClass: T = WebComponentBase as unknown as T,
+) => class extends BaseClass {
+  [key: string]: unknown;
 
-  constructor() {
-    super();
+  declare _hoverHandler: ((event: MouseEvent) => void) | null;
+
+  constructor(...args: any[]) {
+    super(...args);
     this._hoverHandler = null;
     // Enforce naming convention for mixins
     Assert.assert(
@@ -39,7 +43,7 @@ const MixinBase = (BaseClass = WebComponentBase) => class extends BaseClass {
   /* -----------------------------------------
    *  Mixin / Target detection helpers
    * -------------------------------------- */
-  isMixin(element) {
+  isMixin(element: HTMLElement | null | undefined) {
     if (!element) return false;
     // Heuristic: custom element tag name ending with -mixin
     if (element.tagName && element.tagName.toLowerCase().endsWith('-mixin')) {
@@ -58,13 +62,13 @@ const MixinBase = (BaseClass = WebComponentBase) => class extends BaseClass {
    * should act upon.
    */
   findActualTargetComponent() {
-    const search = (el) => {
+    const search = (el: HTMLElement): HTMLElement | null => {
       if (!el || !el.children || el.children.length === 0) {
         return el === this ? null : el;
       }
       for (const child of el.children) {
-        if (!this.isMixin(child)) return child;
-        const deeper = search(child);
+        if (!this.isMixin(child as HTMLElement)) return child as HTMLElement;
+        const deeper = search(child as HTMLElement);
         if (deeper) return deeper;
       }
       return el === this ? null : el;
@@ -83,11 +87,15 @@ const MixinBase = (BaseClass = WebComponentBase) => class extends BaseClass {
    * @param {Object<string,Function|any>} map  name → value
    * @param {boolean} [force=false]  override existing?
    */
-  injectIntoTarget(target, map, force = false) {
+  injectIntoTarget(
+    target: HTMLElement & Record<string, unknown>,
+    map: Record<string, unknown>,
+    force = false,
+  ) {
     if (!target) return;
     Object.entries(map).forEach(([key, val]) => {
       if (force || typeof target[key] === 'undefined') {
-        target[key] = typeof val === 'function' ? val.bind(this) : val;
+        target[key] = typeof val === 'function' ? (val as (...args: unknown[]) => unknown).bind(this) : val;
       }
     });
   }
@@ -95,7 +103,10 @@ const MixinBase = (BaseClass = WebComponentBase) => class extends BaseClass {
   /* -----------------------------------------
    *  Hover helpers
    * -------------------------------------- */
-  setupHoverListeners(target, handler) {
+  setupHoverListeners(
+    target: HTMLElement | null | undefined,
+    handler: ((event: MouseEvent) => void) | null | undefined,
+  ) {
     if (!target || typeof handler !== 'function') return;
     this.cleanupHoverListeners();
     this._hoverHandler = handler;
@@ -110,6 +121,8 @@ const MixinBase = (BaseClass = WebComponentBase) => class extends BaseClass {
     }
   }
 };
+
+type Constructor<T = {}> = new (...args: any[]) => T;
 
 export { MixinBase };
 

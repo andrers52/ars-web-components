@@ -40,7 +40,7 @@ class ArsPage extends WebComponentBase {
     return ["default-page", "routes", "base-path", "routing-mode"];
   }
 
-  static defaultAttributeValue(name) {
+  static defaultAttributeValue(name: string) {
     if (name === "routes") {
       return "{}";
     }
@@ -50,7 +50,7 @@ class ArsPage extends WebComponentBase {
     return null;
   }
 
-  static parseAttributeValue(name, value) {
+  static parseAttributeValue(name: string, value: string) {
     if (name === "routes") {
       try {
         return JSON.parse(value);
@@ -62,7 +62,7 @@ class ArsPage extends WebComponentBase {
     return WebComponentBase.parseAttributeValue(name, value);
   }
 
-  allAttributesChangedCallback(attributes) {
+  allAttributesChangedCallback(attributes: Record<string, unknown>) {
     if (attributes.routes) {
       this._routes = attributes.routes;
       this._buildRouteMaps();
@@ -123,7 +123,7 @@ class ArsPage extends WebComponentBase {
   _initializePages() {
     this._pages.clear();
     const pageElements = Array.from(this.children).filter((child) => child.id);
-    pageElements.forEach((element) => {
+    pageElements.forEach((element: Element) => {
       this._pages.set(element.id, element);
       (element as HTMLElement).style.display = "none";
     });
@@ -133,7 +133,7 @@ class ArsPage extends WebComponentBase {
     this._routeToPageMap.clear();
     this._pageToRouteMap.clear();
 
-    const processRoutes = (routes, parentKey = null) => {
+    const processRoutes = (routes: Record<string, unknown>, parentKey: string | null = null) => {
       Object.entries(routes).forEach(([key, value]) => {
         if (typeof value === "string") {
           // The key is the pageId (e.g., "demo-ars-calendar")
@@ -148,10 +148,10 @@ class ArsPage extends WebComponentBase {
             this._pageToRouteMap.set(parentPageId, `/${parentPageId}`);
           }
 
-          Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+          Object.entries(value as Record<string, unknown>).forEach(([nestedKey, nestedValue]) => {
             if (typeof nestedValue === "string") {
               this._routeToPageMap.set(nestedValue, parentPageId);
-            } else if (typeof nestedValue === "object") {
+            } else if (typeof nestedValue === "object" && nestedValue !== null) {
               processRoutes({ [nestedKey]: nestedValue }, parentPageId);
             }
           });
@@ -162,7 +162,7 @@ class ArsPage extends WebComponentBase {
     processRoutes(this._routes);
   }
 
-  _getPageIdFromRoute(route) {
+  _getPageIdFromRoute(route: string) {
     const rel = route.startsWith(this._basePath)
       ? route.slice(this._basePath.length)
       : route;
@@ -182,7 +182,7 @@ class ArsPage extends WebComponentBase {
     return null;
   }
 
-  _getRouteFromPageId(pageId) {
+  _getRouteFromPageId(pageId: string) {
     // Get the direct route mapping
     const directRoute = this._pageToRouteMap.get(pageId);
     if (directRoute) {
@@ -193,7 +193,7 @@ class ArsPage extends WebComponentBase {
     return null;
   }
 
-  _isNestedRouteForPage(path, pageId) {
+  _isNestedRouteForPage(path: string, pageId: string) {
     const directRoute = this._getRouteFromPageId(pageId);
     if (!directRoute) return false;
     
@@ -204,7 +204,7 @@ class ArsPage extends WebComponentBase {
     return path.startsWith(directRoutePath) && path !== directRoutePath;
   }
 
-  _updateBrowserUrl(route) {
+  _updateBrowserUrl(route: string | null) {
     if (!route) {
       return;
     }
@@ -222,7 +222,7 @@ class ArsPage extends WebComponentBase {
     }
   }
 
-  _handlePopState(_event) {
+  _handlePopState(_event: PopStateEvent) {
     if (!this._usesBrowserRouting()) {
       return;
     }
@@ -237,7 +237,7 @@ class ArsPage extends WebComponentBase {
     }
   }
 
-  _showPage(pageId, updateUrl = true) {
+  _showPage(pageId: string, updateUrl: boolean = true) {
     if (!this._pages.has(pageId)) {
       console.error(`ARS Page: Page with ID '${pageId}' not found`);
       return false;
@@ -285,7 +285,7 @@ class ArsPage extends WebComponentBase {
     return true;
   }
 
-  _hidePage(pageId) {
+  _hidePage(pageId: string) {
     if (!this._pages.has(pageId)) {
       console.error(`ARS Page: Page with ID '${pageId}' not found`);
       return false;
@@ -299,7 +299,7 @@ class ArsPage extends WebComponentBase {
   }
 
   // Public methods (called by ars-page-controller via _callRemote)
-  showPage(pageId) {
+  showPage(pageId: string) {
     const success = this._showPage(pageId);
     return {
       success,
@@ -309,20 +309,20 @@ class ArsPage extends WebComponentBase {
     };
   }
 
-  hidePage(pageId) {
+  hidePage(pageId: string) {
     const success = this._hidePage(pageId);
     return { success, pageId, currentPage: this._currentPage };
   }
 
   showAllPages() {
-    this._pages.forEach((element) => {
+    this._pages.forEach((element: Element) => {
       (element as HTMLElement).style.display = "";
     });
     return { success: true, pagesShown: this._pages.size };
   }
 
   hideAllPages() {
-    this._pages.forEach((element) => {
+    this._pages.forEach((element: Element) => {
       (element as HTMLElement).style.display = "none";
     });
     this._currentPage = null;
@@ -349,7 +349,7 @@ class ArsPage extends WebComponentBase {
   }
 
   // New methods for route-based navigation
-  navigateToRoute(route) {
+  navigateToRoute(route: string) {
     const pageId = this._getPageIdFromRoute(route);
 
     if (pageId) {

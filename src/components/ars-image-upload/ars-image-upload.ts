@@ -161,7 +161,7 @@ class ArsImageUpload extends HTMLElement {
   #bindEvents() {
     if (!this.shadowRoot) return;
 
-    const dropzone = this.shadowRoot.querySelector(".dropzone");
+    const dropzone = this.shadowRoot.querySelector(".dropzone") as HTMLElement | null;
     const input = this.shadowRoot.querySelector('input[type="file"]') as HTMLInputElement;
     const removeButtons = this.shadowRoot.querySelectorAll(".preview__remove");
 

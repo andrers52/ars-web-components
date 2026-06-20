@@ -24,7 +24,11 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
 
     // simple shadow that just renders children "as-is"
     this.attachShadow({ mode: 'open' });
-    this.shadowRoot.innerHTML = `
+    const shadowRoot = this.shadowRoot;
+    if (!shadowRoot) {
+      throw new Error('Failed to attach shadow root');
+    }
+    shadowRoot.innerHTML = `
       <style>
         :host {
           display: flex;
@@ -40,18 +44,18 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
   }
 
   // Private utility functions
-  _validateThreshold(threshold) {
-    const num = parseInt(threshold);
+  _validateThreshold(threshold: string | null) {
+    const num = parseInt(threshold ?? "");
     return !isNaN(num) && num >= 0;
   }
 
-  _calculateDragDistance(currentX, currentY) {
+  _calculateDragDistance(currentX: number, currentY: number) {
     const deltaX = currentX - this._dragStartX;
     const deltaY = currentY - this._dragStartY;
     return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
   }
 
-  _determineDragDirection(deltaX, deltaY) {
+  _determineDragDirection(deltaX: number, deltaY: number) {
     const absX = Math.abs(deltaX);
     const absY = Math.abs(deltaY);
     if (absX > absY) {
@@ -62,13 +66,13 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
   }
 
   // Public API
-  setDragThreshold(threshold) {
+  setDragThreshold(threshold: string | null) {
     if (this._validateThreshold(threshold)) {
-      this._dragThreshold = parseInt(threshold);
+      this._dragThreshold = parseInt(threshold ?? "");
     }
   }
 
-  onDragStart(details) {
+  onDragStart(details: Record<string, unknown>) {
     this.dispatchEvent(new CustomEvent("dragstart", {
       detail: details,
       bubbles: true,
@@ -76,7 +80,7 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
     }));
   }
 
-  onDragMove(details) {
+  onDragMove(details: Record<string, unknown>) {
     this.dispatchEvent(new CustomEvent("dragmove", {
       detail: details,
       bubbles: true,
@@ -84,7 +88,7 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
     }));
   }
 
-  onDragEnd(details) {
+  onDragEnd(details: Record<string, unknown>) {
     this.dispatchEvent(new CustomEvent("dragend", {
       detail: details,
       bubbles: true,
@@ -93,14 +97,14 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
   }
 
   connectedCallback() {
-    if (super.connectedCallback) super.connectedCallback();
-    
+    super.connectedCallback();
+
     // Set initial attributes
     const threshold = this.getAttribute("drag-threshold");
     if (this._validateThreshold(threshold)) {
-      this._dragThreshold = parseInt(threshold);
+      this._dragThreshold = parseInt(threshold ?? "");
     }
-    
+
     // Attach pointer events to the host element
     this.addEventListener("pointerdown", this._handlePointerDown);
     this.addEventListener("pointermove", this._handlePointerMove);
@@ -110,7 +114,7 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
   }
 
   disconnectedCallback() {
-    if (super.disconnectedCallback) super.disconnectedCallback();
+    super.disconnectedCallback();
     this.removeEventListener("pointerdown", this._handlePointerDown);
     this.removeEventListener("pointermove", this._handlePointerMove);
     this.removeEventListener("pointerup", this._handlePointerUp);
@@ -118,14 +122,14 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
     this.removeEventListener("pointerleave", this._handlePointerUp);
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (super.attributeChangedCallback) super.attributeChangedCallback(name, oldValue, newValue);
+  attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
+    super.attributeChangedCallback(name, oldValue, newValue);
     if (name === "drag-threshold" && this._validateThreshold(newValue)) {
-      this._dragThreshold = parseInt(newValue);
+      this._dragThreshold = parseInt(newValue ?? "");
     }
   }
 
-  _handlePointerDown = (event) => {
+  _handlePointerDown = (event: PointerEvent) => {
     if (this._pointerDown) return; // Only track one pointer
     
     // Try to capture the pointer (only for non-redispatched events)
@@ -154,7 +158,7 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
     }
   };
 
-  _handlePointerMove = (event) => {
+  _handlePointerMove = (event: PointerEvent) => {
     if (!this._pointerDown || event.pointerId !== this._pointerId) return;
     
     // Only process if we captured the pointer or it's a redispatched event from another element
@@ -213,7 +217,7 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
     }
   };
 
-  _handlePointerUp = (event) => {
+  _handlePointerUp = (event: PointerEvent) => {
     if (!this._pointerDown || event.pointerId !== this._pointerId) return;
     
     // Only process if we captured the pointer or it's a redispatched event from another element

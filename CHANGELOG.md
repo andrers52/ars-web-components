@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.1] - 2026-06-20
+
+### Changed
+
+- **Enabled `strict: true` in `tsconfig.json`.** The entire source tree now
+  type-checks under TypeScript strict mode.
+
+- **Added explicit type annotations across components and mixins.** This
+  includes event-handler signatures, DOM element parameters, static base-class
+  members (`observedAttributes`, `defaultAttributeValue`, `parseAttributeValue`),
+  and utility helpers such as `calendar-utils.ts`.
+
+- **Added `DOM.Iterable` to `tsconfig.json` libs** so DOM collections can be
+  iterated with `for...of` under strict settings.
+
+### Fixed
+
+- **Eliminated strict-mode errors surfaced when consumers type-check the raw
+  source.** Nexus and other workspace consumers can now enable `strict: true`
+  without errors propagating from `ars-web-components` source files.
+
+- **Guarded potentially-null `shadowRoot` and `getContext('2d')` results**
+  in components and mixins that attach or query shadow roots.
+
 ## [3.0.0] - 2026-06-19
 
 ### Added

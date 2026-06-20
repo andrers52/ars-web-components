@@ -3,7 +3,7 @@
 // from: http://2ality.com/2014/12/es6-proxies.html (tracePropAccess)
 
 // Pure utility functions
-const parseJsonSafely = (value) => {
+const parseJsonSafely = (value: string) => {
   try {
     return JSON.parse(value);
   } catch {
@@ -12,16 +12,22 @@ const parseJsonSafely = (value) => {
 };
 
 // Pure function to create event
-const createCustomEvent = (name, detail) =>
+const createCustomEvent = (name: string, detail: unknown) =>
   new CustomEvent(name, { detail, bubbles: true, composed: true });
 
 // Pure function to filter observed attributes
-const filterObservedAttributes = (attributes, observedAttrs) =>
-  observedAttrs.filter((name) => !!attributes.getNamedItem(name));
+const filterObservedAttributes = (
+  attributes: NamedNodeMap,
+  observedAttrs: string[],
+) => observedAttrs.filter((name) => !!attributes.getNamedItem(name));
 
 // Pure function to create initial attributes map
-const createInitialAttributesMap = (element, observedAttrs, defaultValueFn) => {
-  const attributesMap = {};
+const createInitialAttributesMap = (
+  element: HTMLElement,
+  observedAttrs: string[],
+  defaultValueFn: (name: string) => unknown,
+) => {
+  const attributesMap: Record<string, unknown> = {};
   observedAttrs.forEach((name) => {
     if (!element.attributes.getNamedItem(name)) {
       attributesMap[name] = defaultValueFn(name);
@@ -31,7 +37,7 @@ const createInitialAttributesMap = (element, observedAttrs, defaultValueFn) => {
 };
 
 // Pure function to remove item from array
-const removeFromArray = (array, item) => {
+const removeFromArray = <T>(array: T[], item: T) => {
   const index = array.indexOf(item);
   if (index !== -1) {
     array.splice(index, 1);
@@ -40,17 +46,17 @@ const removeFromArray = (array, item) => {
 };
 
 // Resolves a dotted property path against the component so event connectors can stay declarative.
-const resolveComponentPath = (root, path) => {
-  return path.split(".").reduce((currentValue, key) => {
+const resolveComponentPath = (root: unknown, path: string) => {
+  return path.split(".").reduce((currentValue: unknown, key: string) => {
     if (currentValue == null) {
       throw new Error(`Cannot resolve '${path}' from component.`);
     }
-    return currentValue[key];
+    return (currentValue as Record<string, unknown>)[key];
   }, root);
 };
 
 // Parses the supported declarative event syntax into a method name and optional primitive/property arguments.
-const parseMethodCallExpression = (methodCallStr) => {
+const parseMethodCallExpression = (methodCallStr: string) => {
   const normalizedMethodCall = methodCallStr.trim().replace(/;$/, "");
   const match = normalizedMethodCall.match(
     /^(?:this\.)?([A-Za-z_$][\w$]*)(?:\((.*)\))?$/,
@@ -71,7 +77,10 @@ const parseMethodCallExpression = (methodCallStr) => {
 };
 
 // Resolves declarative string arguments without executing arbitrary code.
-const resolveMethodArgument = (component, argument) => {
+const resolveMethodArgument = (
+  component: WebComponentBase,
+  argument: string,
+) => {
   if (!argument.length) {
     return undefined;
   }
@@ -106,20 +115,30 @@ const resolveMethodArgument = (component, argument) => {
 };
 
 // Factory function for event connection without arbitrary code execution.
-const createEventConnector = (elementId, eventStr, methodCallStr) => (self) => {
-  const element = self.shadowRoot.getElementById(elementId);
-  const { methodName, args } = parseMethodCallExpression(methodCallStr);
-
-  element[eventStr] = function () {
-    const method = self[methodName];
-    if (typeof method !== "function") {
-      throw new Error(`Event connector method '${methodName}' does not exist.`);
+const createEventConnector = (
+  elementId: string,
+  eventStr: string,
+  methodCallStr: string,
+) =>
+  (self: WebComponentBase) => {
+    const element = self.shadowRoot?.getElementById(elementId);
+    if (!element) {
+      throw new Error(`Event connector element '${elementId}' does not exist.`);
     }
+    const { methodName, args } = parseMethodCallExpression(methodCallStr);
 
-    const resolvedArgs = args.map((argument) => resolveMethodArgument(self, argument));
-    method.apply(self, resolvedArgs);
+    (element as HTMLElement & Record<string, unknown>)[eventStr] = function () {
+      const method = self[methodName] as unknown;
+      if (typeof method !== "function") {
+        throw new Error(`Event connector method '${methodName}' does not exist.`);
+      }
+
+      const resolvedArgs = args.map((argument) =>
+        resolveMethodArgument(self, argument),
+      );
+      (method as (...args: unknown[]) => unknown).apply(self, resolvedArgs);
+    };
   };
-};
 
 class WebComponentBase extends HTMLElement {
   [key: string]: any;
@@ -166,16 +185,16 @@ class WebComponentBase extends HTMLElement {
 
   // ── Standard lifecycle ─────────────────────────────────────────────
 
-  static get observedAttributes() {
+  static get observedAttributes(): string[] {
     return []; // Override in the subclass to specify observed attributes
   }
 
-  static defaultAttributeValue(_name) {
+  static defaultAttributeValue(_name: string): unknown {
     return null; // Override in the subclass if needed
   }
 
-  static parseAttributeValue(_name, value) {
-    return parseJsonSafely(value);
+  static parseAttributeValue(_name: string, value: string | null): unknown {
+    return parseJsonSafely(value ?? "");
   }
 
   constructor() {
@@ -214,12 +233,14 @@ class WebComponentBase extends HTMLElement {
     // Subclasses may override.
   }
 
-  attributeChangedCallback(attr, oldValue, newValue) {
-    this._attributesMap[attr] = (this.constructor as any).parseAttributeValue.call(
-      this,
-      attr,
-      newValue,
-    );
+  attributeChangedCallback(
+    attr: string,
+    _oldValue: string | null,
+    newValue: string | null,
+  ) {
+    this._attributesMap[attr] = (
+      this.constructor as typeof WebComponentBase
+    ).parseAttributeValue.call(this, attr, newValue);
 
     if (this._waitingOnAttr.length) {
       removeFromArray(this._waitingOnAttr, attr);
@@ -231,16 +252,19 @@ class WebComponentBase extends HTMLElement {
     }
   }
 
-  emitEvent(name, detail) {
+  emitEvent(name: string, detail: unknown) {
     this.dispatchEvent(createCustomEvent(name, detail));
   }
 
-  allAttributesChangedCallback(attributes) {
-    void attributes;
+  allAttributesChangedCallback(_attributes: Record<string, unknown>) {
     // Subclasses may override.
   }
 
-  connectElementWithEvent(elementId, eventStr, methodCallStr) {
+  connectElementWithEvent(
+    elementId: string,
+    eventStr: string,
+    methodCallStr: string,
+  ) {
     const connector = createEventConnector(elementId, eventStr, methodCallStr);
     connector(this);
   }

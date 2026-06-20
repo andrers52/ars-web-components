@@ -4,7 +4,7 @@
 class Event {
   [key: string]: any;
 
-  constructor({ text = "", color = "white", day, month, year }) {
+  constructor({ text = "", color = "white", day, month, year }: { text?: string; color?: string; day: number; month: number; year: number }) {
     this.#validateRequiredFields(day, month, year);
 
     this.text = text;
@@ -15,7 +15,7 @@ class Event {
   }
 
   // Private utility functions
-  #validateRequiredFields(day, month, year) {
+  #validateRequiredFields(day: number, month: number, year: number) {
     if (typeof day !== "number" || isNaN(day)) {
       throw new Error("Day must be a valid number");
     }
@@ -27,7 +27,7 @@ class Event {
     }
   }
 
-  #validateDateRange(day, month, year) {
+  #validateDateRange(day: number, month: number, year: number) {
     const date = new Date(year, month - 1, day);
     return (
       date.getDate() === day &&
@@ -45,7 +45,7 @@ class Event {
     return new Date(this.year, this.month - 1, this.day);
   }
 
-  isOnDate(date) {
+  isOnDate(date: Date) {
     if (!(date instanceof Date)) {
       return false;
     }
@@ -66,8 +66,8 @@ class Event {
     };
   }
 
-  static fromJSON(data) {
-    return new Event(data);
+  static fromJSON(data: Record<string, unknown>) {
+    return new Event(data as { text?: string; color?: string; day: number; month: number; year: number });
   }
 }
 

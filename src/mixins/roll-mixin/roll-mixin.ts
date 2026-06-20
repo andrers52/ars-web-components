@@ -23,7 +23,11 @@ class RollMixin extends WebComponentBase {
 
     // simple shadow that just renders children "as-is"
     this.attachShadow({ mode: 'open' });
-    this.shadowRoot.innerHTML = `
+    const shadowRoot = this.shadowRoot;
+    if (!shadowRoot) {
+      throw new Error('Failed to attach shadow root');
+    }
+    shadowRoot.innerHTML = `
       <style>:host{display:contents}</style><slot></slot>`;
   }
 
@@ -41,7 +45,7 @@ class RollMixin extends WebComponentBase {
     this.emitEvent('roll-started', { duration: this._rollDuration });
 
     // Get the target component (first child element)
-    const targetComponent = this.firstElementChild;
+    const targetComponent = this.firstElementChild as HTMLElement | null;
 
     if (targetComponent) {
       this.triggerRollAnimation(targetComponent);
@@ -57,7 +61,7 @@ class RollMixin extends WebComponentBase {
     return num > 0 ? num : this._rollDuration;
   }
 
-  setRollDuration(duration) {
+  setRollDuration(duration: string | number) {
     const parsed = Number(duration) || 1000;
 
     // Skip if value hasn't changed
@@ -79,7 +83,7 @@ class RollMixin extends WebComponentBase {
   /* --------------------------------------------------
    *  Private animation method
    * -------------------------------------------------- */
-  triggerRollAnimation(targetComponent) {
+  triggerRollAnimation(targetComponent: HTMLElement) {
     // Always fetch the latest duration right before animating
     const currentDuration = this.getRollDuration();
 
@@ -184,10 +188,10 @@ class RollMixin extends WebComponentBase {
     }, 0);
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
+  attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
     super.attributeChangedCallback?.(name, oldValue, newValue);
 
-    if (name === "roll-duration") {
+    if (name === "roll-duration" && newValue) {
       this.setRollDuration(newValue);
     }
   }
@@ -220,7 +224,7 @@ class RollMixin extends WebComponentBase {
     this.cleanupHoverListeners();
 
     // Create hover handler
-    this._hoverHandler = (event) => {
+    this._hoverHandler = (event: MouseEvent) => {
       // Only trigger if not already rolling, not in cooldown, and correct target
       if (!this._isRolling && !this._isInCooldown && event.target === targetComponent) {
         this.roll();

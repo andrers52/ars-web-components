@@ -26,7 +26,7 @@ class PressedEffectMixin extends MixinBase() {
     this._origColorArr = [200, 200, 200];
 
     // Bound handlers
-    this._onDown     = (e) => { if (e.type === 'mousedown' && e.button !== 0) return; this._startPress(); };
+    this._onDown     = (e: MouseEvent | TouchEvent) => { if (e.type === 'mousedown' && (e as MouseEvent).button !== 0) return; this._startPress(); };
     this._onUpCancel = () => this._endPress();
   }
 
@@ -66,7 +66,7 @@ class PressedEffectMixin extends MixinBase() {
     super.disconnectedCallback && super.disconnectedCallback();
   }
 
-  attributeChangedCallback(name, oldVal, newVal) {
+  attributeChangedCallback(name: string, oldVal: string | null, newVal: string | null) {
     super.attributeChangedCallback && super.attributeChangedCallback(name, oldVal, newVal);
     if (name === 'pressed-class' && newVal) this._pressedClass = newVal;
   }
@@ -134,9 +134,9 @@ class PressedEffectMixin extends MixinBase() {
   /* --------------------------------------------------
    *  Old ripple-effect implementation
    * -------------------------------------------------- */
-  _getRGBArrayFromBackgroundColor(el) {
+  _getRGBArrayFromBackgroundColor(el: HTMLElement) {
     const rgbStr = getComputedStyle(el).backgroundColor;
-    const nums   = rgbStr.match(/\d+/g) || [200, 200, 200];
+    const nums   = rgbStr.match(/\d+/g) || ["200", "200", "200"];
     return nums.slice(0, 3).map(n => parseInt(n, 10));
   }
 
@@ -149,11 +149,11 @@ class PressedEffectMixin extends MixinBase() {
     this._target.style.backgroundImage = `radial-gradient(rgb(${r},${g},${b}), rgb(${r},${g},${b}))`;
   }
 
-  _setButtonColorStep(percentageCompleted, r, g, b) {
+  _setButtonColorStep(percentageCompleted: number, r: number, g: number, b: number) {
     this._target.style.backgroundImage = `\n      radial-gradient(circle,\n        rgba(255, 255, 255, 0.2) ${percentageCompleted}%,\n        rgb(${r},${g},${b}) ${100 - percentageCompleted}%\n      )\n    `;
   }
 
-  _animate(totalTime, numIterations) {
+  _animate(totalTime: number, numIterations: number) {
     this._getOriginalButtonColor();
     const timeSlice = totalTime / numIterations;
 

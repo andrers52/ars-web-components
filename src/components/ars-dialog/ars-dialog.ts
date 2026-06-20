@@ -25,7 +25,7 @@ class ArsDialog extends WebComponentBase {
     return ["open", "localizedOk", "localizedCancel", "localized-close", "show-close-button", "custom-css", "css-vars"];
   }
 
-  attributeChangedCallback(attrName, oldVal, newVal) {
+  attributeChangedCallback(attrName: string, oldVal: string | null, newVal: string | null) {
     super.attributeChangedCallback(attrName, oldVal, newVal);
     if (attrName === "open" && newVal === "true") this.#activate();
     if (attrName === "custom-css") {
@@ -39,11 +39,13 @@ class ArsDialog extends WebComponentBase {
   }
 
   #render() {
-    this.shadowRoot.innerHTML = this.#getTemplate();
-    ArsDialog.#applyCSSVars(this.shadowRoot, this.cssVars);
+    const shadowRoot = this.shadowRoot;
+    if (!shadowRoot) return;
+    shadowRoot.innerHTML = this.#getTemplate();
+    ArsDialog.#applyCSSVars(shadowRoot, this.cssVars);
   }
 
-  setCSSVars(cssVars) {
+  setCSSVars(cssVars: Record<string, string>) {
     this.cssVars = { ...cssVars };
     ArsDialog.#applyCSSVars(this.shadowRoot, this.cssVars);
   }
@@ -104,27 +106,27 @@ class ArsDialog extends WebComponentBase {
   }
 
   // ---- PRIVATE STATIC UTILITY METHODS ----
-  static #getTitle(component) {
+  static #getTitle(component: ArsDialog) {
     return component.title || component.getAttribute("title") || "";
   }
 
-  static #getContent(component) {
+  static #getContent(component: ArsDialog) {
     return component.content || component.getAttribute("content");
   }
 
-  static #shouldShowConfirmButtons(component) {
+  static #shouldShowConfirmButtons(component: ArsDialog) {
     return component.getAttribute("showConfirmButtons") === "true";
   }
 
-  static #getLocalizedOk(component) {
+  static #getLocalizedOk(component: ArsDialog) {
     return component.localizedOk || "Ok";
   }
 
-  static #getLocalizedCancel(component) {
+  static #getLocalizedCancel(component: ArsDialog) {
     return component.localizedCancel || "Cancel";
   }
 
-  static #createCSSVarsString(cssVars) {
+  static #createCSSVarsString(cssVars: Record<string, string>) {
     if (!cssVars || Object.keys(cssVars).length === 0) return "";
     let cssVarString = ":host {\n";
     for (const [key, value] of Object.entries(cssVars)) {
@@ -134,7 +136,7 @@ class ArsDialog extends WebComponentBase {
     return cssVarString;
   }
 
-  static #parseCSSVars(value) {
+  static #parseCSSVars(value: string | null) {
     if (!value) return {};
     try {
       const parsed = JSON.parse(value);
@@ -146,7 +148,7 @@ class ArsDialog extends WebComponentBase {
     }
   }
 
-  static #applyCSSVars(shadowRoot, cssVars) {
+  static #applyCSSVars(shadowRoot: ShadowRoot | null, cssVars: Record<string, string>) {
     if (!cssVars || !shadowRoot) return;
     let cssVarStyle = shadowRoot.querySelector("style.css-vars-style");
     if (!cssVarStyle) {
@@ -157,7 +159,7 @@ class ArsDialog extends WebComponentBase {
     cssVarStyle.textContent = ArsDialog.#createCSSVarsString(cssVars);
   }
 
-  static #createConfirmButtonsHTML(component) {
+  static #createConfirmButtonsHTML(component: ArsDialog) {
     return `
       <pressed-effect-mixin>
         <button id="dialog_button_ok:${component.id}">
@@ -174,7 +176,7 @@ class ArsDialog extends WebComponentBase {
     `;
   }
 
-  static #createOkButtonHTML(component) {
+  static #createOkButtonHTML(component: ArsDialog) {
     return `
       <pressed-effect-mixin>
         <button id="dialog_button_ok:${component.id}"> Ok </button>
@@ -182,7 +184,7 @@ class ArsDialog extends WebComponentBase {
     `;
   }
 
-  static #createFooterHTML(component) {
+  static #createFooterHTML(component: ArsDialog) {
     if (ArsDialog.#shouldShowConfirmButtons(component)) {
       return ArsDialog.#createConfirmButtonsHTML(component);
     } else {
@@ -190,16 +192,16 @@ class ArsDialog extends WebComponentBase {
     }
   }
 
-  static #getShowCloseButton(component) {
+  static #getShowCloseButton(component: ArsDialog) {
     const attr = component.getAttribute("show-close-button");
     return attr === null || attr !== "false";
   }
 
-  static #getLocalizedClose(component) {
+  static #getLocalizedClose(component: ArsDialog) {
     return component.getAttribute("localized-close") || "✕";
   }
 
-  static #createTemplate(component) {
+  static #createTemplate(component: ArsDialog) {
     const showClose = ArsDialog.#getShowCloseButton(component);
     return `
       <style>
@@ -223,10 +225,10 @@ class ArsDialog extends WebComponentBase {
     `;
   }
 
-  static #createButtonHandler(component, action) {
+  static #createButtonHandler(component: ArsDialog, action: string) {
     return () => {
       if (action === "ok") {
-        const content = component.shadowRoot.getElementById("content");
+        const content = component.shadowRoot!.getElementById("content");
         component.onbuttonclick && component.onbuttonclick(content);
       } else if (action === "ok") {
         component.onbuttonclick && component.onbuttonclick(true);
@@ -237,21 +239,22 @@ class ArsDialog extends WebComponentBase {
     };
   }
 
-  static #setupButtonHandlers(component) {
-    const okButton = component.shadowRoot.getElementById(
+  static #setupButtonHandlers(component: ArsDialog) {
+    const sr = component.shadowRoot!;
+    const okButton = sr.getElementById(
       `dialog_button_ok:${component.id}`,
     );
     if (okButton) {
       okButton.onclick = ArsDialog.#createButtonHandler(component, "ok");
     }
 
-    const cancelButton = component.shadowRoot.getElementById(
+    const cancelButton = sr.getElementById(
       `dialog_button_cancel:${component.id}`,
     );
     if (cancelButton)
       cancelButton.onclick = ArsDialog.#createButtonHandler(component, "cancel");
 
-    const closeButton = component.shadowRoot.getElementById(
+    const closeButton = sr.getElementById(
       `dialog_close:${component.id}`,
     );
     if (closeButton) {
@@ -266,31 +269,31 @@ class ArsDialog extends WebComponentBase {
     }
   }
 
-  static #showOverlay(component) {
-    component.shadowRoot.getElementById("overlay").style.visibility = "visible";
+  static #showOverlay(component: ArsDialog) {
+    component.shadowRoot!.getElementById("overlay")!.style.visibility = "visible";
   }
 
-  static #hideOverlay(component) {
-    const overlay = component.shadowRoot.getElementById("overlay");
+  static #hideOverlay(component: ArsDialog) {
+    const overlay = component.shadowRoot!.getElementById("overlay");
     if (overlay) overlay.style.visibility = "hidden";
   }
 
-  static #isOverlayVisible(component) {
+  static #isOverlayVisible(component: ArsDialog) {
     return (
-      component.shadowRoot.getElementById("overlay").style.visibility ===
+      component.shadowRoot!.getElementById("overlay")!.style.visibility ===
       "visible"
     );
   }
 
   static #createDialogElement(
-    id,
-    content,
-    title,
-    showConfirmButtons,
-    localizedOk,
-    localizedCancel,
-    customCSS,
-    cssVars,
+    id: string,
+    content: string,
+    title: string,
+    showConfirmButtons: boolean | null,
+    localizedOk: string | null,
+    localizedCancel: string | null,
+    customCSS: string | null,
+    cssVars: Record<string, string>,
     options: ArsDialogMountOptions,
   ) {
     const targetDocument = options.targetDocument || document;
@@ -300,11 +303,11 @@ class ArsDialog extends WebComponentBase {
     if (Object.keys(cssVars).length > 0)
       dialog.setAttribute("css-vars", JSON.stringify(cssVars));
     dialog.setAttribute("content", content);
-    dialog.setAttribute("showConfirmButtons", showConfirmButtons);
+    dialog.setAttribute("showConfirmButtons", String(showConfirmButtons));
     dialog.setAttribute("title", title);
     if (showConfirmButtons) {
-      dialog.setAttribute("localizedOk", localizedOk);
-      dialog.setAttribute("localizedCancel", localizedCancel);
+      dialog.setAttribute("localizedOk", localizedOk ?? "");
+      dialog.setAttribute("localizedCancel", localizedCancel ?? "");
     }
     return dialog;
   }
@@ -314,15 +317,15 @@ class ArsDialog extends WebComponentBase {
     return options.mountTarget || targetDocument.body;
   }
 
-  static #setupDialogPromise(dialog, resolve) {
-    dialog.onbuttonclick = function (result) {
-      dialog.parentNode.removeChild(dialog);
+  static #setupDialogPromise(dialog: ArsDialog, resolve: (value: unknown) => void) {
+    dialog.onbuttonclick = function (result: unknown) {
+      dialog.parentNode!.removeChild(dialog);
       resolve(result);
     };
-    dialog.setAttribute("open", true);
+    dialog.setAttribute("open", "true");
   }
 
-  static #createNotificationPromise(content, title, customCSS, cssVars, options: ArsDialogMountOptions) {
+  static #createNotificationPromise(content: string, title: string, customCSS: string | null, cssVars: Record<string, string>, options: ArsDialogMountOptions) {
     return new Promise(function (resolve) {
       const dialog = ArsDialog.#createDialogElement(
         "notification_dialog",
@@ -334,19 +337,19 @@ class ArsDialog extends WebComponentBase {
         customCSS,
         cssVars,
         options,
-      );
+      ) as ArsDialog;
       ArsDialog.#resolveMountTarget(options).appendChild(dialog);
       ArsDialog.#setupDialogPromise(dialog, resolve);
     });
   }
 
   static #createDialogPromise(
-    content,
-    title,
-    cssVars,
-    customCSS,
-    localizedOk,
-    localizedCancel,
+    content: string,
+    title: string,
+    cssVars: Record<string, string>,
+    customCSS: string | null,
+    localizedOk: string | null,
+    localizedCancel: string | null,
     options: ArsDialogMountOptions,
   ) {
     return new Promise(function (resolve) {
@@ -360,13 +363,13 @@ class ArsDialog extends WebComponentBase {
         customCSS,
         cssVars,
         options,
-      );
+      ) as ArsDialog;
       ArsDialog.#resolveMountTarget(options).appendChild(dialog);
       ArsDialog.#setupDialogPromise(dialog, resolve);
     });
   }
 
-  static #initializeDialog(component) {
+  static #initializeDialog(component: ArsDialog) {
     component.cssVars = {};
     component.customCSS = null;
     component.defaultCSS = DEFAULT_CSS;

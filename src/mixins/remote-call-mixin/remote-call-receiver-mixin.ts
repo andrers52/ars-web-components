@@ -37,13 +37,13 @@ class RemoteCallReceiverMixin extends MixinBase() {
     document.removeEventListener(EVENT_NAME, this._boundHandler);
   }
 
-  _parseList(attr) {
+  _parseList(attr: string) {
     const v = (this.getAttribute(attr) || '').trim();
     return v ? v.split(',').map(s=>s.trim()).filter(Boolean) : null;
   }
 
   /** override handler to forward to inner component */
-  _handleRemoteCall(event) {
+  _handleRemoteCall(event: CustomEvent) {
     const { targetId, method, args = [] } = event.detail || {};
 
     if (!targetId || targetId !== this.id) {
@@ -53,7 +53,7 @@ class RemoteCallReceiverMixin extends MixinBase() {
     const allowList = this._parseList(AttributeKeys.ALLOW);
     const denyList  = this._parseList(AttributeKeys.DENY);
 
-    if (method.startsWith('_')) {
+    if ((method as string).startsWith('_')) {
       console.error(`Cannot call private method: ${method}`);
       return;
     }
@@ -72,13 +72,13 @@ class RemoteCallReceiverMixin extends MixinBase() {
       return;
     }
 
-    if (typeof target[method] !== 'function') {
+    if (typeof (target as unknown as Record<string, unknown>)[method] !== 'function') {
       console.error(`Method ${method} does not exist on wrapped component of ${this.id}`);
       return;
     }
 
     try {
-      target[method](...args);
+      ((target as unknown as Record<string, unknown>)[method] as (...args: unknown[]) => unknown)(...(args as unknown[]));
     } catch(err) {
       console.error(`Error executing ${method} on wrapped component of ${this.id}:`, err);
     }

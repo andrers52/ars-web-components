@@ -14,7 +14,7 @@ class PointerCoordinator {
    * @param {number} pointerId - The pointer ID to capture
    * @returns {boolean} - True if successfully captured, false if already captured by another element
    */
-  static capturePointer(element, pointerId) {
+  static capturePointer(element: HTMLElement, pointerId: number) {
     // Check if already captured by another element
     const currentCapturer = this._capturedPointers.get(pointerId);
     if (currentCapturer && currentCapturer !== element) {
@@ -41,7 +41,7 @@ class PointerCoordinator {
    * @param {HTMLElement} element - The element releasing the capture
    * @param {number} pointerId - The pointer ID to release
    */
-  static releasePointer(element, pointerId) {
+  static releasePointer(element: HTMLElement, pointerId: number) {
     if (this._capturedPointers.get(pointerId) === element) {
       try {
         element.releasePointerCapture(pointerId);
@@ -62,7 +62,7 @@ class PointerCoordinator {
    * @param {number} pointerId - The pointer ID to check
    * @returns {boolean} - True if pointer is captured
    */
-  static isPointerCaptured(pointerId) {
+  static isPointerCaptured(pointerId: number) {
     return this._capturedPointers.has(pointerId);
   }
   
@@ -71,7 +71,7 @@ class PointerCoordinator {
    * @param {number} pointerId - The pointer ID to check
    * @returns {HTMLElement|null} - The capturing element or null
    */
-  static getCapturingElement(pointerId) {
+  static getCapturingElement(pointerId: number) {
     return this._capturedPointers.get(pointerId) || null;
   }
   
@@ -81,7 +81,7 @@ class PointerCoordinator {
    * @param {number} pointerId - The pointer ID to check
    * @returns {boolean} - True if the element has captured the pointer
    */
-  static hasPointerCapture(element, pointerId) {
+  static hasPointerCapture(element: HTMLElement, pointerId: number) {
     return this._capturedPointers.get(pointerId) === element;
   }
   
@@ -90,7 +90,7 @@ class PointerCoordinator {
    * @param {Event} event - The event to check
    * @returns {boolean} - True if event is already redispatched
    */
-  static isRedispatchedEvent(event) {
+  static isRedispatchedEvent(event: Event) {
     return this._redispatchedEvents.has(event);
   }
   
@@ -98,7 +98,7 @@ class PointerCoordinator {
    * Mark an event as redispatched
    * @param {Event} event - The event to mark
    */
-  static markAsRedispatched(event) {
+  static markAsRedispatched(event: Event) {
     this._redispatchedEvents.add(event);
   }
   
@@ -108,7 +108,7 @@ class PointerCoordinator {
    * @param {PointerEvent} originalEvent - The original pointer event
    * @param {string} eventType - The type of event to redispatch
    */
-  static redispatchPointerEvent(capturingElement, originalEvent, eventType = null) {
+  static redispatchPointerEvent(capturingElement: HTMLElement, originalEvent: PointerEvent, eventType: string | null = null) {
     // Don't redispatch if this is already a redispatched event
     if (this.isRedispatchedEvent(originalEvent)) {
       return;
@@ -147,7 +147,7 @@ class PointerCoordinator {
     this._scrollPreventionEnabled = true;
     
     // Prevent touch scrolling
-    const preventScroll = (e) => {
+    const preventScroll = (e: TouchEvent | WheelEvent) => {
       // Only prevent if we have active captures
       if (this._capturedPointers.size > 0) {
         e.preventDefault();
@@ -203,7 +203,7 @@ class PointerCoordinator {
    * @param {number} threshold - Minimum distance threshold
    * @returns {boolean} - True if gesture should be processed
    */
-  static shouldProcessGesture(deltaX, deltaY, threshold = 10) {
+  static shouldProcessGesture(deltaX: number, deltaY: number, threshold: number = 10) {
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     return distance >= threshold;
   }
@@ -214,12 +214,12 @@ class PointerCoordinator {
    * @param {number} threshold - Distance threshold for gesture detection
    * @param {Function} onGestureStart - Callback when gesture is detected
    */
-  static setupEarlyGestureDetection(element, threshold, onGestureStart) {
+  static setupEarlyGestureDetection(element: HTMLElement, threshold: number, onGestureStart: (event: PointerEvent, info: Record<string, unknown>) => void) {
     let startX = 0;
     let startY = 0;
     let isMonitoring = false;
     
-    const handlePointerDown = (event) => {
+    const handlePointerDown = (event: PointerEvent) => {
       if (PointerCoordinator.isRedispatchedEvent(event)) return;
       
       startX = event.clientX;
@@ -227,7 +227,7 @@ class PointerCoordinator {
       isMonitoring = true;
     };
     
-    const handlePointerMove = (event) => {
+    const handlePointerMove = (event: PointerEvent) => {
       if (!isMonitoring || PointerCoordinator.isRedispatchedEvent(event)) return;
       
       const deltaX = event.clientX - startX;

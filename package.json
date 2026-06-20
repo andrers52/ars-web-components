@@ -1,6 +1,6 @@
 {
     "name": "ars-web-components",
-    "version": "3.0.0",
+    "version": "3.0.1",
     "description": "A collection of reusable web components built with TypeScript and ES modules",
     "repository": "https://github.com/andrers52/ars-web-components.git",
     "main": "dist/index.js",

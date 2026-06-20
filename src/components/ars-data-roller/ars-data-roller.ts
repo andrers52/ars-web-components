@@ -14,12 +14,13 @@ class ArsDataRoller extends WebComponentBase {
   static #DEFAULT_INTERVAL = 3000;
   static #DEFAULT_ANIMATION_DURATION = 500;
 
-  static #createRollerItem(item) {
+  static #createRollerItem(item: unknown) {
     if (typeof item === 'string') {
       return `<span class="param-value">${item}</span>`;
-    } else if (typeof item === 'object' && item.title && item.hasOwnProperty('value')) {
-      return `<span class="param-value"><span class="param-label">${item.title}:</span><span class="param-value-content"> ${item.value}</span></span>`;
-    } else if (typeof item === 'object') {
+    } else if (typeof item === 'object' && item !== null && 'title' in item && 'value' in item) {
+      const obj = item as { title: string; value: unknown };
+      return `<span class="param-value"><span class="param-label">${obj.title}:</span><span class="param-value-content"> ${obj.value}</span></span>`;
+    } else if (typeof item === 'object' && item !== null) {
       return `<span class="param-value">${Object.entries(item).map(([k, v]) => `<span class='param-label'>${k}:</span><span class='param-value-content'> ${v}</span>`).join(' | ')}</span>`;
     }
     return `<span class="param-value">${JSON.stringify(item)}</span>`;
@@ -105,7 +106,7 @@ class ArsDataRoller extends WebComponentBase {
     `;
   }
 
-  static #parseDataAttribute(value) {
+  static #parseDataAttribute(value: string) {
     try {
       if (!value || value.trim() === '') return [];
       Assert.assertIsValidJSON(value, '[ars-data-roller] data attribute is not valid JSON');
@@ -116,12 +117,12 @@ class ArsDataRoller extends WebComponentBase {
     }
   }
 
-  static #parseIntervalAttribute(value) {
+  static #parseIntervalAttribute(value: string) {
     const parsed = parseInt(value);
     return isNaN(parsed) ? ArsDataRoller.#DEFAULT_INTERVAL : parsed;
   }
 
-  static #parseAnimationDurationAttribute(value) {
+  static #parseAnimationDurationAttribute(value: string) {
     const parsed = parseInt(value);
     return isNaN(parsed) ? ArsDataRoller.#DEFAULT_ANIMATION_DURATION : parsed;
   }
@@ -131,7 +132,9 @@ class ArsDataRoller extends WebComponentBase {
     if (!this.shadowRoot) {
       this.attachShadow({ mode: "open" });
     }
-    this.shadowRoot.innerHTML = ArsDataRoller.#createTemplate();
+    const shadowRoot = this.shadowRoot;
+    if (!shadowRoot) return;
+    shadowRoot.innerHTML = ArsDataRoller.#createTemplate();
     this.#render();
     this.#startRolling();
   }
@@ -169,8 +172,13 @@ class ArsDataRoller extends WebComponentBase {
   }
 
   #animateRoll() {
-    const current = this.shadowRoot.querySelector('.roller-item.current');
-    const next = this.shadowRoot.querySelector('.roller-item.next');
+    const shadowRoot = this.shadowRoot;
+    if (!shadowRoot) {
+      this.animating = false;
+      return;
+    }
+    const current = shadowRoot.querySelector('.roller-item.current');
+    const next = shadowRoot.querySelector('.roller-item.next');
 
     if (!current || !next) {
       this.animating = false;
@@ -202,8 +210,8 @@ class ArsDataRoller extends WebComponentBase {
         this.animating = false;
         this.#render();
         // Reset styles for next cycle
-        const newCurrent = this.shadowRoot.querySelector('.roller-item.current');
-        const newNext = this.shadowRoot.querySelector('.roller-item.next');
+        const newCurrent = shadowRoot.querySelector('.roller-item.current');
+        const newNext = shadowRoot.querySelector('.roller-item.next');
         if (newCurrent && newNext) {
           (newCurrent as HTMLElement).style.transition = 'none';
           (newCurrent as HTMLElement).style.transform = 'translateY(0%) rotateX(0deg)';
@@ -244,7 +252,7 @@ class ArsDataRoller extends WebComponentBase {
     return ["data", "interval", "animation-duration"];
   }
 
-  static defaultAttributeValue(name) {
+  static defaultAttributeValue(name: string) {
     switch (name) {
       case "data":
         return "[]";
@@ -257,7 +265,7 @@ class ArsDataRoller extends WebComponentBase {
     }
   }
 
-  static parseAttributeValue(name, value) {
+  static parseAttributeValue(name: string, value: string) {
     switch (name) {
       case "data":
         return ArsDataRoller.#parseDataAttribute(value);
@@ -270,7 +278,7 @@ class ArsDataRoller extends WebComponentBase {
     }
   }
 
-  attributeChangedCallback(attrName, oldVal, newVal) {
+  attributeChangedCallback(attrName: string, oldVal: string | null, newVal: string | null) {
     super.attributeChangedCallback(attrName, oldVal, newVal);
     if (oldVal === newVal) return;
     // Only update UI if shadowRoot is ready
@@ -278,23 +286,23 @@ class ArsDataRoller extends WebComponentBase {
     switch (attrName) {
       case "data":
         this.currentIndex = 0;
-        this.data = ArsDataRoller.#parseDataAttribute(newVal);
+        this.data = ArsDataRoller.#parseDataAttribute(newVal ?? "[]");
         if (shadowReady) {
           this.#render();
           this.#startRolling();
         }
         break;
       case "interval":
-        this.intervalMs = ArsDataRoller.#parseIntervalAttribute(newVal);
+        this.intervalMs = ArsDataRoller.#parseIntervalAttribute(newVal ?? "3000");
         if (shadowReady) this.#startRolling();
         break;
       case "animation-duration":
-        this.animationDuration = ArsDataRoller.#parseAnimationDurationAttribute(newVal);
+        this.animationDuration = ArsDataRoller.#parseAnimationDurationAttribute(newVal ?? "500");
         break;
     }
   }
 
-  allAttributesChangedCallback(attributes) {
+  allAttributesChangedCallback(attributes: Record<string, unknown>) {
     this.data = attributes.data || [];
     this.intervalMs = attributes.interval || ArsDataRoller.#DEFAULT_INTERVAL;
     this.animationDuration = attributes["animation-duration"] || ArsDataRoller.#DEFAULT_ANIMATION_DURATION;
@@ -324,7 +332,7 @@ class ArsDataRoller extends WebComponentBase {
     this.#nextItem();
   }
 
-  setData(newData) {
+  setData(newData: unknown[]) {
     const current = this.getAttribute('data');
     const newStr = JSON.stringify(newData);
     if (current !== newStr) {
@@ -332,11 +340,11 @@ class ArsDataRoller extends WebComponentBase {
     }
   }
 
-  setInterval(intervalMs) {
+  setInterval(intervalMs: number) {
     this.setAttribute('interval', intervalMs.toString());
   }
 
-  setAnimationDuration(durationMs) {
+  setAnimationDuration(durationMs: number) {
     this.setAttribute('animation-duration', durationMs.toString());
   }
 }
