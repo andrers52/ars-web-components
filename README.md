@@ -2,6 +2,11 @@
 
 A collection of reusable web components built with TypeScript and ES modules.
 
+> **⚠️ Breaking change in v3.0.0**: component modules no longer register
+> custom elements at import time. You must call
+> `registerArsWebComponents()` before using any `<ars-*>` tag. See
+> [Registration](#registration) below.
+
 ## 🚀 Live Demo
 
 Check out the [live demo](https://andrers52.github.io/src/projects/ars-web-components/).
@@ -137,6 +142,28 @@ npm run lint
 
 The lint configuration covers source files, colocated tests, and TypeScript tool config files through `tsconfig.eslint.json`.
 
+## Registration
+
+Because the package is marked `sideEffects: false`, importing a component
+class does **not** register its custom element. Call
+`registerArsWebComponents()` once at application startup before any
+`<ars-*>` tag is rendered:
+
+```ts
+import { registerArsWebComponents } from "ars-web-components";
+
+registerArsWebComponents();
+```
+
+For apps that only use a few components, register them manually instead to
+keep bundles smaller:
+
+```ts
+import { ArsButton } from "ars-web-components";
+
+customElements.define("ars-button", ArsButton);
+```
+
 ## Design System Compatibility (Design-Agnostic by Default)
 
 `ars-web-components` is intended to be **design-system agnostic**.
@@ -157,8 +184,12 @@ import "ars-web-components/styles.css";
 Then initialize the component library with your design adapter:
 
 ```ts
-import { initializeArsWebComponents } from "ars-web-components";
+import {
+  initializeArsWebComponents,
+  registerArsWebComponents,
+} from "ars-web-components";
 
+registerArsWebComponents();
 initializeArsWebComponents({
   designAdapter: {
     rootAttributes: { "data-theme": "my-app-theme" },
@@ -176,8 +207,13 @@ The adapter contract is intentionally small and generic so applications can supp
 If you want an explicit non-Dark-Factory setup without custom adapters:
 
 ```ts
-import { getArsWebComponentsDefaultAdapter, initializeArsWebComponents } from "ars-web-components";
+import {
+  getArsWebComponentsDefaultAdapter,
+  initializeArsWebComponents,
+  registerArsWebComponents,
+} from "ars-web-components";
 
+registerArsWebComponents();
 initializeArsWebComponents({
   designAdapter: getArsWebComponentsDefaultAdapter("dark"),
 });
@@ -384,9 +420,9 @@ ArsToast.show("Operation complete!", {
 });
 ```
 
-**Static API:** `ArsToast.show(message, options)` — options: `severity`, `duration`, `dismissible`, `position`, `mountTarget`, `targetDocument`
+**Static API:** `ArsToast.show(message, options)` — options: `severity`, `duration`, `dismissible`, `position`, `progress`, `mountTarget`, `targetDocument`
 
-**Attributes:** `message`, `severity` (info/success/warning/error), `duration`, `dismissible`, `open`
+**Attributes:** `message`, `severity` (info/success/warning/error), `duration`, `dismissible`, `progress`, `open`
 
 **Events:** `ars-toast:dismiss` — detail: `{ reason }`
 
@@ -648,21 +684,56 @@ This component is intended for projected overlays in tools like Nexus or Brainia
 
 ## Mixins
 
-ARS Web Components includes a collection of reusable mixins that can be applied to any web component to add specific functionality.
+ARS Web Components includes a collection of reusable behavior classes. Each mixin is a concrete custom element class that can be used either as a standalone wrapper element or as the base class for your own element.
 
-### PressedEffect Mixin
+> Register the mixin tags before using them. The easiest way is to call the central registration helper once at application startup:
+>
+> ```ts
+> import { registerArsWebComponents } from "ars-web-components";
+> registerArsWebComponents();
+> ```
+>
+> If you only need a specific mixin, import the class and register it explicitly:
+>
+> ```ts
+> import { DraggableMixin } from "ars-web-components";
+>
+> if (!customElements.get("draggable-mixin")) {
+>   customElements.define("draggable-mixin", DraggableMixin);
+> }
+> ```
 
-Adds pressed animation effects to components with solid background colors.
+### Using a mixin as a wrapper element
+
+```html
+<pressed-effect-mixin>
+  <button>Press me</button>
+</pressed-effect-mixin>
+```
+
+### Using a mixin as a base class
 
 ```javascript
 import { PressedEffectMixin } from "ars-web-components";
 
-class MyButton extends PressedEffectMixin(HTMLElement) {
+class MyButton extends PressedEffectMixin {
   constructor() {
     super();
     // Your component logic
   }
 }
+
+customElements.define("my-button", MyButton);
+```
+
+### PressedEffect Mixin
+
+Adds pressed animation effects to components with solid background colors.
+
+```html
+<pressed-effect-mixin>
+  <button>Press me</button>
+</pressed-effect-mixin>
 ```
 
 **Features:**
@@ -678,10 +749,16 @@ class MyButton extends PressedEffectMixin(HTMLElement) {
 
 Provides localization capabilities for components with dynamic language switching.
 
+```html
+<localized-mixin id="greeting" locale="en">
+  <div>Hello World</div>
+</localized-mixin>
+```
+
 ```javascript
 import { LocalizedMixin } from "ars-web-components";
 
-class LocalizedComponent extends LocalizedMixin(HTMLElement) {
+class LocalizedComponent extends LocalizedMixin {
   constructor() {
     super();
     this.addTranslations("en", { greeting: "Hello World" });
@@ -690,6 +767,8 @@ class LocalizedComponent extends LocalizedMixin(HTMLElement) {
     this.setLocale("en");
   }
 }
+
+customElements.define("localized-component", LocalizedComponent);
 ```
 
 **Features:**
@@ -705,34 +784,23 @@ class LocalizedComponent extends LocalizedMixin(HTMLElement) {
 
 Enables inter-component communication through DOM events and component IDs.
 
-```javascript
-import {
-  RemoteCallCallerMixin,
-  RemoteCallReceiverMixin,
-} from "ars-web-components";
+```html
+<remote-call-caller-mixin receiver="my-receiver" method="greet" args='["World"]'>
+  <button>Send greeting</button>
+</remote-call-caller-mixin>
 
+<remote-call-receiver-mixin id="my-receiver" allow="greet">
+  <greeter-element></greeter-element>
+</remote-call-receiver-mixin>
+```
+
+```javascript
 class GreeterElement extends HTMLElement {
   greet(name) {
     console.log(`Hello ${name}`);
   }
 }
 customElements.define("greeter-element", GreeterElement);
-
-class MyCaller extends RemoteCallCallerMixin(HTMLElement) {
-  sendGreeting() {
-    this.callRemote("my-receiver", "greet", "World");
-  }
-}
-
-class MyReceiver extends RemoteCallReceiverMixin(HTMLElement) {}
-```
-
-**Receiver markup:**
-
-```html
-<remote-call-receiver-mixin id="my-receiver" allow="greet">
-  <greeter-element></greeter-element>
-</remote-call-receiver-mixin>
 ```
 
 **Important:** Receiver elements must have a unique `id` attribute, and the wrapped target must expose public methods.
@@ -748,17 +816,35 @@ class MyReceiver extends RemoteCallReceiverMixin(HTMLElement) {}
 
 ### ShowIfPropertyTrue Mixin
 
-Conditionally shows/hides components based on property values.
+Conditionally shows/hides the first child element based on a property, data attribute, or regular attribute value.
+
+```html
+<show-if-property-true-mixin show-if-property="isVisible">
+  <div class="bar">isVisible Bar</div>
+</show-if-property-true-mixin>
+```
 
 ```javascript
 import { ShowIfPropertyTrueMixin } from "ars-web-components";
 
-class ConditionalComponent extends ShowIfPropertyTrueMixin(HTMLElement) {
-  constructor() {
-    super();
-    this.showIfPropertyTrue("visible", true);
-  }
+// Register once
+if (!customElements.get("show-if-property-true-mixin")) {
+  customElements.define("show-if-property-true-mixin", ShowIfPropertyTrueMixin);
 }
+
+// Toggle visibility by setting the property on the wrapped element
+const mixin = document.querySelector("show-if-property-true-mixin");
+const target = mixin.firstElementChild;
+target.isVisible = true;  // shows the element
+target.isVisible = false; // hides the element
+```
+
+Add the `keep-space-when-hidden` attribute to keep the element's space in the layout when hidden (uses `visibility: hidden` instead of `display: none`).
+
+```html
+<show-if-property-true-mixin show-if-property="isVisible" keep-space-when-hidden>
+  <div class="bar">isVisible Bar</div>
+</show-if-property-true-mixin>
 ```
 
 **Demo:** http://localhost:8080/demos/mixins/show-if-property-true-mixin/
@@ -767,16 +853,24 @@ class ConditionalComponent extends ShowIfPropertyTrueMixin(HTMLElement) {
 
 Adds swipe gesture support to components.
 
+```html
+<swipeable-mixin min-swipe-distance="30" max-swipe-time="800">
+  <div>Swipe me</div>
+</swipeable-mixin>
+```
+
 ```javascript
 import { SwipeableMixin } from "ars-web-components";
 
-class SwipeableComponent extends SwipeableMixin(HTMLElement) {
+class SwipeableComponent extends SwipeableMixin {
   constructor() {
     super();
     this.onSwipeLeft = () => console.log("Swiped left!");
     this.onSwipeRight = () => console.log("Swiped right!");
   }
 }
+
+customElements.define("swipeable-component", SwipeableComponent);
 ```
 
 **Features:**
@@ -792,10 +886,16 @@ class SwipeableComponent extends SwipeableMixin(HTMLElement) {
 
 Adds drag gesture detection to components with customizable thresholds and real-time feedback.
 
+```html
+<draggable-mixin drag-threshold="10">
+  <div>Drag me</div>
+</draggable-mixin>
+```
+
 ```javascript
 import { DraggableMixin } from "ars-web-components";
 
-class DraggableComponent extends DraggableMixin(HTMLElement) {
+class DraggableComponent extends DraggableMixin {
   constructor() {
     super();
     this.addEventListener('dragstart', (e) => console.log('Drag started:', e.detail));
@@ -803,6 +903,8 @@ class DraggableComponent extends DraggableMixin(HTMLElement) {
     this.addEventListener('dragend', (e) => console.log('Drag ended:', e.detail));
   }
 }
+
+customElements.define("draggable-component", DraggableComponent);
 ```
 
 **Features:**
@@ -819,16 +921,24 @@ class DraggableComponent extends DraggableMixin(HTMLElement) {
 
 Adds roll animation effects to components.
 
+```html
+<roll-mixin>
+  <div>Roll me</div>
+</roll-mixin>
+```
+
 ```javascript
 import { RollMixin } from "ars-web-components";
 
-class RollableComponent extends RollMixin(HTMLElement) {
+class RollableComponent extends RollMixin {
   constructor() {
     super();
     this.onRollStart = () => console.log("Roll started!");
     this.onRollEnd = () => console.log("Roll ended!");
   }
 }
+
+customElements.define("rollable-component", RollableComponent);
 ```
 
 **Demo:** http://localhost:8080/demos/mixins/roll-mixin/
@@ -875,45 +985,6 @@ In both examples:
 - Both mixins coordinate through PointerCoordinator
 - Scroll prevention only activates when gestures are detected
 - **Order-independent**: Works regardless of which mixin is parent/child
-
-## Show If Property True Mixin
-
-This mixin allows you to show or hide a custom element based on a boolean property, attribute, or data attribute. It is ideal for toggling the visibility of UI elements in a declarative way.
-
-### Usage Example
-
-```html
-<!-- Toggle the bar by changing the isVisible property -->
-<conditional-element class="bar" show-if-property="isVisible"
-  >isVisible Bar</conditional-element
->
-```
-
-```js
-import { ShowIfPropertyTrueMixin } from "./mixins/show-if-property-true-mixin/show-if-property-true-mixin.js";
-
-class ConditionalElement extends ShowIfPropertyTrueMixin(HTMLElement) {}
-customElements.define("conditional-element", ConditionalElement);
-
-// Toggle visibility
-const el = document.querySelector("conditional-element");
-el.isVisible = true; // shows the bar
-el.isVisible = false; // hides the bar
-```
-
-### keep-space-when-hidden Attribute
-
-Add the `keep-space-when-hidden` attribute to keep the element's space in the layout when hidden (uses `visibility: hidden` instead of `display: none`).
-
-```html
-<conditional-element
-  class="bar"
-  show-if-property="isVisible"
-  keep-space-when-hidden
->
-  isVisible Bar
-</conditional-element>
-```
 
 ## Development
 
@@ -1005,6 +1076,9 @@ export { WebComponentBase } from "./components/web-component-base/web-component-
 
 // Design System
 export { getArsWebComponentsDefaultAdapter, initializeArsWebComponents } from "./design-system.js";
+
+// Registration
+export { registerArsWebComponents } from "./register.js";
 
 // Mixins
 export { DraggableMixin } from "./mixins/draggable-mixin/draggable-mixin.js";

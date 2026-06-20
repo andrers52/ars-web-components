@@ -208,6 +208,12 @@ if (!window.customElements) {
   };
 }
 
+// Register all ars-web-components custom elements once for the test suite.
+// Component modules no longer register themselves at load time so tests can
+// remain side-effect-free while still using <ars-*> tags in assertions.
+import { registerArsWebComponents } from '../src/register.js';
+registerArsWebComponents();
+
 // Clean up after each test
 afterEach(async () => {
   // Reset GPU singleton so tests get fresh devices.

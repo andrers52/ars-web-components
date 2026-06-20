@@ -456,8 +456,4 @@ class ArsColorSelect extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-color-select")) {
-  customElements.define("ars-color-select", ArsColorSelect);
-}
-
 export { ArsColorSelect, ArsColorSelect as default };

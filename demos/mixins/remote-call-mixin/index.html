@@ -361,62 +361,55 @@
 
         <div class="instructions">
           <h4>How to Use the Remote Call Mixin:</h4>
-          <p>1. Import the mixins: <code>import RemoteCallCallerMixin from './remote-call-caller-mixin.js'</code> and
-            <code>import RemoteCallReceiverMixin from './remote-call-receiver-mixin.js'</code>
-          </p>
-          <p>2. Extend your caller class: <code>class MyCaller extends RemoteCallCallerMixin(HTMLElement)</code></p>
-          <p>3. Extend your receiver class: <code>class MyReceiver extends RemoteCallReceiverMixin(HTMLElement)</code>
-          </p>
-          <p>4. Give your receiver component an ID:
-            <code>&lt;my-receiver id="my-receiver"&gt;&lt;/my-receiver&gt;</code>
-          </p>
-          <p>5. Call remote methods: <code>this.callRemote('my-receiver', 'methodName', arg1, arg2)</code></p>
-          <p>6. Remember to call <code>super.connectedCallback()</code> and <code>super.disconnectedCallback()</code> in
-            receiver components</p>
+          <p>1. Register the mixin tags:</p>
+          <pre><code>import { RemoteCallCallerMixin, RemoteCallReceiverMixin } from 'ars-web-components';
+
+if (!customElements.get('remote-call-caller-mixin')) {
+  customElements.define('remote-call-caller-mixin', RemoteCallCallerMixin);
+}
+if (!customElements.get('remote-call-receiver-mixin')) {
+  customElements.define('remote-call-receiver-mixin', RemoteCallReceiverMixin);
+}</code></pre>
+          <p>2. Wrap your caller/receiver content with the mixin elements and give the receiver an ID.</p>
+          <p>3. The caller dispatches a <code>remote-call</code> event; the receiver forwards it to the wrapped target.</p>
         </div>
 
         <div class="code-example">
-          // Caller Component
-          import RemoteCallCallerMixin from './remote-call-caller-mixin.js';
+// Standalone usage
+&lt;remote-call-caller-mixin receiver="my-receiver" method="increment"&gt;
+  &lt;button&gt;Increment&lt;/button&gt;
+&lt;/remote-call-caller-mixin&gt;
 
-          class MyCaller extends RemoteCallCallerMixin(HTMLElement) {
-          constructor() {
-          super();
-          this.innerHTML = '&lt;button onclick="this.callRemote(\'my-receiver\',
-          \'increment\')"&gt;Increment&lt;/button&gt;';
-          }
-          }
-
-          customElements.define('my-caller', MyCaller);
+&lt;remote-call-receiver-mixin id="my-receiver" allow="increment decrement"&gt;
+  &lt;my-counter&gt;&lt;/my-counter&gt;
+&lt;/remote-call-receiver-mixin&gt;
         </div>
 
         <div class="code-example">
-          // Receiver Component
-          import RemoteCallReceiverMixin from './remote-call-receiver-mixin.js';
+// Extending the concrete mixin classes
+import { RemoteCallCallerMixin, RemoteCallReceiverMixin } from 'ars-web-components';
 
-          class MyReceiver extends RemoteCallReceiverMixin(HTMLElement) {
-          constructor() {
-          super();
-          this.counter = 0;
-          this.innerHTML = `&lt;div&gt;Counter: &lt;span id="counter"&gt;${this.counter}&lt;/span&gt;&lt;/div&gt;`;
-          }
+class MyCaller extends RemoteCallCallerMixin {
+  constructor() {
+    super();
+    this.setAttribute('receiver', 'my-receiver');
+    this.setAttribute('method', 'increment');
+  }
+}
 
-          connectedCallback() {
-          super.connectedCallback(); // Important!
-          }
+class MyReceiver extends RemoteCallReceiverMixin {
+  constructor() {
+    super();
+    this.counter = 0;
+  }
 
-          increment() {
-          this.counter++;
-          this.querySelector('#counter').textContent = this.counter;
-          }
+  increment() {
+    this.counter++;
+  }
+}
 
-          decrement() {
-          this.counter--;
-          this.querySelector('#counter').textContent = this.counter;
-          }
-          }
-
-          customElements.define('my-receiver', MyReceiver);
+customElements.define('my-caller', MyCaller);
+customElements.define('my-receiver', MyReceiver);
 
           // Usage in HTML:
           // &lt;my-receiver id="my-receiver"&gt;&lt;/my-receiver&gt;
@@ -446,9 +439,17 @@
   <!-- Load the mixins and demo -->
   <script type="module">
     // Import mixin components
-    import '/dist/mixins/remote-call-mixin/remote-call-caller-mixin.js';
-    import '/dist/mixins/remote-call-mixin/remote-call-receiver-mixin.js';
+    import { RemoteCallCallerMixin } from '/dist/mixins/remote-call-mixin/remote-call-caller-mixin.js';
+    import { RemoteCallReceiverMixin } from '/dist/mixins/remote-call-mixin/remote-call-receiver-mixin.js';
     import '/dist/mixins/remote-call-mixin/demo/demo-receiver.js';
+
+    // Mixin modules are side-effect-free; register their tags explicitly.
+    if (!customElements.get('remote-call-caller-mixin')) {
+      customElements.define('remote-call-caller-mixin', RemoteCallCallerMixin);
+    }
+    if (!customElements.get('remote-call-receiver-mixin')) {
+      customElements.define('remote-call-receiver-mixin', RemoteCallReceiverMixin);
+    }
 
     // Import fragment loader and demo setup
     import { loadFragment } from '/dist/mixins/remote-call-mixin/demo/fragment-loader.js';

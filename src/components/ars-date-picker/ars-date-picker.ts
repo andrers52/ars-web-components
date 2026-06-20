@@ -264,8 +264,4 @@ class ArsDatePicker extends HTMLElement {
   `;
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-date-picker")) {
-  customElements.define("ars-date-picker", ArsDatePicker);
-}
-
 export { ArsDatePicker, ArsDatePicker as default };

@@ -173,8 +173,4 @@ class PressedEffectMixin extends MixinBase() {
 }
 
 // Avoid redefining during HMR / demos
-if (!customElements.get('pressed-effect-mixin')) {
-  customElements.define('pressed-effect-mixin', PressedEffectMixin);
-}
-
 export { PressedEffectMixin };

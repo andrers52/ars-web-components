@@ -277,8 +277,4 @@ class ArsButton extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-button")) {
-  customElements.define("ars-button", ArsButton);
-}
-
 export { ArsButton, ArsButton as default };

@@ -373,12 +373,4 @@ class ArsTabs extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-tab-panel")) {
-  customElements.define("ars-tab-panel", ArsTabPanel);
-}
-
-if (typeof customElements !== "undefined" && !customElements.get("ars-tabs")) {
-  customElements.define("ars-tabs", ArsTabs);
-}
-
 export { ArsTabs, ArsTabPanel, ArsTabs as default };

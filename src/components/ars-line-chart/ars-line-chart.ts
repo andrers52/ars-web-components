@@ -247,6 +247,4 @@ class ArsLineChart extends ChartBase {
   }
 }
 
-window.customElements.define("ars-line-chart", ArsLineChart);
-
 export { ArsLineChart, ArsLineChart as default };

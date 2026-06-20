@@ -240,6 +240,4 @@ class RollMixin extends WebComponentBase {
   }
 }
 
-customElements.define('roll-mixin', RollMixin);
-
 export { RollMixin };

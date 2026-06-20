@@ -450,8 +450,4 @@ class ArsImageUpload extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-image-upload")) {
-  customElements.define("ars-image-upload", ArsImageUpload);
-}
-
 export { ArsImageUpload, ArsImageUpload as default };

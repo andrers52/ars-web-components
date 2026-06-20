@@ -85,6 +85,4 @@ class RemoteCallReceiverMixin extends MixinBase() {
   }
 }
 
-customElements.define('remote-call-receiver-mixin', RemoteCallReceiverMixin);
-
 export { RemoteCallReceiverMixin };

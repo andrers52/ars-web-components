@@ -446,8 +446,4 @@ class ArsTable extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-table")) {
-  customElements.define("ars-table", ArsTable);
-}
-
 export { ArsTable, ArsTable as default };

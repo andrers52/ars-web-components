@@ -736,6 +736,4 @@ class ArsCalendar extends ArsCalendarBase {
   }
 }
 
-window.customElements.define("ars-calendar", ArsCalendar);
-
 export { ArsCalendar, ArsCalendar as default };

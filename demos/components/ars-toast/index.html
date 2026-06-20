@@ -29,6 +29,10 @@
       overflow: hidden;
       margin-top: 8px;
     }
+
+    .toast-preview {
+      margin-top: 12px;
+    }
   </style>
 </head>
 
@@ -36,7 +40,7 @@
   <div class="container">
     <div class="header">
       <h1>ars-toast</h1>
-      <p>Notification toast with severity levels, auto-dismiss, and stacking.</p>
+      <p>Notification toast with severity levels, auto-dismiss, stacking, and progress bar.</p>
     </div>
     <div class="content">
       <a href="/" class="back-link">&larr; Back to Demo Page</a>
@@ -45,7 +49,8 @@
         <h3>About</h3>
         <p>Provides both a <strong>static API</strong> (<code>ArsToast.show(message, options)</code>)
            and a <strong>declarative API</strong> (<code>&lt;ars-toast&gt;</code>).
-           Toasts stack in a fixed container, animate in/out, and auto-dismiss.</p>
+           Toasts stack in a fixed container, animate in/out, auto-dismiss, and can show
+           a reducing progress bar.</p>
       </div>
 
       <!-- Severity levels -->
@@ -57,6 +62,7 @@
           <button class="btn" id="show-warning">Warning</button>
           <button class="btn" id="show-error">Error</button>
         </div>
+        <div class="code-block">ArsToast.show('Operation completed!', { severity: 'success' });</div>
       </div>
 
       <!-- Position -->
@@ -70,13 +76,16 @@
           <button class="btn" data-pos="bottom-center">Bottom Center</button>
           <button class="btn" data-pos="bottom-right">Bottom Right</button>
         </div>
+        <div class="code-block">ArsToast.show('Toast at top-right', { position: 'top-right' });</div>
       </div>
 
       <!-- Stacking -->
       <div class="demo-section">
         <h3>Stacking</h3>
         <p>Click rapidly to see toasts stack.</p>
-        <button class="btn" id="show-stack">Fire 5 Toasts</button>
+        <div class="demo-row">
+          <button class="btn" id="show-stack">Fire 5 Toasts</button>
+        </div>
       </div>
 
       <!-- Duration -->
@@ -87,33 +96,48 @@
           <span id="duration-display">5000ms</span>
           <button class="btn" id="show-timed">Show Toast</button>
         </div>
+        <div class="code-block">ArsToast.show('Custom duration', { duration: 2000 });</div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="demo-section">
+        <h3>Progress Bar</h3>
+        <p>Shows a reducing progress bar at the top of the toast.</p>
+        <div class="demo-row">
+          <button class="btn" id="show-progress">Show with Progress</button>
+        </div>
+        <div class="code-block">ArsToast.show('Saving...', { progress: true, duration: 4000 });</div>
       </div>
 
       <!-- Non-dismissible -->
       <div class="demo-section">
         <h3>Non-Dismissible</h3>
-        <button class="btn" id="show-nondismiss">Show (no close button, auto-dismiss 3s)</button>
+        <div class="demo-row">
+          <button class="btn" id="show-nondismiss">Show (no close button, auto-dismiss 3s)</button>
+        </div>
+        <div class="code-block">ArsToast.show('No close button', { dismissible: false });</div>
       </div>
 
-      <!-- Programmatic API -->
+      <!-- Declarative API -->
       <div class="demo-section">
-        <h3>Programmatic API</h3>
-        <div class="code-block">import { ArsToast } from 'ars-web-components';
-
-ArsToast.show('Operation complete!', {
-  severity: 'success',
-  duration: 4000,
-  dismissible: true,
-  position: 'top-right'
-});</div>
+        <h3>Declarative API</h3>
+        <p>An open toast rendered directly in the page (duration 0 keeps it visible).</p>
+        <div class="toast-preview">
+          <ars-toast message="Declarative info toast" severity="info" duration="0" dismissible progress open></ars-toast>
+        </div>
+        <div class="code-block">&lt;ars-toast message="Saved!" severity="success" duration="5000" dismissible progress open&gt;&lt;/ars-toast&gt;</div>
       </div>
 
       <!-- Custom mount target -->
       <div class="demo-section">
         <h3>Custom Mount Target</h3>
         <p>Toast mounted inside a bounded container:</p>
-        <button class="btn" id="show-bounded">Show in Container</button>
+        <div class="demo-row">
+          <button class="btn" id="show-bounded">Show in Container</button>
+        </div>
         <div class="bounded-container" id="bounded-target"></div>
+        <div class="code-block">const container = document.getElementById('bounded-target');
+ArsToast.show('Inside container', { mountTarget: container, position: 'top-right' });</div>
       </div>
 
       <!-- Event monitor -->
@@ -121,7 +145,7 @@ ArsToast.show('Operation complete!', {
         <h3>Event Monitor</h3>
         <button class="btn" id="clear-log" style="font-size:0.8rem; padding:4px 10px;">Clear</button>
         <div class="event-log" id="event-log">
-          <div class="entry"><span class="timestamp">[ready]</span> Listening...</div>
+          <div class="entry"><span class="timestamp">[ready]</span> Listening for ars-toast:dismiss...</div>
         </div>
       </div>
 
@@ -132,6 +156,29 @@ ArsToast.show('Operation complete!', {
           <button class="btn" id="theme-light">Light</button>
           <button class="btn" id="theme-dark">Dark</button>
         </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="demo-section">
+        <h3>Usage</h3>
+        <div class="code-block">import { ArsToast } from "ars-web-components";
+
+// Static API
+ArsToast.show("Operation complete!", {
+  severity: "success",
+  duration: 4000,
+  dismissible: true,
+  position: "top-right",
+  progress: true,
+});
+
+// Declarative API
+// &lt;ars-toast message="Saved" severity="success" duration="5000" dismissible open&gt;&lt;/ars-toast&gt;
+
+// Events
+document.addEventListener("ars-toast:dismiss", (e) => {
+  console.log("Dismiss reason:", e.detail.reason);
+});</div>
       </div>
 
     </div>
@@ -170,6 +217,11 @@ ArsToast.show('Operation complete!', {
     slider.oninput = () => { display.textContent = slider.value + 'ms'; };
     document.getElementById('show-timed').onclick = () => {
       ArsToast.show(`Auto-dismiss in ${slider.value}ms`, { duration: parseInt(slider.value) });
+    };
+
+    // Progress bar
+    document.getElementById('show-progress').onclick = () => {
+      ArsToast.show('Processing with progress...', { progress: true, duration: 4000 });
     };
 
     // Non-dismissible

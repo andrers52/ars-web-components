@@ -631,8 +631,18 @@
   </div>
 
   <!-- Load the components -->
-  <script type="module" src="/dist/components/ars-page/ars-page.js"></script>
-  <script type="module" src="/dist/components/ars-page/ars-page-controller.js"></script>
+  <script type="module">
+    import { ArsPage } from '/dist/components/ars-page/ars-page.js';
+    import { ArsPageController } from '/dist/components/ars-page/ars-page-controller.js';
+
+    // Component modules are side-effect-free; register their tags explicitly.
+    if (!customElements.get('ars-page')) {
+      customElements.define('ars-page', ArsPage);
+    }
+    if (!customElements.get('ars-page-controller')) {
+      customElements.define('ars-page-controller', ArsPageController);
+    }
+  </script>
 
   <!-- Test scripts -->
   <script>

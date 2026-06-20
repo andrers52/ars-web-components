@@ -268,8 +268,4 @@ class ArsFab extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-fab")) {
-  customElements.define("ars-fab", ArsFab);
-}
-
 export { ArsFab, ArsFab as default };

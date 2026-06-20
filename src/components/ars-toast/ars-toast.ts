@@ -2,16 +2,17 @@
 //
 // Static API (primary):
 //   ArsToast.show(message, options?) — returns the toast element
-//   Options: { severity, duration, dismissible, position, mountTarget, targetDocument }
+//   Options: { severity, duration, dismissible, position, progress, mountTarget, targetDocument }
 //
 // Declarative API:
-//   <ars-toast message="..." severity="info" duration="5000" dismissible open></ars-toast>
+//   <ars-toast message="..." severity="info" duration="5000" dismissible progress open></ars-toast>
 //
 // Attributes:
 //   message     — toast text
 //   severity    — "info" | "success" | "warning" | "error" (default "info")
 //   duration    — auto-dismiss ms (default 5000, 0 = no auto-dismiss)
 //   dismissible — boolean, shows close button
+//   progress    — boolean, shows a reducing progress bar at the top
 //   open        — boolean, controls visibility
 //
 // Slots:
@@ -31,6 +32,7 @@ export interface ArsToastOptions {
   duration?: number;
   dismissible?: boolean;
   position?: ArsToastPosition;
+  progress?: boolean;
   mountTarget?: ParentNode;
   targetDocument?: Document;
 }
@@ -84,7 +86,7 @@ class ArsToast extends HTMLElement {
   private _timer: ReturnType<typeof setTimeout> | null = null;
 
   static get observedAttributes() {
-    return ["message", "severity", "duration", "dismissible", "open"];
+    return ["message", "severity", "duration", "dismissible", "progress", "open"];
   }
 
   constructor() {
@@ -149,6 +151,14 @@ class ArsToast extends HTMLElement {
     this.toggleAttribute("dismissible", val);
   }
 
+  get progress(): boolean {
+    return this.hasAttribute("progress");
+  }
+
+  set progress(val: boolean) {
+    this.toggleAttribute("progress", val);
+  }
+
   get open(): boolean {
     return this.hasAttribute("open");
   }
@@ -188,6 +198,7 @@ class ArsToast extends HTMLElement {
       duration = 5000,
       dismissible = true,
       position = "top-right",
+      progress = false,
       mountTarget,
       targetDocument,
     } = options;
@@ -203,6 +214,7 @@ class ArsToast extends HTMLElement {
     toast.setAttribute("severity", severity);
     toast.setAttribute("duration", String(duration));
     if (dismissible) toast.setAttribute("dismissible", "");
+    if (progress) toast.setAttribute("progress", "");
     toast.setAttribute("open", "");
     toast.style.pointerEvents = "auto";
 
@@ -217,7 +229,20 @@ class ArsToast extends HTMLElement {
     const dur = this.duration;
     if (dur > 0) {
       this._timer = setTimeout(() => this.dismiss("timeout"), dur);
+      this.#animateProgress(dur);
     }
+  }
+
+  #animateProgress(dur: number) {
+    if (!this.progress) return;
+    const bar = this.shadowRoot?.querySelector<HTMLElement>(".progress-bar");
+    if (!bar) return;
+    bar.style.transition = "none";
+    bar.style.width = "100%";
+    // Force reflow so the transition from 100%→0% animates
+    bar.offsetHeight;
+    bar.style.transition = `width ${dur}ms linear`;
+    bar.style.width = "0%";
   }
 
   #clearTimer() {
@@ -234,6 +259,7 @@ class ArsToast extends HTMLElement {
     const sev = this.severity;
     const isDismissible = this.dismissible;
     const isOpen = this.open;
+    const showProgress = this.progress;
 
     const icon = ArsToast.#severityIcon(sev);
 
@@ -241,6 +267,7 @@ class ArsToast extends HTMLElement {
       <style>${ArsToast.#styles()}</style>
       ${isOpen ? `
       <div class="toast toast--${sev}" role="alert">
+        ${showProgress ? '<div class="progress-bar"></div>' : ""}
         <span class="icon" aria-hidden="true">${icon}</span>
         <div class="content">
           <span class="message">${ArsToast.#escapeHtml(msg)}</span>
@@ -289,6 +316,8 @@ class ArsToast extends HTMLElement {
       }
 
       .toast {
+        position: relative;
+        overflow: hidden;
         display: flex;
         align-items: flex-start;
         gap: var(--arswc-spacing-sm, 8px);
@@ -303,18 +332,21 @@ class ArsToast extends HTMLElement {
         border-left: 4px solid var(--arswc-color-accent, #2563eb);
       }
 
-      .toast--info {
-        border-left-color: var(--arswc-color-accent, #2563eb);
+      .progress-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 3px;
+        width: 100%;
+        background: var(--arswc-color-accent, #2563eb);
+        transition: width linear;
+        z-index: 1;
       }
-      .toast--success {
-        border-left-color: var(--arswc-color-success, #16a34a);
-      }
-      .toast--warning {
-        border-left-color: var(--arswc-color-warning, #d97706);
-      }
-      .toast--error {
-        border-left-color: var(--arswc-color-danger, #dc2626);
-      }
+
+      .toast--info { border-left-color: var(--arswc-color-accent, #2563eb); }
+      .toast--success { border-left-color: var(--arswc-color-success, #16a34a); }
+      .toast--warning { border-left-color: var(--arswc-color-warning, #d97706); }
+      .toast--error { border-left-color: var(--arswc-color-danger, #dc2626); }
 
       .toast--info .icon { color: var(--arswc-color-accent, #2563eb); }
       .toast--success .icon { color: var(--arswc-color-success, #16a34a); }
@@ -359,6 +391,31 @@ class ArsToast extends HTMLElement {
         color: var(--arswc-color-text, #1b2430);
       }
 
+      ::slotted([slot="action"]) {
+        flex-shrink: 0;
+        padding: 6px 14px;
+        border: 1px solid var(--arswc-color-accent, #2563eb);
+        border-radius: var(--arswc-radius-sm, 4px);
+        background: transparent;
+        color: var(--arswc-color-accent, #2563eb);
+        font-family: inherit;
+        font-size: var(--arswc-font-size-sm, 0.75rem);
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 150ms ease, color 150ms ease;
+      }
+
+      ::slotted([slot="action"]:hover) {
+        background: var(--arswc-color-accent, #2563eb);
+        color: var(--arswc-color-surface, #ffffff);
+      }
+
+      ::slotted([slot="action"]:focus-visible) {
+        outline: none;
+        box-shadow: 0 0 0 2px var(--arswc-color-surface, #ffffff),
+                    0 0 0 4px var(--arswc-color-accent, #2563eb);
+      }
+
       .toast--exit {
         animation: ars-toast-exit 200ms ease forwards;
       }
@@ -389,13 +446,12 @@ class ArsToast extends HTMLElement {
         .toast, .toast--exit {
           animation: none;
         }
+        .progress-bar {
+          transition: none !important;
+        }
       }
     `;
   }
-}
-
-if (typeof customElements !== "undefined" && !customElements.get("ars-toast")) {
-  customElements.define("ars-toast", ArsToast);
 }
 
 export { ArsToast, ArsToast as default };

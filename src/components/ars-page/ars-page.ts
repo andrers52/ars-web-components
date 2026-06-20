@@ -389,6 +389,4 @@ class ArsPage extends WebComponentBase {
 }
 
 // Register the custom element
-customElements.define("ars-page", ArsPage);
-
 export { ArsPage, ArsPage as default };

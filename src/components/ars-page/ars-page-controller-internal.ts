@@ -336,10 +336,4 @@ class ArsPageControllerInternal extends WebComponentBase {
   }
 }
 
-// Register the custom element
-customElements.define(
-  "ars-page-controller-internal",
-  ArsPageControllerInternal,
-);
-
 export { ArsPageControllerInternal, ArsPageControllerInternal as default };

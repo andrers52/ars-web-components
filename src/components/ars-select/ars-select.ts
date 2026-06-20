@@ -530,9 +530,5 @@ class ArsSelect extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-select")) {
-  customElements.define("ars-select", ArsSelect);
-}
-
 export { ArsSelect, ArsSelect as default };
 export type { ArsSelectOption as ArsSelectOptionType };

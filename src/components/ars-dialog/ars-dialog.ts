@@ -374,6 +374,4 @@ class ArsDialog extends WebComponentBase {
   }
 }
 
-window.customElements.define("ars-dialog", ArsDialog);
-
 export { ArsDialog, ArsDialog as default };

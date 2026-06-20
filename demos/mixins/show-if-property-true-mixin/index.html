@@ -420,7 +420,10 @@
   <script type="module">
     import { ShowIfPropertyTrueMixin } from '/dist/mixins/show-if-property-true-mixin/show-if-property-true-mixin.js';
 
-    console.log('ShowIfPropertyTrueMixin imported successfully');
+    // Mixin modules are side-effect-free; register the tag explicitly.
+    if (!customElements.get('show-if-property-true-mixin')) {
+      customElements.define('show-if-property-true-mixin', ShowIfPropertyTrueMixin);
+    }
 
     console.log('ShowIfPropertyTrueMixin imported successfully');
 
@@ -495,19 +498,22 @@
     // Set custom property
     window.setCustomProperty = function () {
       const input = document.getElementById('customProperty');
-      const propertyName = input.value.trim();
+      const propertyName = input?.value.trim();
 
       if (propertyName) {
-        // Create a new conditional element
+        // Create a new conditional element wrapped by the mixin
         const container = document.querySelector('.demo-section:last-of-type');
         const demoContainer = document.createElement('div');
         demoContainer.className = 'demo-container';
+        demoContainer.dataset.propertyName = propertyName;
         demoContainer.innerHTML = `
           <h4>Custom Property: ${propertyName}</h4>
-          <div class="conditional-element" show-if-property="${propertyName}">
-            <h5>🎯 Custom Element</h5>
-            <p>This element is controlled by the "${propertyName}" property</p>
-          </div>
+          <show-if-property-true-mixin show-if-property="${propertyName}">
+            <div class="conditional-element">
+              <h5>🎯 Custom Element</h5>
+              <p>This element is controlled by the "${propertyName}" property</p>
+            </div>
+          </show-if-property-true-mixin>
           <div class="toggle-buttons">
             <button class="toggle-btn true" onclick="toggleCustomProperty('${propertyName}', true)">Set True</button>
             <button class="toggle-btn false" onclick="toggleCustomProperty('${propertyName}', false)">Set False</button>
@@ -515,6 +521,18 @@
         `;
 
         container.appendChild(demoContainer);
+
+        // Initialize with the current property value (default false)
+        const mixin = demoContainer.querySelector('show-if-property-true-mixin');
+        const targetElement = mixin?.firstElementChild;
+        if (targetElement) {
+          const value = properties[propertyName] ?? false;
+          targetElement[propertyName] = value;
+          if (typeof mixin.refreshVisibility === 'function') {
+            mixin.refreshVisibility();
+          }
+        }
+
         addToLog(`Created custom property: ${propertyName}`, 'property-change');
         input.value = '';
       }
@@ -524,16 +542,16 @@
     window.toggleCustomProperty = function (propertyName, value) {
       properties[propertyName] = value;
 
-              const mixins = document.querySelectorAll(`show-if-property-true-mixin[show-if-property="${propertyName}"]`);
-        mixins.forEach(mixin => {
-          const targetElement = mixin.firstElementChild;
-          if (targetElement) {
-            targetElement[propertyName] = value;
-            if (typeof mixin.refreshVisibility === 'function') {
-              mixin.refreshVisibility();
-            }
+      const mixins = document.querySelectorAll(`show-if-property-true-mixin[show-if-property="${propertyName}"]`);
+      mixins.forEach(mixin => {
+        const targetElement = mixin.firstElementChild;
+        if (targetElement) {
+          targetElement[propertyName] = value;
+          if (typeof mixin.refreshVisibility === 'function') {
+            mixin.refreshVisibility();
           }
-        });
+        }
+      });
 
       addToLog(`${propertyName}: ${value}`, 'property-change');
     };

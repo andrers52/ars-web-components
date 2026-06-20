@@ -329,6 +329,11 @@
   <script type="module">
     import { LocalizedMixin } from '/dist/mixins/localized-mixin/localized-mixin.js';
 
+    // Mixin modules are side-effect-free; register the tag explicitly.
+    if (!customElements.get('localized-mixin')) {
+      customElements.define('localized-mixin', LocalizedMixin);
+    }
+
     // Global translations object - automatically picked up by Mixins
     window.globalTranslations = {
       en: {

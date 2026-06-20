@@ -459,6 +459,11 @@
   <script type="module">
     import { SwipeableMixin } from '/dist/mixins/swipeable-mixin/swipeable-mixin.js';
 
+    // Mixin modules are side-effect-free; register the tag explicitly.
+    if (!customElements.get('swipeable-mixin')) {
+      customElements.define('swipeable-mixin', SwipeableMixin);
+    }
+
     console.log('Swipeable mixin imported successfully');
     
     // Debug: Check for multiple custom element definitions

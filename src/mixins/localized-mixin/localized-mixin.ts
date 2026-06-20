@@ -207,9 +207,4 @@ class LocalizedMixin extends MixinBase() {
 }
 
 // Avoid redefining during HMR / demos
-if (!customElements.get('localized-mixin')) {
-  // @ts-ignore
-  customElements.define('localized-mixin', LocalizedMixin);
-}
-
 export { LocalizedMixin };

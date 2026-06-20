@@ -15,6 +15,11 @@ import {
   initializeArsWebComponents,
   getArsWebComponentsDefaultAdapter,
 } from '/dist/design-system.js';
+import { registerArsWebComponents } from '/dist/register.js';
+
+// Component modules no longer self-register, so register all ars-* custom
+// elements once for the demo pages.
+registerArsWebComponents();
 
 /* --------------------------------------------------------------------------
    Design-system helpers

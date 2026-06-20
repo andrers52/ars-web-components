@@ -342,11 +342,4 @@ class ArsPropertyEditor extends HTMLElement {
   }
 }
 
-if (
-  typeof customElements !== "undefined" &&
-  !customElements.get("ars-property-editor")
-) {
-  customElements.define("ars-property-editor", ArsPropertyEditor);
-}
-
 export { ArsPropertyEditor, ArsPropertyEditor as default };

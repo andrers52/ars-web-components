@@ -90,6 +90,4 @@ class ArsPageController extends WebComponentBase {
 }
 
 // Register the custom element
-customElements.define("ars-page-controller", ArsPageController);
-
 export { ArsPageController, ArsPageController as default };

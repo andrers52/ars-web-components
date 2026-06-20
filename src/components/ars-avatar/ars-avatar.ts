@@ -243,8 +243,4 @@ class ArsAvatar extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-avatar")) {
-  customElements.define("ars-avatar", ArsAvatar);
-}
-
 export { ArsAvatar, ArsAvatar as default };

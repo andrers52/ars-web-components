@@ -275,8 +275,4 @@ class ArsCard extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-card")) {
-  customElements.define("ars-card", ArsCard);
-}
-
 export { ArsCard, ArsCard as default };

@@ -227,8 +227,4 @@ class ArsToggle extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-toggle")) {
-  customElements.define("ars-toggle", ArsToggle);
-}
-
 export { ArsToggle, ArsToggle as default };

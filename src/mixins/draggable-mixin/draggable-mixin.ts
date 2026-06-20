@@ -259,6 +259,4 @@ class DraggableMixin extends MixinBase(WebComponentBase) {
   };
 }
 
-customElements.define('draggable-mixin', DraggableMixin);
-
-export { DraggableMixin }; 
+export { DraggableMixin };

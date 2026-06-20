@@ -166,8 +166,4 @@ class ArsLeaderboard extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-leaderboard")) {
-  customElements.define("ars-leaderboard", ArsLeaderboard);
-}
-
 export { ArsLeaderboard, ArsLeaderboard as default };

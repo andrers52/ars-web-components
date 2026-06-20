@@ -7,7 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-06-19
+
 ### Added
+
+- **`registerArsWebComponents()` central custom-element registry.**
+  All component and mixin tags are now registered by an explicit
+  `registerArsWebComponents()` function exported from the package barrel and
+  from `ars-web-components/register`. Calling it is now required before any
+  `<ars-*>` tag is used in the DOM.
+
+- **`sideEffects: false`** in `package.json` so bundlers can tree-shake
+  unused component classes.
+
+- **Regression tests** for `registerArsWebComponents()` in
+  `src/register.test.ts`.
 
 - **`ars-info-tile`: `displayValues` support for formatted property rendering.**
   The `data` object now accepts an optional `displayValues` record. When a
@@ -17,6 +31,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   This lets hosts (e.g. Nexus) present human-readable dates
   (`"Jun 2, 2026, 5:00 PM"`) while keeping ISO-8601 raw values for editing
   and storage.
+
+### Changed
+
+- **Component and mixin modules are side-effect-free.**
+  Importing a component class no longer registers its custom element tag.
+  This enables tree-shaking but is a breaking change for consumers that
+  relied on import-time registration.
+
+- **`initializeArsWebComponents()` no longer registers custom elements.**
+
+### Fixed
+
+- **Demo pages for mixins and `ars-page` now register their custom elements**
+  explicitly. Pages that previously relied on import-time registration (e.g.
+  draggable, swipeable, roll, localized, pressed-effect, remote-call,
+  show-if-property-true, and ars-page) were updated to call
+  `customElements.define(...)` after importing the class.
+
+- **The `ars-toast` demo page was rebuilt to follow the standard demo layout**
+  and showcases the full API: severity levels, positions, stacking,
+  auto-dismiss duration, progress bar, non-dismissible toasts, declarative
+  usage, custom mount targets, and event monitoring.
+  It only applies the design adapter (CSS variables and root attributes).
+  Consumers must call `registerArsWebComponents()` separately.
+
+- **README and demo mixin examples corrected.** The previous examples showed
+  mixins being invoked as factory functions (`MixinName(HTMLElement)`), which
+  does not match the concrete custom-element classes shipped by the library.
+  The README now explains that mixins are standalone wrapper elements or base
+  classes, and shows how to register them via `registerArsWebComponents()` or
+  `customElements.define(...)`. The `show-if-property-true-mixin` demo's custom
+  property creation was also fixed to wrap content with the mixin element.
+
+### Migration from 2.x
+
+Replace:
+
+```ts
+import { initializeArsWebComponents } from "ars-web-components";
+initializeArsWebComponents({ designAdapter: ... });
+```
+
+With:
+
+```ts
+import {
+  initializeArsWebComponents,
+  registerArsWebComponents,
+} from "ars-web-components";
+
+registerArsWebComponents();
+initializeArsWebComponents({ designAdapter: ... });
+```
+
+For consumers that only need a subset of components, import the classes
+and register them manually instead of calling `registerArsWebComponents()`.
 
 ## [2.3.0] - 2026-05-22
 

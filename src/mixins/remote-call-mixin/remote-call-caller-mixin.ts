@@ -118,8 +118,6 @@ class RemoteCallCallerMixin extends MixinBase() {
   }
 }
 
-customElements.define('remote-call-caller-mixin', RemoteCallCallerMixin);
-
 if (typeof module !== 'undefined') {
   module.exports = { RemoteCallCallerMixin };
 } else if (typeof window !== 'undefined') {

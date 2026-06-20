@@ -99,6 +99,4 @@ class ArsList extends HTMLElement {
   }
 }
 
-window.customElements.define("ars-list", ArsList);
-
 export { ArsList };

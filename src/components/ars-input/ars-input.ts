@@ -329,8 +329,4 @@ class ArsInput extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-input")) {
-  customElements.define("ars-input", ArsInput);
-}
-
 export { ArsInput, ArsInput as default };

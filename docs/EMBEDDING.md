@@ -167,8 +167,13 @@ No shell-level assumptions. Safe to mount anywhere — shadow roots, iframes, cu
 ### Standard initialization
 
 ```javascript
-import { initializeArsWebComponents, getArsWebComponentsDefaultAdapter } from "ars-web-components";
+import {
+  initializeArsWebComponents,
+  getArsWebComponentsDefaultAdapter,
+  registerArsWebComponents,
+} from "ars-web-components";
 
+registerArsWebComponents();
 initializeArsWebComponents({
   designAdapter: getArsWebComponentsDefaultAdapter("light"),
 });

@@ -425,6 +425,4 @@ class ArsCandlestickChart extends ChartBase {
   }
 }
 
-window.customElements.define("ars-candlestick-chart", ArsCandlestickChart);
-
 export { ArsCandlestickChart, ArsCandlestickChart as default };

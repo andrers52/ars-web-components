@@ -307,6 +307,4 @@ class SwipeableMixin extends MixinBase(WebComponentBase) {
   };
 }
 
-customElements.define('swipeable-mixin', SwipeableMixin);
-
 export { SwipeableMixin };

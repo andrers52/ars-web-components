@@ -204,8 +204,4 @@ class ArsBadge extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-badge")) {
-  customElements.define("ars-badge", ArsBadge);
-}
-
 export { ArsBadge, ArsBadge as default };

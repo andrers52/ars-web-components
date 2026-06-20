@@ -142,8 +142,4 @@ class ArsMinimap extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-minimap")) {
-  customElements.define("ars-minimap", ArsMinimap);
-}
-
 export { ArsMinimap, ArsMinimap as default };

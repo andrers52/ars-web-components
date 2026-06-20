@@ -67,3 +67,4 @@ export { ShowIfPropertyTrueMixin } from "./mixins/show-if-property-true-mixin/sh
 export { SwipeableMixin } from "./mixins/swipeable-mixin/swipeable-mixin.js";
 export type { ArsDesignAdapter, InitializeArsWebComponentsOptions } from "./design-system.js";
 export { getArsWebComponentsDefaultAdapter, initializeArsWebComponents } from "./design-system.js";
+export { registerArsWebComponents } from "./register.js";

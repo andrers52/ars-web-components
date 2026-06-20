@@ -258,12 +258,6 @@ class ArsBottomNavItem extends HTMLElement {
 }
 
 if (typeof customElements !== "undefined") {
-  if (!customElements.get("ars-bottom-nav")) {
-    customElements.define("ars-bottom-nav", ArsBottomNav);
-  }
-  if (!customElements.get("ars-bottom-nav-item")) {
-    customElements.define("ars-bottom-nav-item", ArsBottomNavItem);
-  }
-}
+    }
 
 export { ArsBottomNav, ArsBottomNavItem, ArsBottomNav as default, ArsBottomNavItem as defaultItem };

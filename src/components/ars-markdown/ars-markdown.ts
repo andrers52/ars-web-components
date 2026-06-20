@@ -260,6 +260,4 @@ class ArsMarkdown extends HTMLElement {
   }
 }
 
-window.customElements.define("ars-markdown", ArsMarkdown);
-
 export { ArsMarkdown };

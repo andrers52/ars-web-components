@@ -304,8 +304,4 @@ class ArsToolbar extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-toolbar")) {
-  customElements.define("ars-toolbar", ArsToolbar);
-}
-
 export { ArsToolbar, ArsToolbar as default };

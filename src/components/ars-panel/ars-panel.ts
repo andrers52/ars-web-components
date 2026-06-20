@@ -81,6 +81,4 @@ class ArsPanel extends HTMLElement {
   }
 }
 
-window.customElements.define("ars-panel", ArsPanel);
-
 export { ArsPanel };

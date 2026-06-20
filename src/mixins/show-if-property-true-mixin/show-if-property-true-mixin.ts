@@ -146,6 +146,4 @@ class ShowIfPropertyTrueMixin extends WebComponentBase {
   }
 }
 
-customElements.define('show-if-property-true-mixin', ShowIfPropertyTrueMixin);
-
 export { ShowIfPropertyTrueMixin };

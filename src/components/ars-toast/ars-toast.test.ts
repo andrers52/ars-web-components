@@ -83,6 +83,35 @@ describe("ArsToast", () => {
     expect(element.shadowRoot!.querySelector(".close-btn")).toBeNull();
   });
 
+  // --- Progress bar ---
+
+  it("renders progress bar when progress attribute is set", () => {
+    element.setAttribute("progress", "");
+    element.setAttribute("open", "");
+    document.body.appendChild(element);
+    expect(element.shadowRoot!.querySelector(".progress-bar")).toBeTruthy();
+  });
+
+  it("does not render progress bar by default", () => {
+    element.setAttribute("open", "");
+    document.body.appendChild(element);
+    expect(element.shadowRoot!.querySelector(".progress-bar")).toBeNull();
+  });
+
+  it("defaults progress to false", () => {
+    expect(element.progress).toBe(false);
+  });
+
+  it("reflects progress via property", () => {
+    element.progress = true;
+    expect(element.hasAttribute("progress")).toBe(true);
+  });
+
+  it("ArsToast.show() applies progress option", () => {
+    const toast = ArsToast.show("Test", { progress: true });
+    expect(toast.progress).toBe(true);
+  });
+
   // --- Auto-dismiss ---
 
   it("auto-dismisses after duration", () => {
@@ -205,7 +234,7 @@ describe("ArsToast", () => {
 
   it("observes the expected attributes", () => {
     const attrs = ArsToast.observedAttributes;
-    for (const attr of ["message", "severity", "duration", "dismissible", "open"]) {
+    for (const attr of ["message", "severity", "duration", "dismissible", "progress", "open"]) {
       expect(attrs).toContain(attr);
     }
   });

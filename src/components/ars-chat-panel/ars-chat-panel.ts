@@ -628,8 +628,4 @@ class ArsChatPanel extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ars-chat-panel")) {
-  customElements.define("ars-chat-panel", ArsChatPanel);
-}
-
 export { ArsChatPanel, ArsChatPanel as default };

@@ -77,6 +77,4 @@ class ArsGroup extends HTMLElement {
   }
 }
 
-window.customElements.define("ars-group", ArsGroup);
-
 export { ArsGroup };

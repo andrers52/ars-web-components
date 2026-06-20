@@ -208,9 +208,14 @@
       <div class="demo-section">
         <h3>Usage</h3>
         <div class="code-block">&lt;script type="module"&gt;
-  import { ArsButton, initializeArsWebComponents, getArsWebComponentsDefaultAdapter }
-    from 'ars-web-components';
+  import {
+    ArsButton,
+    initializeArsWebComponents,
+    getArsWebComponentsDefaultAdapter,
+    registerArsWebComponents,
+  } from 'ars-web-components';
 
+  registerArsWebComponents();
   initializeArsWebComponents({
     designAdapter: getArsWebComponentsDefaultAdapter('light')
   });

@@ -288,7 +288,12 @@
 
   <!-- Load the pressed-effect-mixin mixin and simple counter script -->
   <script type="module">
-    import '/dist/mixins/pressed-effect-mixin/pressed-effect-mixin.js'; // auto-registers <pressed-effect-mixin>
+    import { PressedEffectMixin } from '/dist/mixins/pressed-effect-mixin/pressed-effect-mixin.js';
+
+    // Mixin modules are side-effect-free; register the tag explicitly.
+    if (!customElements.get('pressed-effect-mixin')) {
+      customElements.define('pressed-effect-mixin', PressedEffectMixin);
+    }
 
     const countEl = document.getElementById('pressCount');
     let presses = 0;

@@ -342,7 +342,6 @@ class ArsDataRoller extends WebComponentBase {
 }
 
 if (document.createElement("ars-data-roller").constructor === HTMLElement) {
-  window.customElements.define("ars-data-roller", ArsDataRoller);
-}
+  }
 
 export { ArsDataRoller, ArsDataRoller as default };

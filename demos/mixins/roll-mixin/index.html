@@ -340,6 +340,11 @@
   <script type="module">
     import { RollMixin } from '/dist/mixins/roll-mixin/roll-mixin.js';
 
+    // Mixin modules are side-effect-free; register the tag explicitly.
+    if (!customElements.get('roll-mixin')) {
+      customElements.define('roll-mixin', RollMixin);
+    }
+
     console.log('RollMixin imported successfully');
 
     // Utility to update all "hover" texts to "tap" on mobile

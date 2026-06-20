@@ -1098,21 +1098,6 @@ class ArsInfoTile extends HTMLElement {
 }
 
 
-if (
-  typeof customElements !== "undefined" &&
-  !customElements.get("ars-info-tile")
-) {
-  customElements.define("ars-info-tile", ArsInfoTile);
-}
-
-// Deprecated alias — register the old tag name so existing consumers continue to work during transition.
-if (
-  typeof customElements !== "undefined" &&
-  !customElements.get("ars-relational-node")
-) {
-  customElements.define("ars-relational-node", class extends ArsInfoTile {});
-}
-
 export { ArsInfoTile, ArsInfoTile as default };
 
 // Deprecated re-exports for backwards compatibility.
