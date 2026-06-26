@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.2] - 2026-06-26
+
+### Changed
+
+- **`ars-calendar`: exposed additional CSS variables for theming.**
+  The component's inline default stylesheet now reads the following properties
+  from CSS custom properties before falling back to the previous hardcoded
+  values, so consumers can override spacing, sizing, badge layout, and hover
+  scale without rewriting the whole component CSS:
+  - `--ars-calendar-header-padding` (default `15px`)
+  - `--ars-calendar-title-font-size` (default `1.2em`)
+  - `--ars-calendar-nav-padding` (default `8px 12px`)
+  - `--ars-calendar-nav-prev-left` (default `15px`)
+  - `--ars-calendar-nav-next-right` (default `15px`)
+  - `--ars-calendar-today-margin` (default `10px 5px 0 5px`)
+  - `--ars-calendar-today-font-size` (default `0.9em`)
+  - `--ars-calendar-weekday-padding` (default `10px`)
+  - `--ars-calendar-weekday-font-size` (default `0.9em`)
+  - `--ars-calendar-day-padding` (default `10px`)
+  - `--ars-calendar-day-min-height` (default `40px`)
+  - `--ars-calendar-day-hover-scale` (default `1.05`)
+  - `--ars-calendar-event-badge-top` (default `4px`)
+  - `--ars-calendar-event-badge-right` (default `6px`)
+  - `--ars-calendar-event-badge-min-width` (default `16px`)
+  - `--ars-calendar-event-badge-height` (default `16px`)
+  - `--ars-calendar-event-badge-padding` (default `0 4px`)
+  - `--ars-calendar-event-badge-font-size` (default `0.7em`)
+  - `--ars-calendar-event-badge-line-height` (default `16px`)
+
+### Fixed
+
+- **`ars-calendar`: collapsed empty trailing day cells.** Months that only need
+  five weeks previously reserved a blank sixth row because every `.calendar-day`
+  cell kept its `min-height`. The default stylesheet now collapses truly empty
+  cells (`.calendar-day:empty { min-height: 0; padding: 0; }`) so the calendar
+  shrinks to fit the month's weeks. The grid's 1px gap keeps the layout stable
+  when a month genuinely needs a sixth row.
+
 ## [3.0.1] - 2026-06-20
 
 ### Changed
