@@ -228,6 +228,10 @@ class ArsMarkdown extends HTMLElement {
         font-size: var(--arsds-font-size-md, 1rem);
         line-height: 1.6;
         color: var(--arsds-color-text-primary, inherit);
+        /* Reset any inherited white-space (e.g. a consumer setting pre-wrap on
+           the host) — the parser emits block HTML, so preserved whitespace from
+           the template's indentation would otherwise render as blank lines. */
+        white-space: normal;
       }
       .markdown-body h1, .markdown-body h2, .markdown-body h3,
       .markdown-body h4, .markdown-body h5, .markdown-body h6 {
