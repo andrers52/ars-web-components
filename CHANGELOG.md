@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.3] - 2026-08-12
+
+### Fixed
+
+- **`MixinBase`: stopped asserting on class names, which broke every minified
+  build.** The constructor required `this.constructor.name` to end with
+  `'Mixin'`. `Function.prototype.name` is a build-time artifact — minifiers
+  rename classes freely, because names are unobservable to code that does not
+  reflect on them — so the check passed in dev and tests (which never minify)
+  and threw in production bundles with messages like
+  `Test failed: Class name 'Kb' must end with 'Mixin'`. Because the throw came
+  from a custom element constructor, it aborted the element's upgrade rather
+  than merely logging, leaving the mixin non-functional.
+
+  The tag-name assertion is unchanged and still enforced: a mixin's tag must
+  end in `-mixin`. Unlike the class name it is a real runtime value the author
+  chose, it survives minification, and it is what the rest of the class keys
+  on.
+
+- **`MixinBase.isMixin()`: removed the same class-name heuristic, which failed
+  silently.** Detection fell back to `constructor.name.endsWith('Mixin')` when
+  the tag check did not match. In a minified bundle every mangled class made
+  that fallback answer `false` with nothing thrown, so nested-mixin traversal
+  in `findActualTargetComponent()` quietly misbehaved. Detection is now by tag
+  suffix only, which the constructor guarantees.
+
+### Notes for consumers
+
+- No API change and no migration needed. Mixins that already follow the
+  documented convention — registered with a tag ending in `-mixin` — keep
+  working unchanged.
+- Build workarounds for this bug can be removed. If you enabled esbuild's
+  `keepNames`, terser's `keep_classnames`, or an equivalent option solely to
+  keep `ars-web-components` working, it is no longer required (dropping it also
+  makes bundles smaller).
+- Mixin class names are now free to be anything; only the registered tag name
+  is enforced.
+
 ## [3.0.2] - 2026-06-26
 
 ### Changed

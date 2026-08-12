@@ -42,6 +42,42 @@ describe('MixinBase', () => {
       expect(mixinElement).toBeInstanceOf(HTMLElement);
       expect(mixinElement.tagName.toLowerCase()).toBe(harnessMixinTagName);
     });
+
+    it('accepts a mixin whose class name was renamed by a minifier', () => {
+      // Regression: the constructor used to assert `constructor.name` ends in
+      // 'Mixin'. Minifiers rename classes, so this threw in every production
+      // bundle while passing in dev and tests. `Kb` is a real name emitted by
+      // terser for PressedEffectMixin.
+      const tagName = `minified-harness-${(customElementCounter += 1)}-mixin`;
+      class Kb extends MixinBase(WebComponentBase) {}
+      defineUniqueElement(tagName, Kb);
+
+      expect(() => document.createElement(tagName)).not.toThrow();
+    });
+
+    it('still rejects a tag that does not end in -mixin', () => {
+      // The tag name survives minification, so it remains enforced. jsdom
+      // reports a throw from a custom element constructor as an unhandled
+      // error rather than propagating it out of createElement, so the
+      // assertion is captured off the error event instead of via toThrow().
+      const tagName = `badly-named-harness-${(customElementCounter += 1)}`;
+      class WronglyTaggedMixin extends MixinBase(WebComponentBase) {}
+      defineUniqueElement(tagName, WronglyTaggedMixin);
+
+      const errors = [];
+      const onError = (event) => {
+        errors.push(event.error?.message ?? event.message);
+        event.preventDefault();
+      };
+      window.addEventListener('error', onError);
+      try {
+        document.createElement(tagName);
+      } finally {
+        window.removeEventListener('error', onError);
+      }
+
+      expect(errors.join('\n')).toMatch(/must end with '-mixin'/);
+    });
   });
 
   describe('isMixin', () => {
@@ -59,6 +95,17 @@ describe('MixinBase', () => {
 
     it('returns false for missing elements', () => {
       expect(mixinElement.isMixin(null)).toBe(false);
+    });
+
+    it('detects a mixin whose class name was renamed by a minifier', () => {
+      // Regression: detection used to fall back to `constructor.name`, which a
+      // minifier erases. Unlike the constructor guard this failed silently —
+      // nested-mixin detection just answered false in production.
+      const tagName = `minified-nested-${(customElementCounter += 1)}-mixin`;
+      class Zq extends MixinBase(WebComponentBase) {}
+      defineUniqueElement(tagName, Zq);
+
+      expect(mixinElement.isMixin(document.createElement(tagName))).toBe(true);
     });
   });
 

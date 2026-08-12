@@ -29,11 +29,16 @@ const MixinBase = <T extends Constructor<HTMLElement> = Constructor<WebComponent
   constructor(...args: any[]) {
     super(...args);
     this._hoverHandler = null;
-    // Enforce naming convention for mixins
-    Assert.assert(
-      this.constructor.name.endsWith('Mixin'),
-      `Class name '${this.constructor.name}' must end with 'Mixin'`
-    );
+    // Enforce naming convention for mixins.
+    //
+    // Only the tag name is checked. A class-name check cannot be used here:
+    // `Function.prototype.name` is a build-time artifact, and minifiers are
+    // free to rename classes because names are unobservable to code that does
+    // not reflect on them. Asserting on it made the library throw in any
+    // minified bundle (`Class name 'Kb' must end with 'Mixin'`) while passing
+    // in dev and tests, which never minify. The tag name is a real runtime
+    // value the author chose, survives minification, and is what the rest of
+    // this class actually keys on.
     Assert.assert(
       this.tagName && this.tagName.toLowerCase().endsWith('-mixin'),
       `Custom element tag name '${this.tagName}' must end with '-mixin'`
@@ -45,15 +50,13 @@ const MixinBase = <T extends Constructor<HTMLElement> = Constructor<WebComponent
    * -------------------------------------- */
   isMixin(element: HTMLElement | null | undefined) {
     if (!element) return false;
-    // Heuristic: custom element tag name ending with -mixin
-    if (element.tagName && element.tagName.toLowerCase().endsWith('-mixin')) {
-      return true;
-    }
-    // Heuristic: class name ending with Mixin
-    if (element.constructor && element.constructor.name.endsWith('Mixin')) {
-      return true;
-    }
-    return false;
+    // Detected by tag name only. The former class-name fallback
+    // (`constructor.name.endsWith('Mixin')`) was worse than useless in a
+    // minified bundle: renamed classes made it silently answer false, so
+    // nested-mixin detection quietly misbehaved with nothing thrown. The
+    // constructor guarantees every mixin's tag ends in `-mixin`, so the tag
+    // check alone is both sufficient and minification-safe.
+    return Boolean(element.tagName && element.tagName.toLowerCase().endsWith('-mixin'));
   }
 
   /**
