@@ -9,12 +9,12 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ArsDialog } from './ars-dialog.js';
 
 describe('ArsDialog', () => {
-  let element;
+  let element: ArsDialog;
 
   beforeEach(() => {
     vi.useFakeTimers();
     document.body.innerHTML = '';
-    element = document.createElement('ars-dialog');
+    element = document.createElement('ars-dialog') as unknown as ArsDialog;
     element.id = 'test-dialog';
   });
 
@@ -88,7 +88,7 @@ describe('ArsDialog', () => {
         const promise = ArsDialog.notify('Test message', 'Test Title');
         
         // Find the dialog and trigger its callback
-        const dialog = document.querySelector('ars-dialog');
+        const dialog = document.querySelector('ars-dialog') as unknown as ArsDialog & { onbuttonclick: (result: unknown) => void };
         dialog.onbuttonclick(true);
         
         const result = await promise;
@@ -108,7 +108,7 @@ describe('ArsDialog', () => {
         
         await Promise.resolve();
         
-        const dialog = document.querySelector('ars-dialog');
+        const dialog = document.querySelector('ars-dialog')!;
         expect(dialog.getAttribute('showConfirmButtons')).toBe('true');
       });
 
@@ -117,7 +117,7 @@ describe('ArsDialog', () => {
         
         await Promise.resolve();
         
-        const dialog = document.querySelector('ars-dialog');
+        const dialog = document.querySelector('ars-dialog') as unknown as ArsDialog & { onbuttonclick: (result: unknown) => void };
         dialog.onbuttonclick(document.createElement('div'));
         
         const result = await promise;

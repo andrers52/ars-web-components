@@ -95,10 +95,10 @@ describe("ArsLineChart", () => {
 
   it("paint with GPU renderer pushes rect, line, and text commands", async () => {
     document.body.appendChild(element);
-    await element.initGPU();
+    await element["initGPU"]();
 
     element.data = [10, 20, 30, 40];
-    const renderer = element.gpuRenderer!;
+    const renderer = element["gpuRenderer"]!;
     const pushRectSpy = vi.spyOn(renderer, 'pushRect');
     const pushLineSpy = vi.spyOn(renderer, 'pushLine');
     const pushTextSpy = vi.spyOn(renderer, 'pushText');
@@ -120,11 +120,11 @@ describe("ArsLineChart", () => {
 
   it("show-dots=false skips circle rendering", async () => {
     document.body.appendChild(element);
-    await element.initGPU();
+    await element["initGPU"]();
 
     element.setAttribute("show-dots", "false");
     element.data = [10, 20, 30];
-    const pushCircleSpy = vi.spyOn(element.gpuRenderer!, 'pushCircle');
+    const pushCircleSpy = vi.spyOn(element["gpuRenderer"]!, 'pushCircle');
 
     element.paint();
 
@@ -134,7 +134,7 @@ describe("ArsLineChart", () => {
 
   it("handles single data point without division by zero", async () => {
     document.body.appendChild(element);
-    await element.initGPU();
+    await element["initGPU"]();
     element.data = [42];
     expect(() => element.paint()).not.toThrow();
     document.body.removeChild(element);
@@ -142,7 +142,7 @@ describe("ArsLineChart", () => {
 
   it("handles data with all identical values", async () => {
     document.body.appendChild(element);
-    await element.initGPU();
+    await element["initGPU"]();
     element.data = [10, 10, 10, 10];
     expect(() => element.paint()).not.toThrow();
     document.body.removeChild(element);
@@ -150,12 +150,12 @@ describe("ArsLineChart", () => {
 
   it("renders markers as dashed lines with optional labels", async () => {
     document.body.appendChild(element);
-    await element.initGPU();
+    await element["initGPU"]();
 
     element.data = [10, 20, 30, 40, 50];
     element.markers = [{ index: 2, label: "Gen 1" }];
-    const pushDashedSpy = vi.spyOn(element.gpuRenderer!, 'pushDashedLine');
-    const pushTextSpy = vi.spyOn(element.gpuRenderer!, 'pushText');
+    const pushDashedSpy = vi.spyOn(element["gpuRenderer"]!, 'pushDashedLine');
+    const pushTextSpy = vi.spyOn(element["gpuRenderer"]!, 'pushText');
 
     element.paint();
 

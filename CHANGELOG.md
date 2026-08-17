@@ -7,6 +7,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-08-16
+
+### Added
+
+- **`ars-input`: host attributes are now forwarded to the native input.**
+  Any attribute the component does not own (`autocomplete`,
+  `autocapitalize`, `spellcheck`, `inputmode`, `maxlength`, `name`, …) is
+  passed through to the shadow `<input>` at render time. Consumers no
+  longer need the component to explicitly enumerate every native input
+  attribute; setting `<ars-input autocomplete="off" inputmode="numeric">`
+  just works.
+
+  Excluded from forwarding, by design:
+  - component-owned control attributes (`type`, `value`, `placeholder`,
+    `label`, `error`, `disabled`, `readonly`, `clearable`, `min`, `max`,
+    `step`, `pattern`, `required`) — these flow through the component's own
+    channels;
+  - host mechanics (`id`, `class`, `style`, `slot`, `part`, `exportparts`,
+    `tabindex`);
+  - `aria-*` and `on*` attributes — the component owns accessibility and
+    events, and forwarding `on*` would re-enable inline handlers.
+
+- **`ars-input`: a `MutationObserver` keeps forwarded attributes in sync.**
+  Attributes added or changed *after* the element is connected trigger a
+  re-render (custom elements only observe their declared
+  `observedAttributes`, and Chromium has no `"*"` wildcard). The observer
+  only fires for attributes outside the observed set and is disconnected on
+  `disconnectedCallback`.
+
+- **Tests** for attribute forwarding: pass-through of arbitrary attributes,
+  late-added attributes (post-connect), exclusion of component-owned and
+  host attributes, and rejection of `on*`/`aria-*`.
+
+### Fixed
+
+- **Test suite runs again under Vite 8.** The lockfile update that shipped
+  with 3.0.3 silently pulled Vite 8, whose oxc transformer requires every
+  transformed TypeScript file to be covered by the nearest `tsconfig.json`.
+  `test/setup.ts` and the co-located `src/**/*.test.ts` files were not
+  covered (excluded from the project), so all 52 test files failed to load
+  with `Tsconfig not found` — the 3.0.3 release was published with a suite
+  that could not run. Configuration was restructured:
+  - `tsconfig.json` now covers `src/**/*` **and** `test/**/*`, including test
+    files (with `vitest/globals` in `types` to match `globals: true` in the
+    vitest config);
+  - new `tsconfig.build.json` keeps the previous restrictive include/exclude,
+    and `npm run build` (`tsc -p tsconfig.build.json`) emits the exact same
+    `dist/` output as before — no test files leak into the published build.
+
+- **Eliminated the legacy strict-mode debt in test files.** With the root
+  tsconfig now covering the tests, ~830 strict-mode diagnostics surfaced in
+  19 legacy test files that had never been type-checked (the `tsconfig.json`
+  of 3.0.3 excluded `**/*.test.ts`, and `tsconfig.eslint.json` type-checks
+  nothing at lint time). All were fixed without changing runtime behaviour:
+  - explicit types on test locals and mock objects (`let element: RollMixin`,
+    `document.createElement(...) as unknown as ArsCalendar`, typed mock
+    events/targets);
+  - `test/setup.ts` mocks (`PointerEvent`, `ResizeObserver`,
+    `IntersectionObserver`, `getContext`) now declare their fields and
+    parameters and install via `globalThis` casts;
+  - protected-member access in chart tests (`initGPU`, `gpuRenderer`,
+    `parseJsonAttribute`, `gpuDraw*`) uses bracket element access, the
+    documented escape hatch from TypeScript's protected-visibility check;
+  - numeric-vs-string argument mismatches in validation tests now pass
+    strings, matching the `parseInt`-based signatures with identical
+    runtime semantics.
+
+  `tsc --noEmit -p tsconfig.json` is now clean; the 1115-test suite passes
+  unchanged. (Remaining strict diagnostics in `demos/**/*.ts` are pre-
+  existing demo-page debt, unchanged by this release.)
+
 ## [3.0.3] - 2026-08-12
 
 ### Fixed

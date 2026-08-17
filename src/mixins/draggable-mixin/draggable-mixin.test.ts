@@ -10,14 +10,14 @@ import { DraggableMixin } from './draggable-mixin.js';
 import { PointerCoordinator } from '../common/pointer-coordinator.js';
 
 describe('DraggableMixin', () => {
-  let element;
+  let element: DraggableMixin;
 
   beforeEach(() => {
     vi.useFakeTimers();
     PointerCoordinator.clearAllCaptures();
     document.body.innerHTML = '';
     
-    element = document.createElement('draggable-mixin');
+    element = document.createElement('draggable-mixin') as DraggableMixin;
   });
 
   afterEach(() => {
@@ -70,9 +70,9 @@ describe('DraggableMixin', () => {
 
   describe('Validation methods', () => {
     it('should validate threshold correctly', () => {
-      expect(element._validateThreshold(10)).toBe(true);
-      expect(element._validateThreshold(0)).toBe(true);
-      expect(element._validateThreshold(-1)).toBe(false);
+      expect(element._validateThreshold('10')).toBe(true);
+      expect(element._validateThreshold('0')).toBe(true);
+      expect(element._validateThreshold('-1')).toBe(false);
       expect(element._validateThreshold('invalid')).toBe(false);
     });
   });

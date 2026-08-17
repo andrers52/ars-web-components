@@ -10,11 +10,11 @@ import { RemoteCallCallerMixin } from './remote-call-caller-mixin.js';
 import { RemoteCallReceiverMixin } from './remote-call-receiver-mixin.js';
 
 describe('RemoteCallCallerMixin', () => {
-  let element;
+  let element: RemoteCallCallerMixin;
 
   beforeEach(() => {
     document.body.innerHTML = '';
-    element = document.createElement('remote-call-caller-mixin');
+    element = document.createElement('remote-call-caller-mixin') as RemoteCallCallerMixin;
   });
 
   describe('Static properties', () => {
@@ -63,7 +63,7 @@ describe('RemoteCallCallerMixin', () => {
 
   describe('_buildArgs', () => {
     it('should return empty array if no args-map', () => {
-      const result = element._buildArgs({});
+      const result = element._buildArgs({} as unknown as CustomEvent);
       
       expect(result).toEqual([]);
     });
@@ -71,7 +71,7 @@ describe('RemoteCallCallerMixin', () => {
     it('should parse args-map JSON', () => {
       element.setAttribute('args-map', '{"value": 0}');
       
-      const result = element._buildArgs({ detail: { value: 'test' } });
+      const result = element._buildArgs({ detail: { value: 'test' } } as unknown as CustomEvent);
       
       expect(result).toEqual(['test']);
     });
@@ -79,7 +79,7 @@ describe('RemoteCallCallerMixin', () => {
     it('should handle invalid args-map JSON', () => {
       element.setAttribute('args-map', 'invalid json');
       
-      const result = element._buildArgs({});
+      const result = element._buildArgs({} as unknown as CustomEvent);
       
       expect(result).toEqual([]);
     });
@@ -87,7 +87,7 @@ describe('RemoteCallCallerMixin', () => {
     it('should map multiple args', () => {
       element.setAttribute('args-map', '{"a": 0, "b": 1}');
       
-      const result = element._buildArgs({ detail: { a: 'first', b: 'second' } });
+      const result = element._buildArgs({ detail: { a: 'first', b: 'second' } } as unknown as CustomEvent);
       
       expect(result).toEqual(['first', 'second']);
     });
@@ -130,11 +130,11 @@ describe('RemoteCallCallerMixin', () => {
 });
 
 describe('RemoteCallReceiverMixin', () => {
-  let element;
+  let element: RemoteCallReceiverMixin;
 
   beforeEach(() => {
     document.body.innerHTML = '';
-    element = document.createElement('remote-call-receiver-mixin');
+    element = document.createElement('remote-call-receiver-mixin') as RemoteCallReceiverMixin;
     element.id = 'test-receiver';
   });
 
@@ -198,14 +198,15 @@ describe('RemoteCallReceiverMixin', () => {
   });
 
   describe('_handleRemoteCall', () => {
-    let mockTarget;
-    let mockEvent;
+    // Plain-object stand-ins: the handler only reads event.detail.
+    let mockTarget: Record<string, unknown>;
+    let mockEvent: CustomEvent;
 
     beforeEach(() => {
       mockTarget = {
         testMethod: vi.fn()
       };
-      element.findActualTargetComponent = () => mockTarget;
+      element.findActualTargetComponent = () => mockTarget as unknown as HTMLElement;
       
       mockEvent = {
         detail: {
@@ -213,7 +214,7 @@ describe('RemoteCallReceiverMixin', () => {
           method: 'testMethod',
           args: ['arg1', 'arg2']
         }
-      };
+      } as unknown as CustomEvent;
     });
 
     it('should ignore calls to different target', () => {

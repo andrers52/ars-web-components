@@ -9,12 +9,12 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { LocalizedMixin } from './localized-mixin.js';
 
 describe('LocalizedMixin', () => {
-  let element;
+  let element: LocalizedMixin;
 
   beforeEach(() => {
     // Create a fresh instance for each test
     document.body.innerHTML = '';
-    element = document.createElement('localized-mixin');
+    element = document.createElement('localized-mixin') as unknown as LocalizedMixin;
   });
 
   describe('Translation methods', () => {
@@ -60,7 +60,7 @@ describe('LocalizedMixin', () => {
       });
 
       it('should reject invalid translations object', () => {
-        const result = element.addTranslations('es', null);
+        const result = element.addTranslations('es', null as unknown as Record<string, unknown>);
 
         expect(result).toBe(false);
       });
@@ -220,7 +220,7 @@ describe('LocalizedMixin', () => {
       expect(element._isValidLocale('en-US')).toBe(true);
       expect(element._isValidLocale('')).toBe(false);
       expect(element._isValidLocale(null)).toBe(false);
-      expect(element._isValidLocale(123)).toBe(false);
+      expect(element._isValidLocale(123 as unknown as string)).toBe(false);
     });
 
     it('should validate translations correctly', () => {

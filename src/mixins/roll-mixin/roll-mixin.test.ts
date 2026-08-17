@@ -9,14 +9,14 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { RollMixin } from './roll-mixin.js';
 
 describe('RollMixin', () => {
-  let element;
-  let childElement;
+  let element: RollMixin;
+  let childElement: HTMLElement;
 
   beforeEach(() => {
     vi.useFakeTimers();
     document.body.innerHTML = '';
     
-    element = document.createElement('roll-mixin');
+    element = document.createElement('roll-mixin') as RollMixin;
     childElement = document.createElement('button');
     childElement.id = 'child';
   });
@@ -212,7 +212,7 @@ describe('RollMixin', () => {
       // Mock animate method on child element
       childElement.animate = vi.fn(() => ({
         finished: Promise.resolve()
-      }));
+      })) as unknown as typeof childElement.animate;
       
       element.roll();
       

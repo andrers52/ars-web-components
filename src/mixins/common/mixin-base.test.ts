@@ -10,16 +10,20 @@ import { MixinBase } from './mixin-base.js';
 
 let customElementCounter = 0;
 
-const defineUniqueElement = (tagName, elementClass) => {
+// The harness classes are re-created per test (unique tags), so type the
+// instance via the factory's return type.
+type AnyMixinInstance = InstanceType<ReturnType<typeof MixinBase>>;
+
+const defineUniqueElement = (tagName: string, elementClass: CustomElementConstructor) => {
   if (!customElements.get(tagName)) {
     customElements.define(tagName, elementClass);
   }
 };
 
 describe('MixinBase', () => {
-  let mixinElement;
-  let nestedMixinTagName;
-  let harnessMixinTagName;
+  let mixinElement: AnyMixinInstance;
+  let nestedMixinTagName: string;
+  let harnessMixinTagName: string;
 
   beforeEach(() => {
     document.body.innerHTML = '';
@@ -34,7 +38,7 @@ describe('MixinBase', () => {
     defineUniqueElement(harnessMixinTagName, TestHarnessMixin);
     defineUniqueElement(nestedMixinTagName, NestedHarnessMixin);
 
-    mixinElement = document.createElement(harnessMixinTagName);
+    mixinElement = document.createElement(harnessMixinTagName) as unknown as AnyMixinInstance;
   });
 
   describe('constructor guards', () => {
@@ -64,8 +68,8 @@ describe('MixinBase', () => {
       class WronglyTaggedMixin extends MixinBase(WebComponentBase) {}
       defineUniqueElement(tagName, WronglyTaggedMixin);
 
-      const errors = [];
-      const onError = (event) => {
+      const errors: string[] = [];
+      const onError = (event: ErrorEvent) => {
         errors.push(event.error?.message ?? event.message);
         event.preventDefault();
       };
@@ -134,20 +138,21 @@ describe('MixinBase', () => {
 
   describe('injectIntoTarget', () => {
     it('adds missing functions and binds them to the mixin instance', () => {
-      const target = document.createElement('div');
+      const target = document.createElement('div') as unknown as HTMLDivElement & Record<string, unknown>;
       mixinElement.injectIntoTarget(target, {
-        readTag() {
+        readTag(this: HTMLElement) {
           return this.tagName.toLowerCase();
         },
         enabled: true,
       });
 
-      expect(target.readTag()).toBe(harnessMixinTagName);
+      const readTag = target.readTag as unknown as () => string;
+      expect(readTag()).toBe(harnessMixinTagName);
       expect(target.enabled).toBe(true);
     });
 
     it('does not override existing properties unless forced', () => {
-      const target = document.createElement('div');
+      const target = document.createElement('div') as unknown as HTMLDivElement & Record<string, unknown>;
       target.existing = 'keep-me';
 
       mixinElement.injectIntoTarget(target, { existing: 'replace-me' });
@@ -159,7 +164,7 @@ describe('MixinBase', () => {
 
     it('returns early when no target is provided', () => {
       expect(() => {
-        mixinElement.injectIntoTarget(null, { anything: true });
+        mixinElement.injectIntoTarget(null as unknown as HTMLElement & Record<string, unknown>, { anything: true });
       }).not.toThrow();
     });
   });

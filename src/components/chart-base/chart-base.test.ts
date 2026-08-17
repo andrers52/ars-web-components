@@ -139,18 +139,18 @@ describe("ChartBase", () => {
   it("parseJsonAttribute returns parsed JSON for valid input", () => {
     const el = new TestChart();
     el.setAttribute("data", "[1,2,3]");
-    expect(el.parseJsonAttribute("data", [])).toEqual([1, 2, 3]);
+    expect(el["parseJsonAttribute"]("data", [])).toEqual([1, 2, 3]);
   });
 
   it("parseJsonAttribute returns fallback for absent attribute", () => {
     const el = new TestChart();
-    expect(el.parseJsonAttribute("missing", [99])).toEqual([99]);
+    expect(el["parseJsonAttribute"]("missing", [99])).toEqual([99]);
   });
 
   it("parseJsonAttribute returns fallback for non-JSON string", () => {
     const el = new TestChart();
     el.setAttribute("data", "not-json");
-    expect(el.parseJsonAttribute("data", [42])).toEqual([42]);
+    expect(el["parseJsonAttribute"]("data", [42])).toEqual([42]);
   });
 
   // --- GPU lifecycle ---
@@ -164,24 +164,24 @@ describe("ChartBase", () => {
 
   it("gpuRenderer is null before initGPU", () => {
     const el = new TestChart();
-    expect(el.gpuRenderer).toBeNull();
+    expect(el["gpuRenderer"]).toBeNull();
   });
 
   it("initGPU creates the GPU renderer", async () => {
     const el = new TestChart();
     document.body.appendChild(el);
-    await el.initGPU();
-    expect(el.gpuRenderer).not.toBeNull();
+    await el["initGPU"]();
+    expect(el["gpuRenderer"]).not.toBeNull();
     document.body.removeChild(el);
   });
 
   it("initGPU is idempotent (safe to call multiple times)", async () => {
     const el = new TestChart();
     document.body.appendChild(el);
-    await el.initGPU();
-    const renderer1 = el.gpuRenderer;
-    await el.initGPU();
-    expect(el.gpuRenderer).toBe(renderer1);
+    await el["initGPU"]();
+    const renderer1 = el["gpuRenderer"];
+    await el["initGPU"]();
+    expect(el["gpuRenderer"]).toBe(renderer1);
     document.body.removeChild(el);
   });
 
@@ -190,10 +190,10 @@ describe("ChartBase", () => {
   it("gpuDrawBackground pushes a rect to the renderer", async () => {
     const el = new TestChart();
     document.body.appendChild(el);
-    await el.initGPU();
-    const spy = vi.spyOn(el.gpuRenderer!, 'pushRect');
-    el.gpuRenderer!.beginFrame(320, 180, [0, 0, 0, 1]);
-    el.gpuDrawBackground(320, 180, '#000000');
+    await el["initGPU"]();
+    const spy = vi.spyOn(el["gpuRenderer"]!, 'pushRect');
+    el["gpuRenderer"]!.beginFrame(320, 180, [0, 0, 0, 1]);
+    el["gpuDrawBackground"](320, 180, '#000000');
     expect(spy).toHaveBeenCalledWith(0, 0, 320, 180, '#000000');
     document.body.removeChild(el);
   });
@@ -201,10 +201,10 @@ describe("ChartBase", () => {
   it("gpuDrawHorizontalGrid pushes lines to the renderer", async () => {
     const el = new TestChart();
     document.body.appendChild(el);
-    await el.initGPU();
-    const spy = vi.spyOn(el.gpuRenderer!, 'pushLine');
-    el.gpuRenderer!.beginFrame(320, 180, [0, 0, 0, 1]);
-    el.gpuDrawHorizontalGrid({ top: 12, right: 12, bottom: 28, left: 48 }, 140, 5, '#ccc', 320);
+    await el["initGPU"]();
+    const spy = vi.spyOn(el["gpuRenderer"]!, 'pushLine');
+    el["gpuRenderer"]!.beginFrame(320, 180, [0, 0, 0, 1]);
+    el["gpuDrawHorizontalGrid"]({ top: 12, right: 12, bottom: 28, left: 48 }, 140, 5, '#ccc', 320);
     expect(spy).toHaveBeenCalledTimes(5);
     document.body.removeChild(el);
   });
@@ -212,10 +212,10 @@ describe("ChartBase", () => {
   it("gpuDrawYAxisLabels pushes text to the renderer", async () => {
     const el = new TestChart();
     document.body.appendChild(el);
-    await el.initGPU();
-    const spy = vi.spyOn(el.gpuRenderer!, 'pushText');
-    el.gpuRenderer!.beginFrame(320, 180, [0, 0, 0, 1]);
-    el.gpuDrawYAxisLabels({ top: 12, right: 12, bottom: 28, left: 48 }, [0, 25, 50, 75, 100], 140, '#fff', 10);
+    await el["initGPU"]();
+    const spy = vi.spyOn(el["gpuRenderer"]!, 'pushText');
+    el["gpuRenderer"]!.beginFrame(320, 180, [0, 0, 0, 1]);
+    el["gpuDrawYAxisLabels"]({ top: 12, right: 12, bottom: 28, left: 48 }, [0, 25, 50, 75, 100], 140, '#fff', 10);
     expect(spy).toHaveBeenCalledTimes(5);
     document.body.removeChild(el);
   });

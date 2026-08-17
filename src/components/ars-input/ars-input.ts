@@ -32,13 +32,20 @@ export type ArsInputType = "text" | "number" | "email" | "password" | "search" |
 class ArsInput extends HTMLElement {
   private _value = "";
   private _eventsBound = false;
+  // Re-renders on host attribute changes the component does not observe
+  // (autocomplete, inputmode, ...) so forwarded attributes stay in sync even
+  // when set after the element is connected. Chromium does not support the
+  // observedAttributes ["*"] wildcard, hence the explicit list + observer.
+  private _attrObserver: MutationObserver | null = null;
+
+  static #observedSet = new Set([
+    "type", "value", "placeholder", "label", "error",
+    "disabled", "readonly", "clearable",
+    "min", "max", "step", "pattern", "required",
+  ]);
 
   static get observedAttributes() {
-    return [
-      "type", "value", "placeholder", "label", "error",
-      "disabled", "readonly", "clearable",
-      "min", "max", "step", "pattern", "required",
-    ];
+    return [...ArsInput.#observedSet];
   }
 
   constructor() {
@@ -49,6 +56,18 @@ class ArsInput extends HTMLElement {
   connectedCallback() {
     this.#render();
     this.#bindEvents();
+    // Any host attribute outside the observed set (autocomplete, name, ...)
+    // re-renders the native input so the forward stays current.
+    this._attrObserver = new MutationObserver((mutations) => {
+      const unobserved = mutations.some((m) => !ArsInput.#observedSet.has(m.attributeName ?? ""));
+      if (unobserved) this.#render();
+    });
+    this._attrObserver.observe(this, { attributes: true });
+  }
+
+  disconnectedCallback() {
+    this._attrObserver?.disconnect();
+    this._attrObserver = null;
   }
 
   attributeChangedCallback(name: string) {
@@ -150,6 +169,12 @@ class ArsInput extends HTMLElement {
       max !== null ? `max="${ArsInput.#escapeAttr(max)}"` : "",
       step !== null ? `step="${ArsInput.#escapeAttr(step)}"` : "",
       pattern !== null ? `pattern="${ArsInput.#escapeAttr(pattern)}"` : "",
+      // Forward every host attribute the component does not own (autocomplete,
+      // autocapitalize, spellcheck, inputmode, maxlength, name, ...) so
+      // consumers never need the component to enumerate them.
+      ...Array.from(this.attributes)
+        .filter((a) => ArsInput.#isForwarded(a.name))
+        .map((a) => `${a.name}="${ArsInput.#escapeAttr(a.value)}"`),
     ].filter(Boolean).join(" ");
 
     this.shadowRoot.innerHTML = `
@@ -220,6 +245,24 @@ class ArsInput extends HTMLElement {
         this.shadowRoot?.querySelector("input")?.focus();
       }
     });
+  }
+
+  /** Whether a host attribute should be forwarded to the native input.
+   *  Reserved: component-owned control attributes (keep in sync with
+   *  #observedSet), host mechanics (id/class/style/slot/part/tabindex) and
+   *  aria- and on- handler attributes (the component owns accessibility and
+   *  events). */
+  static #isForwarded(name: string): boolean {
+    if (name.startsWith("on") || name.startsWith("aria-")) return false;
+    switch (name) {
+      case "id": case "class": case "style": case "slot": case "part": case "exportparts": case "tabindex":
+      case "type": case "value": case "placeholder": case "label": case "error":
+      case "disabled": case "readonly": case "clearable":
+      case "min": case "max": case "step": case "pattern": case "required":
+        return false;
+      default:
+        return true;
+    }
   }
 
   static #escapeHtml(value: string): string {

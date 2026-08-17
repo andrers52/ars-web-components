@@ -9,12 +9,12 @@ import { afterEach, describe, it, expect, beforeEach, vi } from 'vitest';
 import { ArsCalendar } from './ars-calendar.js';
 
 describe('ArsCalendar', () => {
-  let element;
+  let element: ArsCalendar;
 
   beforeEach(() => {
     vi.useFakeTimers();
     document.body.innerHTML = '';
-    element = document.createElement('ars-calendar');
+    element = document.createElement('ars-calendar') as unknown as ArsCalendar;
     element.id = 'test-calendar';
   });
 
@@ -338,7 +338,7 @@ describe('ArsCalendar', () => {
     });
 
     it('should set custom template', () => {
-      const templateFn = (_calendar) => '<div>Custom</div>';
+      const templateFn = (_calendar: ArsCalendar) => '<div>Custom</div>';
       
       element.setCustomTemplate(templateFn);
       

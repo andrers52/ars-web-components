@@ -45,45 +45,48 @@ describe('WebComponentBase', () => {
   });
 
   describe('Instance methods', () => {
-    let TestComponent;
-    let instance;
-    let uniqueName;
+    let uniqueName: string;
 
-    beforeEach(() => {
-      uniqueName = getUniqueName();
-      
-      // Create a test component class
+    // Fresh class per test: the custom-elements registry forbids registering
+    // the same constructor under a second tag, and each test uses a unique
+    // tag. The factory keeps a stable name for the instance type.
+    const makeTestComponent = () =>
       class TestComponentClass extends WebComponentBase {
         static get observedAttributes() {
           return ['test-attr', 'another-attr'];
         }
 
-        static defaultAttributeValue(name) {
+        static defaultAttributeValue(name: string) {
           if (name === 'test-attr') return 'default-value';
           return null;
         }
 
-        allAttributesChangedCallback(attributes) {
+        allAttributesChangedCallback(attributes: Record<string, unknown>) {
           this.receivedAttributes = attributes;
         }
 
-        triggerWithArgs(text, count, enabled, nestedValue, selfRef) {
+        triggerWithArgs(text: string, count: number, enabled: boolean, nestedValue: unknown, selfRef: unknown) {
           this.triggerPayload = { text, count, enabled, nestedValue, selfRef };
         }
 
         triggerWithoutArgs() {
           this.triggerCount = (this.triggerCount || 0) + 1;
         }
-      }
+      };
 
-      TestComponent = TestComponentClass;
-      
+    type TestComponent = InstanceType<ReturnType<typeof makeTestComponent>>;
+    let instance: TestComponent;
+
+    beforeEach(() => {
+      uniqueName = getUniqueName();
+      const TestComponentClass = makeTestComponent();
+
       // Only define if not already defined
       if (!customElements.get(uniqueName)) {
-        customElements.define(uniqueName, TestComponent);
+        customElements.define(uniqueName, TestComponentClass);
       }
       
-      instance = document.createElement(uniqueName);
+      instance = document.createElement(uniqueName) as unknown as TestComponent;
     });
 
     describe('emitEvent', () => {
@@ -137,14 +140,14 @@ describe('WebComponentBase', () => {
     describe('connectElementWithEvent', () => {
       beforeEach(() => {
         instance.attachShadow({ mode: 'open' });
-        instance.shadowRoot.innerHTML = '<button id="trigger"></button>';
+        instance.shadowRoot!.innerHTML = '<button id="trigger"></button>';
         instance.nested = { value: 'nested-value' };
       });
 
       it('should call the component method without evaluating code strings', () => {
         instance.connectElementWithEvent('trigger', 'onclick', 'triggerWithoutArgs()');
 
-        instance.shadowRoot.getElementById('trigger').click();
+        instance.shadowRoot!.getElementById('trigger')!.click();
 
         expect(instance.triggerCount).toBe(1);
       });
@@ -156,7 +159,7 @@ describe('WebComponentBase', () => {
           `triggerWithArgs("label", 3, true, this.nested.value, this)`,
         );
 
-        instance.shadowRoot.getElementById('trigger').click();
+        instance.shadowRoot!.getElementById('trigger')!.click();
 
         expect(instance.triggerPayload).toEqual({
           text: 'label',
@@ -173,10 +176,10 @@ describe('WebComponentBase', () => {
           'onclick',
           'triggerWithArgs(window.location)',
         );
-        const handler = instance.shadowRoot.getElementById('trigger').onclick;
+        const handler = instance.shadowRoot!.getElementById('trigger')!.onclick as unknown as (this: HTMLElement) => unknown;
 
         expect(() => {
-          handler.call(instance.shadowRoot.getElementById('trigger'));
+          handler.call(instance.shadowRoot!.getElementById('trigger')!);
         }).toThrow(/Unsupported event handler argument/);
       });
     });

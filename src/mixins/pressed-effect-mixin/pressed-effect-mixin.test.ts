@@ -9,14 +9,14 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { PressedEffectMixin } from './pressed-effect-mixin.js';
 
 describe('PressedEffectMixin', () => {
-  let element;
-  let childElement;
+  let element: PressedEffectMixin;
+  let childElement: HTMLElement;
 
   beforeEach(() => {
     vi.useFakeTimers();
     document.body.innerHTML = '';
     
-    element = document.createElement('pressed-effect-mixin');
+    element = document.createElement('pressed-effect-mixin') as PressedEffectMixin;
     childElement = document.createElement('button');
     childElement.style.backgroundColor = 'rgb(100, 100, 100)';
   });

@@ -163,10 +163,10 @@ describe("ArsCandlestickChart", () => {
 
   it("paint with GPU renderer pushes candle geometry", async () => {
     document.body.appendChild(element);
-    await element.initGPU();
+    await element["initGPU"]();
 
     element.data = makeCandleData(3);
-    const renderer = element.gpuRenderer!;
+    const renderer = element["gpuRenderer"]!;
     const pushRectSpy = vi.spyOn(renderer, 'pushRect');
     const pushLineSpy = vi.spyOn(renderer, 'pushLine');
     const pushTextSpy = vi.spyOn(renderer, 'pushText');
@@ -185,11 +185,11 @@ describe("ArsCandlestickChart", () => {
 
   it("paint draws order overlay lines", async () => {
     document.body.appendChild(element);
-    await element.initGPU();
+    await element["initGPU"]();
 
     element.data = makeCandleData(5);
     element.orders = makeOrders();
-    const pushLineSpy = vi.spyOn(element.gpuRenderer!, 'pushLine');
+    const pushLineSpy = vi.spyOn(element["gpuRenderer"]!, 'pushLine');
 
     element.paint();
 
@@ -202,7 +202,7 @@ describe("ArsCandlestickChart", () => {
 
   it("paint handles orders with prices outside candle range", async () => {
     document.body.appendChild(element);
-    await element.initGPU();
+    await element["initGPU"]();
 
     element.data = makeCandleData(3);
     element.orders = [
@@ -230,7 +230,7 @@ describe("ArsCandlestickChart", () => {
    */
   it("paint draws stop_loss orders in a distinct color from sell orders", async () => {
     document.body.appendChild(element);
-    await element.initGPU();
+    await element["initGPU"]();
 
     element.data = makeCandleData(5);
     element.orders = [
@@ -238,7 +238,7 @@ describe("ArsCandlestickChart", () => {
       { side: "stop_loss", amount: 1, price: 94 },  // SL leg
       { side: "buy", amount: 1, price: 98 },
     ];
-    const pushLineSpy = vi.spyOn(element.gpuRenderer!, 'pushLine');
+    const pushLineSpy = vi.spyOn(element["gpuRenderer"]!, 'pushLine');
     element.paint();
 
     // Collect the color strings from every pushLine call — these
@@ -267,7 +267,7 @@ describe("ArsCandlestickChart", () => {
 
   it("paint uses custom up/down colors from attributes", async () => {
     document.body.appendChild(element);
-    await element.initGPU();
+    await element["initGPU"]();
 
     element.setAttribute("up-color", "#00ff00");
     element.setAttribute("down-color", "#ff0000");
@@ -279,7 +279,7 @@ describe("ArsCandlestickChart", () => {
 
   it("handles data with all bullish candles", async () => {
     document.body.appendChild(element);
-    await element.initGPU();
+    await element["initGPU"]();
 
     const data: CandleDataPoint[] = [
       { open: 10, close: 12, high: 13, low: 9, volume: 100, time: Date.now() },
@@ -293,7 +293,7 @@ describe("ArsCandlestickChart", () => {
 
   it("handles data with all bearish candles", async () => {
     document.body.appendChild(element);
-    await element.initGPU();
+    await element["initGPU"]();
 
     const data: CandleDataPoint[] = [
       { open: 14, close: 12, high: 15, low: 11, volume: 100, time: Date.now() },
@@ -307,7 +307,7 @@ describe("ArsCandlestickChart", () => {
 
   it("handles single candle data point", async () => {
     document.body.appendChild(element);
-    await element.initGPU();
+    await element["initGPU"]();
     element.data = makeCandleData(1);
     expect(() => element.paint()).not.toThrow();
     document.body.removeChild(element);
@@ -315,7 +315,7 @@ describe("ArsCandlestickChart", () => {
 
   it("handles zero volume data", async () => {
     document.body.appendChild(element);
-    await element.initGPU();
+    await element["initGPU"]();
     element.data = [{ open: 10, close: 12, high: 13, low: 9, volume: 0, time: Date.now() }];
     expect(() => element.paint()).not.toThrow();
     document.body.removeChild(element);
@@ -357,12 +357,12 @@ describe("ArsCandlestickChart", () => {
 
   it("paint draws dashed marker lines", async () => {
     document.body.appendChild(element);
-    await element.initGPU();
+    await element["initGPU"]();
 
     element.data = makeCandleData(5);
     element.markers = [{ index: 2, color: "rgba(92,128,196,0.6)", label: "GEN" }];
-    const pushDashedSpy = vi.spyOn(element.gpuRenderer!, 'pushDashedLine');
-    const pushTextSpy = vi.spyOn(element.gpuRenderer!, 'pushText');
+    const pushDashedSpy = vi.spyOn(element["gpuRenderer"]!, 'pushDashedLine');
+    const pushTextSpy = vi.spyOn(element["gpuRenderer"]!, 'pushText');
 
     element.paint();
 
@@ -409,12 +409,12 @@ describe("ArsCandlestickChart", () => {
 
   it("paint draws highlight range overlay", async () => {
     document.body.appendChild(element);
-    await element.initGPU();
+    await element["initGPU"]();
 
     element.data = makeCandleData(5);
     element.highlightRange = { startIndex: 1, endIndex: 3 };
-    const pushRectSpy = vi.spyOn(element.gpuRenderer!, 'pushRect');
-    const pushLineSpy = vi.spyOn(element.gpuRenderer!, 'pushLine');
+    const pushRectSpy = vi.spyOn(element["gpuRenderer"]!, 'pushRect');
+    const pushLineSpy = vi.spyOn(element["gpuRenderer"]!, 'pushLine');
 
     element.paint();
 

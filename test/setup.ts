@@ -134,40 +134,54 @@ global.console = {
 };
 
 if (typeof PointerEvent === 'undefined') {
-  global.PointerEvent = class PointerEvent extends MouseEvent {
-    constructor(type, options = {}) {
+  // jsdom has no PointerEvent; define a minimal polyfill.  Field defaults
+  // mirror the constructor options so `event.pointerId` etc. work in tests.
+  (globalThis as any).PointerEvent = class PointerEvent extends MouseEvent {
+    pointerId: number;
+    pointerType: string;
+    pressure: number;
+    tiltX: number;
+    tiltY: number;
+    width: number;
+    height: number;
+    isPrimary: boolean;
+    constructor(type: string, options: Partial<PointerEvent> = {}) {
       super(type, options);
-      this.pointerId = options.pointerId || 0;
-      this.pointerType = options.pointerType || 'mouse';
-      this.pressure = options.pressure || 0;
-      this.tiltX = options.tiltX || 0;
-      this.tiltY = options.tiltY || 0;
-      this.width = options.width || 1;
-      this.height = options.height || 1;
-      this.isPrimary = options.isPrimary || false;
+      this.pointerId = options.pointerId ?? 0;
+      this.pointerType = options.pointerType ?? 'mouse';
+      this.pressure = options.pressure ?? 0;
+      this.tiltX = options.tiltX ?? 0;
+      this.tiltY = options.tiltY ?? 0;
+      this.width = options.width ?? 1;
+      this.height = options.height ?? 1;
+      this.isPrimary = options.isPrimary ?? false;
     }
   };
 }
 
 // Mock ResizeObserver
-global.ResizeObserver = class ResizeObserver {
-  constructor(callback) {
+class MockResizeObserver {
+  callback: ResizeObserverCallback;
+  constructor(callback: ResizeObserverCallback) {
     this.callback = callback;
   }
   observe() {}
   unobserve() {}
   disconnect() {}
-};
+}
+(globalThis as any).ResizeObserver = MockResizeObserver;
 
 // Mock IntersectionObserver
-global.IntersectionObserver = class IntersectionObserver {
-  constructor(callback) {
+class MockIntersectionObserver {
+  callback: IntersectionObserverCallback;
+  constructor(callback: IntersectionObserverCallback) {
     this.callback = callback;
   }
   observe() {}
   unobserve() {}
   disconnect() {}
-};
+}
+(globalThis as any).IntersectionObserver = MockIntersectionObserver;
 
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -199,13 +213,14 @@ window.getComputedStyle = (element) => {
   return Object.assign(Object.create(Object.getPrototypeOf(style)), style, overrides);
 };
 
-// Ensure customElements is available
+// Ensure customElements is available (defensive — jsdom already provides it;
+// the stub only needs the subset the test suite exercises).
 if (!window.customElements) {
   window.customElements = {
     define: vi.fn(),
     get: vi.fn(),
-    whenDefined: vi.fn(() => Promise.resolve()),
-  };
+    whenDefined: vi.fn(() => Promise.resolve({} as CustomElementConstructor)),
+  } as unknown as CustomElementRegistry;
 }
 
 // Register all ars-web-components custom elements once for the test suite.
@@ -233,21 +248,23 @@ afterAll(() => {
 
 // Cache mock context per canvas so repeated getContext calls return the same spy objects.
 // Handles both '2d' (legacy / calendar) and 'webgpu' (chart GPU rendering) contexts.
-HTMLCanvasElement.prototype.getContext = vi.fn(function (type) {
+HTMLCanvasElement.prototype.getContext = vi.fn(function (this: HTMLCanvasElement, type: string) {
+  // Cache slots are test-only; they are not part of the DOM interface.
+  const self = this as HTMLCanvasElement & { _mockGpuCtx?: unknown; _mockCtx?: unknown };
   // WebGPU context — one per canvas, cached.
   if (type === 'webgpu') {
-    if (this._mockGpuCtx) return this._mockGpuCtx;
-    this._mockGpuCtx = createMockGPUCanvasContext();
-    return this._mockGpuCtx;
+    if (self._mockGpuCtx) return self._mockGpuCtx;
+    self._mockGpuCtx = createMockGPUCanvasContext();
+    return self._mockGpuCtx;
   }
 
   // Canvas 2D context — one per canvas, cached.
-  if (this._mockCtx) return this._mockCtx;
-  this._mockCtx = {
+  if (self._mockCtx) return self._mockCtx;
+  self._mockCtx = {
     canvas: this,
     fillRect: vi.fn(),
     clearRect: vi.fn(),
-    getImageData: (x, y, w, h) => ({ data: new Array(w * h * 4) }),
+    getImageData: (x: number, y: number, w: number, h: number) => ({ data: new Array(w * h * 4) }),
     putImageData: vi.fn(),
     createImageData: () => ([]),
     setTransform: vi.fn(),
@@ -282,5 +299,5 @@ HTMLCanvasElement.prototype.getContext = vi.fn(function (type) {
     textBaseline: "alphabetic",
     font: "10px sans-serif",
   };
-  return this._mockCtx;
-});
+  return self._mockCtx;
+}) as unknown as HTMLCanvasElement["getContext"];

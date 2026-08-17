@@ -2,7 +2,7 @@
 
 // Mock Assert
 export const Assert = {
-  assert: (condition, message) => {
+  assert: (condition: unknown, message?: string) => {
     if (!condition) {
       throw new Error(message || 'Assertion failed');
     }
@@ -11,7 +11,7 @@ export const Assert = {
 
 // Mock EObject
 export const EObject = {
-  hasSameProperties: (obj1, obj2) => {
+  hasSameProperties: (obj1: Record<string, unknown>, obj2: Record<string, unknown>) => {
     if (!obj1 || !obj2) return false;
     const keys1 = Object.keys(obj1);
     const keys2 = Object.keys(obj2);
@@ -22,7 +22,7 @@ export const EObject = {
 
 // Mock EArray
 export const EArray = {
-  choice: (arr) => {
+  choice: <T>(arr: T[]) => {
     if (!arr || arr.length === 0) return undefined;
     return arr[Math.floor(Math.random() * arr.length)];
   }

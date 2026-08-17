@@ -9,8 +9,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { PointerCoordinator } from './pointer-coordinator.js';
 
 describe('PointerCoordinator', () => {
-  let mockElement;
-  let mockElement2;
+  let mockElement: HTMLElement;
+  let mockElement2: HTMLElement;
 
   beforeEach(() => {
     // Clear all captures before each test
@@ -24,7 +24,7 @@ describe('PointerCoordinator', () => {
       dispatchEvent: vi.fn(),
       addEventListener: vi.fn(),
       removeEventListener: vi.fn()
-    };
+    } as unknown as HTMLElement;
     
     mockElement2 = {
       tagName: 'DIV-TWO',
@@ -33,7 +33,7 @@ describe('PointerCoordinator', () => {
       dispatchEvent: vi.fn(),
       addEventListener: vi.fn(),
       removeEventListener: vi.fn()
-    };
+    } as unknown as HTMLElement;
   });
 
   describe('capturePointer', () => {

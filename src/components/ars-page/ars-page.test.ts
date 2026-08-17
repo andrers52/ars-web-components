@@ -9,14 +9,14 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { ArsPage } from './ars-page.js';
 
 describe('ArsPage', () => {
-  let element;
-  let page1;
-  let page2;
+  let element: ArsPage;
+  let page1: HTMLElement;
+  let page2: HTMLElement;
 
   beforeEach(() => {
     document.body.innerHTML = '';
     
-    element = document.createElement('ars-page');
+    element = document.createElement('ars-page') as unknown as ArsPage;
     element.id = 'test-router';
     
     page1 = document.createElement('div');
@@ -202,14 +202,14 @@ describe('ArsPage', () => {
     });
 
     it('should include page info in event detail', () => {
-      let eventDetail = null;
-      element.addEventListener('ars-page:page-changed', (e) => {
-        eventDetail = e.detail;
+      let eventDetail: { currentPage?: string } | null = null;
+      element.addEventListener('ars-page:page-changed', (e: Event) => {
+        eventDetail = (e as CustomEvent<{ currentPage?: string }>).detail;
       });
       
       element.showPage('page1');
       
-      expect(eventDetail.currentPage).toBe('page1');
+      expect(eventDetail!.currentPage).toBe('page1');
     });
   });
 

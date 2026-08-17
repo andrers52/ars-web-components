@@ -285,6 +285,55 @@ describe("ArsInput", () => {
     expect(slot).toBeTruthy();
   });
 
+  // --- Attribute forwarding ---
+
+  it("forwards arbitrary attributes to the native input", () => {
+    element.setAttribute("autocomplete", "off");
+    element.setAttribute("autocapitalize", "none");
+    element.setAttribute("spellcheck", "false");
+    element.setAttribute("inputmode", "numeric");
+    element.setAttribute("maxlength", "40");
+    element.setAttribute("name", "field");
+    document.body.appendChild(element);
+    const input = element.shadowRoot?.querySelector("input");
+    expect(input?.getAttribute("autocomplete")).toBe("off");
+    expect(input?.getAttribute("autocapitalize")).toBe("none");
+    expect(input?.getAttribute("spellcheck")).toBe("false");
+    expect(input?.getAttribute("inputmode")).toBe("numeric");
+    expect(input?.getAttribute("maxlength")).toBe("40");
+    expect(input?.getAttribute("name")).toBe("field");
+  });
+
+  it("forwards attributes added after the element is connected", async () => {
+    document.body.appendChild(element);
+    element.setAttribute("autocomplete", "off");
+    // MutationObserver callbacks run on a microtask; flush before asserting.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const input = element.shadowRoot?.querySelector("input");
+    expect(input?.getAttribute("autocomplete")).toBe("off");
+  });
+
+  it("does not forward component-owned or host attributes", () => {
+    element.setAttribute("label", "X");
+    element.setAttribute("type", "text");
+    element.setAttribute("value", "v");
+    document.body.appendChild(element);
+    const input = element.shadowRoot?.querySelector("input");
+    expect(input?.getAttribute("label")).toBeNull();
+    expect(input?.getAttribute("tabindex")).toBeNull();
+    // value reaches the input through the component's own channel, not a pass-through
+    expect(input?.value).toBe("v");
+  });
+
+  it("does not forward on-* or aria-* attributes", () => {
+    element.setAttribute("oninput", "alert(1)");
+    element.setAttribute("aria-label", "ignored");
+    document.body.appendChild(element);
+    const input = element.shadowRoot?.querySelector("input");
+    expect(input?.hasAttribute("oninput")).toBe(false);
+    expect(input?.hasAttribute("aria-label")).toBe(false);
+  });
+
   // --- Observed attributes ---
 
   it("observes the expected attributes", () => {

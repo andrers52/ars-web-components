@@ -10,14 +10,14 @@ import { SwipeableMixin } from './swipeable-mixin.js';
 import { PointerCoordinator } from '../common/pointer-coordinator.js';
 
 describe('SwipeableMixin', () => {
-  let element;
+  let element: SwipeableMixin;
 
   beforeEach(() => {
     vi.useFakeTimers();
     PointerCoordinator.clearAllCaptures();
     document.body.innerHTML = '';
     
-    element = document.createElement('swipeable-mixin');
+    element = document.createElement('swipeable-mixin') as SwipeableMixin;
   });
 
   afterEach(() => {
@@ -71,16 +71,16 @@ describe('SwipeableMixin', () => {
 
   describe('Validation methods', () => {
     it('should validate distance correctly', () => {
-      expect(element._validateDistance(50)).toBe(true);
-      expect(element._validateDistance(0)).toBe(false);
-      expect(element._validateDistance(-10)).toBe(false);
+      expect(element._validateDistance('50')).toBe(true);
+      expect(element._validateDistance('0')).toBe(false);
+      expect(element._validateDistance('-10')).toBe(false);
       expect(element._validateDistance('invalid')).toBe(false);
     });
 
     it('should validate time correctly', () => {
-      expect(element._validateTime(500)).toBe(true);
-      expect(element._validateTime(0)).toBe(false);
-      expect(element._validateTime(-10)).toBe(false);
+      expect(element._validateTime('500')).toBe(true);
+      expect(element._validateTime('0')).toBe(false);
+      expect(element._validateTime('-10')).toBe(false);
       expect(element._validateTime('invalid')).toBe(false);
     });
   });
@@ -204,7 +204,7 @@ describe('SwipeableMixin', () => {
 
   describe('Touch coordinates', () => {
     it('should get coordinates from mouse event', () => {
-      const event = { clientX: 100, clientY: 200 };
+      const event = { clientX: 100, clientY: 200 } as unknown as PointerEvent;
       
       const coords = element._getTouchCoordinates(event);
       
@@ -215,7 +215,7 @@ describe('SwipeableMixin', () => {
     it('should get coordinates from touch event', () => {
       const event = {
         touches: [{ clientX: 150, clientY: 250 }]
-      };
+      } as unknown as TouchEvent;
       
       const coords = element._getTouchCoordinates(event);
       
@@ -227,7 +227,7 @@ describe('SwipeableMixin', () => {
       const event = {
         touches: [],
         changedTouches: [{ clientX: 175, clientY: 275 }]
-      };
+      } as unknown as TouchEvent;
       
       const coords = element._getTouchCoordinates(event);
       

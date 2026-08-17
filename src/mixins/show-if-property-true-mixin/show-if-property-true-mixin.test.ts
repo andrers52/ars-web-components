@@ -10,14 +10,14 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ShowIfPropertyTrueMixin } from './show-if-property-true-mixin.js';
 
 describe('ShowIfPropertyTrueMixin', () => {
-  let element;
-  let childElement;
+  let element: ShowIfPropertyTrueMixin;
+  let childElement: HTMLElement & { isVisible?: boolean };
 
   beforeEach(() => {
     vi.useFakeTimers();
     document.body.innerHTML = '';
     
-    element = document.createElement('show-if-property-true-mixin');
+    element = document.createElement('show-if-property-true-mixin') as ShowIfPropertyTrueMixin;
     childElement = document.createElement('div');
     childElement.id = 'child';
   });

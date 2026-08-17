@@ -17,16 +17,17 @@
     ],
     "types": [
       "@webgpu/types",
-      "node"
+      "node",
+      "vitest/globals"
     ]
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "test/**/*"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "**/*.test.ts",
     "**/demo/**/*"
   ]
 }
