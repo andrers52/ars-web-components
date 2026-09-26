@@ -105,11 +105,26 @@ describe('ArsDialog', () => {
 
       it('should create dialog with confirm buttons', async () => {
         ArsDialog.dialog('Content', 'Title', {}, '', 'OK', 'Cancel');
-        
+
         await Promise.resolve();
-        
+
         const dialog = document.querySelector('ars-dialog')!;
         expect(dialog.getAttribute('showConfirmButtons')).toBe('true');
+      });
+
+      it('should render the localized button labels', async () => {
+        ArsDialog.dialog('Content', 'Title', {}, '', 'Save', 'Dismiss');
+
+        await Promise.resolve();
+
+        const dialog = document.querySelector('ars-dialog') as HTMLElement & { shadowRoot: ShadowRoot };
+        const sr = dialog.shadowRoot;
+        expect(sr).toBeDefined();
+
+        const okButton = sr.getElementById(`dialog_button_ok:${dialog.id}`)!;
+        const cancelButton = sr.getElementById(`dialog_button_cancel:${dialog.id}`)!;
+        expect(okButton.textContent!.trim()).toBe('Save');
+        expect(cancelButton.textContent!.trim()).toBe('Dismiss');
       });
 
       it('should resolve with content element on OK', async () => {

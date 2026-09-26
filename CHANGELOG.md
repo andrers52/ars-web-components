@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`ars-dialog`: the localized button labels are now rendered.**
+  `ArsDialog.dialog(content, title, cssVars, customCSS, okText, cancelText)`
+  stored `okText`/`cancelText` in the `localizedOk`/`localizedCancel`
+  attributes, but the template read them back from non-existent
+  properties, so every confirm button fell back to "Ok" (and cancel to
+  "Cancel") no matter what was passed. The template now reads the
+  attributes.
+
 ## [3.1.0] - 2026-08-16
 
 ### Added

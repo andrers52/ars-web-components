@@ -119,11 +119,14 @@ class ArsDialog extends WebComponentBase {
   }
 
   static #getLocalizedOk(component: ArsDialog) {
-    return component.localizedOk || "Ok";
+    // #createDialogElement sets the label as an attribute; there is no
+    // matching property, so reading component.localizedOk was always
+    // undefined and every dialog rendered the "Ok" fallback.
+    return component.getAttribute("localizedOk") || "Ok";
   }
 
   static #getLocalizedCancel(component: ArsDialog) {
-    return component.localizedCancel || "Cancel";
+    return component.getAttribute("localizedCancel") || "Cancel";
   }
 
   static #createCSSVarsString(cssVars: Record<string, string>) {
